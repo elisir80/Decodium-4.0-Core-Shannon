@@ -847,7 +847,8 @@ void CallsignIntelligenceService::lookupRemoteClubLog(const QString& callsign)
 void CallsignIntelligenceService::handleRemoteLookupFinished(QNetworkReply* reply, const QString& callsign)
 {
     if (!reply) return;
-    const QByteArray payload = reply->readAll();
+    const QByteArray payload = reply->error() == QNetworkReply::NoError && reply->isReadable()
+            ? reply->readAll() : QByteArray();
     const QNetworkReply::NetworkError error = reply->error();
     const QString errorText = reply->errorString();
     reply->deleteLater();
@@ -1262,7 +1263,8 @@ void CallsignIntelligenceService::handleDatabaseReply(QNetworkReply* reply,
                                                       bool eqslInboxAdif)
 {
     if (!reply) return;
-    const QByteArray payload = reply->readAll();
+    const QByteArray payload = reply->error() == QNetworkReply::NoError && reply->isReadable()
+            ? reply->readAll() : QByteArray();
     const QUrl responseUrl = reply->url();
     const auto error = reply->error();
     const QString errorText = reply->errorString();

@@ -17,7 +17,8 @@ class DecodiumLegacyBackend final : public QObject
     Q_OBJECT
 
 public:
-    explicit DecodiumLegacyBackend(QObject* parent = nullptr);
+    explicit DecodiumLegacyBackend(QObject* parent = nullptr,
+                                   QStringList const& udpClientIds = {});
     ~DecodiumLegacyBackend() override;
 
     bool available() const { return m_available; }
@@ -125,7 +126,9 @@ public:
     void setSpecialOperationActivity(int activity);
     void setSuperFoxEnabled(bool enabled);
     void setEmbeddedUiUpdatesEnabled(bool enabled);
-    void refreshUdpReporting();
+    void refreshUdpReporting(QString const& primaryId = {},
+                             QString const& secondaryId = {},
+                             QString const& tertiaryId = {});
 
 Q_SIGNALS:
     void waterfallRowReady(QByteArray const& rowLevels,

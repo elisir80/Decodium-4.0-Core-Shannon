@@ -926,7 +926,8 @@ void MapOperationsService::handlePotaReply(QNetworkReply* reply)
         setPotaLoading(false);
         return;
     }
-    QByteArray const bytes = reply->readAll();
+    QByteArray const bytes = reply->error() == QNetworkReply::NoError && reply->isReadable()
+            ? reply->readAll() : QByteArray();
     QString const networkError = reply->error() == QNetworkReply::NoError
         ? QString() : reply->errorString();
     reply->deleteLater();
@@ -1030,7 +1031,8 @@ void MapOperationsService::handlePotaParkReply(QNetworkReply* reply)
         }
         return;
     }
-    QByteArray const bytes = reply->readAll();
+    QByteArray const bytes = reply->error() == QNetworkReply::NoError && reply->isReadable()
+            ? reply->readAll() : QByteArray();
     bool const ok = reply->error() == QNetworkReply::NoError;
     reply->deleteLater();
     if (!ok) return;
@@ -1328,7 +1330,8 @@ void MapOperationsService::handleIotaCatalogReply(QNetworkReply* reply)
         m_iotaLoading = false;
         return;
     }
-    QByteArray const bytes = reply->readAll();
+    QByteArray const bytes = reply->error() == QNetworkReply::NoError && reply->isReadable()
+            ? reply->readAll() : QByteArray();
     QString const networkError = reply->error() == QNetworkReply::NoError
         ? QString() : reply->errorString();
     reply->deleteLater();
@@ -1592,7 +1595,8 @@ void MapOperationsService::handleGeoReply(const QString& layerId,
         setGeographicLoading(!m_geoPendingLayers.isEmpty());
         return;
     }
-    QByteArray const bytes = reply->readAll();
+    QByteArray const bytes = reply->error() == QNetworkReply::NoError && reply->isReadable()
+            ? reply->readAll() : QByteArray();
     QString const error = reply->error() == QNetworkReply::NoError
         ? QString() : reply->errorString();
     reply->deleteLater();

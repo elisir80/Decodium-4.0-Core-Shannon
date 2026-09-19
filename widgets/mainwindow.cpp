@@ -354,7 +354,7 @@ namespace
 
   QString legacy_udp_client_id (QSettings const * settings,
                                 QString const& key = QStringLiteral ("UDPClientId"),
-                                QString const& fallback = QStringLiteral ("WSJTX"))
+                                QString const& fallback = QStringLiteral ("Decodium"))
   {
     return decodium::network::normalizedUdpClientId (
       legacy_runtime_string (settings, key, fallback), fallback);
@@ -4814,8 +4814,18 @@ MessageClient * MainWindow::ensureTertiaryUdpMessageClient() const
   return m_udpTertiaryMessageClient;
 }
 
-void MainWindow::refreshLegacyUdpReporting()
+void MainWindow::refreshLegacyUdpReporting(QString const& primaryId,
+                                           QString const& secondaryId,
+                                           QString const& tertiaryId)
 {
+  // Apply the effective dashboard IDs to the actual backend settings object.
+  // It can differ from the QML store (notably with a selected profile).
+  if (m_settings)
+    {
+      if (!primaryId.isEmpty ()) m_settings->setValue ("UDPClientId", primaryId);
+      if (!secondaryId.isEmpty ()) m_settings->setValue ("UDPSecondaryClientId", secondaryId);
+      if (!tertiaryId.isEmpty ()) m_settings->setValue ("UDPTertiaryClientId", tertiaryId);
+    }
   if (m_settings)
     {
       m_settings->sync ();

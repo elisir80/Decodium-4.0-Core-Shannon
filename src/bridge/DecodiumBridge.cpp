@@ -11954,7 +11954,7 @@ void DecodiumBridge::runPostQmlStartupServices()
 #if defined(Q_OS_MAC)
         if (m_useLegacyTxBackend && ensureLegacyBackendAvailable()) {
             bridgeLog(QStringLiteral("UDP WSJT-X delegated to legacy backend"));
-            shutdownUdpMessageClient();
+            initUdpMessageClient();
             return;
         }
 #endif
@@ -12201,7 +12201,11 @@ bool DecodiumBridge::ensureLegacyBackendAvailable()
                              embeddedLegacyRigControlEnabledForBackend(m_catBackend,
                                                                        legacyTxBackendRequested()));
         }
-        m_legacyBackend = new DecodiumLegacyBackend(this);
+        QStringList const udpClientIds {
+            decodium::network::normalizedUdpClientId(getSetting(QStringLiteral("UDPClientId"), QStringLiteral("Decodium")).toString()),
+            decodium::network::normalizedUdpClientId(getSetting(QStringLiteral("UDPSecondaryClientId"), QStringLiteral("Decodium")).toString()),
+            decodium::network::normalizedUdpClientId(getSetting(QStringLiteral("UDPTertiaryClientId"), QStringLiteral("Decodium")).toString())};
+        m_legacyBackend = new DecodiumLegacyBackend(this, udpClientIds);
     }
 
     if (!legacyBackendAvailable()) {
@@ -12580,11 +12584,7 @@ bool DecodiumBridge::ensureLegacyBackendAvailable()
         // Decodium3 espone un sender WSJT-X UDP quando e' il backend TX attivo.
         // Se il bridge moderno resta responsabile del QSO, il suo MessageClient
         // deve restare vivo per inoltrare LoggedADIF/QSOLogged ai log esterni.
-        if (usingLegacyBackendForTx()) {
-            shutdownUdpMessageClient();
-        } else {
-            initUdpMessageClient();
-        }
+        initUdpMessageClient();
 
         if (legacyTxBackendRequested() && m_monitoring && !m_transmitting && !m_tuning) {
             migrateActiveMonitoringToLegacyBackend();
@@ -33116,8 +33116,8 @@ void DecodiumBridge::initUdpMessageClient()
     // campo per destinazione si servono entrambi senza raddoppiare i
     // pacchetti.
     QString const clientId = decodium::network::normalizedUdpClientId(
-        getSetting(QStringLiteral("UDPClientId"), QStringLiteral("WSJTX")).toString(),
-        QStringLiteral("WSJTX"));
+        getSetting(QStringLiteral("UDPClientId"), QStringLiteral("Decodium")).toString(),
+        QStringLiteral("Decodium"));
     QString const secondaryClientId = decodium::network::normalizedUdpClientId(
         getSetting(QStringLiteral("UDPSecondaryClientId"), QStringLiteral("Decodium")).toString());
     QString const tertiaryClientId = decodium::network::normalizedUdpClientId(
@@ -33145,6 +33145,12 @@ void DecodiumBridge::initUdpMessageClient()
                   .arg(boolText(adifTcpEnabled), adifTcpServer, QString::number(adifTcpPort)));
     bridgeLog(QStringLiteral("Reporting config: N1MM UDP %1 target=%2:%3")
                   .arg(boolText(n1mmEnabled), n1mmServer, QString::number(n1mmPort)));
+
+    // Even in native modes (e.g. RTTY), the embedded backend can still send
+    // heartbeats. Keep its wire identity aligned with the visible settings.
+    if (m_legacyBackend && legacyBackendAvailable()) {
+        m_legacyBackend->refreshUdpReporting(clientId, secondaryClientId, tertiaryClientId);
+    }
 
     if (usingLegacyBackendForTx()) {
         bridgeLog(QStringLiteral("Standalone UDP MessageClient suppressed: legacy TX backend active"));
@@ -33393,10 +33399,6 @@ void DecodiumBridge::scheduleUdpMessageClientRestart()
     m_udpMessageClientRestartPending = true;
     QTimer::singleShot(150, this, [this]() {
         m_udpMessageClientRestartPending = false;
-        if (usingLegacyBackendForTx() && m_legacyBackend) {
-            m_legacyBackend->refreshUdpReporting();
-            return;
-        }
         shutdownUdpMessageClient();
         initUdpMessageClient();
     });
@@ -54892,7 +54894,8 @@ void DecodiumBridge::checkCtyDatUpdate(bool forceDownload)
     connect(nam, &QNetworkAccessManager::finished, this, [this, destPath, nam](QNetworkReply* reply) {
         const QUrl sourceUrl = reply->url();
         const int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-        const QByteArray payload = reply->readAll();
+        const QByteArray payload = reply->error() == QNetworkReply::NoError && reply->isReadable()
+            ? reply->readAll() : QByteArray();
 
         QString failureReason;
         if (reply->error() != QNetworkReply::NoError) {
@@ -55067,7 +55070,8 @@ void DecodiumBridge::downloadCall3Txt()
             return;
         }
 
-        QByteArray const data = reply->readAll();
+        QByteArray const data = reply->error() == QNetworkReply::NoError && reply->isReadable()
+            ? reply->readAll() : QByteArray();
         QString validationError;
         if (!isProbablyCall3TxtPayload(data, &validationError)) {
             m_call3TxtLastError = validationError;
@@ -57118,7 +57122,8 @@ void DecodiumBridge::startLotwUsersDownload(QString const& cachePath,
     QNetworkReply* reply = nam->get(request);
     connect(reply, &QNetworkReply::finished, this,
             [this, reply, nam, cachePath, reportErrors]() {
-        QByteArray const data = reply->readAll();
+        QByteArray const data = reply->error() == QNetworkReply::NoError && reply->isReadable()
+            ? reply->readAll() : QByteArray();
         QNetworkReply::NetworkError const networkError = reply->error();
         QString const networkErrorText = reply->errorString();
         reply->deleteLater();

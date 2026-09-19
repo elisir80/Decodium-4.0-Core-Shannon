@@ -374,7 +374,7 @@ The source-contract script checks all 14 pages and profile-aware setters. test_s
 | bridge.themeManager.accentVariant | qml/decodium/components/SettingsTab4.qml:129 | Service property: paired load/save in owning service (see store map below) |
 | bridge.themeManager.density | qml/decodium/components/SettingsTab4.qml:166 | Service property: paired load/save in owning service (see store map below) |
 | bridge.processPriority | qml/decodium/components/SettingsTab4.qml:316 | src/bridge/DecodiumBridge.cpp:7418 (setProcessPriority); immediate write or saveSettings snapshot |
-| bridge.showUsState | qml/decodium/components/SettingsTab4.qml:564 | src/bridge/DecodiumBridge.cpp:56926 (setShowUsState); immediate write or saveSettings snapshot |
+| bridge.showUsState | qml/decodium/components/SettingsTab4.qml:564 | src/bridge/DecodiumBridge.cpp:56930 (setShowUsState); immediate write or saveSettings snapshot |
 | setUiQuality | qml/decodium/components/SettingsTab4.qml:293 | src/bridge/DecodiumBridge.cpp:8138; setter or snapshot |
 | setUiStyle | qml/decodium/components/SettingsTab4.qml:344 | src/bridge/DecodiumBridge.cpp:8194; setter or snapshot |
 | setUiFramelessPopouts | qml/decodium/components/SettingsTab4.qml:366 | src/bridge/DecodiumBridge.cpp:8180; setter or snapshot |
@@ -527,17 +527,17 @@ The source-contract script checks all 14 pages and profile-aware setters. test_s
 | bridge.dxCluster.callsign | qml/decodium/components/SettingsTab6.qml:233 | Service property: paired load/save in owning service (see store map below) |
 | bridge.decoLogLinkEnabled | qml/decodium/components/SettingsTab6.qml:272 | src/bridge/DecodiumBridge.cpp:15880 (setDecoLogLinkEnabled); immediate write or saveSettings snapshot |
 | bridge.decoLogLinkPort | qml/decodium/components/SettingsTab6.qml:295 | Bridge property decoLogLinkPort; setter/snapshot route |
-| bridge.cloudlogEnabled | qml/decodium/components/SettingsTab6.qml:316 | src/bridge/DecodiumBridge.cpp:58324 (setCloudlogEnabled); immediate write or saveSettings snapshot |
+| bridge.cloudlogEnabled | qml/decodium/components/SettingsTab6.qml:316 | src/bridge/DecodiumBridge.cpp:58329 (setCloudlogEnabled); immediate write or saveSettings snapshot |
 | bridge.cloudlogUrl | qml/decodium/components/SettingsTab6.qml:330 | Bridge property cloudlogUrl; setter/snapshot route |
 | bridge.cloudlogApiKey | qml/decodium/components/SettingsTab6.qml:341 | Bridge property cloudlogApiKey; setter/snapshot route |
-| bridge.qrzLogbookEnabled | qml/decodium/components/SettingsTab6.qml:367 | src/bridge/DecodiumBridge.cpp:58377 (setQrzLogbookEnabled); immediate write or saveSettings snapshot |
-| bridge.qrzLogbookReplaceDuplicates | qml/decodium/components/SettingsTab6.qml:380 | src/bridge/DecodiumBridge.cpp:58404 (setQrzLogbookReplaceDuplicates); immediate write or saveSettings snapshot |
+| bridge.qrzLogbookEnabled | qml/decodium/components/SettingsTab6.qml:367 | src/bridge/DecodiumBridge.cpp:58382 (setQrzLogbookEnabled); immediate write or saveSettings snapshot |
+| bridge.qrzLogbookReplaceDuplicates | qml/decodium/components/SettingsTab6.qml:380 | src/bridge/DecodiumBridge.cpp:58409 (setQrzLogbookReplaceDuplicates); immediate write or saveSettings snapshot |
 | bridge.qrzLogbookApiKey | qml/decodium/components/SettingsTab6.qml:393 | Bridge property qrzLogbookApiKey; setter/snapshot route |
 | bridge.lotwEnabled | qml/decodium/components/SettingsTab6.qml:449 | Bridge property lotwEnabled; setter/snapshot route |
 | bridge.recordRxEnabled | qml/decodium/components/SettingsTab6.qml:580 | Bridge property recordRxEnabled; setter/snapshot route |
 | bridge.recordTxEnabled | qml/decodium/components/SettingsTab6.qml:590 | Bridge property recordTxEnabled; setter/snapshot route |
 | bridge.wsprUploadEnabled | qml/decodium/components/SettingsTab6.qml:601 | Bridge property wsprUploadEnabled; setter/snapshot route |
-| setUdpInterfaceName | qml/decodium/components/SettingsTab6.qml:767 | src/bridge/DecodiumBridge.cpp:34203; setter or snapshot |
+| setUdpInterfaceName | qml/decodium/components/SettingsTab6.qml:767 | src/bridge/DecodiumBridge.cpp:34205; setter or snapshot |
 | UDPPrimarySendDecode | qml/decodium/components/SettingsTab6.qml:779 | Dynamic control: generic settings or colour property setter |
 | UDPPrimarySendStatus | qml/decodium/components/SettingsTab6.qml:780 | Dynamic control: generic settings or colour property setter |
 | UDPPrimarySendQso | qml/decodium/components/SettingsTab6.qml:782 | Dynamic control: generic settings or colour property setter |
