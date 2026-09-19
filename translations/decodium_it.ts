@@ -2627,6 +2627,10 @@ Premi Monitor per iniziare</translation>
 <context>
     <name>DecodiumBridge</name>
     <message>
+        <source>Update available: v%1</source>
+        <translation>Aggiornamento disponibile: v%1</translation>
+    </message>
+    <message>
         <source>SSTV Transmit Studio is not available</source>
         <translation>Transmit Studio SSTV non è disponibile</translation>
     </message>

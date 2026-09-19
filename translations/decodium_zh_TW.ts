@@ -2603,6 +2603,10 @@ Click Monitor to start</source>
 <context>
     <name>DecodiumBridge</name>
     <message>
+        <source>Update available: v%1</source>
+        <translation>有可用更新：v%1</translation>
+    </message>
+    <message>
         <source>Update in progress...</source>
         <translation>正在更新...</translation>
     </message>

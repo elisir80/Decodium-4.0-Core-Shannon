@@ -2605,6 +2605,10 @@ Click Monitor to start</source>
 <context>
     <name>DecodiumBridge</name>
     <message>
+        <source>Update available: v%1</source>
+        <translation>Доступно обновление: v%1</translation>
+    </message>
+    <message>
         <source>Update in progress...</source>
         <translation>Идёт обновление...</translation>
     </message>

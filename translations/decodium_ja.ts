@@ -2603,6 +2603,10 @@ Monitor を押すと開始します</translation>
 <context>
     <name>DecodiumBridge</name>
     <message>
+        <source>Update available: v%1</source>
+        <translation>アップデートがあります: v%1</translation>
+    </message>
+    <message>
         <source>Update in progress...</source>
         <translation>更新中...</translation>
     </message>

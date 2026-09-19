@@ -2678,6 +2678,10 @@ Pulsa Monitor para empezar</translation>
 <context>
     <name>DecodiumBridge</name>
     <message>
+        <source>Update available: v%1</source>
+        <translation>Actualización disponible: v%1</translation>
+    </message>
+    <message>
         <source>Update in progress...</source>
         <translation>Actualización en curso...</translation>
     </message>

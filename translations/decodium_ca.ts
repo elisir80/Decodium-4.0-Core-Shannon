@@ -2606,6 +2606,10 @@ Prem Monitor per començar</translation>
 <context>
     <name>DecodiumBridge</name>
     <message>
+        <source>Update available: v%1</source>
+        <translation>Actualització disponible: v%1</translation>
+    </message>
+    <message>
         <source>Update in progress...</source>
         <translation>Actualització en curs...</translation>
     </message>

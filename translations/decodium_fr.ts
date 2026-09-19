@@ -2610,6 +2610,10 @@ Cliquez sur Monitor pour démarrer</translation>
 <context>
     <name>DecodiumBridge</name>
     <message>
+        <source>Update available: v%1</source>
+        <translation>Mise à jour disponible : v%1</translation>
+    </message>
+    <message>
         <source>Update in progress...</source>
         <translation>Mise à jour en cours...</translation>
     </message>

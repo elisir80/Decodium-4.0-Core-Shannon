@@ -56333,7 +56333,7 @@ void DecodiumBridge::checkForUpdates()
             emit updateAvailableChanged();
         }
         if (newer)
-            emit statusMessage("Aggiornamento disponibile: v" + latestTag);
+            emit statusMessage(tr("Update available: v%1").arg(latestTag));
     });
 }
 

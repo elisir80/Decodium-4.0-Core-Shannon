@@ -2608,6 +2608,10 @@ A kezdéshez kattintson a Monitor gombra</translation>
 <context>
     <name>DecodiumBridge</name>
     <message>
+        <source>Update available: v%1</source>
+        <translation>Elérhető frissítés: v%1</translation>
+    </message>
+    <message>
         <source>Update in progress...</source>
         <translation>Frissítés folyamatban...</translation>
     </message>

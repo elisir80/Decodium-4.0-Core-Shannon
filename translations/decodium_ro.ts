@@ -2010,6 +2010,10 @@ Apasă Monitor pentru a începe</translation>
 <context>
     <name>DecodiumBridge</name>
     <message>
+        <source>Update available: v%1</source>
+        <translation>Actualizare disponibilă: v%1</translation>
+    </message>
+    <message>
         <source>Update in progress...</source>
         <translation>Actualizare în curs...</translation>
     </message>

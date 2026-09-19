@@ -2618,6 +2618,10 @@ Noklikšķiniet uz Monitor, lai sāktu</translation>
 <context>
     <name>DecodiumBridge</name>
     <message>
+        <source>Update available: v%1</source>
+        <translation>Pieejams atjauninājums: v%1</translation>
+    </message>
+    <message>
         <source>Update in progress...</source>
         <translation>Notiek atjaunināšana...</translation>
     </message>

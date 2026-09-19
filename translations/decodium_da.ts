@@ -2605,6 +2605,10 @@ Klik på Monitor for at starte</translation>
 <context>
     <name>DecodiumBridge</name>
     <message>
+        <source>Update available: v%1</source>
+        <translation>Opdatering tilgængelig: v%1</translation>
+    </message>
+    <message>
         <source>Update in progress...</source>
         <translation>Opdatering i gang...</translation>
     </message>

@@ -118,6 +118,9 @@ private:
     int     m_progress {0};
     QString m_statusText;
     bool    m_checkOnStartup {true};
+    // Solo diagnostica: DECODIUM_UPDATE_FAKE_CURRENT finge una versione piu'
+    // vecchia e deroga alla soglia di un controllo al giorno.
+    bool    m_provaFinestra {false};
     bool    m_offlineMode {false};
     bool    m_appImageRuntime {false};
 };

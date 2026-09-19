@@ -2614,6 +2614,10 @@ Klik op Monitor om te starten</translation>
 <context>
     <name>DecodiumBridge</name>
     <message>
+        <source>Update available: v%1</source>
+        <translation>Update beschikbaar: v%1</translation>
+    </message>
+    <message>
         <source>Update in progress...</source>
         <translation>Update bezig...</translation>
     </message>

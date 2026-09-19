@@ -96,6 +96,16 @@ DecodiumUpdater::DecodiumUpdater(QObject* parent)
     , m_releaseRepository(QString::fromLatin1(kPrimaryRepository))
     , m_releasePageUrl(QString::fromLatin1(kPrimaryReleasesPage))
 {
+    // Prova della finestra di aggiornamento senza aspettare il rilascio
+    // successivo: la variabile finge una versione corrente piu' vecchia.
+    // Solo per diagnostica; senza variabile il comportamento e' invariato.
+    const QString versioneFinta =
+        qEnvironmentVariable("DECODIUM_UPDATE_FAKE_CURRENT").trimmed();
+    if (!versioneFinta.isEmpty()) {
+        m_currentVersion = versioneFinta;
+        m_provaFinestra = true;
+    }
+
     m_checkOnStartup = settingsStore().value(kKeyCheckOnStartup, true).toBool();
     if (currentPlatformKey() == QLatin1String("linux")) {
         const QString appImagePath = qEnvironmentVariable("APPIMAGE").trimmed();
@@ -164,7 +174,8 @@ void DecodiumUpdater::checkOnStartupIfDue()
     // Non tempestare GitHub (e l'utente) a ogni avvio: al massimo una volta al
     // giorno. Chi vuole puo' sempre forzare il controllo dal menu.
     const QDateTime last = settingsStore().value(kKeyLastCheckUtc).toDateTime();
-    if (last.isValid() && last.secsTo(QDateTime::currentDateTimeUtc()) < 24 * 3600)
+    if (!m_provaFinestra && last.isValid()
+        && last.secsTo(QDateTime::currentDateTimeUtc()) < 24 * 3600)
         return;
     check(/*silent=*/true);
 }
