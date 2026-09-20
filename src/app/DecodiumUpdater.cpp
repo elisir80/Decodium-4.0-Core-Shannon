@@ -471,7 +471,9 @@ void DecodiumUpdater::downloadAndInstall()
             [this, reply, output, atomicFile, regularFile, target,
              targetPermissions, replaceRunningAppImage, appImageSavedToDownloads]() {
         reply->deleteLater();
-        output->write(reply->readAll());
+        if (reply->error() == QNetworkReply::NoError && reply->isReadable()) {
+            output->write(reply->readAll());
+        }
         const qint64 size = output->size();
 
         const auto discardDownload = [atomicFile, regularFile, target]() {

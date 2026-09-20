@@ -2,48 +2,70 @@
 
 ## English (UK)
 
-This release removes the Italian text that appeared in the interface regardless of the language chosen.
+Changes since **v1.0.643**, including upstream v1.0.644 and the local fixes collected in v1.0.645.
 
-### Ninety-four strings were Italian at source
+### Update window and localisation — upstream v1.0.644
 
-- Qt's source language is whatever is written in the code. Ninety-four strings were written in Italian, so they appeared in Italian to everyone — to the German, Spanish and Japanese interfaces too. Nothing could be translated, because there was nothing to translate: the "original" was already Italian.
-- Twenty-two of them were status messages that did not even go through the translation call: *transmission complete*, *reception stopped*, *settings saved*, *tune finished*, *transmit audio device not found*, *transmit watchdog timed out*, *no WAV file found*. They are now translatable, and the ones that carried a device name or a path now use a placeholder instead of concatenating strings, which is what translation requires.
-- The other seventy-two were already inside the translation call but written in Italian: forty-eight in the callsign service (LoTW, QRZ.com, eQSL, Club Log), the rest in CAT, Cloudlog, QRZ Logbook, the QSO log dialog, the main window and four QML files — the lookup panel, the live map and two settings pages.
-- All ninety-four now read in English at source and are translated into **all fifteen supplied languages**, each in its correct translation context. Italian users see exactly what they saw before.
+- The update notice now keeps its contents within its own frame. Its layout determines its height, bounded by the hosting window, with separate header and footer areas.
+- Release notes are rendered as formatted text in a framed, scrollable panel instead of displaying raw Markdown over the decode list.
+- Colours follow the application theme; the new version is highlighted and the buttons follow the application's styling.
+- The “Update available: v…” status is translatable, with updated source and compiled translation catalogues. Other existing updater status messages are not yet all localised; this release does not claim complete updater localisation.
+- A diagnostic override, `DECODIUM_UPDATE_FAKE_CURRENT`, allows developers to exercise the update notice without waiting for a new release and bypasses the daily check limit. Normal operation is unchanged when it is unset.
+- The cross-process settings persistence test accounts for case-insensitive Windows INI keys, avoiding false comparisons between intentional key pairs differing only in case.
 
-### Also in this release
+### Consistent UDP client identity — v1.0.645
 
-- The update window rebuilt in v1.0.644, the unresolved-hash sequencing safeguard from v1.0.641 and the safe CPU dispatch from v1.0.640, plus upstream v1.0.643 (settings and profile persistence, localised weather, SSTV receive controls).
+- The default primary UDP client ID is now **Decodium** in the dashboard and both modern and legacy backends. Explicitly configured compatibility IDs, including **WSJTX**, remain supported rather than being forcibly replaced.
+- The effective primary, secondary and tertiary IDs are passed to the embedded legacy backend before its first heartbeat, preventing an initial stale identity from being advertised.
+- Changes to the dashboard IDs are propagated to the legacy backend's actual settings object, including when the active profile and backend settings stores differ.
+- UDP reconfiguration refreshes legacy identities even in native modes such as RTTY. The standalone UDP sender remains suppressed while the legacy TX backend owns reporting, retaining the existing protection against duplicate reporting.
+- A regression test exercises changing an existing WSJTX client to Decodium and explicitly switching it back, checking the heartbeat identity.
 
-### Known and not addressed
+### Safer network reply handling — v1.0.645
 
-- The Romanian catalogue is shorter than the others and is stale with respect to the code: it carries the new strings, but older parts of the interface remain untranslated there.
+- Completed network replies are read only when they report no network error and are still readable, avoiding attempts to read closed or failed replies.
+- This applies to the updater's final download read, remote callsign and confirmation database lookups, POTA and geographic map data, the IOTA catalogue, satellite TLE downloads, CTY/CALL3 data and the LoTW user list.
+- Existing error handling remains in place. These guards do not resolve external server outages or guarantee that every remote service is available.
 
-### Downloads
+### Downloads and verification scope
 
-Source ZIP and tar.gz archives are available for this tag. The Windows x64 installer EXE is attached to this release; GitHub workflows add Linux x86_64/aarch64 AppImages with checksum files as they finish.
+- Source ZIP and tar.gz archives are provided by GitHub for this tag.
+- Release workflows publish the Windows x64 installer, Linux x86_64 and aarch64 AppImages, Apple Silicon DMGs for Sequoia/Tahoe, and Intel DMGs for Ventura/Sonoma/Sequoia. Binary files appear as their respective workflows finish; macOS and Linux packages include checksum files.
+- Build and automated-test results are distinct from live radio and third-party logger validation. The changes do not imply that every radio, operating-system configuration or external logger has been tested.
+- Existing user settings are retained. Check the UDP client ID expected by your logging software; select WSJTX explicitly if that software requires this compatibility identity.
 
 ---
 
 ## Italiano
 
-Questo rilascio toglie il testo italiano che compariva nell'interfaccia qualunque lingua fosse stata scelta.
+Modifiche dalla **v1.0.643**, comprendenti la versione upstream v1.0.644 e le correzioni locali raccolte nella v1.0.645.
 
-### Novantaquattro stringhe erano italiane all'origine
+### Finestra di aggiornamento e traduzioni — upstream v1.0.644
 
-- La lingua di partenza di Qt è quella scritta nel codice. Novantaquattro stringhe erano scritte in italiano, quindi comparivano in italiano a chiunque — anche nell'interfaccia in tedesco, in spagnolo, in giapponese. Non c'era niente da tradurre, perché l'«originale» era già italiano.
-- Ventidue erano messaggi di stato che non passavano nemmeno dalla chiamata di traduzione: *TX completato*, *RX fermato*, *impostazioni salvate*, *Tune terminato*, *audio TX non trovato*, *watchdog di trasmissione scaduto*, *nessun file WAV trovato*. Ora sono traducibili, e quelle che portavano il nome di un dispositivo o un percorso usano un segnaposto invece di sommare stringhe, come la traduzione richiede.
-- Le altre settantadue erano già dentro la chiamata di traduzione ma scritte in italiano: quarantotto nel servizio dei nominativi (LoTW, QRZ.com, eQSL, Club Log), le restanti in CAT, Cloudlog, QRZ Logbook, la finestra di log del QSO, la finestra principale e quattro file QML — il pannello lookup, la mappa live e due schede delle impostazioni.
-- Tutte e novantaquattro sono ora in inglese all'origine e tradotte in **tutte e quindici le lingue fornite**, ciascuna nel contesto di traduzione giusto. Chi usa l'italiano vede esattamente quello che vedeva prima.
+- L'avviso di aggiornamento mantiene ora il contenuto nel proprio riquadro. Il layout ne determina l'altezza entro i limiti della finestra ospitante, con intestazione e area dei pulsanti separate.
+- Le note di rilascio vengono visualizzate come testo formattato in un pannello con scorrimento, anziché mostrare Markdown grezzo sopra la lista delle decodifiche.
+- I colori seguono il tema dell'applicazione; la nuova versione è evidenziata e i pulsanti rispettano lo stile del programma.
+- Lo stato «Update available: v…» è traducibile, con cataloghi sorgente e compilati aggiornati. Altri messaggi preesistenti dell'aggiornamento non sono ancora tutti localizzati: questa versione non dichiara una traduzione completa dell'updater.
+- La variabile diagnostica `DECODIUM_UPDATE_FAKE_CURRENT` consente agli sviluppatori di provare l'avviso senza attendere una nuova release e supera il limite giornaliero del controllo. Se non impostata, il funzionamento normale resta invariato.
+- Il test di persistenza delle impostazioni fra processi tiene conto delle chiavi INI Windows non sensibili alle maiuscole, evitando confronti errati fra coppie intenzionali di chiavi che differiscono soltanto per la grafia.
 
-### Nel rilascio c'è anche
+### Identità UDP coerente — v1.0.645
 
-- La finestra dell'aggiornamento rifatta nella 1.0.644, la cautela sul destinatario nascosto dietro l'hash della 1.0.641 e il dispatch sicuro della CPU della 1.0.640, oltre alla versione upstream 1.0.643 (persistenza di impostazioni e profili, meteo localizzato, controlli di ricezione SSTV).
+- L'ID predefinito del client UDP primario è ora **Decodium** nella dashboard e nei backend moderno e legacy. Gli ID di compatibilità configurati esplicitamente, incluso **WSJTX**, restano utilizzabili e non vengono sostituiti forzatamente.
+- Gli ID effettivi delle tre destinazioni UDP vengono trasmessi al backend legacy incorporato prima del suo primo heartbeat, evitando l'annuncio iniziale di un'identità non aggiornata.
+- Le modifiche agli ID nella dashboard vengono propagate all'archivio effettivamente usato dal backend legacy, anche quando profilo attivo e archivio del backend differiscono.
+- La riconfigurazione UDP aggiorna le identità legacy anche nei modi nativi come RTTY. Il mittente UDP autonomo resta disabilitato quando il backend TX legacy gestisce il reporting, mantenendo la protezione esistente dalle duplicazioni.
+- Un test di regressione verifica il passaggio di un client esistente da WSJTX a Decodium e il ritorno esplicito a WSJTX, controllando l'identità negli heartbeat.
 
-### Noto e non risolto
+### Gestione più sicura delle risposte di rete — v1.0.645
 
-- Il catalogo rumeno è più corto degli altri ed è arretrato rispetto al codice: le stringhe nuove ci sono, ma parti più vecchie dell'interfaccia restano lì non tradotte.
+- Le risposte concluse vengono lette soltanto se non riportano errori di rete e risultano ancora leggibili, evitando letture su risposte chiuse o fallite.
+- La protezione riguarda la lettura finale del download dell'aggiornamento, le ricerche remote di nominativi e database di conferme, POTA e dati geografici della mappa, catalogo IOTA, download TLE dei satelliti, dati CTY/CALL3 e lista utenti LoTW.
+- La gestione degli errori già presente rimane attiva. Questi controlli non risolvono indisponibilità dei server esterni e non garantiscono l'accessibilità di ogni servizio remoto.
 
-### Download
+### Download e limiti delle verifiche
 
-Per questo tag sono disponibili gli archivi sorgente ZIP e tar.gz. L'installer Windows x64 EXE è allegato a questo rilascio; i workflow di GitHub aggiungono le AppImage Linux x86_64/aarch64 con i file di checksum man mano che finiscono.
+- GitHub fornisce gli archivi sorgente ZIP e tar.gz associati al tag.
+- I workflow pubblicano l'installer Windows x64, le AppImage Linux x86_64 e aarch64, i DMG Apple Silicon per Sequoia/Tahoe e i DMG Intel per Ventura/Sonoma/Sequoia. I binari compaiono al termine dei rispettivi workflow; i pacchetti macOS e Linux includono i file di checksum.
+- Compilazione e test automatici sono distinti dalla verifica con radio reali e logger esterni. Le modifiche non implicano che siano stati provati tutti i modelli di radio, le configurazioni dei sistemi operativi o i programmi di log.
+- Le impostazioni dell'utente vengono conservate. Controllare quale ID UDP richiede il proprio logger e selezionare esplicitamente WSJTX se necessario per compatibilità.

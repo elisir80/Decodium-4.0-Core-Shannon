@@ -63,6 +63,20 @@ private slots:
     verifyHeartbeat(tertiary, configuredId);
   }
 
+  void replacesStaleLegacyIdAndPreservesExplicitCompatibilityId()
+  {
+    QUdpSocket receiver;
+    QVERIFY(receiver.bind(QHostAddress::LocalHost, 0));
+    MessageClient client {QStringLiteral("WSJTX"), QStringLiteral("test"), QStringLiteral("test"),
+                          QStringLiteral("127.0.0.1"), receiver.localPort(), 0, {}, 1,
+                          this, QStringLiteral("legacy identity refresh")};
+    verifyHeartbeat(receiver, QStringLiteral("WSJTX"));
+    client.set_client_id(QStringLiteral("Decodium"));
+    verifyHeartbeat(receiver, QStringLiteral("Decodium"));
+    client.set_client_id(QStringLiteral("WSJTX"));
+    verifyHeartbeat(receiver, QStringLiteral("WSJTX"));
+  }
+
   void appliesClientIdChangeImmediately()
   {
     QUdpSocket receiver;

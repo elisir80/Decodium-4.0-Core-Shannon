@@ -287,7 +287,8 @@ void SatelliteTrackingService::handleTleReply()
     m_reply = nullptr;
     if (!reply) return;
 
-    QByteArray const payload = reply->readAll();
+    QByteArray const payload = reply->error() == QNetworkReply::NoError && reply->isReadable()
+            ? reply->readAll() : QByteArray();
     bool const networkOk = reply->error() == QNetworkReply::NoError;
     QString const networkError = reply->errorString();
     reply->deleteLater();

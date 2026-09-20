@@ -553,7 +553,7 @@ QPalette embeddedLegacyWidgetPalette(QPalette base)
 }
 }
 
-DecodiumLegacyBackend::DecodiumLegacyBackend(QObject* parent)
+DecodiumLegacyBackend::DecodiumLegacyBackend(QObject* parent, QStringList const& udpClientIds)
     : QObject(parent)
 {
     m_backendStartupMs = QDateTime::currentMSecsSinceEpoch();
@@ -598,6 +598,15 @@ DecodiumLegacyBackend::DecodiumLegacyBackend(QObject* parent)
 
     try {
         m_multiSettings = std::make_unique<MultiSettings>();
+        // Seed the effective QML identity before MainWindow sends its first
+        // heartbeat; updating it afterwards leaves a stale connection event.
+        QStringList const idKeys {QStringLiteral("UDPClientId"),
+                                  QStringLiteral("UDPSecondaryClientId"),
+                                  QStringLiteral("UDPTertiaryClientId")};
+        for (int i = 0; i < idKeys.size() && i < udpClientIds.size(); ++i) {
+            m_multiSettings->settings()->setValue(idKeys.at(i), udpClientIds.at(i));
+        }
+
 
         const bool disableInputResampling =
             m_multiSettings->settings()->value(QStringLiteral("Audio/DisableInputResampling"), false).toBool();
@@ -1314,10 +1323,12 @@ void DecodiumLegacyBackend::setEmbeddedUiUpdatesEnabled(bool enabled)
     }
 }
 
-void DecodiumLegacyBackend::refreshUdpReporting()
+void DecodiumLegacyBackend::refreshUdpReporting(QString const& primaryId,
+                                                QString const& secondaryId,
+                                                QString const& tertiaryId)
 {
     if (m_mainWindow) {
-        m_mainWindow->refreshLegacyUdpReporting();
+        m_mainWindow->refreshLegacyUdpReporting(primaryId, secondaryId, tertiaryId);
     }
 }
 

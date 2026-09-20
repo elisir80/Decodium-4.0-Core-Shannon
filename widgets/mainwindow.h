@@ -186,7 +186,9 @@ public:
   bool legacyTuning() const;
   bool legacyCatConnected() const;
   double legacySignalLevel() const;
-  void refreshLegacyUdpReporting();
+  void refreshLegacyUdpReporting(QString const& primaryId = {},
+                                 QString const& secondaryId = {},
+                                 QString const& tertiaryId = {});
   int legacyBandActivityRevision() const;
   QStringList legacyBandActivityLines() const;
   QStringList legacyTakeBandActivityDelta(bool * reset);
