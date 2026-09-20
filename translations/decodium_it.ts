@@ -2627,6 +2627,14 @@ Premi Monitor per iniziare</translation>
 <context>
     <name>DecodiumBridge</name>
     <message>
+        <source>%1 not connected</source>
+        <translation>%1 non collegato</translation>
+    </message>
+    <message>
+        <source>%1 %2 connected</source>
+        <translation>%1 %2 collegato</translation>
+    </message>
+    <message>
         <source>Direct call received, but the callsign is not resolved</source>
         <translation>Chiamata diretta ricevuta, ma il nominativo non e&apos; risolto</translation>
     </message>

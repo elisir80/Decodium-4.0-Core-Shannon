@@ -2605,6 +2605,14 @@ Click Monitor to start</source>
 <context>
     <name>DecodiumBridge</name>
     <message>
+        <source>%1 not connected</source>
+        <translation>%1 не подключён</translation>
+    </message>
+    <message>
+        <source>%1 %2 connected</source>
+        <translation>%1 %2 подключён</translation>
+    </message>
+    <message>
         <source>Update available: v%1</source>
         <translation>Доступно обновление: v%1</translation>
     </message>

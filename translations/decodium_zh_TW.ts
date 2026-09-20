@@ -2603,6 +2603,14 @@ Click Monitor to start</source>
 <context>
     <name>DecodiumBridge</name>
     <message>
+        <source>%1 not connected</source>
+        <translation>%1 未連線</translation>
+    </message>
+    <message>
+        <source>%1 %2 connected</source>
+        <translation>%1 %2 已連線</translation>
+    </message>
+    <message>
         <source>Update available: v%1</source>
         <translation>有可用更新：v%1</translation>
     </message>

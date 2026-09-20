@@ -110,6 +110,7 @@ void DecodiumDecoLogLink::onDisconnected()
     const bool was = m_connected;
     m_connected = false;
     m_peerVersion.clear();
+    m_peerProduct.clear();
     if (was)
         emit connectedChanged(false);
     if (m_enabled && !m_retry.isActive())
@@ -138,11 +139,18 @@ void DecodiumDecoLogLink::handle(const QJsonObject& message)
 {
     const QString type = message.value(QStringLiteral("type")).toString();
     if (type == QLatin1String("hello")) {
-        if (message.value(QStringLiteral("app")).toString() != QLatin1String("DecoLog")) {
+        // "app" e' il nome del PROTOCOLLO, non del programma: DecoLog lo manda
+        // cosi' anche dopo essersi rinominato DecoDXLog. Si accettano entrambi,
+        // perche' un saluto rifiutato qui diventa una riconnessione ogni 5
+        // secondi all'infinito, senza che si veda perche'.
+        const QString app = message.value(QStringLiteral("app")).toString();
+        if (app != QLatin1String("DecoLog") && app != QLatin1String("DecoDXLog")) {
             m_socket->abort();
             return;
         }
         m_peerVersion = message.value(QStringLiteral("version")).toString();
+        // Nome vero del programma, se lo dichiara: e' quello da mostrare.
+        m_peerProduct = message.value(QStringLiteral("product")).toString().trimmed();
         if (!m_connected) {
             m_connected = true;
             emit connectedChanged(true);

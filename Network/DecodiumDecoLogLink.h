@@ -45,6 +45,9 @@ public:
 
     bool isConnected() const { return m_connected; }
     QString peerVersion() const { return m_peerVersion; }
+    // Nome del programma dall'altra parte ("product" nel saluto). Vuoto con i
+    // log piu' vecchi del campo: in quel caso vale il nome di protocollo.
+    QString peerProduct() const { return m_peerProduct; }
 
     // Che cosa sa DecoLog di questi nominativi; risposta con queryAnswered().
     int query(const QStringList& calls, const QString& band, const QString& mode);
@@ -83,6 +86,7 @@ private:
     QString m_version;
     QString m_station;
     QString m_peerVersion;
+    QString m_peerProduct;
 };
 
 #endif // DECODIUMDECOLOGLINK_H

@@ -2610,6 +2610,14 @@ Zum Starten auf Monitor klicken</translation>
 <context>
     <name>DecodiumBridge</name>
     <message>
+        <source>%1 not connected</source>
+        <translation>%1 nicht verbunden</translation>
+    </message>
+    <message>
+        <source>%1 %2 connected</source>
+        <translation>%1 %2 verbunden</translation>
+    </message>
+    <message>
         <source>Update available: v%1</source>
         <translation>Update verfügbar: v%1</translation>
     </message>

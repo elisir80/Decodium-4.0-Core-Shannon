@@ -2606,6 +2606,14 @@ Prem Monitor per començar</translation>
 <context>
     <name>DecodiumBridge</name>
     <message>
+        <source>%1 not connected</source>
+        <translation>%1 no connectat</translation>
+    </message>
+    <message>
+        <source>%1 %2 connected</source>
+        <translation>%1 %2 connectat</translation>
+    </message>
+    <message>
         <source>Update available: v%1</source>
         <translation>Actualització disponible: v%1</translation>
     </message>

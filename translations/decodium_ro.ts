@@ -2010,6 +2010,14 @@ Apasă Monitor pentru a începe</translation>
 <context>
     <name>DecodiumBridge</name>
     <message>
+        <source>%1 not connected</source>
+        <translation>%1 neconectat</translation>
+    </message>
+    <message>
+        <source>%1 %2 connected</source>
+        <translation>%1 %2 conectat</translation>
+    </message>
+    <message>
         <source>Update available: v%1</source>
         <translation>Actualizare disponibilă: v%1</translation>
     </message>

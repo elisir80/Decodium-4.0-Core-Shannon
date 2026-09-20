@@ -10390,9 +10390,15 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     m_decoLogLink = new DecodiumDecoLogLink(this);
     connect(m_decoLogLink, &DecodiumDecoLogLink::connectedChanged, this, [this](bool connected) {
         m_decoLogConnected = connected;
+        // Il nome mostrato e' quello dichiarato dal programma ("product"), non
+        // quello di protocollo: dopo la rinomina in DecoDXLog l'utente deve
+        // leggere il nome che vede sulla sua finestra.
+        const QString nome = m_decoLogLink->peerProduct().isEmpty()
+                                 ? QStringLiteral("DecoLog")
+                                 : m_decoLogLink->peerProduct();
         m_decoLogStatus = connected
-            ? QStringLiteral("DecoLog %1 collegato").arg(m_decoLogLink->peerVersion())
-            : QStringLiteral("DecoLog non collegato");
+            ? tr("%1 %2 connected").arg(nome, m_decoLogLink->peerVersion())
+            : tr("%1 not connected").arg(nome);
         bridgeLog(QStringLiteral("DecoLink: %1").arg(m_decoLogStatus));
         emit decoLogStateChanged();
     });

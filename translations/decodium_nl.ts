@@ -2614,6 +2614,14 @@ Klik op Monitor om te starten</translation>
 <context>
     <name>DecodiumBridge</name>
     <message>
+        <source>%1 not connected</source>
+        <translation>%1 niet verbonden</translation>
+    </message>
+    <message>
+        <source>%1 %2 connected</source>
+        <translation>%1 %2 verbonden</translation>
+    </message>
+    <message>
         <source>Update available: v%1</source>
         <translation>Update beschikbaar: v%1</translation>
     </message>
