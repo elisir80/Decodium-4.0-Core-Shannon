@@ -23,7 +23,11 @@ import QtQuick.Layouts
 Dialog {
     id: updateDialog
     modal: true
-    anchors.centerIn: parent
+    // Il Dialog nasce dentro un Loader, che non ha dimensioni: prendere da li'
+    // la larghezza disponibile dava misure negative e faceva sparire lo sfondo.
+    // Il riferimento giusto e' l'Overlay della finestra.
+    parent: Overlay.overlay
+    anchors.centerIn: Overlay.overlay
     closePolicy: Popup.CloseOnEscape
     standardButtons: Dialog.NoButton
     padding: 0
@@ -42,11 +46,12 @@ Dialog {
     Material.accent: primaryBlue
     Material.primary: secondaryCyan
 
-    readonly property int spazioLarghezza: parent ? parent.width : 900
-    readonly property int spazioAltezza: parent ? parent.height : 700
-    width: Math.min(680, spazioLarghezza - 48)
-    // L'altezza la chiede il contenuto, ma non oltre la finestra che lo ospita.
-    height: Math.min(implicitHeight, spazioAltezza - 48)
+    readonly property int spazioLarghezza: Overlay.overlay ? Overlay.overlay.width : 900
+    readonly property int spazioAltezza: Overlay.overlay ? Overlay.overlay.height : 700
+    width: Math.max(360, Math.min(680, spazioLarghezza - 48))
+    // Altezza fissa entro lo spazio della finestra: legarla a implicitHeight
+    // mentre il pannello delle note ha Layout.fillHeight e' un anello.
+    height: Math.max(320, Math.min(560, spazioAltezza - 48))
 
     background: Rectangle {
         color: bgDeep
@@ -99,7 +104,11 @@ Dialog {
 
                 Label {
                     id: versionLabel
-                    anchors.centerIn: parent
+                    // Il Dialog nasce dentro un Loader, che non ha dimensioni: prendere da li'
+    // la larghezza disponibile dava misure negative e faceva sparire lo sfondo.
+    // Il riferimento giusto e' l'Overlay della finestra.
+    parent: Overlay.overlay
+    anchors.centerIn: Overlay.overlay
                     text: updater.latestVersion
                     color: accentOrange
                     font.pixelSize: 12
