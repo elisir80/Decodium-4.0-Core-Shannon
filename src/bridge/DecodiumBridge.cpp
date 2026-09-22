@@ -37072,101 +37072,22 @@ bool DecodiumBridge::isDirectedToLocalHashFromActivePartner(const QString& messa
         }
     }
 
-    // CASO 2: hash NON risolto ("<...>"). Qui il destinatario non si conosce e
-    // va dedotto dal QSO in corso, con tutte le cautele che seguono.
-    QStringList const tokens = normalizedMessageTokens(msg);
-    if (tokens.size() < 3) {
-        return false;
-    }
-
-    bool const firstIsPlaceholder = isPlaceholderCallToken(tokens.at(0));
-    bool const secondIsPlaceholder = isPlaceholderCallToken(tokens.at(1));
-    if (firstIsPlaceholder == secondIsPlaceholder) {
-        return false;
-    }
-
-    int const partnerIndex = firstIsPlaceholder ? 1 : 0;
-    QString const partner = normalizedUsableCallToken(tokens.at(partnerIndex));
-    QString const partnerBase = normalizedBaseCall(partner);
-    if (partner.isEmpty()
-        || partnerBase.isEmpty()
-        || !isPlausibleDecodedCallsign(partner)
-        || hasHighConfidenceGhostPrefix(partner)) {
-        return false;
-    }
-
-    QString const myBaseUpper = normalizedBaseCall(m_callsign.trimmed().toUpper());
-    if (!myBaseUpper.isEmpty() && partnerBase == myBaseUpper) {
-        return false;
-    }
-
-    // CERTEZZA sul destinatario, al posto del dubbio dei puntini. In un
-    // messaggio con hash non risolto decide il nominativo scritto per esteso:
-    //   - se chi trasmette e' NON standard, l'hash e' un nominativo standard e
-    //     puo' essere il nostro (e' il caso II8IHBC del 12/09/2026);
-    //   - se chi trasmette e' STANDARD, l'hash e' per forza un nominativo non
-    //     standard: il nostro lo e' solo se lo abbiamo composto noi.
-    // Con entrambi standard il messaggio NON e' nostro, per quanto il QSO in
-    // corso lo faccia sembrare. Segnalato in aria il 18/09/2026: "<...> KG6DX
-    // R-07" mentre si chiamava KG6DX, che stava rispondendo a un terzo, ha
-    // avviato la sequenza di risposta.
-    if (!decodium::txmsg::hiddenHashCanBeOwnCall(partner,
-                                                m_callsign.trimmed().toUpper())) {
-        return false;
-    }
-
-    QStringList payload = tokens.mid(2);
-    while (!payload.isEmpty() && payload.constLast() == QStringLiteral("?")) {
-        payload.removeLast();
-    }
-
-    QString payloadRejectReason;
-    bool const contestExchanges = contestDecodeExchangesEnabled();
-    if (!isDirectedDecodePayloadValid(payload, contestExchanges, &payloadRejectReason)
-        || !isResolvablePlaceholderDirectedPayload(payload, contestExchanges)) {
-        return false;
-    }
-
-    auto const partnerMatchesCall = [&partner, &partnerBase](QString const& call) {
-        QString const normalized = normalizeCallToken(call).trimmed().toUpper();
-        QString const callBase = normalizedBaseCall(normalized);
-        return (!normalized.isEmpty() && normalized == partner)
-            || (!callBase.isEmpty() && callBase == partnerBase);
-    };
-
-    bool const matchesAwaitingFt2Partner =
-        !m_ft2AutoCqAwaitingPartnerBase.isEmpty()
-        && partnerBase == m_ft2AutoCqAwaitingPartnerBase;
-    bool const knownExchangePartner =
-        partnerMatchesCall(m_dxCall)
-        || partnerMatchesCall(m_autoCqLockedCall)
-        || partnerMatchesCall(m_resumeTargetCall)
-        || partnerMatchesCall(m_pendingAutoSeqPartnerBase)
-        || partnerMatchesCall(inferredPartnerForAutolog())
-        || matchesAwaitingFt2Partner
-        || messageContainsCallToken(buildCurrentTxMessage(), partner, partnerBase)
-        || messageContainsCallToken(m_lastTransmittedMessage, partner, partnerBase)
-        || messageContainsCallToken(m_pendingAutoSeqMessage, partner, partnerBase);
-    if (!knownExchangePartner) {
-        return false;
-    }
-
-    bool const activeExchangeContext =
-        m_qsoProgress > 1
-        || (m_txEnabled && m_currentTx >= 1 && m_currentTx <= 5)
-        || m_transmitting
-        || m_tuning
-        || m_pendingAutoSeqTxAfterActiveTx > 0
-        || matchesAwaitingFt2Partner
-        || (!m_autoCqLockedCall.trimmed().isEmpty() && m_currentTx != 6);
-    if (!activeExchangeContext) {
-        return false;
-    }
-
-    if (partnerOut) {
-        *partnerOut = partner;
-    }
-    return true;
+    // CASO 2: hash NON risolto ("<...>"). Qui non c'e' piu' niente da dedurre,
+    // e non si deve dedurre: la prova l'ha gia' fatta il decoder.
+    //
+    // Nei messaggi di tipo 4 il destinatario viaggia come hash a 12 bit. In
+    // unpack77 (FtxMessageEncoder.cpp) quell'hash viene confrontato con quello
+    // del NOSTRO nominativo e, se coincide, il testo esce col nominativo
+    // scritto: "<IT9MRM> 8Z96ND RR73". FT8, FT4 e FT2 passano tutti e tre da
+    // quel decode77 con il nostro nominativo nel contesto.
+    //
+    // Se quindi leggiamo ancora "<...>", l'hash non era il nostro: il messaggio
+    // e' per un altro. Segnalato in aria il 22/09/2026 da IT9MRM mentre
+    // lavorava 8Z96ND (nominativo non standard): il QSO veniva chiuso sulla
+    // risposta che 8Z96ND dava a una terza stazione. Con un corrispondente non
+    // standard TUTTI i suoi messaggi hanno quella forma, quindi dedurre il
+    // destinatario dal QSO in corso non poteva che sbagliare, prima o poi.
+    return false;
 }
 
 bool DecodiumBridge::isDirectedActivePartnerSignoffDecode(const QStringList& fields) const
