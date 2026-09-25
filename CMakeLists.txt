@@ -1380,6 +1380,9 @@ if (DECODIUM_ENABLE_RTTY)
   add_subdirectory (src/rtty)
 endif ()
 
+# JTTY: il modo nuovo di WSJT-X 3.2, portato in C++ (niente Fortran).
+add_subdirectory (src/jtty)
+
 if (BUILD_TESTING AND EXISTS ${CMAKE_SOURCE_DIR}/tests AND IS_DIRECTORY ${CMAKE_SOURCE_DIR}/tests)
   add_subdirectory (tests)
 endif ()
@@ -2248,6 +2251,8 @@ else ()
   target_compile_definitions (decodium_qml PRIVATE DECODIUM_HAS_SSTV=0)
 endif ()
 
+
+target_link_libraries (decodium_qml decodium_jtty)
 
 # DecoRTTY: la libreria di aggancio porta con se' tutte le altre.
 if (DECODIUM_ENABLE_RTTY)

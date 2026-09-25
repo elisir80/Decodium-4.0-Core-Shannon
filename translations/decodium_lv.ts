@@ -8512,6 +8512,10 @@ Labais klikšķis: atvienot</translation>
         <source>DECØMETER - RF Meter - Decodium</source>
         <translation>DECØMETER - RF mērītājs - Decodium</translation>
     </message>
+    <message>
+        <source>Open the JTTY window...</source>
+        <translation>Atvērt JTTY logu...</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>
@@ -30138,5 +30142,185 @@ ieliktu laukā HIS CALL.</translation>
     <message><source>Thunderstorm</source><translation>Pērkona negaiss</translation></message>
     <message><source>Fog</source><translation>Migla</translation></message>
     <message><source>Unknown</source><translation>Nezināms</translation></message>
+</context>
+<context>
+    <name>JttyWindow</name>
+    <message>
+        <source>JTTY - keyboard mode</source>
+        <translation>JTTY - tastatūras režīms</translation>
+    </message>
+    <message>
+        <source>TX</source>
+        <translation>TX</translation>
+    </message>
+    <message>
+        <source>RX</source>
+        <translation>RX</translation>
+    </message>
+    <message>
+        <source>JTTY OFF</source>
+        <translation>JTTY IZSL.</translation>
+    </message>
+    <message>
+        <source>RX %1 Hz</source>
+        <translation>RX %1 Hz</translation>
+    </message>
+    <message>
+        <source>TX %1 Hz</source>
+        <translation>TX %1 Hz</translation>
+    </message>
+    <message>
+        <source>TX=RX</source>
+        <translation>TX=RX</translation>
+    </message>
+    <message>
+        <source>FTol</source>
+        <translation>FTol</translation>
+    </message>
+    <message>
+        <source>DX</source>
+        <translation>DX</translation>
+    </message>
+    <message>
+        <source>lower case</source>
+        <translation>mazie burti</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Notīrīt</translation>
+    </message>
+    <message>
+        <source>QSO FREQUENCY  (RX %1 ± %2 Hz)</source>
+        <translation>QSO FREKVENCE  (RX %1 ± %2 Hz)</translation>
+    </message>
+    <message>
+        <source>ALL FREQUENCIES  (click a line: RX there and pick the call)</source>
+        <translation>VISAS FREKVENCES  (klikšķis uz rindas: RX tur un izsaukuma signāls)</translation>
+    </message>
+    <message>
+        <source>Click to send, right click to edit</source>
+        <translation>Klikšķis - sūtīt, labais klikšķis - rediģēt</translation>
+    </message>
+    <message>
+        <source>Contest</source>
+        <translation>Sacensības</translation>
+    </message>
+    <message>
+        <source>None</source>
+        <translation>Nav</translation>
+    </message>
+    <message>
+        <source>Field Day</source>
+        <translation>Field Day</translation>
+    </message>
+    <message>
+        <source>RTTY Roundup</source>
+        <translation>RTTY Roundup</translation>
+    </message>
+    <message>
+        <source>Exchange</source>
+        <translation>Apmaiņa</translation>
+    </message>
+    <message>
+        <source>Serial</source>
+        <translation>Numurs</translation>
+    </message>
+    <message>
+        <source>log on &quot;TU&quot;</source>
+        <translation>reģistrēt pie &quot;TU&quot;</translation>
+    </message>
+    <message>
+        <source>Log QSO</source>
+        <translation>Reģistrēt QSO</translation>
+    </message>
+    <message>
+        <source>Type a message and press Enter (Esc stops the transmission)</source>
+        <translation>Ierakstiet ziņu un nospiediet Enter (Esc aptur raidīšanu)</translation>
+    </message>
+    <message>
+        <source>Send</source>
+        <translation>Sūtīt</translation>
+    </message>
+    <message>
+        <source>Stop TX</source>
+        <translation>Apturēt TX</translation>
+    </message>
+    <message>
+        <source>Sending: %1</source>
+        <translation>Raida: %1</translation>
+    </message>
+    <message>
+        <source>Select JTTY in the mode selector to receive and transmit.</source>
+        <translation>Izvēlieties JTTY režīmu atlasē, lai uztvertu un raidītu.</translation>
+    </message>
+    <message>
+        <source>F%1 template</source>
+        <translation>F%1 veidne</translation>
+    </message>
+    <message>
+        <source>%M my call, %H and %Q the DX call, %E exchange, %G grid.
+The default templates are sent as compact native frames.</source>
+        <translation>%M mans izsaukuma signāls, %H un %Q DX signāls, %E apmaiņa, %G lokators.
+Noklusējuma veidnes tiek sūtītas kā kompakti vietējie kadri.</translation>
+    </message>
+    <message>
+        <source>Save</source>
+        <translation>Saglabāt</translation>
+    </message>
+    <message>
+        <source>Defaults (all)</source>
+        <translation>Noklusējums (visi)</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Atcelt</translation>
+    </message>
+</context>
+<context>
+    <name>decodium::jtty::JttyController</name>
+    <message>
+        <source>unknown ARRL/RAC section</source>
+        <translation>nezināma ARRL/RAC sekcija</translation>
+    </message>
+    <message>
+        <source>invalid native atom</source>
+        <translation>nederīgs vietējais atoms</translation>
+    </message>
+    <message>
+        <source>Transmission stopped by the watchdog.</source>
+        <translation>Raidīšanu apturēja sargs.</translation>
+    </message>
+    <message>
+        <source>The message does not fit in 16 JTTY frames.</source>
+        <translation>Ziņa neietilpst 16 JTTY kadros.</translation>
+    </message>
+    <message>
+        <source>Nothing to send.</source>
+        <translation>Nav ko sūtīt.</translation>
+    </message>
+    <message>
+        <source>too long (max 16 frames)</source>
+        <translation>par garu (maks. 16 kadri)</translation>
+    </message>
+    <message>
+        <source>%1 frames, %2 s</source>
+        <translation>%1 kadri, %2 s</translation>
+    </message>
+    <message>
+        <source>Cannot transmit: JTTY must be the active mode, the TX audio output must be available and no other transmission may be running.</source>
+        <translation>Nevar raidīt: JTTY jābūt aktīvajam režīmam, TX audio izejai pieejamai un nedrīkst notikt cita raidīšana.</translation>
+    </message>
+    <message>
+        <source>The transmitter did not key (PTT refused).</source>
+        <translation>Raidītājs neieslēdzās (PTT noraidīts).</translation>
+    </message>
+    <message>
+        <source>Transmission interrupted: PTT dropped.</source>
+        <translation>Raidīšana pārtraukta: PTT atlaists.</translation>
+    </message>
+    <message>
+        <source>No DX call to log.</source>
+        <translation>Nav DX izsaukuma signāla reģistrēšanai.</translation>
+    </message>
 </context>
 </TS>

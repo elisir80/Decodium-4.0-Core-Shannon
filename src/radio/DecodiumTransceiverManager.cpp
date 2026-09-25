@@ -1583,7 +1583,7 @@ static Transceiver::MODE parseMode(const QString& s)
     if (mode == "DIG-FM") return Transceiver::DIG_FM;
     if (mode == "FT8" || mode == "FT4" || mode == "FT2" || mode == "Q65"
         || mode == "MSK144" || mode == "JT65" || mode == "JT9" || mode == "JT4"
-        || mode == "FST4" || mode == "FST4W" || mode == "WSPR"
+        || mode == "FST4" || mode == "FST4W" || mode == "WSPR" || mode == "JTTY"
         || mode.startsWith("FST4-") || mode.startsWith("FST4W-"))
         return Transceiver::DIG_U;
     return Transceiver::UNK;

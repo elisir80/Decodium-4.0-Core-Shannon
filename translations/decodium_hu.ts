@@ -8498,6 +8498,10 @@ Jobb kattintás: lecsatlakozás</translation>
         <source>DECØMETER - RF Meter - Decodium</source>
         <translation>DECØMETER - RF mérő - Decodium</translation>
     </message>
+    <message>
+        <source>Open the JTTY window...</source>
+        <translation>JTTY ablak megnyitása...</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>
@@ -29989,5 +29993,185 @@ mezőbe kerüljön.</translation>
     <message><source>Thunderstorm</source><translation>Zivatar</translation></message>
     <message><source>Fog</source><translation>Köd</translation></message>
     <message><source>Unknown</source><translation>Ismeretlen</translation></message>
+</context>
+<context>
+    <name>JttyWindow</name>
+    <message>
+        <source>JTTY - keyboard mode</source>
+        <translation>JTTY - billentyűzetes mód</translation>
+    </message>
+    <message>
+        <source>TX</source>
+        <translation>TX</translation>
+    </message>
+    <message>
+        <source>RX</source>
+        <translation>RX</translation>
+    </message>
+    <message>
+        <source>JTTY OFF</source>
+        <translation>JTTY KI</translation>
+    </message>
+    <message>
+        <source>RX %1 Hz</source>
+        <translation>RX %1 Hz</translation>
+    </message>
+    <message>
+        <source>TX %1 Hz</source>
+        <translation>TX %1 Hz</translation>
+    </message>
+    <message>
+        <source>TX=RX</source>
+        <translation>TX=RX</translation>
+    </message>
+    <message>
+        <source>FTol</source>
+        <translation>FTol</translation>
+    </message>
+    <message>
+        <source>DX</source>
+        <translation>DX</translation>
+    </message>
+    <message>
+        <source>lower case</source>
+        <translation>kisbetűk</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Törlés</translation>
+    </message>
+    <message>
+        <source>QSO FREQUENCY  (RX %1 ± %2 Hz)</source>
+        <translation>QSO FREKVENCIA  (RX %1 ± %2 Hz)</translation>
+    </message>
+    <message>
+        <source>ALL FREQUENCIES  (click a line: RX there and pick the call)</source>
+        <translation>ÖSSZES FREKVENCIA  (kattintás egy sorra: RX oda, hívójel átvétele)</translation>
+    </message>
+    <message>
+        <source>Click to send, right click to edit</source>
+        <translation>Kattintás: küldés, jobb klikk: szerkesztés</translation>
+    </message>
+    <message>
+        <source>Contest</source>
+        <translation>Verseny</translation>
+    </message>
+    <message>
+        <source>None</source>
+        <translation>Nincs</translation>
+    </message>
+    <message>
+        <source>Field Day</source>
+        <translation>Field Day</translation>
+    </message>
+    <message>
+        <source>RTTY Roundup</source>
+        <translation>RTTY Roundup</translation>
+    </message>
+    <message>
+        <source>Exchange</source>
+        <translation>Csere</translation>
+    </message>
+    <message>
+        <source>Serial</source>
+        <translation>Sorszám</translation>
+    </message>
+    <message>
+        <source>log on &quot;TU&quot;</source>
+        <translation>naplózás &quot;TU&quot;-nál</translation>
+    </message>
+    <message>
+        <source>Log QSO</source>
+        <translation>QSO naplózása</translation>
+    </message>
+    <message>
+        <source>Type a message and press Enter (Esc stops the transmission)</source>
+        <translation>Írjon üzenetet és nyomjon Entert (Esc leállítja az adást)</translation>
+    </message>
+    <message>
+        <source>Send</source>
+        <translation>Küldés</translation>
+    </message>
+    <message>
+        <source>Stop TX</source>
+        <translation>TX leállítása</translation>
+    </message>
+    <message>
+        <source>Sending: %1</source>
+        <translation>Adás: %1</translation>
+    </message>
+    <message>
+        <source>Select JTTY in the mode selector to receive and transmit.</source>
+        <translation>Válassza a JTTY-t a módválasztóban a vételhez és adáshoz.</translation>
+    </message>
+    <message>
+        <source>F%1 template</source>
+        <translation>F%1 sablon</translation>
+    </message>
+    <message>
+        <source>%M my call, %H and %Q the DX call, %E exchange, %G grid.
+The default templates are sent as compact native frames.</source>
+        <translation>%M saját hívójel, %H és %Q a DX hívójele, %E csere, %G lokátor.
+Az alapértelmezett sablonok tömör natív keretekként mennek ki.</translation>
+    </message>
+    <message>
+        <source>Save</source>
+        <translation>Mentés</translation>
+    </message>
+    <message>
+        <source>Defaults (all)</source>
+        <translation>Alapértelmezett (mind)</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Mégse</translation>
+    </message>
+</context>
+<context>
+    <name>decodium::jtty::JttyController</name>
+    <message>
+        <source>unknown ARRL/RAC section</source>
+        <translation>ismeretlen ARRL/RAC szekció</translation>
+    </message>
+    <message>
+        <source>invalid native atom</source>
+        <translation>érvénytelen natív atom</translation>
+    </message>
+    <message>
+        <source>Transmission stopped by the watchdog.</source>
+        <translation>Az adást a felügyelő leállította.</translation>
+    </message>
+    <message>
+        <source>The message does not fit in 16 JTTY frames.</source>
+        <translation>Az üzenet nem fér el 16 JTTY keretben.</translation>
+    </message>
+    <message>
+        <source>Nothing to send.</source>
+        <translation>Nincs mit küldeni.</translation>
+    </message>
+    <message>
+        <source>too long (max 16 frames)</source>
+        <translation>túl hosszú (max. 16 keret)</translation>
+    </message>
+    <message>
+        <source>%1 frames, %2 s</source>
+        <translation>%1 keret, %2 s</translation>
+    </message>
+    <message>
+        <source>Cannot transmit: JTTY must be the active mode, the TX audio output must be available and no other transmission may be running.</source>
+        <translation>Nem lehet adni: a JTTY-nek aktív módnak kell lennie, a TX hangkimenetnek elérhetőnek, és nem futhat más adás.</translation>
+    </message>
+    <message>
+        <source>The transmitter did not key (PTT refused).</source>
+        <translation>Az adó nem kapcsolt be (PTT elutasítva).</translation>
+    </message>
+    <message>
+        <source>Transmission interrupted: PTT dropped.</source>
+        <translation>Adás megszakítva: a PTT elengedett.</translation>
+    </message>
+    <message>
+        <source>No DX call to log.</source>
+        <translation>Nincs naplózandó DX hívójel.</translation>
+    </message>
 </context>
 </TS>

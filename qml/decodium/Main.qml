@@ -1819,6 +1819,41 @@ ApplicationWindow {
         function onModeChanged() {
             if (bridge.mode === "RTTY")
                 mainWindow.showRttyWindow()
+            if (bridge.mode === "JTTY")
+                mainWindow.showJttyWindow()
+        }
+    }
+
+    // JTTY (WSJT-X 3.2): stessa logica di RTTY. Sceglierlo dal selettore
+    // apre la finestra; aprirla dal menu sceglie il modo.
+    function showJttyWindow() {
+        jttyWindowLoader.active = true
+        if (jttyWindowLoader.item) {
+            jttyWindowLoader.item.show()
+            jttyWindowLoader.item.raise()
+            jttyWindowLoader.item.requestActivate()
+        }
+    }
+
+    function openJttyWindow() {
+        if (bridge.mode !== "JTTY")
+            bridge.mode = "JTTY"
+        if (bridge.mode === "JTTY")
+            mainWindow.showJttyWindow()
+    }
+
+    Loader {
+        id: jttyWindowLoader
+        active: false
+        asynchronous: true
+        source: "components/JttyWindow.qml"
+        // Riaprendo Decodium gia' in JTTY la finestra torna da sola: senza
+        // non ci sarebbe niente da leggere ne' da scrivere.
+        Component.onCompleted: if (bridge && bridge.mode === "JTTY") active = true
+        onLoaded: {
+            item.show()
+            item.raise()
+            item.requestActivate()
         }
     }
 
@@ -12668,6 +12703,23 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
             text: qsTr("Open the RTTY window...")
             icon.source: ""
             onTriggered: mainWindow.openRttyWindow()
+
+            background: Rectangle {
+                color: parent.highlighted ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2) : "transparent"
+                radius: 6
+            }
+            contentItem: Text {
+                text: parent.text
+                font.pixelSize: 12
+                color: textPrimary
+                leftPadding: 10
+            }
+        }
+
+        MenuItem {
+            text: qsTr("Open the JTTY window...")
+            icon.source: ""
+            onTriggered: mainWindow.openJttyWindow()
 
             background: Rectangle {
                 color: parent.highlighted ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2) : "transparent"

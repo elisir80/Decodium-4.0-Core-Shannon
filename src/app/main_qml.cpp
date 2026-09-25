@@ -39,6 +39,7 @@
 #include <QMessageBox>
 #include <QRegularExpression>
 #include <QSettings>
+#include <cmath>
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>
@@ -86,6 +87,7 @@ __declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance = 0x00000001;
 #endif
 
 #include "DecodiumBridge.h"
+#include "JttyController.h"
 #include "DecodiumDiagnostics.h"
 #include "DecodiumDxCluster.h"
 #include "DecodiumLogging.hpp"
@@ -2790,6 +2792,9 @@ int main(int argc, char* argv[])
     // Vedi doc/PIANO_INTEGRAZIONE_DECORTTY.md.
     decortty::DecoRttyHost rttyHost;
 #endif
+    // JTTY (WSJT-X 3.2) in C++ nativo: ricevitore su un thread suo, TX sulla
+    // stessa uscita audio condivisa dei modi da tastiera.
+    decodium::jtty::JttyController jtty;
     auto labDialOverrideActive = std::make_shared<bool>(labDialHz > 0);
     auto applyLabRuntimeOverrides =
         [&bridge,
@@ -4244,6 +4249,59 @@ int main(int argc, char* argv[])
         L("DecoRTTY: sottosistema RTTY avviato");
     }
 #endif
+    {
+        // JTTY: frequenze RX/TX, nominativi e log sono quelli dell'applicazione;
+        // PTT e audio passano dall'uscita dei modi da tastiera, la stessa di
+        // RTTY (e' il modo attivo a decidere chi la usa).
+        static QSettings jttySettings {QSettings::IniFormat, QSettings::UserScope,
+                                       QStringLiteral ("Decodium"), QStringLiteral ("Decodium")};
+        decodium::jtty::JttyController::Hooks h;
+        h.rxFrequency    = [&bridge] { return bridge.rxFrequency (); };
+        h.txFrequency    = [&bridge] { return bridge.txFrequency (); };
+        h.setRxFrequency = [&bridge] (int hz) { bridge.setRxFrequency (hz); };
+        h.myCall         = [&bridge] { return bridge.callsign (); };
+        h.myGrid         = [&bridge] { return bridge.grid (); };
+        h.hisCall        = [&bridge] { return bridge.dxCall (); };
+        h.setHisCall     = [&bridge] (QString const& c) { bridge.setDxCall (c); };
+        h.monitoring     = [&bridge] { return bridge.monitoring (); };
+        h.canTransmit    = [&bridge] { return bridge.rttyCanTransmit (); };
+        h.keyPtt         = [&bridge] (bool on) { bridge.rttyAlzaPtt (on); };
+        h.txActive       = [&bridge] { return bridge.rttyTxActive (); };
+        h.sendAudio      = [&bridge] (QVector<short> const& c) { bridge.rttyMandaAudioTx (c); };
+        // Il cursore di uscita di Decodium: 0..450 = 0..45 dB di attenuazione.
+        h.txAmplitude    = [&bridge] {
+            double const att = qBound (0.0, bridge.txOutputLevel () / 10.0, 45.0);
+            return 0.9 * std::pow (10.0, -att / 20.0);
+        };
+        h.decodedLine    = [&bridge] (QString const& t, double f, QDateTime const& w) {
+            bridge.aggiungiRigaJtty (t, f, w);
+        };
+        h.allTxt         = [&bridge] (bool tx, int f, QString const& t, QDateTime const& w) {
+            bridge.appendJttyAllTxt (tx, f, t, w);
+        };
+        h.logQso         = [&bridge] (QString const& call, QString const& sent, QString const& rcvd) {
+            bridge.registraQsoRtty (call, sent, rcvd, QString {}, QString {}, QString {});
+        };
+        h.log            = [] (QString const& s) { qInfo ().noquote () << s; };
+        jtty.setHooks (std::move (h));
+        jtty.load (jttySettings);
+        QObject::connect (&bridge, &DecodiumBridge::campioniRxJtty,
+                          &jtty, &decodium::jtty::JttyController::feedAudio);
+        QObject::connect (&bridge, &DecodiumBridge::jttyModeLeaving,
+                          &jtty, &decodium::jtty::JttyController::leave);
+        // Monitor spento e riacceso: l'audio riprende dopo un buco di durata
+        // ignota, e il ricevitore riparte da zero invece di sbagliare gli orari.
+        QObject::connect (&bridge, &DecodiumBridge::monitoringChanged, &jtty, [&bridge, &jtty] {
+            if (bridge.monitoring ())
+                jtty.restartReceiver ();
+        });
+        QObject::connect (&bridge, &DecodiumBridge::modeChanged, &jtty, [&bridge, &jtty] {
+            jtty.setActive (bridge.mode () == QStringLiteral ("JTTY"));
+        });
+        jtty.setActive (bridge.mode () == QStringLiteral ("JTTY"));
+        engine.rootContext ()->setContextProperty ("jtty", &jtty);
+        L("JTTY: controller avviato");
+    }
     // IU8LMC: aggiornamento automatico con avviso e conferma. Il checker
     // storico (DecodiumBridge::checkForUpdates) e' spento dalla 1.0.62 e non ha
     // mai avvisato nessuno: e' il motivo per cui i tester restano su release

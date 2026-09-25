@@ -7784,6 +7784,10 @@ Clic dreapta: deconectează</translation>
         <source>DECØMETER - RF Meter - Decodium</source>
         <translation>DECØMETER - Instrument RF - Decodium</translation>
     </message>
+    <message>
+        <source>Open the JTTY window...</source>
+        <translation>Deschide fereastra JTTY...</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>
@@ -22427,5 +22431,185 @@ in the HIS CALL field.</source>
     <message><source>Thunderstorm</source><translation>Furtună</translation></message>
     <message><source>Fog</source><translation>Ceață</translation></message>
     <message><source>Unknown</source><translation>Necunoscut</translation></message>
+</context>
+<context>
+    <name>JttyWindow</name>
+    <message>
+        <source>JTTY - keyboard mode</source>
+        <translation>JTTY - mod tastatură</translation>
+    </message>
+    <message>
+        <source>TX</source>
+        <translation>TX</translation>
+    </message>
+    <message>
+        <source>RX</source>
+        <translation>RX</translation>
+    </message>
+    <message>
+        <source>JTTY OFF</source>
+        <translation>JTTY OPRIT</translation>
+    </message>
+    <message>
+        <source>RX %1 Hz</source>
+        <translation>RX %1 Hz</translation>
+    </message>
+    <message>
+        <source>TX %1 Hz</source>
+        <translation>TX %1 Hz</translation>
+    </message>
+    <message>
+        <source>TX=RX</source>
+        <translation>TX=RX</translation>
+    </message>
+    <message>
+        <source>FTol</source>
+        <translation>FTol</translation>
+    </message>
+    <message>
+        <source>DX</source>
+        <translation>DX</translation>
+    </message>
+    <message>
+        <source>lower case</source>
+        <translation>litere mici</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Șterge</translation>
+    </message>
+    <message>
+        <source>QSO FREQUENCY  (RX %1 ± %2 Hz)</source>
+        <translation>FRECVENȚA QSO  (RX %1 ± %2 Hz)</translation>
+    </message>
+    <message>
+        <source>ALL FREQUENCIES  (click a line: RX there and pick the call)</source>
+        <translation>TOATE FRECVENȚELE  (clic pe un rând: RX acolo și preia indicativul)</translation>
+    </message>
+    <message>
+        <source>Click to send, right click to edit</source>
+        <translation>Clic pentru a trimite, clic dreapta pentru editare</translation>
+    </message>
+    <message>
+        <source>Contest</source>
+        <translation>Concurs</translation>
+    </message>
+    <message>
+        <source>None</source>
+        <translation>Niciunul</translation>
+    </message>
+    <message>
+        <source>Field Day</source>
+        <translation>Field Day</translation>
+    </message>
+    <message>
+        <source>RTTY Roundup</source>
+        <translation>RTTY Roundup</translation>
+    </message>
+    <message>
+        <source>Exchange</source>
+        <translation>Schimb</translation>
+    </message>
+    <message>
+        <source>Serial</source>
+        <translation>Număr</translation>
+    </message>
+    <message>
+        <source>log on &quot;TU&quot;</source>
+        <translation>înregistrează la &quot;TU&quot;</translation>
+    </message>
+    <message>
+        <source>Log QSO</source>
+        <translation>Înregistrează QSO</translation>
+    </message>
+    <message>
+        <source>Type a message and press Enter (Esc stops the transmission)</source>
+        <translation>Scrieți un mesaj și apăsați Enter (Esc oprește emisia)</translation>
+    </message>
+    <message>
+        <source>Send</source>
+        <translation>Trimite</translation>
+    </message>
+    <message>
+        <source>Stop TX</source>
+        <translation>Oprește TX</translation>
+    </message>
+    <message>
+        <source>Sending: %1</source>
+        <translation>Se transmite: %1</translation>
+    </message>
+    <message>
+        <source>Select JTTY in the mode selector to receive and transmit.</source>
+        <translation>Alegeți JTTY în selectorul de moduri pentru a recepționa și emite.</translation>
+    </message>
+    <message>
+        <source>F%1 template</source>
+        <translation>Șablon F%1</translation>
+    </message>
+    <message>
+        <source>%M my call, %H and %Q the DX call, %E exchange, %G grid.
+The default templates are sent as compact native frames.</source>
+        <translation>%M indicativul meu, %H și %Q al DX-ului, %E schimbul, %G locatorul.
+Șabloanele implicite sunt trimise ca cadre native compacte.</translation>
+    </message>
+    <message>
+        <source>Save</source>
+        <translation>Salvează</translation>
+    </message>
+    <message>
+        <source>Defaults (all)</source>
+        <translation>Implicite (toate)</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Anulează</translation>
+    </message>
+</context>
+<context>
+    <name>decodium::jtty::JttyController</name>
+    <message>
+        <source>unknown ARRL/RAC section</source>
+        <translation>secțiune ARRL/RAC necunoscută</translation>
+    </message>
+    <message>
+        <source>invalid native atom</source>
+        <translation>atom nativ invalid</translation>
+    </message>
+    <message>
+        <source>Transmission stopped by the watchdog.</source>
+        <translation>Emisia oprită de watchdog.</translation>
+    </message>
+    <message>
+        <source>The message does not fit in 16 JTTY frames.</source>
+        <translation>Mesajul nu încape în 16 cadre JTTY.</translation>
+    </message>
+    <message>
+        <source>Nothing to send.</source>
+        <translation>Nimic de trimis.</translation>
+    </message>
+    <message>
+        <source>too long (max 16 frames)</source>
+        <translation>prea lung (max. 16 cadre)</translation>
+    </message>
+    <message>
+        <source>%1 frames, %2 s</source>
+        <translation>%1 cadre, %2 s</translation>
+    </message>
+    <message>
+        <source>Cannot transmit: JTTY must be the active mode, the TX audio output must be available and no other transmission may be running.</source>
+        <translation>Nu se poate emite: JTTY trebuie să fie modul activ, ieșirea audio TX disponibilă și nicio altă emisie în curs.</translation>
+    </message>
+    <message>
+        <source>The transmitter did not key (PTT refused).</source>
+        <translation>Emițătorul nu a intrat în emisie (PTT refuzat).</translation>
+    </message>
+    <message>
+        <source>Transmission interrupted: PTT dropped.</source>
+        <translation>Emisie întreruptă: PTT eliberat.</translation>
+    </message>
+    <message>
+        <source>No DX call to log.</source>
+        <translation>Niciun indicativ DX de înregistrat.</translation>
+    </message>
 </context>
 </TS>

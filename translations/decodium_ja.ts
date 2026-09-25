@@ -8498,6 +8498,10 @@ Right-click: disconnect</source>
         <source>DECØMETER - RF Meter - Decodium</source>
         <translation>DECØMETER - RFメーター - Decodium</translation>
     </message>
+    <message>
+        <source>Open the JTTY window...</source>
+        <translation>JTTY ウィンドウを開く...</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>
@@ -30119,5 +30123,185 @@ HIS CALL 欄に入ります。</translation>
     <message><source>Thunderstorm</source><translation>雷雨</translation></message>
     <message><source>Fog</source><translation>霧</translation></message>
     <message><source>Unknown</source><translation>不明</translation></message>
+</context>
+<context>
+    <name>JttyWindow</name>
+    <message>
+        <source>JTTY - keyboard mode</source>
+        <translation>JTTY - キーボードモード</translation>
+    </message>
+    <message>
+        <source>TX</source>
+        <translation>TX</translation>
+    </message>
+    <message>
+        <source>RX</source>
+        <translation>RX</translation>
+    </message>
+    <message>
+        <source>JTTY OFF</source>
+        <translation>JTTY オフ</translation>
+    </message>
+    <message>
+        <source>RX %1 Hz</source>
+        <translation>RX %1 Hz</translation>
+    </message>
+    <message>
+        <source>TX %1 Hz</source>
+        <translation>TX %1 Hz</translation>
+    </message>
+    <message>
+        <source>TX=RX</source>
+        <translation>TX=RX</translation>
+    </message>
+    <message>
+        <source>FTol</source>
+        <translation>FTol</translation>
+    </message>
+    <message>
+        <source>DX</source>
+        <translation>DX</translation>
+    </message>
+    <message>
+        <source>lower case</source>
+        <translation>小文字</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>クリア</translation>
+    </message>
+    <message>
+        <source>QSO FREQUENCY  (RX %1 ± %2 Hz)</source>
+        <translation>QSO 周波数  (RX %1 ± %2 Hz)</translation>
+    </message>
+    <message>
+        <source>ALL FREQUENCIES  (click a line: RX there and pick the call)</source>
+        <translation>全周波数  (行をクリック: そこで RX しコールサインを取得)</translation>
+    </message>
+    <message>
+        <source>Click to send, right click to edit</source>
+        <translation>クリックで送信、右クリックで編集</translation>
+    </message>
+    <message>
+        <source>Contest</source>
+        <translation>コンテスト</translation>
+    </message>
+    <message>
+        <source>None</source>
+        <translation>なし</translation>
+    </message>
+    <message>
+        <source>Field Day</source>
+        <translation>Field Day</translation>
+    </message>
+    <message>
+        <source>RTTY Roundup</source>
+        <translation>RTTY Roundup</translation>
+    </message>
+    <message>
+        <source>Exchange</source>
+        <translation>交換</translation>
+    </message>
+    <message>
+        <source>Serial</source>
+        <translation>シリアル</translation>
+    </message>
+    <message>
+        <source>log on &quot;TU&quot;</source>
+        <translation>&quot;TU&quot; でログ</translation>
+    </message>
+    <message>
+        <source>Log QSO</source>
+        <translation>QSO を記録</translation>
+    </message>
+    <message>
+        <source>Type a message and press Enter (Esc stops the transmission)</source>
+        <translation>メッセージを入力して Enter (Esc で送信停止)</translation>
+    </message>
+    <message>
+        <source>Send</source>
+        <translation>送信</translation>
+    </message>
+    <message>
+        <source>Stop TX</source>
+        <translation>TX 停止</translation>
+    </message>
+    <message>
+        <source>Sending: %1</source>
+        <translation>送信中: %1</translation>
+    </message>
+    <message>
+        <source>Select JTTY in the mode selector to receive and transmit.</source>
+        <translation>受信と送信にはモード選択で JTTY を選んでください。</translation>
+    </message>
+    <message>
+        <source>F%1 template</source>
+        <translation>F%1 テンプレート</translation>
+    </message>
+    <message>
+        <source>%M my call, %H and %Q the DX call, %E exchange, %G grid.
+The default templates are sent as compact native frames.</source>
+        <translation>%M 自局コール、%H と %Q は DX コール、%E 交換、%G グリッド。
+既定のテンプレートはコンパクトなネイティブフレームで送信されます。</translation>
+    </message>
+    <message>
+        <source>Save</source>
+        <translation>保存</translation>
+    </message>
+    <message>
+        <source>Defaults (all)</source>
+        <translation>既定値 (すべて)</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>キャンセル</translation>
+    </message>
+</context>
+<context>
+    <name>decodium::jtty::JttyController</name>
+    <message>
+        <source>unknown ARRL/RAC section</source>
+        <translation>不明な ARRL/RAC セクション</translation>
+    </message>
+    <message>
+        <source>invalid native atom</source>
+        <translation>無効なネイティブアトム</translation>
+    </message>
+    <message>
+        <source>Transmission stopped by the watchdog.</source>
+        <translation>ウォッチドッグにより送信を停止しました。</translation>
+    </message>
+    <message>
+        <source>The message does not fit in 16 JTTY frames.</source>
+        <translation>メッセージが 16 JTTY フレームに収まりません。</translation>
+    </message>
+    <message>
+        <source>Nothing to send.</source>
+        <translation>送信するものがありません。</translation>
+    </message>
+    <message>
+        <source>too long (max 16 frames)</source>
+        <translation>長すぎます (最大 16 フレーム)</translation>
+    </message>
+    <message>
+        <source>%1 frames, %2 s</source>
+        <translation>%1 フレーム、%2 秒</translation>
+    </message>
+    <message>
+        <source>Cannot transmit: JTTY must be the active mode, the TX audio output must be available and no other transmission may be running.</source>
+        <translation>送信できません: JTTY が有効なモードで、TX 音声出力が利用可能で、他の送信が行われていない必要があります。</translation>
+    </message>
+    <message>
+        <source>The transmitter did not key (PTT refused).</source>
+        <translation>送信機がキーされませんでした (PTT 拒否)。</translation>
+    </message>
+    <message>
+        <source>Transmission interrupted: PTT dropped.</source>
+        <translation>送信中断: PTT が解除されました。</translation>
+    </message>
+    <message>
+        <source>No DX call to log.</source>
+        <translation>記録する DX コールがありません。</translation>
+    </message>
 </context>
 </TS>

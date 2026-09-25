@@ -8665,6 +8665,10 @@ Clic derecho: desconectar</translation>
         <source>DECØMETER - RF Meter - Decodium</source>
         <translation>DECØMETER - Medidor RF - Decodium</translation>
     </message>
+    <message>
+        <source>Open the JTTY window...</source>
+        <translation>Abrir la ventana JTTY...</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>
@@ -30633,5 +30637,185 @@ en el campo HIS CALL.</translation>
     <message><source>Thunderstorm</source><translation>Tormenta</translation></message>
     <message><source>Fog</source><translation>Niebla</translation></message>
     <message><source>Unknown</source><translation>Desconocido</translation></message>
+</context>
+<context>
+    <name>JttyWindow</name>
+    <message>
+        <source>JTTY - keyboard mode</source>
+        <translation>JTTY - modo de teclado</translation>
+    </message>
+    <message>
+        <source>TX</source>
+        <translation>TX</translation>
+    </message>
+    <message>
+        <source>RX</source>
+        <translation>RX</translation>
+    </message>
+    <message>
+        <source>JTTY OFF</source>
+        <translation>JTTY APAGADO</translation>
+    </message>
+    <message>
+        <source>RX %1 Hz</source>
+        <translation>RX %1 Hz</translation>
+    </message>
+    <message>
+        <source>TX %1 Hz</source>
+        <translation>TX %1 Hz</translation>
+    </message>
+    <message>
+        <source>TX=RX</source>
+        <translation>TX=RX</translation>
+    </message>
+    <message>
+        <source>FTol</source>
+        <translation>FTol</translation>
+    </message>
+    <message>
+        <source>DX</source>
+        <translation>DX</translation>
+    </message>
+    <message>
+        <source>lower case</source>
+        <translation>minúsculas</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Borrar</translation>
+    </message>
+    <message>
+        <source>QSO FREQUENCY  (RX %1 ± %2 Hz)</source>
+        <translation>FRECUENCIA QSO  (RX %1 ± %2 Hz)</translation>
+    </message>
+    <message>
+        <source>ALL FREQUENCIES  (click a line: RX there and pick the call)</source>
+        <translation>TODAS LAS FRECUENCIAS  (clic en una línea: RX allí y toma el indicativo)</translation>
+    </message>
+    <message>
+        <source>Click to send, right click to edit</source>
+        <translation>Clic para enviar, clic derecho para editar</translation>
+    </message>
+    <message>
+        <source>Contest</source>
+        <translation>Concurso</translation>
+    </message>
+    <message>
+        <source>None</source>
+        <translation>Ninguno</translation>
+    </message>
+    <message>
+        <source>Field Day</source>
+        <translation>Field Day</translation>
+    </message>
+    <message>
+        <source>RTTY Roundup</source>
+        <translation>RTTY Roundup</translation>
+    </message>
+    <message>
+        <source>Exchange</source>
+        <translation>Intercambio</translation>
+    </message>
+    <message>
+        <source>Serial</source>
+        <translation>Número</translation>
+    </message>
+    <message>
+        <source>log on &quot;TU&quot;</source>
+        <translation>registrar al &quot;TU&quot;</translation>
+    </message>
+    <message>
+        <source>Log QSO</source>
+        <translation>Registrar QSO</translation>
+    </message>
+    <message>
+        <source>Type a message and press Enter (Esc stops the transmission)</source>
+        <translation>Escriba un mensaje y pulse Intro (Esc detiene la transmisión)</translation>
+    </message>
+    <message>
+        <source>Send</source>
+        <translation>Enviar</translation>
+    </message>
+    <message>
+        <source>Stop TX</source>
+        <translation>Detener TX</translation>
+    </message>
+    <message>
+        <source>Sending: %1</source>
+        <translation>Transmitiendo: %1</translation>
+    </message>
+    <message>
+        <source>Select JTTY in the mode selector to receive and transmit.</source>
+        <translation>Seleccione JTTY en el selector de modos para recibir y transmitir.</translation>
+    </message>
+    <message>
+        <source>F%1 template</source>
+        <translation>Plantilla F%1</translation>
+    </message>
+    <message>
+        <source>%M my call, %H and %Q the DX call, %E exchange, %G grid.
+The default templates are sent as compact native frames.</source>
+        <translation>%M mi indicativo, %H y %Q el del DX, %E el intercambio, %G el localizador.
+Las plantillas por defecto se envían como tramas nativas compactas.</translation>
+    </message>
+    <message>
+        <source>Save</source>
+        <translation>Guardar</translation>
+    </message>
+    <message>
+        <source>Defaults (all)</source>
+        <translation>Predeterminados (todos)</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Cancelar</translation>
+    </message>
+</context>
+<context>
+    <name>decodium::jtty::JttyController</name>
+    <message>
+        <source>unknown ARRL/RAC section</source>
+        <translation>sección ARRL/RAC desconocida</translation>
+    </message>
+    <message>
+        <source>invalid native atom</source>
+        <translation>átomo nativo no válido</translation>
+    </message>
+    <message>
+        <source>Transmission stopped by the watchdog.</source>
+        <translation>Transmisión detenida por el vigilante.</translation>
+    </message>
+    <message>
+        <source>The message does not fit in 16 JTTY frames.</source>
+        <translation>El mensaje no cabe en 16 tramas JTTY.</translation>
+    </message>
+    <message>
+        <source>Nothing to send.</source>
+        <translation>Nada que enviar.</translation>
+    </message>
+    <message>
+        <source>too long (max 16 frames)</source>
+        <translation>demasiado largo (máx. 16 tramas)</translation>
+    </message>
+    <message>
+        <source>%1 frames, %2 s</source>
+        <translation>%1 tramas, %2 s</translation>
+    </message>
+    <message>
+        <source>Cannot transmit: JTTY must be the active mode, the TX audio output must be available and no other transmission may be running.</source>
+        <translation>No se puede transmitir: JTTY debe ser el modo activo, la salida de audio TX estar disponible y no debe haber otra transmisión en curso.</translation>
+    </message>
+    <message>
+        <source>The transmitter did not key (PTT refused).</source>
+        <translation>El transmisor no se activó (PTT rechazado).</translation>
+    </message>
+    <message>
+        <source>Transmission interrupted: PTT dropped.</source>
+        <translation>Transmisión interrumpida: PTT liberado.</translation>
+    </message>
+    <message>
+        <source>No DX call to log.</source>
+        <translation>No hay indicativo DX que registrar.</translation>
+    </message>
 </context>
 </TS>

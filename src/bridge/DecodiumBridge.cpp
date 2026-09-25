@@ -4177,6 +4177,11 @@ static QString canonicalApplicationDecodeMode(QString mode)
     if (upperMode == QStringLiteral("RTTY")) {
         return QStringLiteral("RTTY");
     }
+    // JTTY (WSJT-X 3.2): testo da tastiera a frame da 1,888 s, trasmissione
+    // libera nel tempo. Modo dell'applicazione, non della radio.
+    if (upperMode == QStringLiteral("JTTY")) {
+        return QStringLiteral("JTTY");
+    }
     return {};
 }
 
@@ -4187,6 +4192,17 @@ static bool isFt2LinkApplicationMode(QString mode)
         || upperMode == QStringLiteral("FT2LINK")
         || upperMode == QStringLiteral("D4LINK")
         || upperMode == QStringLiteral("D4 LINK");
+}
+
+// RTTY e JTTY non passano dai decodificatori a slot: hanno un proprio modem a
+// flusso continuo, alimentato dalla cattura PCM nativa, e l'area di lavoro dei
+// modi digitali (backend legacy, code di decodifica, timer di periodo) resta
+// ferma finche' uno dei due e' il modo attivo.
+static bool isStreamingKeyboardMode(QString const& mode)
+{
+    QString const m = mode.trimmed();
+    return m.compare(QStringLiteral("RTTY"), Qt::CaseInsensitive) == 0
+        || m.compare(QStringLiteral("JTTY"), Qt::CaseInsensitive) == 0;
 }
 
 static bool isRadioOnlyModeLabel(QString mode)
@@ -6681,8 +6697,9 @@ bool DecodiumBridge::looksLikeGhostDecode(QVariantMap const& entry) const
     // sono tarati sui nominativi dei modi digitali e il controllo sulla forma
     // ITU scarterebbe qualunque parola. Chi legge RTTY vede il testo com'e',
     // errori compresi, ed e' proprio quello che serve.
-    if (entry.value(QStringLiteral("mode")).toString().compare(
-            QStringLiteral("RTTY"), Qt::CaseInsensitive) == 0) {
+    // Lo stesso vale per JTTY: i suoi frame hanno gia' passato FEC, CRC e la
+    // grammatica completa, e portano anche testo libero.
+    if (isStreamingKeyboardMode(entry.value(QStringLiteral("mode")).toString())) {
         return false;
     }
 
@@ -8234,6 +8251,52 @@ void DecodiumBridge::aggiungiRigaRtty (QString const& testo, double qualita,
     appendDecodeMapToList (entry);
 }
 
+void DecodiumBridge::aggiungiRigaJtty (QString const& testo, double frequenzaHz,
+                                      QDateTime const& inizioUtc)
+{
+    if (testo.trimmed ().isEmpty ())
+        return;
+    QDateTime const quando = inizioUtc.isValid () ? inizioUtc.toUTC ()
+                                                  : QDateTime::currentDateTimeUtc ();
+    QVariantMap entry;
+    entry.insert (QStringLiteral ("mode"), QStringLiteral ("JTTY"));
+    entry.insert (QStringLiteral ("time"), quando.toString (QStringLiteral ("hhmmss")));
+    entry.insert (QStringLiteral ("utc"), quando.toString (QStringLiteral ("hhmm")));
+    entry.insert (QStringLiteral ("timestamp"), quando.toMSecsSinceEpoch ());
+    entry.insert (QStringLiteral ("message"), testo);
+    entry.insert (QStringLiteral ("displayMessage"), testo);
+    entry.insert (QStringLiteral ("freq"), qRound (frequenzaHz));
+    entry.insert (QStringLiteral ("isTx"), false);
+    entry.insert (QStringLiteral ("db"), QString ());
+    entry.insert (QStringLiteral ("dt"), QStringLiteral ("0.0"));
+    appendDecodeMapToList (entry);
+}
+
+// ALL.TXT come lo scrive WSJT-X 3.2 per JTTY: niente SNR ne' DT, la
+// frequenza audio della riga e il testo del messaggio completo.
+void DecodiumBridge::appendJttyAllTxt (bool trasmesso, int frequenzaAudio,
+                                      QString const& testo, QDateTime const& quando) const
+{
+    if (testo.trimmed ().isEmpty ())
+        return;
+    QString const path = legacyAllTxtPath ();
+    QDir ().mkpath (QFileInfo (path).absolutePath ());
+    QFile file (path);
+    if (!file.open (QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append))
+        return;
+    QDateTime const utc = quando.isValid () ? quando.toUTC () : QDateTime::currentDateTimeUtc ();
+    QTextStream out (&file);
+    out << QStringLiteral ("%1 %2  %3  JTTY  %4  %5 %6  %7")
+              .arg (utc.toString (QStringLiteral ("yyMMdd_hhmmss")))
+              .arg (m_frequency / 1e6, 10, 'f', 3)
+              .arg (trasmesso ? QStringLiteral ("Tx") : QStringLiteral ("Rx"))
+              .arg (QStringLiteral ("0"), 4)
+              .arg (QStringLiteral ("0.0"), 5)
+              .arg (frequenzaAudio, 5)
+              .arg (testo.trimmed ())
+        << '\n';
+}
+
 void DecodiumBridge::appendDecodeMapToList(QVariantMap const& entry)
 {
 #if DECODIUM_HAS_SSTV
@@ -8247,9 +8310,9 @@ void DecodiumBridge::appendDecodeMapToList(QVariantMap const& entry)
     // A worker callback queued immediately before entering RTTY must not add
     // an FT8/FT4/JT line after the RTTY window is visible.  RTTY's own modem
     // explicitly tags its rows as RTTY, so its history remains intact.
-    if (m_mode.trimmed().compare(QStringLiteral("RTTY"), Qt::CaseInsensitive) == 0
+    if (isStreamingKeyboardMode(m_mode)
         && entry.value(QStringLiteral("mode")).toString().trimmed()
-               .compare(QStringLiteral("RTTY"), Qt::CaseInsensitive) != 0) {
+               .compare(m_mode.trimmed(), Qt::CaseInsensitive) != 0) {
         return;
     }
     // Telemetria stazione+meteo (tipo FT8/FT4 0.5, opt-in): il testo
@@ -11559,7 +11622,7 @@ bool DecodiumBridge::usingLegacyBackendForTx() const
         // RTTY has its own QML/native modem.  The embedded legacy backend
         // deliberately has no RTTY mode, so letting it retain its previous
         // FT8/FT4/JT mode makes its state poll silently take ownership back.
-        || normalizedMode == QStringLiteral("RTTY")
+        || isStreamingKeyboardMode(normalizedMode)
         || normalizedMode == QStringLiteral("WSPR")) {
         return false;
     }
@@ -11595,7 +11658,7 @@ bool DecodiumBridge::legacyBackendRequestedForRx() const
     if (rtlSdrEnabled()) {
         return false;
     }
-    if (m_mode.trimmed().compare(QStringLiteral("RTTY"), Qt::CaseInsensitive) == 0
+    if (isStreamingKeyboardMode(m_mode)
         || bridgeOwnsLegacyJtRxWhenCatSuppressed(m_mode)
         || bridgeOwnsFst4Audio(m_mode)) {
         return false;
@@ -12637,7 +12700,7 @@ void DecodiumBridge::syncLegacyBackendDialogState()
         ? QStringLiteral("FT2")
         : m_mode;
     m_legacyBackend->setFt2DecodeEnabled(m_mode == QStringLiteral("FT2"));
-    if (m_mode.compare(QStringLiteral("RTTY"), Qt::CaseInsensitive) == 0) {
+    if (isStreamingKeyboardMode(m_mode)) {
         // Do not hand RTTY to the hidden legacy decoder: it has no RTTY
         // implementation and would retain its previous decoder mode.  CAT
         // parameters below are still mirrored for legacy CAT fallback.
@@ -12984,8 +13047,7 @@ void DecodiumBridge::syncLegacyBackendState()
         return;
     }
     QScopedValueRollback<bool> legacyStateGuard(m_syncingLegacyBackendState, true);
-    bool const rttyApplicationMode =
-        m_mode.trimmed().compare(QStringLiteral("RTTY"), Qt::CaseInsensitive) == 0;
+    bool const rttyApplicationMode = isStreamingKeyboardMode(m_mode);
 #if DECODIUM_HAS_SSTV
     // The legacy state poll can otherwise reassert its saved MONITOR state a
     // few hundred milliseconds after the SSTV workspace switched to the
@@ -14232,8 +14294,7 @@ void DecodiumBridge::applyLegacyFullSpectrumModelDelta()
 
 void DecodiumBridge::syncLegacyBackendDecodeList()
 {
-    bool const rttyApplicationMode =
-        m_mode.trimmed().compare(QStringLiteral("RTTY"), Qt::CaseInsensitive) == 0;
+    bool const rttyApplicationMode = isStreamingKeyboardMode(m_mode);
 #if DECODIUM_HAS_SSTV
     if (m_sstvWorkspaceActive || rttyApplicationMode) {
         // Discard any final queued legacy result. The ALL.TXT cursor is
@@ -18108,7 +18169,7 @@ void DecodiumBridge::setMode(const QString& v) {
         QString const previousMode = m_mode;
         bool const monitorWasActive = m_monitoring;
         bool const monitorShouldStayActive = monitorWasActive || m_monitorRequested;
-        bool const enteringRtty = normalizedMode == QStringLiteral("RTTY");
+        bool const enteringRtty = isStreamingKeyboardMode(normalizedMode);
         // Compute this before m_mode is changed.  A legacy FT8/JT monitor
         // needs a deliberate hand-off to the native RTTY PCM capture.
         bool const rearmModernMonitor = monitorWasActive
@@ -18136,6 +18197,37 @@ void DecodiumBridge::setMode(const QString& v) {
             }
             m_decoPortTxOutRate = 0;
             bridgeLog(QStringLiteral("Leaving RTTY: producer stopped, PTT release requested, USB TX output closing"));
+        }
+        if (previousMode == QStringLiteral("JTTY")) {
+            // Come per RTTY: prima si ferma chi produce audio, poi si
+            // rilascia l'uscita condivisa.
+            emit jttyModeLeaving();
+            decoPortKeyLocalRig(false);
+            if (m_decoPortTxOut) {
+                QPointer<RtlSdrAudioOutput> out(m_decoPortTxOut);
+                QMetaObject::invokeMethod(m_decoPortTxOut, [out]() {
+                    if (out) out->stop(QStringLiteral("leaving-jtty"));
+                }, Qt::QueuedConnection);
+            }
+            m_decoPortTxOutRate = 0;
+            bridgeLog(QStringLiteral("Leaving JTTY: producer stopped, PTT release requested, USB TX output closing"));
+        }
+        if (normalizedMode == QStringLiteral("JTTY")) {
+            // JTTY ha il suo ricevitore nativo sul PCM: il decodificatore
+            // legacy si ferma come per RTTY. La radio resta nel modo dati
+            // configurato (e' la stessa strada di FT8) e la frequenza la
+            // sceglie il piano di banda di JTTY.
+            if (m_legacyBackend && m_legacyBackend->monitoring()) {
+                m_legacyBackend->setMonitoring(false);
+            }
+            m_legacyPcmSpectrumFeed = false;
+            m_legacyStartupModeGuard.clear();
+            m_legacyStartupModeGuardUntilMs = 0;
+            if (m_decoding) {
+                m_decoding = false;
+                emit decodingChanged();
+            }
+            bridgeLog(QStringLiteral("JTTY exclusive workspace: legacy decoder stopped; native PCM keeps JTTY and panadapter active"));
         }
 
         // Entrando in RTTY si commuta la radio, perche' sceglierlo dal
@@ -18283,7 +18375,7 @@ void DecodiumBridge::setMode(const QString& v) {
         emit modeChanged();
         if (legacyBackendAvailable()
             && !isFt2LinkApplicationMode(normalizedMode)
-            && normalizedMode != QStringLiteral("RTTY")) {
+            && !isStreamingKeyboardMode(normalizedMode)) {
             // setMode() causes the embedded widget backend to regenerate CQ
             // synchronously.  Refresh the profile identity immediately before
             // that call, even if an earlier state sync has not run yet.
@@ -18293,7 +18385,7 @@ void DecodiumBridge::setMode(const QString& v) {
             applyAutoCqBurstCadenceToLegacyBackend();
             m_legacyStartupModeGuard = normalizedMode.trimmed();
             m_legacyStartupModeGuardUntilMs = QDateTime::currentMSecsSinceEpoch() + 6000;
-        } else if (legacyBackendAvailable() && normalizedMode != QStringLiteral("RTTY")) {
+        } else if (legacyBackendAvailable() && !isStreamingKeyboardMode(normalizedMode)) {
             m_legacyBackend->setStationIdentity(m_callsign, m_grid);
             m_legacyBackend->setFt2DecodeEnabled(false);
             m_legacyBackend->setMode(QStringLiteral("FT2"));
@@ -23293,7 +23385,7 @@ void DecodiumBridge::startRx()
     quint64 const monitorSessionId = ++m_periodTimerSessionId;
 
     if (!rtlSdrEnabled()
-        && m_mode.compare(QStringLiteral("RTTY"), Qt::CaseInsensitive) != 0
+        && !isStreamingKeyboardMode(m_mode)
         && legacyTxBackendRequested()
         && !legacyBackendAvailable()
         && !ensureLegacyBackendAvailable()) {
@@ -23404,15 +23496,14 @@ void DecodiumBridge::startRx()
 #else
         false;
 #endif
-    const bool rttyWorkspaceReceiver =
-        m_mode.trimmed().compare(QStringLiteral("RTTY"), Qt::CaseInsensitive) == 0;
+    const bool rttyWorkspaceReceiver = isStreamingKeyboardMode(m_mode);
     if (!rtlGeneralReceiver && !sstvWorkspaceReceiver && !rttyWorkspaceReceiver) {
         ensureDecodeWorkerForMode(m_mode);
     } else if (rtlGeneralReceiver) {
         bridgeLog(QStringLiteral("startRx: RTL-SDR general receiver selected; digital decoder dispatch disabled"));
     } else {
         bridgeLog(rttyWorkspaceReceiver
-                      ? QStringLiteral("startRx: RTTY workspace selected; normal digital decoder dispatch disabled")
+                      ? QStringLiteral("startRx: %1 workspace selected; normal digital decoder dispatch disabled").arg(m_mode)
                       : QStringLiteral("startRx: SSTV workspace selected; normal digital decoder dispatch disabled"));
     }
 
@@ -41914,9 +42005,12 @@ void DecodiumBridge::reloadActiveLogbookState(const QString& reason)
                   .arg(reason, path));
 }
 
+// L'uscita audio condivisa dei modi da tastiera: la usano RTTY e JTTY, uno
+// alla volta (e' il modo attivo a decidere chi), con lo stesso PTT e gli
+// stessi ritegni verso DecoPort e i modi digitali.
 bool DecodiumBridge::rttyCanTransmit()
 {
-    if (m_mode != QStringLiteral("RTTY") || m_transmitting || m_tuning
+    if (!isStreamingKeyboardMode(m_mode) || m_transmitting || m_tuning
         || sstvTxActive() || (m_decoPortRemoteKeyed && !m_rttyTxActive)
         || m_decoPortUseRemote)
         return false;
@@ -41936,8 +42030,8 @@ void DecodiumBridge::rttyAlzaPtt(bool on)
         return;
     keySharedAudioTransmitter(true, true);
     m_rttyTxActive = m_decoPortRemoteKeyed;
-    bridgeLog(QStringLiteral("RTTY TX start: active=%1 CAT=%2 (without CAT: audio/AFSK, operator VOX/manual PTT)")
-                  .arg(m_rttyTxActive).arg(m_catConnected));
+    bridgeLog(QStringLiteral("%1 TX start: active=%2 CAT=%3 (without CAT: audio/AFSK, operator VOX/manual PTT)")
+                  .arg(m_mode).arg(m_rttyTxActive).arg(m_catConnected));
 }
 
 void DecodiumBridge::rttyMandaAudioTx(const QVector<short>& campioni12k)
@@ -50857,7 +50951,17 @@ void DecodiumBridge::ensureAudioSink()
         // esce quando la finestra e' chiusa, che e' quasi sempre.
         connect(m_audioSink, &DecodiumAudioSink::audioSamplesReady,
                 this, [this](QVector<short> samples) {
-            if (!m_rttyInAscolto || samples.isEmpty())
+            if (samples.isEmpty())
+                return;
+            // JTTY: il ricevitore ascolta sempre quando il modo e' attivo e
+            // il monitor e' acceso, anche a finestra chiusa (le righe
+            // complete vanno comunque nella lista dei decodificati).
+            if (m_mode == QStringLiteral("JTTY") && m_monitoring
+                && !m_transmitting && !m_tuning && !m_rttyTxActive) {
+                emit campioniRxJtty(samples);
+                return;
+            }
+            if (!m_rttyInAscolto)
                 return;
             // In trasmissione l'ingresso non e' la radio: dare quei campioni al
             // demodulatore vorrebbe dire decodificare la propria coda.
@@ -52728,7 +52832,7 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
     QString const modeSnapshot = m_mode;
     // RTTY has a streaming native modem.  This is a final asynchronous
     // boundary for an FT8/FT4/JT dispatch queued before the RTTY switch.
-    if (modeSnapshot.compare(QStringLiteral("RTTY"), Qt::CaseInsensitive) == 0) {
+    if (isStreamingKeyboardMode(modeSnapshot)) {
         {
             QMutexLocker locker(&m_audioBufferMutex);
             m_audioBuffer.clear();
@@ -53621,7 +53725,7 @@ QStringList DecodiumBridge::availableModes() const
 {
     // RTTY in fondo: e' l'unico che non passa dai decodificatori a slot, e
     // sceglierlo ferma la decodifica dei modi digitali invece di affiancarsi.
-    return {"FT8", "FT2", "FT2-Link", "FT4", "Q65", "MSK144", "JT65", "JT9", "JT4", "FST4", "FST4W", "WSPR", "RTTY"};
+    return {"FT8", "FT2", "FT2-Link", "FT4", "Q65", "MSK144", "JT65", "JT9", "JT4", "FST4", "FST4W", "WSPR", "RTTY", "JTTY"};
 }
 
 // Simple radix-2 in-place FFT (Cooley-Tukey)

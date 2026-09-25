@@ -8508,6 +8508,10 @@ Rechtermuisklik: verbinding verbreken</translation>
         <source>DECØMETER - RF Meter - Decodium</source>
         <translation>DECØMETER - RF-meter - Decodium</translation>
     </message>
+    <message>
+        <source>Open the JTTY window...</source>
+        <translation>JTTY-venster openen...</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>
@@ -30135,5 +30139,185 @@ HIS CALL te zetten.</translation>
     <message><source>Thunderstorm</source><translation>Onweer</translation></message>
     <message><source>Fog</source><translation>Mist</translation></message>
     <message><source>Unknown</source><translation>Onbekend</translation></message>
+</context>
+<context>
+    <name>JttyWindow</name>
+    <message>
+        <source>JTTY - keyboard mode</source>
+        <translation>JTTY - toetsenbordmodus</translation>
+    </message>
+    <message>
+        <source>TX</source>
+        <translation>TX</translation>
+    </message>
+    <message>
+        <source>RX</source>
+        <translation>RX</translation>
+    </message>
+    <message>
+        <source>JTTY OFF</source>
+        <translation>JTTY UIT</translation>
+    </message>
+    <message>
+        <source>RX %1 Hz</source>
+        <translation>RX %1 Hz</translation>
+    </message>
+    <message>
+        <source>TX %1 Hz</source>
+        <translation>TX %1 Hz</translation>
+    </message>
+    <message>
+        <source>TX=RX</source>
+        <translation>TX=RX</translation>
+    </message>
+    <message>
+        <source>FTol</source>
+        <translation>FTol</translation>
+    </message>
+    <message>
+        <source>DX</source>
+        <translation>DX</translation>
+    </message>
+    <message>
+        <source>lower case</source>
+        <translation>kleine letters</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Wissen</translation>
+    </message>
+    <message>
+        <source>QSO FREQUENCY  (RX %1 ± %2 Hz)</source>
+        <translation>QSO-FREQUENTIE  (RX %1 ± %2 Hz)</translation>
+    </message>
+    <message>
+        <source>ALL FREQUENCIES  (click a line: RX there and pick the call)</source>
+        <translation>ALLE FREQUENTIES  (klik op een regel: RX daar en roepnaam overnemen)</translation>
+    </message>
+    <message>
+        <source>Click to send, right click to edit</source>
+        <translation>Klik om te zenden, rechtsklik om te bewerken</translation>
+    </message>
+    <message>
+        <source>Contest</source>
+        <translation>Contest</translation>
+    </message>
+    <message>
+        <source>None</source>
+        <translation>Geen</translation>
+    </message>
+    <message>
+        <source>Field Day</source>
+        <translation>Field Day</translation>
+    </message>
+    <message>
+        <source>RTTY Roundup</source>
+        <translation>RTTY Roundup</translation>
+    </message>
+    <message>
+        <source>Exchange</source>
+        <translation>Uitwisseling</translation>
+    </message>
+    <message>
+        <source>Serial</source>
+        <translation>Volgnummer</translation>
+    </message>
+    <message>
+        <source>log on &quot;TU&quot;</source>
+        <translation>loggen bij &quot;TU&quot;</translation>
+    </message>
+    <message>
+        <source>Log QSO</source>
+        <translation>QSO loggen</translation>
+    </message>
+    <message>
+        <source>Type a message and press Enter (Esc stops the transmission)</source>
+        <translation>Typ een bericht en druk op Enter (Esc stopt het zenden)</translation>
+    </message>
+    <message>
+        <source>Send</source>
+        <translation>Zenden</translation>
+    </message>
+    <message>
+        <source>Stop TX</source>
+        <translation>TX stoppen</translation>
+    </message>
+    <message>
+        <source>Sending: %1</source>
+        <translation>Zendt: %1</translation>
+    </message>
+    <message>
+        <source>Select JTTY in the mode selector to receive and transmit.</source>
+        <translation>Kies JTTY in de modekeuze om te ontvangen en te zenden.</translation>
+    </message>
+    <message>
+        <source>F%1 template</source>
+        <translation>Sjabloon F%1</translation>
+    </message>
+    <message>
+        <source>%M my call, %H and %Q the DX call, %E exchange, %G grid.
+The default templates are sent as compact native frames.</source>
+        <translation>%M mijn roepnaam, %H en %Q die van het DX-station, %E uitwisseling, %G locator.
+De standaardsjablonen gaan als compacte native frames de lucht in.</translation>
+    </message>
+    <message>
+        <source>Save</source>
+        <translation>Opslaan</translation>
+    </message>
+    <message>
+        <source>Defaults (all)</source>
+        <translation>Standaard (alle)</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Annuleren</translation>
+    </message>
+</context>
+<context>
+    <name>decodium::jtty::JttyController</name>
+    <message>
+        <source>unknown ARRL/RAC section</source>
+        <translation>onbekende ARRL/RAC-sectie</translation>
+    </message>
+    <message>
+        <source>invalid native atom</source>
+        <translation>ongeldig native atoom</translation>
+    </message>
+    <message>
+        <source>Transmission stopped by the watchdog.</source>
+        <translation>Zenden gestopt door de watchdog.</translation>
+    </message>
+    <message>
+        <source>The message does not fit in 16 JTTY frames.</source>
+        <translation>Het bericht past niet in 16 JTTY-frames.</translation>
+    </message>
+    <message>
+        <source>Nothing to send.</source>
+        <translation>Niets om te zenden.</translation>
+    </message>
+    <message>
+        <source>too long (max 16 frames)</source>
+        <translation>te lang (max. 16 frames)</translation>
+    </message>
+    <message>
+        <source>%1 frames, %2 s</source>
+        <translation>%1 frames, %2 s</translation>
+    </message>
+    <message>
+        <source>Cannot transmit: JTTY must be the active mode, the TX audio output must be available and no other transmission may be running.</source>
+        <translation>Zenden niet mogelijk: JTTY moet de actieve mode zijn, de TX-audio-uitgang beschikbaar en er mag geen andere uitzending lopen.</translation>
+    </message>
+    <message>
+        <source>The transmitter did not key (PTT refused).</source>
+        <translation>De zender ging niet in zenden (PTT geweigerd).</translation>
+    </message>
+    <message>
+        <source>Transmission interrupted: PTT dropped.</source>
+        <translation>Zenden onderbroken: PTT weggevallen.</translation>
+    </message>
+    <message>
+        <source>No DX call to log.</source>
+        <translation>Geen DX-roepnaam om te loggen.</translation>
+    </message>
 </context>
 </TS>

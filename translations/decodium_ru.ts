@@ -8501,6 +8501,10 @@ Right-click: disconnect</source>
         <source>DECØMETER - RF Meter - Decodium</source>
         <translation>DECØMETER - ВЧ-измеритель - Decodium</translation>
     </message>
+    <message>
+        <source>Open the JTTY window...</source>
+        <translation>Открыть окно JTTY...</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>
@@ -30158,5 +30162,185 @@ in the HIS CALL field.</source>
     <message><source>Thunderstorm</source><translation>Гроза</translation></message>
     <message><source>Fog</source><translation>Туман</translation></message>
     <message><source>Unknown</source><translation>Неизвестно</translation></message>
+</context>
+<context>
+    <name>JttyWindow</name>
+    <message>
+        <source>JTTY - keyboard mode</source>
+        <translation>JTTY - клавиатурный режим</translation>
+    </message>
+    <message>
+        <source>TX</source>
+        <translation>TX</translation>
+    </message>
+    <message>
+        <source>RX</source>
+        <translation>RX</translation>
+    </message>
+    <message>
+        <source>JTTY OFF</source>
+        <translation>JTTY ВЫКЛ</translation>
+    </message>
+    <message>
+        <source>RX %1 Hz</source>
+        <translation>RX %1 Hz</translation>
+    </message>
+    <message>
+        <source>TX %1 Hz</source>
+        <translation>TX %1 Hz</translation>
+    </message>
+    <message>
+        <source>TX=RX</source>
+        <translation>TX=RX</translation>
+    </message>
+    <message>
+        <source>FTol</source>
+        <translation>FTol</translation>
+    </message>
+    <message>
+        <source>DX</source>
+        <translation>DX</translation>
+    </message>
+    <message>
+        <source>lower case</source>
+        <translation>строчные</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Очистить</translation>
+    </message>
+    <message>
+        <source>QSO FREQUENCY  (RX %1 ± %2 Hz)</source>
+        <translation>ЧАСТОТА QSO  (RX %1 ± %2 Гц)</translation>
+    </message>
+    <message>
+        <source>ALL FREQUENCIES  (click a line: RX there and pick the call)</source>
+        <translation>ВСЕ ЧАСТОТЫ  (щелчок по строке: RX туда и взять позывной)</translation>
+    </message>
+    <message>
+        <source>Click to send, right click to edit</source>
+        <translation>Щелчок - передать, правый щелчок - изменить</translation>
+    </message>
+    <message>
+        <source>Contest</source>
+        <translation>Контест</translation>
+    </message>
+    <message>
+        <source>None</source>
+        <translation>Нет</translation>
+    </message>
+    <message>
+        <source>Field Day</source>
+        <translation>Field Day</translation>
+    </message>
+    <message>
+        <source>RTTY Roundup</source>
+        <translation>RTTY Roundup</translation>
+    </message>
+    <message>
+        <source>Exchange</source>
+        <translation>Обмен</translation>
+    </message>
+    <message>
+        <source>Serial</source>
+        <translation>Номер</translation>
+    </message>
+    <message>
+        <source>log on &quot;TU&quot;</source>
+        <translation>в журнал при &quot;TU&quot;</translation>
+    </message>
+    <message>
+        <source>Log QSO</source>
+        <translation>Записать QSO</translation>
+    </message>
+    <message>
+        <source>Type a message and press Enter (Esc stops the transmission)</source>
+        <translation>Введите сообщение и нажмите Enter (Esc останавливает передачу)</translation>
+    </message>
+    <message>
+        <source>Send</source>
+        <translation>Передать</translation>
+    </message>
+    <message>
+        <source>Stop TX</source>
+        <translation>Стоп TX</translation>
+    </message>
+    <message>
+        <source>Sending: %1</source>
+        <translation>Передача: %1</translation>
+    </message>
+    <message>
+        <source>Select JTTY in the mode selector to receive and transmit.</source>
+        <translation>Выберите JTTY в переключателе режимов для приёма и передачи.</translation>
+    </message>
+    <message>
+        <source>F%1 template</source>
+        <translation>Шаблон F%1</translation>
+    </message>
+    <message>
+        <source>%M my call, %H and %Q the DX call, %E exchange, %G grid.
+The default templates are sent as compact native frames.</source>
+        <translation>%M мой позывной, %H и %Q позывной DX, %E обмен, %G локатор.
+Стандартные шаблоны передаются компактными нативными кадрами.</translation>
+    </message>
+    <message>
+        <source>Save</source>
+        <translation>Сохранить</translation>
+    </message>
+    <message>
+        <source>Defaults (all)</source>
+        <translation>По умолчанию (все)</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Отмена</translation>
+    </message>
+</context>
+<context>
+    <name>decodium::jtty::JttyController</name>
+    <message>
+        <source>unknown ARRL/RAC section</source>
+        <translation>неизвестная секция ARRL/RAC</translation>
+    </message>
+    <message>
+        <source>invalid native atom</source>
+        <translation>недопустимый нативный атом</translation>
+    </message>
+    <message>
+        <source>Transmission stopped by the watchdog.</source>
+        <translation>Передача остановлена сторожевым таймером.</translation>
+    </message>
+    <message>
+        <source>The message does not fit in 16 JTTY frames.</source>
+        <translation>Сообщение не помещается в 16 кадров JTTY.</translation>
+    </message>
+    <message>
+        <source>Nothing to send.</source>
+        <translation>Нечего передавать.</translation>
+    </message>
+    <message>
+        <source>too long (max 16 frames)</source>
+        <translation>слишком длинно (макс. 16 кадров)</translation>
+    </message>
+    <message>
+        <source>%1 frames, %2 s</source>
+        <translation>кадров: %1, %2 с</translation>
+    </message>
+    <message>
+        <source>Cannot transmit: JTTY must be the active mode, the TX audio output must be available and no other transmission may be running.</source>
+        <translation>Передача невозможна: JTTY должен быть активным режимом, аудиовыход TX доступен и никакая другая передача не идёт.</translation>
+    </message>
+    <message>
+        <source>The transmitter did not key (PTT refused).</source>
+        <translation>Передатчик не включился (PTT отклонён).</translation>
+    </message>
+    <message>
+        <source>Transmission interrupted: PTT dropped.</source>
+        <translation>Передача прервана: PTT отпущен.</translation>
+    </message>
+    <message>
+        <source>No DX call to log.</source>
+        <translation>Нет позывного DX для записи.</translation>
+    </message>
 </context>
 </TS>

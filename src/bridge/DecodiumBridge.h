@@ -1960,6 +1960,9 @@ public:
 signals:
     void rttyModeLeaving();
     void satelliteTrackingWindowRequested();
+    // Uscita da JTTY: il suo modem deve smettere di produrre audio prima che
+    // l'uscita condivisa venga chiusa.
+    void jttyModeLeaving();
     void ft2LinkSatelliteHalfDuplexStatusChanged();
     void spectrumDataReady(QVector<float> data);
     // Alta risoluzione: dB raw + range + frequenze exact — per PanadapterItem
@@ -2197,6 +2200,9 @@ signals:
     // scheda. Emesso solo con la finestra RTTY aperta.
     void campioniRxRtty(QVector<short> const& campioni12k);
     void statusMessage(const QString& msg);
+    // L'audio ricevuto a 12 kHz per il ricevitore JTTY, quando JTTY e' il modo
+    // attivo e il monitor e' acceso.
+    void campioniRxJtty(QVector<short> const& campioni12k);
     void errorMessage(const QString& msg);
     void warningRaised(const QString& title, const QString& summary, const QString& details);
     void setupSettingsRequested(int tabIndex);
@@ -4436,6 +4442,9 @@ public slots:
     // l'AUDIO e non uno spettro gia' fatto: cosi' il waterfall resta quello di
     // Decodium, con la sua risoluzione e la sua resa, invece di dover
     // convertire due formati diversi (512 bin contro 1024 a passo 3,9 Hz).
+    void aggiungiRigaJtty (QString const& testo, double frequenzaHz, QDateTime const& inizioUtc);
+    void appendJttyAllTxt (bool trasmesso, int frequenzaAudio, QString const& testo,
+                           QDateTime const& quando) const;
     // I campioni arrivano a 24 kHz e vengono decimati a 12, che e' il passo
     // del ring. Ha effetto solo quando il modo attivo e' RTTY: negli altri
     // modi il ring resta alimentato dall'audio locale come sempre.

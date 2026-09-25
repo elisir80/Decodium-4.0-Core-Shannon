@@ -8500,6 +8500,10 @@ Højreklik: afbryd</translation>
         <source>DECØMETER - RF Meter - Decodium</source>
         <translation>DECØMETER - RF-måler - Decodium</translation>
     </message>
+    <message>
+        <source>Open the JTTY window...</source>
+        <translation>Åbn JTTY-vinduet...</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>
@@ -30124,5 +30128,185 @@ i feltet HIS CALL.</translation>
     <message><source>Thunderstorm</source><translation>Tordenvejr</translation></message>
     <message><source>Fog</source><translation>Tåge</translation></message>
     <message><source>Unknown</source><translation>Ukendt</translation></message>
+</context>
+<context>
+    <name>JttyWindow</name>
+    <message>
+        <source>JTTY - keyboard mode</source>
+        <translation>JTTY - tastaturmode</translation>
+    </message>
+    <message>
+        <source>TX</source>
+        <translation>TX</translation>
+    </message>
+    <message>
+        <source>RX</source>
+        <translation>RX</translation>
+    </message>
+    <message>
+        <source>JTTY OFF</source>
+        <translation>JTTY FRA</translation>
+    </message>
+    <message>
+        <source>RX %1 Hz</source>
+        <translation>RX %1 Hz</translation>
+    </message>
+    <message>
+        <source>TX %1 Hz</source>
+        <translation>TX %1 Hz</translation>
+    </message>
+    <message>
+        <source>TX=RX</source>
+        <translation>TX=RX</translation>
+    </message>
+    <message>
+        <source>FTol</source>
+        <translation>FTol</translation>
+    </message>
+    <message>
+        <source>DX</source>
+        <translation>DX</translation>
+    </message>
+    <message>
+        <source>lower case</source>
+        <translation>små bogstaver</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Ryd</translation>
+    </message>
+    <message>
+        <source>QSO FREQUENCY  (RX %1 ± %2 Hz)</source>
+        <translation>QSO-FREKVENS  (RX %1 ± %2 Hz)</translation>
+    </message>
+    <message>
+        <source>ALL FREQUENCIES  (click a line: RX there and pick the call)</source>
+        <translation>ALLE FREKVENSER  (klik på en linje: RX dér og kaldesignalet hentes)</translation>
+    </message>
+    <message>
+        <source>Click to send, right click to edit</source>
+        <translation>Klik for at sende, højreklik for at redigere</translation>
+    </message>
+    <message>
+        <source>Contest</source>
+        <translation>Contest</translation>
+    </message>
+    <message>
+        <source>None</source>
+        <translation>Ingen</translation>
+    </message>
+    <message>
+        <source>Field Day</source>
+        <translation>Field Day</translation>
+    </message>
+    <message>
+        <source>RTTY Roundup</source>
+        <translation>RTTY Roundup</translation>
+    </message>
+    <message>
+        <source>Exchange</source>
+        <translation>Udveksling</translation>
+    </message>
+    <message>
+        <source>Serial</source>
+        <translation>Løbenummer</translation>
+    </message>
+    <message>
+        <source>log on &quot;TU&quot;</source>
+        <translation>log ved &quot;TU&quot;</translation>
+    </message>
+    <message>
+        <source>Log QSO</source>
+        <translation>Log QSO</translation>
+    </message>
+    <message>
+        <source>Type a message and press Enter (Esc stops the transmission)</source>
+        <translation>Skriv en besked og tryk Enter (Esc stopper udsendelsen)</translation>
+    </message>
+    <message>
+        <source>Send</source>
+        <translation>Send</translation>
+    </message>
+    <message>
+        <source>Stop TX</source>
+        <translation>Stop TX</translation>
+    </message>
+    <message>
+        <source>Sending: %1</source>
+        <translation>Sender: %1</translation>
+    </message>
+    <message>
+        <source>Select JTTY in the mode selector to receive and transmit.</source>
+        <translation>Vælg JTTY i modevælgeren for at modtage og sende.</translation>
+    </message>
+    <message>
+        <source>F%1 template</source>
+        <translation>Skabelon F%1</translation>
+    </message>
+    <message>
+        <source>%M my call, %H and %Q the DX call, %E exchange, %G grid.
+The default templates are sent as compact native frames.</source>
+        <translation>%M mit kaldesignal, %H og %Q DX-kaldesignalet, %E udveksling, %G locator.
+Standardskabelonerne sendes som kompakte native rammer.</translation>
+    </message>
+    <message>
+        <source>Save</source>
+        <translation>Gem</translation>
+    </message>
+    <message>
+        <source>Defaults (all)</source>
+        <translation>Standard (alle)</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Annuller</translation>
+    </message>
+</context>
+<context>
+    <name>decodium::jtty::JttyController</name>
+    <message>
+        <source>unknown ARRL/RAC section</source>
+        <translation>ukendt ARRL/RAC-sektion</translation>
+    </message>
+    <message>
+        <source>invalid native atom</source>
+        <translation>ugyldigt nativt atom</translation>
+    </message>
+    <message>
+        <source>Transmission stopped by the watchdog.</source>
+        <translation>Udsendelsen stoppet af vagthunden.</translation>
+    </message>
+    <message>
+        <source>The message does not fit in 16 JTTY frames.</source>
+        <translation>Beskeden kan ikke være i 16 JTTY-rammer.</translation>
+    </message>
+    <message>
+        <source>Nothing to send.</source>
+        <translation>Intet at sende.</translation>
+    </message>
+    <message>
+        <source>too long (max 16 frames)</source>
+        <translation>for lang (maks. 16 rammer)</translation>
+    </message>
+    <message>
+        <source>%1 frames, %2 s</source>
+        <translation>%1 rammer, %2 s</translation>
+    </message>
+    <message>
+        <source>Cannot transmit: JTTY must be the active mode, the TX audio output must be available and no other transmission may be running.</source>
+        <translation>Kan ikke sende: JTTY skal være den aktive mode, TX-lydudgangen tilgængelig og ingen anden udsendelse i gang.</translation>
+    </message>
+    <message>
+        <source>The transmitter did not key (PTT refused).</source>
+        <translation>Senderen blev ikke nøglet (PTT afvist).</translation>
+    </message>
+    <message>
+        <source>Transmission interrupted: PTT dropped.</source>
+        <translation>Udsendelse afbrudt: PTT faldt.</translation>
+    </message>
+    <message>
+        <source>No DX call to log.</source>
+        <translation>Intet DX-kaldesignal at logge.</translation>
+    </message>
 </context>
 </TS>

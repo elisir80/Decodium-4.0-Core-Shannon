@@ -8497,6 +8497,10 @@ Right-click: disconnect</source>
         <source>DECØMETER - RF Meter - Decodium</source>
         <translation>DECØMETER - 射頻測量錶 - Decodium</translation>
     </message>
+    <message>
+        <source>Open the JTTY window...</source>
+        <translation>開啟 JTTY 視窗...</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>
@@ -30116,5 +30120,185 @@ HIS CALL 欄。</translation>
     <message><source>Thunderstorm</source><translation>雷暴</translation></message>
     <message><source>Fog</source><translation>霧</translation></message>
     <message><source>Unknown</source><translation>未知</translation></message>
+</context>
+<context>
+    <name>JttyWindow</name>
+    <message>
+        <source>JTTY - keyboard mode</source>
+        <translation>JTTY - 鍵盤模式</translation>
+    </message>
+    <message>
+        <source>TX</source>
+        <translation>TX</translation>
+    </message>
+    <message>
+        <source>RX</source>
+        <translation>RX</translation>
+    </message>
+    <message>
+        <source>JTTY OFF</source>
+        <translation>JTTY 關閉</translation>
+    </message>
+    <message>
+        <source>RX %1 Hz</source>
+        <translation>RX %1 Hz</translation>
+    </message>
+    <message>
+        <source>TX %1 Hz</source>
+        <translation>TX %1 Hz</translation>
+    </message>
+    <message>
+        <source>TX=RX</source>
+        <translation>TX=RX</translation>
+    </message>
+    <message>
+        <source>FTol</source>
+        <translation>FTol</translation>
+    </message>
+    <message>
+        <source>DX</source>
+        <translation>DX</translation>
+    </message>
+    <message>
+        <source>lower case</source>
+        <translation>小寫</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>清除</translation>
+    </message>
+    <message>
+        <source>QSO FREQUENCY  (RX %1 ± %2 Hz)</source>
+        <translation>QSO 頻率  (RX %1 ± %2 Hz)</translation>
+    </message>
+    <message>
+        <source>ALL FREQUENCIES  (click a line: RX there and pick the call)</source>
+        <translation>所有頻率  (點擊一行: RX 移到該處並取呼號)</translation>
+    </message>
+    <message>
+        <source>Click to send, right click to edit</source>
+        <translation>點擊發送，右鍵編輯</translation>
+    </message>
+    <message>
+        <source>Contest</source>
+        <translation>競賽</translation>
+    </message>
+    <message>
+        <source>None</source>
+        <translation>無</translation>
+    </message>
+    <message>
+        <source>Field Day</source>
+        <translation>Field Day</translation>
+    </message>
+    <message>
+        <source>RTTY Roundup</source>
+        <translation>RTTY Roundup</translation>
+    </message>
+    <message>
+        <source>Exchange</source>
+        <translation>交換</translation>
+    </message>
+    <message>
+        <source>Serial</source>
+        <translation>序號</translation>
+    </message>
+    <message>
+        <source>log on &quot;TU&quot;</source>
+        <translation>&quot;TU&quot; 時記錄</translation>
+    </message>
+    <message>
+        <source>Log QSO</source>
+        <translation>記錄 QSO</translation>
+    </message>
+    <message>
+        <source>Type a message and press Enter (Esc stops the transmission)</source>
+        <translation>輸入訊息並按 Enter (Esc 停止發射)</translation>
+    </message>
+    <message>
+        <source>Send</source>
+        <translation>發送</translation>
+    </message>
+    <message>
+        <source>Stop TX</source>
+        <translation>停止 TX</translation>
+    </message>
+    <message>
+        <source>Sending: %1</source>
+        <translation>發送中: %1</translation>
+    </message>
+    <message>
+        <source>Select JTTY in the mode selector to receive and transmit.</source>
+        <translation>在模式選擇中選擇 JTTY 以接收和發射。</translation>
+    </message>
+    <message>
+        <source>F%1 template</source>
+        <translation>F%1 範本</translation>
+    </message>
+    <message>
+        <source>%M my call, %H and %Q the DX call, %E exchange, %G grid.
+The default templates are sent as compact native frames.</source>
+        <translation>%M 我的呼號，%H 和 %Q 為 DX 呼號，%E 交換，%G 網格。
+預設範本以緊湊的原生幀發送。</translation>
+    </message>
+    <message>
+        <source>Save</source>
+        <translation>儲存</translation>
+    </message>
+    <message>
+        <source>Defaults (all)</source>
+        <translation>預設 (全部)</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>取消</translation>
+    </message>
+</context>
+<context>
+    <name>decodium::jtty::JttyController</name>
+    <message>
+        <source>unknown ARRL/RAC section</source>
+        <translation>未知的 ARRL/RAC 分區</translation>
+    </message>
+    <message>
+        <source>invalid native atom</source>
+        <translation>無效的原生原子</translation>
+    </message>
+    <message>
+        <source>Transmission stopped by the watchdog.</source>
+        <translation>發射已被看門狗停止。</translation>
+    </message>
+    <message>
+        <source>The message does not fit in 16 JTTY frames.</source>
+        <translation>訊息超出 16 個 JTTY 幀。</translation>
+    </message>
+    <message>
+        <source>Nothing to send.</source>
+        <translation>沒有要發送的內容。</translation>
+    </message>
+    <message>
+        <source>too long (max 16 frames)</source>
+        <translation>太長 (最多 16 幀)</translation>
+    </message>
+    <message>
+        <source>%1 frames, %2 s</source>
+        <translation>%1 幀，%2 秒</translation>
+    </message>
+    <message>
+        <source>Cannot transmit: JTTY must be the active mode, the TX audio output must be available and no other transmission may be running.</source>
+        <translation>無法發射：JTTY 必須是目前模式，TX 音訊輸出可用，且沒有其他發射在進行。</translation>
+    </message>
+    <message>
+        <source>The transmitter did not key (PTT refused).</source>
+        <translation>發射機未鍵控 (PTT 被拒絕)。</translation>
+    </message>
+    <message>
+        <source>Transmission interrupted: PTT dropped.</source>
+        <translation>發射中斷：PTT 已釋放。</translation>
+    </message>
+    <message>
+        <source>No DX call to log.</source>
+        <translation>沒有可記錄的 DX 呼號。</translation>
+    </message>
 </context>
 </TS>
