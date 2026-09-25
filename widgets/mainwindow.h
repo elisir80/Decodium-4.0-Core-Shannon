@@ -1421,6 +1421,7 @@ private:
   bool m_asyncL2DefaultAppliedForCurrentFt2 {false};
   short int m_asyncAudio[90000];     // ring buffer ~7.5s at 12kHz
   uint64_t m_asyncAudioPos {0};      // write position in ring buffer (unsigned to avoid signed overflow UB)
+  int m_asyncLastK {0};              // ultima posizione cumulativa in d2 gia' copiata nel ring
   bool m_bAsyncDecoding {false};     // async decode in progress
   QSet<QString> m_asyncDedupeSet;    // deduplication within sliding window
   QDateTime m_asyncDedupeLastCleared;

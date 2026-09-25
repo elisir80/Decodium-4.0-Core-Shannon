@@ -31,6 +31,7 @@ namespace decodium::audio { class RttyRxRecovery; }
 #include <memory>
 
 #include "DecodiumThemeManager.h"
+#include "Detector/Ft2AsyncRegistry.hpp"
 #include "DecodiumSubManagers.h"
 #include "DecodiumCatManager.h"
 #include "DecodiumCat4OmManager.h"
@@ -1959,10 +1960,10 @@ public:
 
 signals:
     void rttyModeLeaving();
-    void satelliteTrackingWindowRequested();
     // Uscita da JTTY: il suo modem deve smettere di produrre audio prima che
     // l'uscita condivisa venga chiusa.
     void jttyModeLeaving();
+    void satelliteTrackingWindowRequested();
     void ft2LinkSatelliteHalfDuplexStatusChanged();
     void spectrumDataReady(QVector<float> data);
     // Alta risoluzione: dB raw + range + frequenze exact — per PanadapterItem
@@ -2199,10 +2200,10 @@ signals:
     // radio ascolta, senza aprire una seconda sorgente audio sulla stessa
     // scheda. Emesso solo con la finestra RTTY aperta.
     void campioniRxRtty(QVector<short> const& campioni12k);
-    void statusMessage(const QString& msg);
     // L'audio ricevuto a 12 kHz per il ricevitore JTTY, quando JTTY e' il modo
     // attivo e il monitor e' acceso.
     void campioniRxJtty(QVector<short> const& campioni12k);
+    void statusMessage(const QString& msg);
     void errorMessage(const QString& msg);
     void warningRaised(const QString& title, const QString& summary, const QString& details);
     void setupSettingsRequested(int tabIndex);
@@ -4118,6 +4119,11 @@ private:
     int   m_wfRingPos {0};
     int   m_lastWaterfallAudioBufferSize {0};
     qint64 m_lastFt2AsyncDecodeDispatchMs {0};
+    // PROGETTO_ASYMX_JTTY F2 (acceso; DECODIUM_FT2_ASYNC_REGISTRO=0 lo spegne): i doppioni del
+    // decode asincrono si riconoscono dall'inizio assoluto della trasmissione e
+    // dalla frequenza, non dallo slot di 3,75 s calcolato al dispatch.
+    decodium::ft2::AsyncRegistry<QString> m_ft2AsyncRegistry;
+    qint64 m_ft2AsyncRegistryDispatchMs {0};
     QVector<short> m_spectrumBuf;
     static constexpr int SPECTRUM_FFT_SIZE    = 512;   // legacy WaterfallItem
     static constexpr int PANADAPTER_FFT_SIZE  = 4096;  // visual panadapter (~2.93 Hz/bin @ 12kHz)
@@ -4436,15 +4442,15 @@ public slots:
     // arrivano solo le righe chiuse, perche' finiscano nella cronologia e
     // nell'archivio come le altre decodifiche.
     void aggiungiRigaRtty (QString const& testo, double qualita, double frequenzaHz);
+    void aggiungiRigaJtty (QString const& testo, double frequenzaHz, QDateTime const& inizioUtc);
+    void appendJttyAllTxt (bool trasmesso, int frequenzaAudio, QString const& testo,
+                           QDateTime const& quando) const;
 
 
     // Alimenta il waterfall con l'audio che arriva dalla radio RTTY. Si passa
     // l'AUDIO e non uno spettro gia' fatto: cosi' il waterfall resta quello di
     // Decodium, con la sua risoluzione e la sua resa, invece di dover
     // convertire due formati diversi (512 bin contro 1024 a passo 3,9 Hz).
-    void aggiungiRigaJtty (QString const& testo, double frequenzaHz, QDateTime const& inizioUtc);
-    void appendJttyAllTxt (bool trasmesso, int frequenzaAudio, QString const& testo,
-                           QDateTime const& quando) const;
     // I campioni arrivano a 24 kHz e vengono decimati a 12, che e' il passo
     // del ring. Ha effetto solo quando il modo attivo e' RTTY: negli altri
     // modi il ring resta alimentato dall'audio locale come sempre.

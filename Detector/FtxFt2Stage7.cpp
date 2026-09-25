@@ -41,6 +41,15 @@ namespace
 // Perdita voluta, come sopra: vive quanto il processo.
 thread_local std::vector<quint32>& g_ft2ApHashCache = *new std::vector<quint32>;
 
+// PROGETTO_ASYMX_JTTY F3 — finestra incrementale del decode asincrono. Come in
+// JTTY, a ogni giro si cercano solo gli inizi di frame che sono diventati
+// completi dall'ultimo giro: il worker imposta l'intervallo di ibest (campioni
+// a 1333,33 Hz dall'inizio della finestra) prima del decode e lo spegne dopo.
+// hi < lo = spento: la ricerca resta quella di sempre, su tre segmenti. Il
+// decoder e' a thread singolo, quindi thread_local basta.
+thread_local int g_ft2AsyncIbLo = 0;
+thread_local int g_ft2AsyncIbHi = -1;
+
 // Vero se almeno una call del messaggio decodificato è nella cache band-wide.
 // USA ft2MessageCallHashes (CallsignHash28.h), IDENTICA al seed del bridge → match garantito.
 inline bool ft2_decode_cache_confirmed (QByteArray const& message_fixed)
@@ -3393,11 +3402,17 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
             }
 
           float segment1_smax = -99.0f;
+          bool const async_incremental = g_ft2AsyncIbHi >= g_ft2AsyncIbLo;
           for (int iseg = 1; iseg <= 3; ++iseg)
             {
               if (abort_if_cancelled ())
                 {
                   return;
+                }
+              // F3: un solo segmento, l'intervallo dei frame appena completati.
+              if (async_incremental && iseg > 1)
+                {
+                  continue;
                 }
               SegmentSearchTrace& segment_trace = search_trace[static_cast<size_t> (iseg - 1)];
               int ibest = -1;
@@ -3418,7 +3433,12 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
                   int ibmax = 2024;
                   int ibstp = 4;
 
-                  if (isync == 1)
+                  if (isync == 1 && async_incremental)
+                    {
+                      ibmin = g_ft2AsyncIbLo;
+                      ibmax = g_ft2AsyncIbHi;
+                    }
+                  else if (isync == 1)
                     {
                       if (iseg == 1)
                         {
@@ -4339,6 +4359,12 @@ extern "C" void ftx_ft2_stage7_set_cancel_c (int cancel)
 
 // 1.0.294 — AP cache Fase 1: il worker setta lo snapshot degli hash28 (call viste in
 // banda) PRIMA del decode e lo azzera dopo. thread_local → per-thread, niente lock.
+extern "C" void ftx_ft2_set_async_ib_range_c (int lo, int hi)
+{
+  g_ft2AsyncIbLo = lo;
+  g_ft2AsyncIbHi = hi;
+}
+
 extern "C" void ftx_ft2_set_ap_hash_cache_c (quint32 const* hashes, int count)
 {
   g_ft2ApHashCache.clear ();

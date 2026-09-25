@@ -4,6 +4,7 @@
 #include "Sequencer/AutoCqCallPolicy.hpp"
 #include "RTTYTerminalWidget.hpp"
 #include "Detector/FT2DecodeWorker.hpp"
+#include "widgets/Ft2AsyncRing.hpp"
 #include "Detector/FT4DecodeWorker.hpp"
 #include "Detector/FST4DecodeWorker.hpp"
 #include "Detector/FT8DecodeWorker.hpp"
@@ -7257,14 +7258,16 @@ void MainWindow::dataSink(qint64 frames)
 
   static float s[NSMAX];
 
-  // Async FT2: fill ring buffer with latest audio
+  // Async FT2: il ring riceve solo i campioni NUOVI. k e' la posizione
+  // cumulativa in d2 dall'inizio del periodo: ricopiare ogni volta tutto il
+  // periodo (fino alla 1.0.649) riempiva il ring di prefissi ripetuti e la
+  // finestra del decoder non era audio contiguo. Vedi Ft2AsyncRing.hpp e
+  // tests/ft2_async_ring_test.cpp.
   if (m_mode == "FT2" && ui->cbAsyncDecode->isChecked() && k > 0) {
-    int nsamples = qMin(k, 90000);
-    int src_start = qMax(0, k - nsamples);
-    for (int i = 0; i < nsamples; i++) {
-      m_asyncAudio[m_asyncAudioPos % 90000] = dec_data.d2[src_start + i];
-      m_asyncAudioPos++;
-    }
+    decodium::ft2::async_ring_append (m_asyncAudio, m_asyncAudioPos, m_asyncLastK,
+                                      dec_data.d2, k);
+  } else {
+    m_asyncLastK = k;
   }
 
   if (m_mode == "RTTY" && m_rttyDetector && k > 0) {

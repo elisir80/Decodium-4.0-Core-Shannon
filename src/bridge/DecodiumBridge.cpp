@@ -48443,8 +48443,23 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
                                                         entry.value("freq").toString(),
                                                         msg,
                                                         entry.value("timestamp").toLongLong());
-        bool const duplicate = m_ft2AsyncDecodeDedupKeys.contains(dedupKey)
-            || batchDedupKeys.contains(dedupKey);
+        // Acceso di default (banco: doppioni 26 -> 0 su 240
+        // trasmissioni, nessuna perdita); DECODIUM_FT2_ASYNC_REGISTRO=0 torna
+        // alla chiave per slot.
+        static bool const ft2AsyncRegistro =
+            qEnvironmentVariable("DECODIUM_FT2_ASYNC_REGISTRO").trimmed() != QStringLiteral("0");
+        bool duplicate = false;
+        if (ft2AsyncRegistro && m_ft2AsyncRegistryDispatchMs > 0) {
+            bool dtOk = false, fOk = false;
+            double const dt = f[2].trimmed().toDouble(&dtOk);
+            double const fHz = f[7].trimmed().toDouble(&fOk);
+            double const start = m_ft2AsyncRegistryDispatchMs / 1000.0 - 3.75 + (dtOk ? dt : 0.0);
+            duplicate = !m_ft2AsyncRegistry.admit(canonicalDecodeMessage(msg), fOk ? fHz : 0.0, start,
+                                                  QDateTime::currentMSecsSinceEpoch() / 1000.0);
+        } else {
+            duplicate = m_ft2AsyncDecodeDedupKeys.contains(dedupKey)
+                || batchDedupKeys.contains(dedupKey);
+        }
         if (duplicate) {
             ++duplicatesSkipped;
             continue;
@@ -48675,8 +48690,24 @@ void DecodiumBridge::onAsyncDecodeTimer()
     if (m_ft2ApHashCache)
         req.apHashCache = m_hashedCallsignCache.snapshotValid(nowMs);
 
+    // PROGETTO_ASYMX_JTTY F3 (DECODIUM_FT2_ASYNC_INCREMENTALE=1): si cercano
+    // solo gli inizi dei frame diventati completi dall'ultimo giro, come in
+    // JTTY. Il tempo nuovo si misura in campioni, non con l'orologio.
+    static bool const ft2AsyncIncremental =
+        qEnvironmentVariableIntValue("DECODIUM_FT2_ASYNC_INCREMENTALE") == 1;
+    if (ft2AsyncIncremental) {
+        double const tauMax = 45000.0 / 12000.0 - 103.0 * 288.0 / 12000.0;   // 1,278 s
+        double delta = 1.8;
+        if (m_ft2AsyncLastDispatchAudioPos > 0 && pos > m_ft2AsyncLastDispatchAudioPos)
+            delta = qMin(1.8, static_cast<double>(pos - m_ft2AsyncLastDispatchAudioPos) / 12000.0);
+        req.ibLo = qMax(-688, static_cast<int>(std::floor((tauMax - delta - 0.02) * 1333.33)));
+        req.ibHi = qMin(2024, static_cast<int>(std::ceil((tauMax + 0.02) * 1333.33)));
+    }
     m_asyncDecodePending = true;
     m_lastFt2AsyncDecodeDispatchMs = nowMs;
+    // Istante (orologio di sistema) in cui la finestra di 45 000 campioni
+    // finiva: l'inizio assoluto di ogni riga e' questo meno 3,75 s piu' il DT.
+    m_ft2AsyncRegistryDispatchMs = QDateTime::currentMSecsSinceEpoch();
     m_ft2AsyncLastDispatchAudioPos = pos;
     // Sprint3-C: decode async oltre la deadline (p99 osservato 2.7s, max 9.7s)
     // blocca il single-flight su audio ormai vecchio di uno slot. Cancel

@@ -108,6 +108,20 @@ add_executable (ft2_make_test_wav ft2_make_test_wav.cpp)
 target_link_libraries (ft2_make_test_wav wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
 add_dependencies (test_qt_helpers ft2_make_test_wav)
 
+# Banco del ricevitore asincrono FT2 (PROGETTO_ASYMX_JTTY, fase F0): scene
+# lunghe con trasmissioni a istanti casuali e simulazione del path vivo del
+# bridge (timer 100 ms, finestra 3,75 s, single-flight, doppioni per slot).
+add_executable (ft2_async_bench ft2_async_bench.cpp)
+target_link_libraries (ft2_async_bench wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
+if (MINGW)
+  target_link_options (ft2_async_bench PRIVATE -Wl,--stack,67108864)
+endif ()
+
+# F1: il ring del decode asincrono deve essere una copia contigua dell'audio.
+add_executable (ft2_async_ring_test ft2_async_ring_test.cpp)
+target_include_directories (ft2_async_ring_test PRIVATE ${CMAKE_SOURCE_DIR})
+add_test (NAME ft2_async_ring_test COMMAND ft2_async_ring_test)
+
 # Raccolta dati per il riaddestramento del gate appreso di superldpc
 # (SUPERLDPC-AI-SPEC-001 SS2b): messaggi FT2 noti attraverso la catena di
 # decodifica vera, con verita' calcolata a mano (vedi ftx_ft2_rvec_c in

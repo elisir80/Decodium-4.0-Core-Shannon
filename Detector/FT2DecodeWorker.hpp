@@ -27,6 +27,11 @@ struct AsyncDecodeRequest
   QByteArray mycall;
   QByteArray hiscall;
   QVector<quint32> apHashCache;  // 1.0.294 — snapshot hash28 call viste in banda (AP cache Fase 1)
+  // PROGETTO_ASYMX_JTTY F3: intervallo di ibest (campioni a 1333,33 Hz
+  // dall'inizio della finestra) dei frame completati dall'ultimo giro.
+  // ibHi < ibLo = ricerca completa di sempre.
+  int ibLo {0};
+  int ibHi {-1};
 };
 
 struct DecodeRequest
