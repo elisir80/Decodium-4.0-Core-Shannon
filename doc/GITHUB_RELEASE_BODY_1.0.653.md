@@ -4,6 +4,11 @@
 
 RTTY transmits again when the DecoPort gateway has a radio of its own, and the DecoPort window opens again.
 
+This release includes the 1.0.651 and 1.0.652 maintenance work:
+
+- 1.0.651: more reliable audio hand-off during mode changes, a startup grace period preventing false `monitoring off`, transition-aware watchdog recovery, a consistent macOS capture buffer, and a readable non-overlapping JTTY keyboard transmit field.
+- 1.0.652: FT2 subtraction now uses the revised 2,000-sample filter path so weak signals next to strong signals are retained; the asynchronous FT2 response-state diagnostics and documentation were also refined.
+
 ### RTTY: PTT went to the wrong port
 
 - Local RTTY transmission shares the PTT path used by DecoPort remote clients. When the DecoPort gateway had opened its own radio on another serial port, the PTT command was sent there instead of to the application's CAT connection. On a Yaesu FT-991 that port was the "Standard" COM port, which does not accept CAT commands: the AFSK audio played normally but the radio stayed in receive.
@@ -23,6 +28,11 @@ Source ZIP and tar.gz archives are available for this tag. The Windows x64 insta
 ## Italiano
 
 L'RTTY torna a trasmettere quando il gateway DecoPort ha una radio propria, e la finestra DecoPort torna ad aprirsi.
+
+Questa release include anche il lavoro di manutenzione delle versioni 1.0.651 e 1.0.652:
+
+- 1.0.651: passaggio audio più affidabile durante i cambi modo, tolleranza iniziale per evitare il falso `monitoring off`, watchdog consapevole delle transizioni, buffer macOS coerente e campo di trasmissione JTTY leggibile senza sovrapposizioni.
+- 1.0.652: la sottrazione FT2 usa il nuovo percorso con filtro da 2.000 campioni, preservando i segnali deboli vicini a quelli forti; sono stati inoltre affinati i log e la documentazione dello stato di risposta FT2 asincrono.
 
 ### RTTY: il PTT finiva sulla porta sbagliata
 
