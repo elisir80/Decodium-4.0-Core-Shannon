@@ -48719,12 +48719,12 @@ void DecodiumBridge::onAsyncDecodeTimer()
     // FT2 asincrono F3 (DECODIUM_FT2_ASYNC_INCREMENTALE=1): si cercano
     // solo gli inizi dei frame diventati completi dall'ultimo giro, come in
     // JTTY. Il tempo nuovo si misura in campioni, non con l'orologio.
-    // FT2 asincrono F5 (DECODIUM_FT2_ASYNC_ATTESO=1): in QSO la risposta
+    // FT2 asincrono F5 (acceso; DECODIUM_FT2_ASYNC_ATTESO=0 lo spegne): in QSO la risposta
     // del corrispondente comincia fra 0,2 e 1,0 s dopo la fine della nostra
     // trasmissione, sulla sua frequenza. La' si prova un candidato esente dai
     // cancelli del sincronismo, con l'AP di mycall+hiscall.
     static bool const ft2AsyncAtteso =
-        qEnvironmentVariableIntValue("DECODIUM_FT2_ASYNC_ATTESO") == 1;
+        qEnvironmentVariable("DECODIUM_FT2_ASYNC_ATTESO").trimmed() != QStringLiteral("0");
     if (ft2AsyncAtteso && !m_dxCall.trimmed().isEmpty() && m_lastTxEndMs > 0) {
         qint64 const wallMs = QDateTime::currentMSecsSinceEpoch();
         if (wallMs - m_lastTxEndMs >= 0 && wallMs - m_lastTxEndMs < 6000) {

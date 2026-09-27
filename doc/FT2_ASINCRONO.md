@@ -369,3 +369,13 @@ Letture:
   (N=2) sulle scene sparse.
 
 Stato: **non attivato**. Resta solo l'opzione del banco.
+
+### F5 acceso di default (27/09/2026)
+
+Su richiesta dell'utente F5 (risposta attesa nel tempo) e' ora **acceso di
+default**; `DECODIUM_FT2_ASYNC_ATTESO=0` lo spegne. Misure a sostegno: al banco
++0,6 dB sulle risposte in QSO (-16,0 -> -16,6 dB), 0 falsi su 528 attese vuote
+(un'ora) e 0 sulla scena Q1. Si attiva solo con un corrispondente impostato e
+nei 6 s dopo la fine di una nostra trasmissione. La conferma in aria e' in
+corso: le righe `[FT2-ATTESO] ... forzato=1` nel log sono le risposte che
+senza F5 mancavano.
