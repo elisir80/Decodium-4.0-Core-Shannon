@@ -874,7 +874,10 @@ int run (Args const& a)
   // giro. --incr-lead=s ammette frame ancora mancanti degli ultimi s secondi.
   bool const incremental = a.num ("incr", 0) != 0;
   double const incr_lead = a.num ("incr-lead", 0.0);
-  double last_dispatch_t = -1.0;
+  // --incr-volte=N: "seconda possibilita'", ogni inizio di frame si prova nei
+  // primi N giri dopo che e' diventato completo (N=1 e' F3 com'era).
+  int const incr_volte = std::max (1, int (a.num ("incr-volte", 1)));
+  std::vector<double> dispatch_hist;
   // --expect=file: QSO ASYMX. Durante ogni scambio hiscall e' il corrispondente
   // (AP come nell'app); con --f5=1 si indica anche la finestra di tempo in cui
   // la risposta deve cominciare (fine della nostra TX + lat-min..lat-max).
@@ -954,12 +957,15 @@ int run (Args const& a)
       if (incremental)
         {
           double const tau_max = kWindow / double (kRate) - kTxSeconds + incr_lead;
-          double const delta = last_dispatch_t < 0 ? 1.8 : std::min (1.8, t - last_dispatch_t);
+          double const ref_t = int (dispatch_hist.size ()) >= incr_volte
+              ? dispatch_hist[dispatch_hist.size () - std::size_t (incr_volte)] : -1.0;
+          double const delta = ref_t < 0 ? 1.8 : std::min (1.8, t - ref_t);
           int const lo = std::max (-688, int (std::floor ((tau_max - delta - 0.02) * 1333.33)));
           int const hi = std::min (2024, int (std::ceil ((tau_max + 0.02) * 1333.33)));
           ftx_ft2_set_async_ib_range_c (lo, hi);
         }
-      last_dispatch_t = t;
+      dispatch_hist.push_back (t);
+      if (dispatch_hist.size () > 16) dispatch_hist.erase (dispatch_hist.begin ());
       if (dispatch_log.is_open ()) dispatch_log << t << '\n';
       auto const c0 = std::chrono::steady_clock::now ();
       auto chiama = [&] (short* iw, decodium::ft2::AsyncDecodeOut& o) {

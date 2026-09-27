@@ -343,3 +343,29 @@ correzione ai bordi del frame, come FT8); `DECODIUM_FT2_SUB_NFILT=700` torna al
 classico. F4 avanti nel codice ma **spento** (`DECODIUM_FT2_ASYNC_AVANTI=1`):
 +2 deboli col filtro 2000 e +5 col 2800, al limite della variabilita' dei
 tempi del banco: da riprovare in aria o su una scena piu' lunga. Retro sweep tolto.
+
+### "Seconda possibilita'": ogni inizio di frame provato piu' volte (27/09/2026)
+
+Idea dal ricevitore JTTY (passo di un quarto di frame, ogni frame esaminato in
+piu' finestre): il decode asincrono e' saturo (~650 ms per giro, 85% dei giri
+saltati) e un debole finisce spesso in una sola finestra. Con la ricerca
+ristretta di F3 si garantiscono N tentativi per inizio di frame a meno CPU
+(`ft2_async_bench run --incr=1 --incr-volte=N`).
+
+| Scena | Ricerca completa (default) | N=1 (F3) | N=2 | N=3 |
+|---|---|---|---|---|
+| L1, 240 trasmissioni sparse | 124, -14,4 dB, 645 ms/giro | 120, -14,3 dB, 196 ms | 123, -14,4 dB, 268 ms | 122, -14,4 dB, 375 ms |
+| genpair, deboli accanto ai forti | 95 deboli, -13,8 dB | — | 61 deboli, -13,1 dB, 1 falso | 86 deboli, -13,6 dB, 1 falso |
+
+Letture:
+
+- Piu' tentativi non danno piu' decodifiche: le finestre successive contengono
+  gli stessi campioni di segnale e di rumore, e l'esito del decoder cambia poco
+  spostando l'inizio del frame nella finestra.
+- Con i segnali sovrapposti e' peggio: la ricerca ristretta non decodifica, e
+  quindi non sottrae, i forti che cominciano fuori dall'intervallo, e il debole
+  resta coperto. Compare anche un falso.
+- Unico vantaggio: CPU da 645 a 268 ms per giro e latenza da 1,17 a 0,65 s
+  (N=2) sulle scene sparse.
+
+Stato: **non attivato**. Resta solo l'opzione del banco.
