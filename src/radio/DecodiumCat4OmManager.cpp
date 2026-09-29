@@ -1238,7 +1238,7 @@ QString DecodiumCat4OmManager::selectSupportedMode(QString const& requested) con
         || upper == QStringLiteral("DIGU") || upper == QStringLiteral("PKT-U")) {
         candidates = {QStringLiteral("DATA-U"), QStringLiteral("USB-D"),
                       QStringLiteral("DIGU"), QStringLiteral("PKT-U"),
-                      QStringLiteral("DATA"), QStringLiteral("USB")};
+                      QStringLiteral("DATA")};
     } else {
         candidates = {upper};
     }

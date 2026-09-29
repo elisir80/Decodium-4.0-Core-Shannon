@@ -30148,6 +30148,20 @@ void DecodiumBridge::applyConfiguredCatRigMode(const QString& reason)
         if (m_cat4OmCat && m_cat4OmCat->connected()) {
             bridgeLog(QStringLiteral("CAT rig mode sync (%1): cat4om -> %2").arg(reason, rigMode));
             m_cat4OmCat->setRigMode(rigMode);
+            // CAT4OM can acknowledge PTT before the radio has applied the
+            // digital-mode command.  Reassert DATA-U after the PTT edge so a
+            // stale USB snapshot cannot win during TX.
+            if (configuredCatRigModeRequestsDataPacket()
+                && reason.compare(QStringLiteral("startTx"), Qt::CaseInsensitive) == 0) {
+                QTimer::singleShot(350, this, [this]() {
+                    if (m_transmitting && m_mode != QStringLiteral("RTTY")
+                        && m_catBackend == QStringLiteral("cat4om")
+                        && m_cat4OmCat && m_cat4OmCat->connected()) {
+                        bridgeLog(QStringLiteral("CAT rig mode verify (post-PTT): cat4om -> DATA-U"));
+                        m_cat4OmCat->setRigMode(QStringLiteral("DATA-U"));
+                    }
+                });
+            }
         }
         return;
     }
@@ -30161,13 +30175,19 @@ void DecodiumBridge::applyConfiguredCatRigMode(const QString& reason)
     }
 
     if (m_catBackend == QStringLiteral("omnirig") && m_omniRigCat && m_omniRigCat->connected()) {
-        if (configuredCatRigModeRequestsDataPacket()) {
-            bridgeLog(QStringLiteral("CAT rig mode sync (%1): omnirig Data/Pkt skipped; OmniRig DIG_U can map to FSK on Kenwood rigs, preserving current radio mode")
-                          .arg(reason));
-            return;
-        }
         bridgeLog(QStringLiteral("CAT rig mode sync (%1): omnirig -> %2").arg(reason, rigMode));
         m_omniRigCat->setRigMode(rigMode);
+        if (configuredCatRigModeRequestsDataPacket()
+            && reason.compare(QStringLiteral("startTx"), Qt::CaseInsensitive) == 0) {
+            QTimer::singleShot(350, this, [this]() {
+                if (m_transmitting && m_mode != QStringLiteral("RTTY")
+                    && m_catBackend == QStringLiteral("omnirig")
+                    && m_omniRigCat && m_omniRigCat->connected()) {
+                    bridgeLog(QStringLiteral("CAT rig mode verify (post-PTT): omnirig -> DATA-U"));
+                    m_omniRigCat->setRigMode(QStringLiteral("DATA-U"));
+                }
+            });
+        }
     }
 }
 
