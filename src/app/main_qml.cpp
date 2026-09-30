@@ -2110,6 +2110,10 @@ int main(int argc, char* argv[])
         QStringList {} << "lab-standard-wait-pounce-ms",
         QStringLiteral("Delay before enabling standard-mode Wait & Pounce in a runtime lab session."),
         QStringLiteral("ms"));
+    QCommandLineOption const labRxInjectOption(
+        QStringList {} << "lab-rx-inject",
+        QStringLiteral("Runtime lab: every new line appended to this file is fed to the FT2 async decode path as a decoded row (sequencer tests without a radio)."),
+        QStringLiteral("file"));
     QCommandLineOption const labTxPeriodOption(
         QStringList {} << "lab-tx-period",
         QStringLiteral("Runtime lab override for TX period: 0=even/first, 1=odd/second."),
@@ -2395,6 +2399,7 @@ int main(int argc, char* argv[])
     parser.addOption(labDxGridOption);
     parser.addOption(labStandardAutoCqMsOption);
     parser.addOption(labStandardWaitPounceMsOption);
+    parser.addOption(labRxInjectOption);
     parser.addOption(labTxPeriodOption);
     parser.addOption(labHeardCallOption);
     parser.addOption(labHeardGridOption);
@@ -3298,6 +3303,53 @@ int main(int argc, char* argv[])
                 << "mode=" << bridge.mode()
                 << "message=" << bridge.currentTxMessage();
         });
+    }
+    // Lab: righe decodificate finte, lette da un file a cui un "corrispondente
+    // robot" aggiunge le risposte. Entrano dallo stesso ingresso del decode FT2
+    // asincrono, quindi il sequencer vero le tratta come segnali ricevuti.
+    QString const labRxInjectPath = parser.value(labRxInjectOption).trimmed();
+    if (!labRxInjectPath.isEmpty()) {
+        auto const injectOffset = std::make_shared<qint64>(0);
+        {
+            QFile existing {labRxInjectPath};
+            if (existing.exists()) {
+                *injectOffset = existing.size();
+            }
+        }
+        auto* injectTimer = new QTimer(&bridge);
+        injectTimer->setInterval(150);
+        QObject::connect(injectTimer, &QTimer::timeout, &bridge,
+                         [&bridge, labRxInjectPath, injectOffset]() {
+            QFile file {labRxInjectPath};
+            if (!file.open(QIODevice::ReadOnly)) {
+                return;
+            }
+            if (file.size() < *injectOffset) {
+                *injectOffset = 0;
+            }
+            file.seek(*injectOffset);
+            QByteArray const data = file.readAll();
+            int const lastNewline = data.lastIndexOf('\n');
+            if (lastNewline < 0) {
+                return;
+            }
+            *injectOffset += lastNewline + 1;
+            QStringList rows;
+            for (QByteArray const& raw : data.left(lastNewline).split('\n')) {
+                QString const row = QString::fromUtf8(raw).remove(QLatin1Char('\r'));
+                if (!row.trimmed().isEmpty()) {
+                    rows << row;
+                }
+            }
+            if (rows.isEmpty()) {
+                return;
+            }
+            qInfo().noquote() << "[LAB] rx inject" << rows.join(QStringLiteral(" | "));
+            QMetaObject::invokeMethod(&bridge, "onFt2AsyncDecodeReady", Qt::DirectConnection,
+                                      Q_ARG(QStringList, rows));
+        });
+        injectTimer->start();
+        qInfo().noquote() << "[LAB] rx inject armed file=" << labRxInjectPath;
     }
     if (parser.isSet(labStandardWaitPounceMsOption)) {
         QTimer::singleShot(labStandardWaitPounceMs,

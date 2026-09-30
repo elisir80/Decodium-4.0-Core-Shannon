@@ -525,8 +525,68 @@ static qint64 bridgeMonotonicMs()
         std::chrono::steady_clock::now().time_since_epoch()).count();
 }
 
+// Registro dei QSO: le decisioni del sequencer (avvio, passaggi, tentativi,
+// log o abbandono) in un file al giorno che NON ruota, tenuto 30 giorni. Il
+// log diagnostico ruota a 5 MB x 3 e copre poche ore: i QSO persi del
+// 16-22/9/2026 non si sono potuti spiegare perche' il log di quei giorni non
+// c'era piu'. DECODIUM_QSO_JOURNAL=0 lo spegne.
+static bool qsoJournalWanted(const QString& msg)
+{
+    static QStringList const keys {
+        QStringLiteral("autoSeq"), QStringLiteral("checkAndStartPeriodicTx"),
+        QStringLiteral("finishAutoSequenceQso"), QStringLiteral("processDecodeDoubleClick"),
+        QStringLiteral("FT2 AutoCQ"), QStringLiteral("UDP reply accepted"),
+        QStringLiteral("Wait & Pounce"), QStringLiteral("[CALL]"), QStringLiteral("[STATE"),
+        QStringLiteral("smartFt2Tx"), QStringLiteral("FT2 async abort"),
+        QStringLiteral("manualTxHold"), QStringLiteral("retry limit"),
+        QStringLiteral("logQso"), QStringLiteral("[FT2-ATTESO]"),
+        QStringLiteral("advanceQsoState"), QStringLiteral("caller queue"),
+        QStringLiteral("processNextInQueue"), QStringLiteral("signoff"),
+        QStringLiteral("QSO complet"), QStringLiteral("partner left"),
+        QStringLiteral("MAM "),
+    };
+    for (QString const& key : keys) {
+        if (msg.contains(key)) return true;
+    }
+    return false;
+}
+
+static void qsoJournal(const QString& msg)
+{
+    static bool const enabled =
+        qEnvironmentVariable("DECODIUM_QSO_JOURNAL").trimmed() != QStringLiteral("0");
+    if (!enabled) return;
+    static QMutex mutex;
+    QMutexLocker locker {&mutex};
+    static QString dirPath;
+    static bool cleaned = false;
+    if (dirPath.isEmpty()) {
+        dirPath = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation)
+            + QStringLiteral("/qso_journal");
+        QDir().mkpath(dirPath);
+    }
+    QDateTime const now = QDateTime::currentDateTimeUtc();
+    if (!cleaned) {
+        cleaned = true;
+        QDir dir {dirPath};
+        QDate const limit = now.date().addDays(-30);
+        for (QFileInfo const& info : dir.entryInfoList({QStringLiteral("sequencer_*.log")}, QDir::Files)) {
+            QDate const day = QDate::fromString(info.completeBaseName().mid(10), QStringLiteral("yyyy-MM-dd"));
+            if (day.isValid() && day < limit) QFile::remove(info.absoluteFilePath());
+        }
+    }
+    QFile file {dirPath + QStringLiteral("/sequencer_") + now.toString(QStringLiteral("yyyy-MM-dd"))
+                + QStringLiteral(".log")};
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) return;
+    QByteArray const line = (now.toString(QStringLiteral("HH:mm:ss.zzz")) + QLatin1Char(' ')
+                             + QString(msg).replace(QLatin1Char('\n'), QLatin1Char(' '))
+                             + QLatin1Char('\n')).toUtf8();
+    file.write(line);
+}
+
 static void bridgeLog(const QString& msg) {
     DIAG_INFO(msg);
+    if (qsoJournalWanted(msg)) qsoJournal(msg);
     if (msg.contains(QStringLiteral("Ft2Link"))
         || msg.contains(QStringLiteral("FT2-Link"))) {
         // FT2-Link can emit several operational traces per audio callback.
@@ -9862,6 +9922,10 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
         DIAG_WARN(line);
     }, Qt::DirectConnection);
     connect(this, &DecodiumBridge::statusMessage, this, [](const QString& msg) {
+        // Registro dei QSO: cosa abbiamo trasmesso e come e' finito.
+        if (msg.startsWith(QStringLiteral("TX: ")) || msg.contains(QStringLiteral("QSO"))) {
+            qsoJournal(QStringLiteral("[STATUS] ") + msg);
+        }
         if (bridgeStatusLooksLikeWarning(msg)) {
             DIAG_WARN(QStringLiteral("[UISTATUS] non-blocking status warning: %1")
                           .arg(bridgeDiagnosticOneLine(msg)));
@@ -24785,16 +24849,34 @@ void DecodiumBridge::mamPruneSlots()
     int const maxRetry = maxCallerRetries();
     int removed = 0;
     for (int i = m_mamSlots.size() - 1; i >= 0; --i) {
-        MamQsoSlot const& s = m_mamSlots.at(i);
+        MamQsoSlot& s = m_mamSlots[i];
         bool drop = false;
+        QString dropReason;
         if (s.logged || s.state == MamQsoSlot::State::Done) {
             drop = true;
         } else if (s.retryCount > maxRetry) {
             drop = true;
-            bridgeLog(QStringLiteral("MAM slot %1 dropped: retry limit %2").arg(s.callFull).arg(maxRetry));
+            dropReason = QStringLiteral("retry limit %1").arg(maxRetry);
         } else if (s.lastHeardMs > 0 && (nowMs - s.lastHeardMs) > 6 * periodMs) {
             drop = true;
-            bridgeLog(QStringLiteral("MAM slot %1 dropped: silent > 6 periods").arg(s.callFull));
+            dropReason = QStringLiteral("silent > 6 periods");
+        }
+        if (drop && !dropReason.isEmpty()) {
+            // Il corrispondente ci ha gia' confermato il rapporto (R+rapporto,
+            // quindi noi siamo al RR73, o RR73/RRR, quindi noi siamo al 73):
+            // lo scambio e' completo e il QSO va loggato anche se il suo ultimo
+            // saluto non arriva, come fa il sequencer normale ("log anyway").
+            // Prima lo slot veniva buttato senza log: QSO con F4MXE e PH2W del
+            // 18/9/2026 persi cosi' (MAM a 1 stream, R ripetuto 7 e 15 volte),
+            // riprodotto col corrispondente robot del laboratorio.
+            if (!s.logged && s.progress >= 4) {
+                bridgeLog(QStringLiteral("MAM slot %1: %2 after partner confirmation (TX%3) -> log anyway")
+                              .arg(s.callFull, dropReason)
+                              .arg(s.currentTx));
+                mamLogSlot(s);
+            } else {
+                bridgeLog(QStringLiteral("MAM slot %1 dropped: %2").arg(s.callFull, dropReason));
+            }
         }
         if (drop) {
             m_mamSlots.removeAt(i);
