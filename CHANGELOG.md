@@ -1,5 +1,37 @@
 # Changelog / Registro Modifiche
 
+## [1.0.657] - 2026-10-02
+
+### English
+
+- Fixed profile-aware loading of MaxCallerRetries and
+  CallerRetriesAlwaysHard, so the active profile value is also the value
+  enforced by the bridge.
+- Fixed TX retry-limit bypasses that allowed repeated TX2 reports to continue
+  through closing-QSO states.
+- Added a final AutoCQ/MAM safety barrier preventing stale state from sending
+  RR73 to a caller that had not received our numeric report.
+- Completed and logged a QSO immediately after a locally transmitted final 73,
+  even if the current TX state or CAT status changes afterwards.
+- Stabilised macOS Hamlib PTT handling: the bridge waits beyond Hamlib's
+  one-second CI-V transaction timeout and does not immediately reconnect CAT
+  from the TX error path.
+
+### Italiano
+
+- Corretto il caricamento profilo-aware di MaxCallerRetries e
+  CallerRetriesAlwaysHard: il valore del profilo attivo è ora anche quello
+  realmente applicato dal bridge.
+- Corretto il bypass del limite retry che consentiva la ripetizione indefinita
+  dei report TX2 durante la chiusura del QSO.
+- Aggiunta una barriera finale AutoCQ/MAM che impedisce l'invio di RR73 a un
+  caller che non ha ancora ricevuto il nostro report numerico.
+- Il QSO viene completato e registrato subito dopo il nostro 73 finale
+  realmente trasmesso, anche se lo stato TX o CAT cambia subito dopo.
+- Stabilizzato il PTT Hamlib su macOS: il bridge attende oltre il timeout CI-V
+  di un secondo e non avvia immediatamente una riconnessione CAT dal percorso
+  di errore TX.
+
 ## [1.0.503] - 2026-07-27
 
 ### Repository and release infrastructure

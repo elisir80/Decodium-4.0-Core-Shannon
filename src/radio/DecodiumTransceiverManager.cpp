@@ -2076,6 +2076,10 @@ void DecodiumTransceiverManager::connectRig()
                 d->desired.online(false);
                 bool const recovering = m_transientCatRetryCount > 0;
                 QString const shownReason = sanitizeHamlibFailure(reason);
+                QString const lowerReason = reason.toLower();
+                bool const pttCommandFailure = lowerReason.contains(QStringLiteral("set_ptt"))
+                    || lowerReason.contains(QStringLiteral("rig_set_ptt"))
+                    || lowerReason.contains(QStringLiteral("icom_set_ptt"));
                 qWarning().noquote()
                     << (startupAttempt ? "[CATDBG] Connect failed" : "[CATDBG] CAT failure")
                     << "rig=" << attemptRig
@@ -2093,7 +2097,8 @@ void DecodiumTransceiverManager::connectRig()
                     emit statusUpdate(shownReason + QStringLiteral(" Ritento CAT a breve..."));
                 } else if (startupAttempt && isTransientCatIoFailure(reason)) {
                     emit statusUpdate(QStringLiteral("CAT non connesso: ") + shownReason);
-                } else if ((wasConnected || recovering) && isTransientCatIoFailure(reason)) {
+                } else if ((wasConnected || recovering) && isTransientCatIoFailure(reason)
+                           && !pttCommandFailure) {
                     scheduleTransientReconnect(reason);
                 } else {
                     emit errorOccurred("CAT failure: " + shownReason);

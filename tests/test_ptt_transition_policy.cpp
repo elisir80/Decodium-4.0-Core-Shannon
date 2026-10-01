@@ -26,7 +26,7 @@ private slots:
     {
         QVERIFY(decodium::tx::legacyReportedTxIsAuthoritative(false));
         QVERIFY(!decodium::tx::legacyReportedTxIsAuthoritative(true));
-        QCOMPARE(decodium::tx::pttFeedbackTimeoutMs(), 650);
+        QCOMPARE(decodium::tx::pttFeedbackTimeoutMs(), 1500);
     }
 };
 

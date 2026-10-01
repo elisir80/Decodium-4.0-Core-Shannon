@@ -33,7 +33,9 @@ inline bool legacyReportedTxIsAuthoritative(bool bridgeManagedAudioPath)
 
 inline int pttFeedbackTimeoutMs()
 {
-    return 650;
+    // Hamlib's Icom CI-V transaction timeout is 1 s.  The bridge must not
+    // declare PTT failed before that worker transaction can report its result.
+    return 1500;
 }
 
 } // namespace tx

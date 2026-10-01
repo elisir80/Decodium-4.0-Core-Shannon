@@ -12607,6 +12607,15 @@ bool DecodiumBridge::ensureLegacyBackendAvailable()
                         }
 #endif
                         bridgeLog(QStringLiteral("legacyPttRequested: active CAT unavailable, retrying connection"));
+#if defined(Q_OS_MAC)
+                        // Never reconnect CAT from the TX callback on macOS.
+                        // The reconnect can serialize with the audio/render
+                        // path and freeze the panadapter after the PTT
+                        // confirmation timeout.  CAT recovery is already
+                        // handled by the backend's normal reconnect path.
+                        bridgeLog(QStringLiteral("legacyPttRequested: CAT unavailable; macOS TX path will not reconnect"));
+                        return;
+#else
                         if (enabled) {
                             retryRigConnection();
                             QTimer::singleShot(700, this, [this]() {
@@ -12673,6 +12682,7 @@ bool DecodiumBridge::ensureLegacyBackendAvailable()
                                 }
                             });
                         }
+#endif
                     }
                     if (!enabled && usingLegacyBackendForTx() && !useModernSpectrumFeedWithLegacy()) {
                         QTimer::singleShot(0, this, [this]() {
@@ -18678,7 +18688,15 @@ void DecodiumBridge::beginLegacyPttTransition(
         if (serial != m_pttTransitionSerial || !m_pttPending) return;
         failLegacyPttTransition(QStringLiteral("PTT non confermato entro %1 ms")
                                     .arg(decodium::tx::pttFeedbackTimeoutMs()),
+                                // A failed PTT must not start a TX retry loop
+                                // on macOS.  The retry re-enters the CAT/TX
+                                // path while the panadapter is running and
+                                // can repeatedly reconnect the radio.
+#if defined(Q_OS_MAC)
+                                false);
+#else
                                 true);
+#endif
     });
 }
 
@@ -38672,6 +38690,22 @@ void DecodiumBridge::checkAndStartPeriodicTx()
         QString const selectedPayload = buildCurrentTxMessage().trimmed();
         QString const activePartner = m_dxCall.trimmed();
         QString const activePartnerBase = normalizedBaseCall(activePartner);
+        // TX5 is the local final 73.  Once it has actually been transmitted
+        // for the active partner, logging must not depend on the current
+        // payload/state still looking like TX5: CAT/status updates can move
+        // that state before this check runs and previously lost valid QSOs.
+        bool const lastTxWasFinal73ForActivePartner =
+            m_lastNtx == 5
+            && messageCarries73PayloadForCall(m_lastTransmittedMessage,
+                                               activePartner,
+                                               activePartnerBase);
+        if (lastTxWasFinal73ForActivePartner
+            && (m_mode == QStringLiteral("FT2")
+                || m_mode == QStringLiteral("FT4")
+                || m_mode == QStringLiteral("FT8"))) {
+            finishAutoSequenceQso(QStringLiteral("checkAndStartPeriodicTx: local TX5 73 confirmed by last TX payload -> QSO complete"), true);
+            return true;
+        }
         bool const selectedPayloadMentionsActivePartner =
             activePartnerBase.isEmpty()
             || messageContainsCallToken(selectedPayload, activePartner, activePartnerBase);
@@ -39235,9 +39269,14 @@ void DecodiumBridge::checkAndStartPeriodicTx()
         // qsoProgress==4 - otherwise with a low cap (e.g. 1) in FT8/FT4 the halt
         // at TX3 cleared the QSO state right when the incoming RR73 arrived, so
         // the RR73 was dropped (user FT8 report; 1.0.431 fix overwritten in 1.0.432).
+        // qsoProgress 4/5 can describe a closing QSO, but it must not
+        // exempt a still-repeated TX2 report from Caller retries.  Otherwise
+        // a partner that already received our report can leave TX2 looping
+        // indefinitely (the visible symptom was 9+ identical report TXs
+        // with Caller retries set to 3).  Only TX3-TX5 are sign-off steps.
         bool const inSignoffTxStep =
             (m_currentTx == 4 || m_currentTx == 5
-             || m_qsoProgress == 4 || m_qsoProgress == 5);
+             || (m_currentTx >= 3 && (m_qsoProgress == 4 || m_qsoProgress == 5)));
         bool applyRetryLimit =
             (m_autoCqRepeat || manualPartnerQso)
             && !isCqAutoCq
@@ -40406,6 +40445,24 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
     }
 
     if (nextTx > 0) {
+        // Safety barrier: never send RR73/73 for a caller unless this
+        // caller has actually received our numeric report.  AutoCQ/MAM can
+        // carry a stale closing state across callers; a grid decode from the
+        // new caller must then restart at TX2 instead of inheriting TX5.
+        if (nextTx == 5 && !messagePartnerBase.isEmpty()) {
+            QString const lastTxReport =
+                decodium::seq::signalReportFromMessage(m_lastTransmittedMessage).trimmed();
+            bool const reportWasSentToThisPartner =
+                !lastTxReport.isEmpty()
+                && messageContainsCallToken(m_lastTransmittedMessage,
+                                             messagePartner,
+                                             messagePartnerBase);
+            if (!reportWasSentToThisPartner) {
+                bridgeLog(QStringLiteral("autoSeq: blocked stale TX5/RR73 for %1; last TX was [%2], restarting at TX2")
+                              .arg(messagePartnerBase, m_lastTransmittedMessage));
+                nextTx = 2;
+            }
+        }
         bool const ft2AutomatedExchange =
             m_mode == QStringLiteral("FT2")
             && m_asyncTxEnabled
@@ -40785,7 +40842,8 @@ void DecodiumBridge::loadSettings()
     // 1.0.446 - P1-5: cap Caller-retries duro anche con watchdog ON.
     // 1.0.493 - default ON su fork: il watchdog (attivo di default) rendeva il cap utente
     // inefficace in ogni installazione standard ("Caller Retries non funziona").
-    m_callerRetriesAlwaysHard = s.value(QStringLiteral("CallerRetriesAlwaysHard"), true).toBool();
+    m_callerRetriesAlwaysHard = decodium::profiledSettingsValue(
+        QString(), QStringLiteral("CallerRetriesAlwaysHard"), true).toBool();
     // 1.0.447 - Fondamenta Fase 1 opt-in: censimento transizioni stato FT2. Default OFF.
     m_ft2TransitionCensus = s.value(QStringLiteral("Ft2TransitionCensus"), false).toBool();
     // 1.0.447 - Leva#6-A opt-in: gate smart-TX adattivi. Default OFF.
@@ -40798,7 +40856,8 @@ void DecodiumBridge::loadSettings()
     // 1.0.326 — ALC calibration target (default 20, range 5-60; FT8/data tipicamente 15-25)
     m_alcTarget = qBound(5, s.value(QStringLiteral("AlcTarget"), 20).toInt(), 60);
     // 1.0.326 B2 — MaxCallerRetries persist (default 10, range 1-99)
-    m_maxCallerRetries = qBound(1, s.value(QStringLiteral("MaxCallerRetries"), 10).toInt(), 99);
+    m_maxCallerRetries = qBound(1, decodium::profiledSettingsValue(
+        QString(), QStringLiteral("MaxCallerRetries"), 10).toInt(), 99);
     // 1.0.388 — priorità processo (default 1 = Sopra il normale). Applicata sotto, dopo
     // il profilo interattivo di startup, così la scelta utente vince.
     m_processPriority  = qBound(0, s.value(QStringLiteral("ProcessPriority"), 1).toInt(), 3);
