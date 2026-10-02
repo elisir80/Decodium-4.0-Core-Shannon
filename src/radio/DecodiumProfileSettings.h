@@ -13,10 +13,20 @@ namespace decodium
 inline QString activeSettingsProfileName()
 {
     auto const* app = QCoreApplication::instance();
-    if (!app) {
-        return {};
+    if (app) {
+        QString const commandLineProfile = app->property("decodiumConfigName").toString().trimmed();
+        if (!commandLineProfile.isEmpty()) {
+            return commandLineProfile;
+        }
     }
-    return app->property("decodiumConfigName").toString().trimmed();
+
+    // The settings UI selects a saved multi-settings configuration without
+    // starting Decodium with `-config`.  Treat that persisted selection as the
+    // active profile too; otherwise QML can display a profile value while C++
+    // services silently fall back to the stale [General] value.
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope,
+                       QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    return settings.value(QStringLiteral("CurrentMultiSettingsConfiguration")).toString().trimmed();
 }
 
 inline void ensureSettingsProfileInitialized(const QString& profileName)
@@ -26,25 +36,36 @@ inline void ensureSettingsProfileInitialized(const QString& profileName)
     }
 
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
-    settings.beginGroup(QStringLiteral("MultiSettings"));
+    // Decodium's QML settings profiles are stored as top-level INI groups
+    // (`CODEXPERF\\MaxCallerRetries`), whereas the old WSJT-X MultiSettings
+    // profiles live below `MultiSettings/`.  Prefer the direct group so the
+    // control shown in QML and the values used by the bridge are identical.
     settings.beginGroup(profileName);
+    bool const directProfileExists = !settings.allKeys().isEmpty() || !settings.childGroups().isEmpty();
     bool const alreadyInitialized =
         settings.value(QStringLiteral("_ProfileSettingsInitialized"), false).toBool();
     settings.endGroup();
-    settings.endGroup();
-    if (alreadyInitialized) {
-        return;
+    if (directProfileExists || alreadyInitialized) {
+      return;
     }
+
+    settings.beginGroup(QStringLiteral("MultiSettings"));
+    settings.beginGroup(profileName);
+    bool const legacyProfileExists = !settings.allKeys().isEmpty() || !settings.childGroups().isEmpty();
+    settings.endGroup();
+    settings.endGroup();
+    if (legacyProfileExists) return;
 
     QHash<QString, QVariant> rootValues;
     for (QString const& key : settings.allKeys()) {
-        if (key.startsWith(QStringLiteral("MultiSettings/"))) {
+        if (key.startsWith(QStringLiteral("MultiSettings/"))
+            || key.startsWith(profileName + QLatin1Char('/'))
+            || key == QStringLiteral("CurrentMultiSettingsConfiguration")) {
             continue;
         }
         rootValues.insert(key, settings.value(key));
     }
 
-    settings.beginGroup(QStringLiteral("MultiSettings"));
     settings.beginGroup(profileName);
     for (auto it = rootValues.constBegin(); it != rootValues.constEnd(); ++it) {
         if (!settings.contains(it.key())) {
@@ -52,7 +73,6 @@ inline void ensureSettingsProfileInitialized(const QString& profileName)
         }
     }
     settings.setValue(QStringLiteral("_ProfileSettingsInitialized"), true);
-    settings.endGroup();
     settings.endGroup();
     settings.sync();
 }
@@ -65,7 +85,15 @@ inline bool beginActiveSettingsProfile(QSettings& settings)
     }
 
     ensureSettingsProfileInitialized(profileName);
-    settings.beginGroup(QStringLiteral("MultiSettings"));
+    settings.beginGroup(profileName);
+    bool const directProfileExists = !settings.allKeys().isEmpty() || !settings.childGroups().isEmpty();
+    settings.endGroup();
+    if (!directProfileExists) {
+        // Compatibility with profiles written by the historical WSJT-X
+        // MultiSettings store. New Decodium profiles always take the direct
+        // branch above.
+        settings.beginGroup(QStringLiteral("MultiSettings"));
+    }
     settings.beginGroup(profileName);
     return true;
 }

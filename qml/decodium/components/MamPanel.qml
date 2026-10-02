@@ -28,14 +28,20 @@ Item {
     readonly property bool mamQueueActive: engine && (engine.multiAnswerMode || engine.autoCqRepeat)
     readonly property var mamQueueEntries: mamPanel.mamQueueActive ? engine.callerQueue : []
     readonly property int mamQueueCount: mamPanel.mamQueueActive ? engine.callerQueueSize : 0
+    readonly property bool mamNativeMultiStream: engine && engine.mamMultiStream
     readonly property string mamActiveCall: inferMamActiveCall()
-    readonly property bool mamHasActiveCaller: engine
+    // In native multi-stream the slots, not the legacy single-QSO state, are
+    // authoritative.  Keeping this false prevents the NOW card from showing
+    // an unrelated serial caller beside the parallel TX payloads.
+    readonly property bool mamHasActiveCaller: !mamNativeMultiStream && engine
                                                && mamPanel.mamActiveCall.length > 0
                                                && (mamPanel.isDirectedTx(engine.currentTxMessage)
                                                    || (engine.currentTx >= 1 && engine.currentTx <= 5)
                                                    || (engine.qsoProgress >= 1 && engine.qsoProgress <= 5)
                                                    || (engine.txEnabled && !mamPanel.isCqMessage(engine.currentTxMessage)))
-    readonly property int mamNowCount: mamPanel.mamHasActiveCaller ? 1 : 0
+    readonly property int mamNowCount: mamNativeMultiStream
+                                       ? engine.mamActiveSlotCount
+                                       : (mamPanel.mamHasActiveCaller ? 1 : 0)
 
     function qsoProgressName(progress) {
         switch (progress) {
@@ -213,6 +219,7 @@ Item {
                     interactive: contentHeight > height
 
                     delegate: Rectangle {
+                        id: queueDelegate
                         width: queueList.width - (queueScroll.visible ? queueScroll.width + 6 : 0)
                         height: 40
                         radius: 4
@@ -276,6 +283,28 @@ Item {
                                 tip: "Move down"
                                 active: index < queueList.count - 1
                                 onTriggered: if (mamPanel.engine) mamPanel.engine.moveCallerQueueItem(index, index + 1)
+                            }
+                        }
+
+                        // La vecchia UI MAM mostrava il suggerimento di doppio
+                        // clic, ma queste righe non avevano un MouseArea: su
+                        // macOS il gesto finiva quindi nel ListView e non
+                        // raggiungeva mai il bridge. In multi-stream la riga
+                        // scelta diventa subito uno slot libero (TX2: il
+                        // chiamante ci ha gia' chiamati), senza duplicarla.
+                        MouseArea {
+                            anchors.fill: parent
+                            // Lascia i pulsanti di riordino sopra questa area:
+                            // il doppio clic vale per la riga, non per le frecce.
+                            z: -1
+                            acceptedButtons: Qt.LeftButton
+                            hoverEnabled: true
+                            cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+                            enabled: mamPanel.engine && mamPanel.engine.mamMultiStream
+                                     && mamPanel.engine.mamActiveSlotCount < mamPanel.engine.mamMaxStreams
+                            onDoubleClicked: {
+                                if (mamPanel.engine)
+                                    mamPanel.engine.mamPromoteQueuedCaller(mamPanel.queueCall(modelData))
                             }
                         }
                     }

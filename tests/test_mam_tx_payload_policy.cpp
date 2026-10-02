@@ -37,6 +37,9 @@ private slots:
     void clearingPayloadClearsBothVectors();
     void cacheNeverCrossesMonoAndMultiStream();
     void bridgeWiresCleanupAtEveryExit();
+    void legacyMirrorRoutesMultiStreamDecodesToSlotState();
+    void legacyMirrorCompletesExistingMamQsoAfterMamIsDisabled();
+    void lateRogerReportResumesRetryExpiredMamSlot();
 };
 
 void TestMamTxPayloadPolicy::liveSequencerCanUseOnlyAValidPayload()
@@ -160,6 +163,77 @@ void TestMamTxPayloadPolicy::bridgeWiresCleanupAtEveryExit()
         QStringLiteral("void DecodiumBridge::saveTxRecordingAsync"));
     QVERIFY(ensure.contains(QStringLiteral("bool const useMultiStream = multiStreamActive();")));
     QVERIFY(ensure.contains(QStringLiteral("m_txAudioCache.multiStream")));
+}
+
+void TestMamTxPayloadPolicy::legacyMirrorRoutesMultiStreamDecodesToSlotState()
+{
+    const QString cpp = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
+    QVERIFY(!cpp.isEmpty());
+
+    // The macOS embedded decoder reaches the sequencer through the legacy
+    // mirror.  In native MAM it must never feed autoSequenceStep(), otherwise
+    // a serial QSO is created beside the real per-slot state machine.
+    QVERIFY(cpp.contains(QStringLiteral("legacy-mirror MAM %1ingest:")));
+    QVERIFY(cpp.contains(QStringLiteral("mamIngestDecode(fields);")));
+    QVERIFY(cpp.contains(QStringLiteral("MAM slot capacity full: queued initial caller")));
+    QVERIFY(cpp.contains(QStringLiteral("plainReportReply")));
+    QVERIFY(cpp.contains(QStringLiteral("MAM plain report queued")));
+    QVERIFY(cpp.contains(QStringLiteral("MAM queue waiting for caller frequency")));
+
+    const int mamIngest = cpp.indexOf(QStringLiteral("legacy-mirror MAM %1ingest:"));
+    const int serialFeed = cpp.indexOf(QStringLiteral("legacy-mirror autoSeq feed:"));
+    QVERIFY(mamIngest >= 0);
+    QVERIFY(serialFeed >= 0);
+    QVERIFY(mamIngest < serialFeed);
+}
+
+void TestMamTxPayloadPolicy::legacyMirrorCompletesExistingMamQsoAfterMamIsDisabled()
+{
+    const QString cpp = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
+    QVERIFY(!cpp.isEmpty());
+
+    const QString mirror = functionBody(
+        cpp,
+        QStringLiteral("void DecodiumBridge::syncLegacyBackendDecodeList()"),
+        QStringLiteral("void DecodiumBridge::syncLegacyBackendState()"));
+    QVERIFY(mirror.contains(QStringLiteral("mamCompletionPending")));
+    QVERIFY(mirror.contains(QStringLiteral("matchesExistingMam")));
+    QVERIFY(mirror.contains(QStringLiteral("QStringLiteral(\"completion \")")));
+    QVERIFY(mirror.contains(QStringLiteral("if (!autoSeqActive)")));
+}
+
+void TestMamTxPayloadPolicy::lateRogerReportResumesRetryExpiredMamSlot()
+{
+    const QString cpp = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
+    QVERIFY(!cpp.isEmpty());
+
+    const QString ingest = functionBody(
+        cpp,
+        QStringLiteral("void DecodiumBridge::mamIngestDecode"),
+        QStringLiteral("void DecodiumBridge::mamPruneSlots"));
+    QVERIFY(ingest.contains(QStringLiteral("hasRogerReport && receivedReportValid")));
+    QVERIFY(ingest.contains(QStringLiteral("MAM late report resumed")));
+    QVERIFY(ingest.contains(QStringLiteral("recovery.slot.currentTx = 4")));
+    QVERIFY(ingest.contains(QStringLiteral("MAM plain report queued")));
+    QVERIFY(ingest.contains(QStringLiteral("A reply must always stay on the caller's original audio frequency")));
+
+    const QString prune = functionBody(
+        cpp,
+        QStringLiteral("void DecodiumBridge::mamPruneSlots"),
+        QStringLiteral("void DecodiumBridge::mamPromoteLateReportRecoveries"));
+    QVERIFY(prune.contains(QStringLiteral("MAM slot %1 retained for late report recovery (120s)")));
+    QVERIFY(prune.contains(QStringLiteral("s.progress >= 2 && s.progress <= 3")));
+
+    const QString promote = functionBody(
+        cpp,
+        QStringLiteral("void DecodiumBridge::mamPromoteLateReportRecoveries"),
+        QStringLiteral("void DecodiumBridge::mamPromoteFromQueue"));
+    QVERIFY(promote.contains(QStringLiteral("MAM deferred reply promoted")));
+    QVERIFY(promote.contains(QStringLiteral("readyForSlot")));
+
+    const QString header = readSource(QStringLiteral("src/bridge/DecodiumBridge.h"));
+    QVERIFY(header.contains(QStringLiteral("A late-report recovery has an exchange state")));
+    QVERIFY(header.contains(QStringLiteral("callerQueueSize() const { return callerQueue().size(); }")));
 }
 
 QTEST_APPLESS_MAIN(TestMamTxPayloadPolicy)

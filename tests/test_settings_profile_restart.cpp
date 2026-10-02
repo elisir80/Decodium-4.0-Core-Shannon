@@ -62,6 +62,26 @@ class SettingsRestartTest : public QObject
 {
     Q_OBJECT
 private slots:
+    void persistedMultiSettingsSelectionIsAnActiveProfile()
+    {
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, dir.path());
+        QCoreApplication::instance()->setProperty("decodiumConfigName", QString {});
+
+        QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+        settings.setFallbacksEnabled(false);
+        settings.setValue("CurrentMultiSettingsConfiguration", "CODEXPERF");
+        settings.setValue("MaxCallerRetries", 7);
+        settings.beginGroup("CODEXPERF");
+        settings.setValue("MaxCallerRetries", 3);
+        settings.setValue("_ProfileSettingsInitialized", true);
+        settings.endGroup();
+        settings.sync();
+
+        QCOMPARE(decodium::profiledSettingsValue({}, "MaxCallerRetries", 10).toInt(), 3);
+    }
+
     void separateProcessesAndProfiles()
     {
         QTemporaryDir dir;

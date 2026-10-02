@@ -79,14 +79,20 @@ Dialog {
     readonly property bool mamQueueActive: engine && (engine.multiAnswerMode || engine.autoCqRepeat)
     readonly property var mamQueueEntries: mamWindow.mamQueueActive ? engine.callerQueue : []
     readonly property int mamQueueCount: mamWindow.mamQueueActive ? engine.callerQueueSize : 0
+    readonly property bool mamNativeMultiStream: engine && engine.mamMultiStream
     readonly property string mamActiveCall: inferMamActiveCall()
-    readonly property bool mamHasActiveCaller: engine
+    // Native multi-stream owns its QSO state in mamActiveSlots.  Never show
+    // the legacy single-QSO fields as "Now" there: they can describe a stale
+    // serial caller while the transmitter is emitting the parallel slots.
+    readonly property bool mamHasActiveCaller: !mamNativeMultiStream && engine
                                                && mamWindow.mamActiveCall.length > 0
                                                && (mamWindow.isDirectedTx(engine.currentTxMessage)
                                                    || (engine.currentTx >= 1 && engine.currentTx <= 5)
                                                    || (engine.qsoProgress >= 1 && engine.qsoProgress <= 5)
                                                    || (engine.txEnabled && !mamWindow.isCqMessage(engine.currentTxMessage)))
-    readonly property int mamNowCount: mamWindow.mamHasActiveCaller ? 1 : 0
+    readonly property int mamNowCount: mamNativeMultiStream
+                                       ? engine.mamActiveSlotCount
+                                       : (mamWindow.mamHasActiveCaller ? 1 : 0)
 
     function qsoProgressName(progress) {
         switch (progress) {
@@ -359,6 +365,7 @@ Dialog {
                         interactive: contentHeight > height
 
                         delegate: Rectangle {
+                            id: queueDelegate
                             width: queueList.width - (queueScroll.visible ? queueScroll.width + 6 : 0)
                             height: 42
                             radius: 4
@@ -422,6 +429,23 @@ Dialog {
                                     tip: "Move down"
                                     active: index < queueList.count - 1
                                     onTriggered: if (mamWindow.engine) mamWindow.engine.moveCallerQueueItem(index, index + 1)
+                                }
+                            }
+
+                            // Stesso comportamento del pannello MAM integrato:
+                            // doppio clic su un caller gia' in coda lo promuove
+                            // a uno slot multi-stream libero, iniziando da TX2.
+                            MouseArea {
+                                anchors.fill: parent
+                                z: -1
+                                acceptedButtons: Qt.LeftButton
+                                hoverEnabled: true
+                                cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+                                enabled: mamWindow.engine && mamWindow.engine.mamMultiStream
+                                         && mamWindow.engine.mamActiveSlotCount < mamWindow.engine.mamMaxStreams
+                                onDoubleClicked: {
+                                    if (mamWindow.engine)
+                                        mamWindow.engine.mamPromoteQueuedCaller(mamWindow.queueCall(modelData))
                                 }
                             }
                         }

@@ -20,6 +20,7 @@
 #include "Modulator/RTTYModulator.hpp"
 #include "Decoder/BaudotDecoder.hpp"
 #include "Sequencer/MessageTokenRules.hpp"
+#include "src/radio/DecodiumProfileSettings.h"
 
 #include <QSoundEffect>
 #include <QCoreApplication>
@@ -17107,8 +17108,10 @@ void MainWindow::guiUpdate()
       if (embeddedDigitalTxNeedsFallback)
         {
           int const fallback_ms = qMax (static_cast<int> (1000.0 * m_config.txDelay ()), 120);
-          QTimer::singleShot (fallback_ms, this, [this, fallback_ms] () {
-            if (m_tx_when_ready && g_iptt == 1 && !m_tci_audio
+          quint64 const txGeneration = m_embeddedTxGeneration;
+          QTimer::singleShot (fallback_ms, this, [this, fallback_ms, txGeneration] () {
+            if (txGeneration == m_embeddedTxGeneration
+                && m_tx_when_ready && g_iptt == 1 && !m_tci_audio
                 && m_embeddedShellMode
                 && (m_mode == "FT8" || m_mode == "FT4" || m_mode == "FT2"))
               {
@@ -17126,8 +17129,10 @@ void MainWindow::guiUpdate()
           int const fallback_ms = (m_mode == "FT2" || m_mode == "FT4")
               ? 20
               : qMax (0, int (1000.0 * m_config.txDelay ()));
-          QTimer::singleShot (fallback_ms, this, [this, fallback_ms] () {
-            if (m_tx_when_ready && g_iptt == 1 && !m_tci_audio
+          quint64 const txGeneration = m_embeddedTxGeneration;
+          QTimer::singleShot (fallback_ms, this, [this, fallback_ms, txGeneration] () {
+            if (txGeneration == m_embeddedTxGeneration
+                && m_tx_when_ready && g_iptt == 1 && !m_tci_audio
                 && m_embeddedShellMode && !m_embeddedRigControlEnabled)
               {
                 debugToFile (QString {"txFallback  startTx2 without legacy CAT confirm mode:%1 after:%2ms"}
@@ -17752,15 +17757,26 @@ void MainWindow::guiUpdate()
     // Auto CQ retry logic (only when Auto CQ mode is active)
     if (m_autoCQ && !m_tune) {
       if (m_ntx >= 2 && m_ntx <= 4) {
-        // Rule 1: Tx2/Tx3/Tx4 repeated 10 times without response -> return to CQ (Tx6)
+        // The QML bridge persists Caller retries in the active MultiSettings
+        // profile.  The embedded sequencer must use that same value: the old
+        // fixed constant (5) made the visible control say 3 while FT4/FT8/FT2
+        // still transmitted five times.
+        int const maxTxRetries = qBound (1,
+                                         decodium::profiledSettingsValue (
+                                           QString {}, QStringLiteral ("MaxCallerRetries"),
+                                           m_settings
+                                             ? m_settings->value (QStringLiteral ("MaxCallerRetries"), MAX_TX_RETRIES)
+                                             : QVariant {MAX_TX_RETRIES}).toInt (),
+                                         99);
+        // Rule 1: Tx2/Tx3/Tx4 repeated without response -> return to CQ (Tx6)
         if (m_ntx == m_lastNtx) {
           ++m_txRetryCount;
           debugAutoCq ("retry-progress",
-                       QString {"tx:%1 count:%2/%3"}.arg (m_ntx).arg (m_txRetryCount).arg (MAX_TX_RETRIES));
-          if (m_txRetryCount >= MAX_TX_RETRIES) {
-            qDebug () << "AutoCQ: Tx" << m_ntx << "sent" << MAX_TX_RETRIES << "times without response, returning to CQ";
+                       QString {"tx:%1 count:%2/%3"}.arg (m_ntx).arg (m_txRetryCount).arg (maxTxRetries));
+          if (m_txRetryCount >= maxTxRetries) {
+            qDebug () << "AutoCQ: Tx" << m_ntx << "sent" << maxTxRetries << "times without response, returning to CQ";
             debugAutoCq ("retry-hit-limit",
-                         QString {"tx:%1 count:%2/%3 -> clearDX"}.arg (m_ntx).arg (m_txRetryCount).arg (MAX_TX_RETRIES));
+                         QString {"tx:%1 count:%2/%3 -> clearDX"}.arg (m_ntx).arg (m_txRetryCount).arg (maxTxRetries));
             // If AutoCQ gives up after we already sent Tx3 (R+report) or later,
             // keep a short recovery window so a late RR73/73 still logs the QSO.
             if (m_autoCQ && m_QSOProgress >= ROGER_REPORT && m_ntx >= 3) {
@@ -17779,7 +17795,7 @@ void MainWindow::guiUpdate()
           m_txRetryCount = 0;
           m_lastNtx = m_ntx;
           m_cqRetryCount = 0;
-          debugAutoCq ("retry-arm", QString {"tx:%1 count:0/%2"}.arg (m_ntx).arg (MAX_TX_RETRIES));
+          debugAutoCq ("retry-arm", QString {"tx:%1 count:0/%2"}.arg (m_ntx).arg (maxTxRetries));
         }
       } else if (m_ntx == 6) {
         // Rule 2: CQ (Tx6) repeated 10 times without response → toggle Tx Even/1st
@@ -17851,8 +17867,10 @@ void MainWindow::guiUpdate()
       debugToFile (QString {"txEmbeddedFallback armed mode:%1 after:%2ms"}
                      .arg (m_mode)
                      .arg (fallback_ms));
-      QTimer::singleShot (fallback_ms, this, [this, fallback_ms] () {
-        if (g_iptt != 1 || !m_transmitting || m_tci_audio
+      quint64 const txGeneration = m_embeddedTxGeneration;
+      QTimer::singleShot (fallback_ms, this, [this, fallback_ms, txGeneration] () {
+        if (txGeneration != m_embeddedTxGeneration
+            || g_iptt != 1 || !m_transmitting || m_tci_audio
             || !(m_mode == "FT8" || m_mode == "FT4" || m_mode == "FT2")) {
           return;
         }
@@ -19628,6 +19646,54 @@ void MainWindow::processMessage (DecodedText const& message, Qt::KeyboardModifie
               || (terminalTokenNumberOk
                   && terminalTokenNumber >= -50
                   && terminalTokenNumber <= 599));
+      // A queued/new AutoCQ caller can be decoded while the previous QSO is
+      // still in its local signoff state.  Never carry TX4/TX5 over to that
+      // caller: doing so rebuilds the old RR73 template with the new callsign
+      // and sends an invalid acknowledgement before an exchange took place.
+      auto const lockedPartnerBase = Radio::base_callsign (m_autoCqLockedCall).trimmed ().toUpper ();
+      bool const staleSignoffPartner =
+          m_autoCQ
+          && localSignoffStageActive
+          && terminalTokenLooksPreSignoff
+          && !payload_partner_base.isEmpty ()
+          && !lockedPartnerBase.isEmpty ()
+          && lockedPartnerBase != payload_partner_base;
+      if (staleSignoffPartner) {
+        m_logAfterOwn73 = false;
+        m_ft2DeferredLogPending = false;
+        m_ft2QuickPeerSignaled = false;
+        m_sentFirst73 = false;
+        m_nTx73 = 0;
+        m_txRetryCount = 0;
+        m_lastNtx = -1;
+        m_cqRetryCount = 0;
+        m_rptRcvd.clear ();
+        m_hisCall = payload_partner_token;
+        m_hisCall0 = payload_partner_token;
+        {
+          QSignalBlocker const callBlocker {ui->dxCallEntry};
+          ui->dxCallEntry->setText (payload_partner_token);
+        }
+        if (terminalToken.contains (grid_regexp)) {
+          m_hisGrid = terminalToken;
+          QSignalBlocker const gridBlocker {ui->dxGridEntry};
+          ui->dxGridEntry->setText (terminalToken);
+        }
+        int const directReplySnr = qBound (-50, message.snr (), 49);
+        ui->rptSpinBox->setValue (directReplySnr);
+        genStdMsgs (QString::number (directReplySnr));
+        setTxMsg (2);
+        m_QSOProgress = REPORT;
+        m_bCallingCQ = false;
+        m_bAutoReply = true;
+        updateAutoCqPartnerLock ();
+        debugAutoCq ("signoff-stale-partner-reset",
+                     QString {"previous:%1 caller:%2 tx:%3 msg:%4"}
+                         .arg (lockedPartnerBase, payload_partner_base)
+                         .arg (m_ntx)
+                         .arg (message.string ().trimmed ()));
+        return;
+      }
       if (!m_bDoubleClicked
           && qso_partner_matched
           && localSignoffStageActive
@@ -20849,6 +20915,7 @@ void MainWindow::enqueueCaller (QString const& call, int freq, int snr, float dt
 
 void MainWindow::processNextInQueue ()
 {
+  ++m_embeddedTxGeneration;
   while (!m_callerQueue.isEmpty ()) {
     QString entry = m_callerQueue.dequeue ();
     auto parts = entry.split (' ', SkipEmptyParts);
@@ -20934,6 +21001,7 @@ void MainWindow::refreshCallerQueueDisplay ()
 
 void MainWindow::clearDX ()
 {
+  ++m_embeddedTxGeneration;
   QString const previousMapCall =
       m_hisCall.trimmed ().isEmpty () ? ui->dxCallEntry->text ().trimmed () : m_hisCall.trimmed ();
   if (m_worldMapWidget && !previousMapCall.isEmpty ()) {

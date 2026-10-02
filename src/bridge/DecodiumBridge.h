@@ -1430,8 +1430,25 @@ public:
     void        setFoxMode(bool v);
     bool        houndMode()      const { return m_houndMode; }
     void        setHoundMode(bool v);
-    QStringList callerQueue()    const { return m_callerQueue; }
-    int         callerQueueSize()const { return m_callerQueue.size(); }
+    QStringList callerQueue() const {
+        QStringList out = m_callerQueue;
+        // A late-report recovery has an exchange state that must not be
+        // flattened into m_callerQueue (that queue always resumes at TX2).
+        // Expose it nevertheless so the MAM panel shows that it is waiting
+        // for capacity rather than having silently disappeared.
+        for (auto it = m_mamLateReportRecoveries.cbegin();
+             it != m_mamLateReportRecoveries.cend(); ++it) {
+            if (!it->readyForSlot) {
+                continue;
+            }
+            out.append(QStringLiteral("%1 %2 %3")
+                           .arg(it->slot.call,
+                                QString::number(it->slot.audioFreqHz),
+                                QString::number(it->slot.partnerSnrDb)));
+        }
+        return out;
+    }
+    int callerQueueSize() const { return callerQueue().size(); }
     QObject*    logManager() { return this; }
     QObject*    propagationManager() const;
     QObject*    satelliteTracking() const;
@@ -2641,7 +2658,7 @@ private:
                           int fallbackPointSize) const;
 
     // Standalone UDP MessageClient for WSJT-X protocol
-    void initUdpMessageClient();
+    void initUdpMessageClient(bool forceForBridgeCommittedQso = false);
     void shutdownUdpMessageClient();
     void scheduleUdpMessageClientRestart();
     bool udpTrafficEnabled(const QString& destinationPrefix,
@@ -3598,6 +3615,18 @@ private:
         enum class State { Active, Signoff, Done } state {State::Active};
     };
     QVector<MamQsoSlot> m_mamSlots;
+    // A station can decode our report only after its slot has reached the
+    // retry/silence limit.  Keep that incomplete exchange briefly so an
+    // unambiguously directed late R+report can finish it at TX4/RR73 instead
+    // of being mistaken for unrelated traffic.  This is deliberately kept
+    // separate from the normal caller queue: it retains the original report,
+    // frequency and QSO start time required for a correct log entry.
+    struct MamLateReportRecovery {
+        MamQsoSlot slot;
+        qint64 expiresMs {0};
+        bool readyForSlot {false};
+    };
+    QHash<QString, MamLateReportRecovery> m_mamLateReportRecoveries;
     int                 m_mamMaxStreams {3};
     // 1.0.569+ — riempi gli slot liberi con CQ paralleli (modello DX-pedition:
     // chiamo CQ su piu' frequenze insieme e ogni risposta si prende il suo slot).
@@ -4406,6 +4435,7 @@ public:
     QString mamBuildSlotMessage(MamQsoSlot& s);
     void    mamPruneSlots();
     void    mamPromoteFromQueue();
+    void    mamPromoteLateReportRecoveries();
     void    mamLogSlot(MamQsoSlot& s);
     int     mamSlotIndexForCall(const QString& base) const;
     // 1.0.365+ — path CLICK->SLOT: doppio-click / spot DX cluster su una stazione
@@ -4413,6 +4443,11 @@ public:
     // pieno, alla coda. Q_INVOKABLE per un eventuale pulsante QML. Gated da
     // mamMultiStreamSequencerActive(): con MAM OFF non fa nulla.
     Q_INVOKABLE void mamEnqueueClickedStation(const QString& callFull, int audioFreqHz);
+    // Promuove esplicitamente un chiamante gia' nella coda MAM a uno slot
+    // multi-stream libero. Il chiamante ha gia' chiamato noi: parte quindi da
+    // TX2, come la promozione automatica al boundary del periodo, non da TX1.
+    // Esposto al pannello MAM per il doppio-click sulle righe della coda.
+    Q_INVOKABLE void mamPromoteQueuedCaller(const QString& callFull);
 
     // 1.0.569+ - DX-Pedition multi-slot. Controlli manuali sugli slot esposti al
     // pannello DX-Pedition (DxPedTxPanel.qml). Tutti no-op quando non ci sono

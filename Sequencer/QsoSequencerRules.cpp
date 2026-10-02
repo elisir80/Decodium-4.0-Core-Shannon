@@ -95,5 +95,14 @@ int qsoProgressForTxStep (int txNum)
     }
 }
 
+bool mayAdvanceRogerReportToRr73 (bool freshAutoCqCaller,
+                                  bool ownReportWasSentToSamePartner,
+                                  bool priorReplyFromSamePartnerAccepted)
+{
+    return !freshAutoCqCaller
+        && ownReportWasSentToSamePartner
+        && priorReplyFromSamePartnerAccepted;
+}
+
 }
 }

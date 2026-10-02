@@ -51,6 +51,14 @@ TxStepRemap remapRequestedTxStep (int txNum, bool quickQsoEnabled, int txDisable
 // 5=SIGNOFF, 1=CALLING_CQ). Ritorna -1 per step non validi.
 int qsoProgressForTxStep (int txNum);
 
+// Un R+report puo' avanzare direttamente a TX4/RR73 solo quando appartiene
+// a uno scambio gia' provato con lo stesso partner. In particolare un caller
+// appena accettato da AutoCQ, oppure il suo primo decode utile, non deve mai
+// ereditare un TX2/TX3 rimasto nello stato precedente.
+bool mayAdvanceRogerReportToRr73 (bool freshAutoCqCaller,
+                                  bool ownReportWasSentToSamePartner,
+                                  bool priorReplyFromSamePartnerAccepted);
+
 }
 }
 

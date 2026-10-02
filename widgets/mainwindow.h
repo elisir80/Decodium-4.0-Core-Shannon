@@ -1646,6 +1646,9 @@ private:
   bool m_monitoring=false;
   bool m_echoRunning=false;
   bool m_tx_when_ready;
+  // Invalidates delayed embedded-TX fallback callbacks when AutoCQ changes
+  // partner or abandons a QSO.
+  quint64 m_embeddedTxGeneration {0};
   bool m_transmitting;
   bool m_tune;
   bool m_tx_watchdog;           // true when watchdog triggered

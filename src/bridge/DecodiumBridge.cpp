@@ -7259,6 +7259,30 @@ bool DecodiumBridge::shouldSuppressDirectedGhostDecode(const QStringList& fields
         return false;
     }
 
+    // A retry-capped AutoCQ exchange retains a short, immutable snapshot of
+    // its partner.  The partner's delayed 73 often has no grid and can be
+    // weak; do not send it through the generic FT2 weak-first-contact gate
+    // before autoSequenceStep gets the opportunity to recover and log it.
+    QString const lateBase = normalizedBaseCall(m_lateAutoLogCall);
+    QStringList const messageTokens = normalizedMessageTokens(msg);
+    QString const finalToken = messageTokens.isEmpty()
+        ? QString()
+        : messageTokens.constLast();
+    bool const lateFinalForSnapshot =
+        m_lateAutoLogValid
+        && m_lateAutoLogExpires.isValid()
+        && QDateTime::currentDateTimeUtc() <= m_lateAutoLogExpires
+        && !lateBase.isEmpty()
+        && peerBase == lateBase
+        && (finalToken == QStringLiteral("73")
+            || finalToken == QStringLiteral("RR73")
+            || finalToken == QStringLiteral("RRR"));
+    if (lateFinalForSnapshot) {
+        bridgeLog(QStringLiteral("[GhostFilter] allow late final signoff for snapshot partner %1 context=%2 msg=%3")
+                      .arg(peerBase, context, msg));
+        return false;
+    }
+
     if (directedPeerLooksStructurallyGhost(peerToken)) {
         bridgeLog(QStringLiteral("[GhostFilter] directed ghost suppress context=%1 reason=structural peer=%2 msg=%3")
                       .arg(context, peerToken.trimmed(), msg));
@@ -7270,6 +7294,12 @@ bool DecodiumBridge::shouldSuppressDirectedGhostDecode(const QStringList& fields
     }
 
     QString grid = extractDecodedGrid(msg);
+    // A standard directed first call with a locator that agrees with the
+    // caller's DXCC has two independent integrity checks (FT message grammar
+    // plus call/grid geography).  It is safe to let AutoCQ answer it on the
+    // first decode rather than losing a weak caller while waiting for a
+    // second repetition.
+    bool trustedDirectedGrid = false;
     if (isGridTokenStrict(grid) && m_dxccLookup && m_dxccLookup->isLoaded()) {
         DxccEntity const ent = m_dxccLookup->lookup(peer);
         if (ent.isValid()) {
@@ -7310,6 +7340,9 @@ bool DecodiumBridge::shouldSuppressDirectedGhostDecode(const QStringList& fields
                     }
                     return true;
                 }
+                if (mismatchKm <= 5000.0) {
+                    trustedDirectedGrid = true;
+                }
             }
         }
     }
@@ -7320,12 +7353,16 @@ bool DecodiumBridge::shouldSuppressDirectedGhostDecode(const QStringList& fields
     // diverso) entro 120s prima di raggiungere lista/auto-seq: i ghost sono
     // one-shot (token casuali ogni volta), una stazione reale ripete la
     // chiamata ogni slot. Esenzione: call gia' vista in banda (AP cache).
-    // Solo FT2; costo per un chiamante reale debole = 1 periodo (7.5s).
+    // Solo FT2. Un call+grid coerente con la DXCC e' gia' validato sopra e
+    // passa al primo decode; gli altri first-contact deboli restano soggetti
+    // alla conferma sul secondo slot.
     // Do not apply the two-decode first-contact gate while rebuilding Signal RX:
     // at that point the row has already passed the Band Activity filters and is
     // visible in Full Spectrum. Signal RX is the QSO timeline, so a weak direct
     // caller must not disappear there while still being used by the sequencer.
-    if (m_mode == QStringLiteral("FT2") && context != QStringLiteral("signal-rx")) {
+    if (m_mode == QStringLiteral("FT2")
+        && context != QStringLiteral("signal-rx")
+        && !trustedDirectedGrid) {
         bool snrOk = false;
         int const snrVal = fields.value(1).trimmed().toInt(&snrOk);
         if (snrOk && snrVal <= -10) {
@@ -13339,7 +13376,26 @@ void DecodiumBridge::syncLegacyBackendState()
     }
     if (usingLegacyBackendForTx()) {
         bool legacyTxEnabled = m_legacyBackend->txEnabled();
-        if (m_autoCqRepeat && !m_manualTxHold && !legacyTxEnabled) {
+        // In native MAM the bridge owns the TX state between UTC slots. The
+        // embedded backend reports TX disabled while it is merely idle; do not
+        // mirror that idle state back into m_txEnabled or MAM's dispatcher is
+        // gated off and the legacy mono AutoCQ sequence starts again.
+        bool const bridgeOwnsMamTx = m_mamMultiStream
+            && isMamMultiStreamMode()
+            && (m_autoCqRepeat || m_multiAnswerMode)
+            && shouldUseBridgeAudioForLegacyDigitalTx();
+        if (bridgeOwnsMamTx) {
+            if (legacyTxEnabled) {
+                m_legacyBackend->setTxEnabled(false);
+                legacyTxEnabled = false;
+                bridgeLog(QStringLiteral("syncLegacyBackendState: MAM bridge owns TX; legacy mono TX disarmed"));
+            }
+            if (!m_txEnabled && !m_manualTxHold) {
+                m_txEnabled = true;
+                emit txEnabledChanged();
+                bridgeLog(QStringLiteral("syncLegacyBackendState: MAM retained bridge TX enable across legacy idle slot"));
+            }
+        } else if (m_autoCqRepeat && !m_manualTxHold && !legacyTxEnabled) {
             bridgeLog(QStringLiteral("syncLegacyBackendState: legacy TX enable off while AutoCQ active -> rearm TX"));
             m_legacyBackend->setTxEnabled(true);
             legacyTxEnabled = true;
@@ -13351,7 +13407,7 @@ void DecodiumBridge::syncLegacyBackendState()
             // user cancellation while that request is pending.
             legacyTxEnabled = true;
         }
-        if (m_txEnabled != legacyTxEnabled) {
+        if (!bridgeOwnsMamTx && m_txEnabled != legacyTxEnabled) {
             bridgeLog(QStringLiteral("syncLegacyBackendState: legacy TX enable -> bridge %1")
                           .arg(legacyTxEnabled ? QStringLiteral("on") : QStringLiteral("off")));
             if (!legacyTxEnabled) {
@@ -14571,6 +14627,14 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
         if ((!m_multiAnswerMode && !m_autoCqRepeat) || m_manualTxHold) {
             return;
         }
+        // With native MAM multi-stream enabled, mamIngestDecode() is the
+        // authoritative per-call state machine.  Feeding this legacy queue
+        // first used to create a second, serial QSO alongside the slots; the
+        // mixer then sent the slots while the UI/sequencer still followed the
+        // unrelated serial partner.
+        if (mamMultiStreamSequencerActive()) {
+            return;
+        }
         for (QVariant const& value : entries) {
             QVariantMap const entry = value.toMap();
             if (entry.value(QStringLiteral("isTx")).toBool()) {
@@ -14629,7 +14693,13 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
         bool const autoSeqActive = !m_callsign.isEmpty()
             && ((m_autoSeq && (m_txEnabled || !m_dxCall.isEmpty()))
                 || m_autoCqRepeat);
-        if (!autoSeqActive || m_manualTxHold) {
+        // A QSO already owned by MAM must still receive its final confirmation
+        // when the operator stops AutoCQ/MAM between our RR73 and the peer's
+        // 73.  In that situation no new MAM QSO may be started, but dropping
+        // the decode here leaves the existing slot unlogged forever.
+        bool const mamCompletionPending = !m_mamSlots.isEmpty()
+            || !m_mamLateReportRecoveries.isEmpty();
+        if ((!autoSeqActive && !mamCompletionPending) || m_manualTxHold) {
             return;
         }
         QString const myCallUpper = m_callsign.trimmed().toUpper();
@@ -14683,6 +14753,30 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
                    << entry.value(QStringLiteral("aptype")).toString()
                    << entry.value(QStringLiteral("quality")).toString()
                    << entry.value(QStringLiteral("freq")).toString();
+            QString const mamPartner = inferPartnerFromDirectedMessage(message,
+                                                                         myCallUpper,
+                                                                         myBaseUpper);
+            QString const mamPartnerBase = normalizedBaseCall(mamPartner);
+            bool const matchesExistingMam = !mamPartnerBase.isEmpty()
+                && (mamSlotIndexForCall(mamPartnerBase) >= 0
+                    || m_mamLateReportRecoveries.contains(mamPartnerBase));
+
+            // Once MAM is disabled, accept only decodes that belong to an
+            // existing MAM QSO. This preserves final-73 logging without
+            // allowing a new caller to enter MAM while it is off.
+            if (mamMultiStreamSequencerActive() || matchesExistingMam) {
+                bridgeLog(QStringLiteral("legacy-mirror MAM %1ingest: %2")
+                              .arg(mamMultiStreamSequencerActive()
+                                       ? QString()
+                                       : QStringLiteral("completion "))
+                              .arg(message));
+                mamIngestDecode(fields);
+                continue;
+            }
+
+            if (!autoSeqActive) {
+                continue;
+            }
             if (shouldSuppressDirectedGhostDecode(fields, QStringLiteral("legacy-mirror-autoseq"))) {
                 continue;
             }
@@ -18374,6 +18468,7 @@ void DecodiumBridge::setMode(const QString& v) {
         // 1.0.364+ MAM multi-stream nativo: un cambio modo invalida
         // ogni QSO multi-stream in corso.
         m_mamSlots.clear();
+        m_mamLateReportRecoveries.clear();
         m_mamMessages.clear();
         m_mamF0sHz.clear();
         // A mode switch invalidates short-lived CAT/audio-frequency guards
@@ -20200,9 +20295,15 @@ void DecodiumBridge::setTxEnabled(bool v)
     // QSO while the QML bridge still shows TX enabled. A subsequent double-click
     // must therefore re-assert the command even when the bridge boolean did not
     // change, otherwise the new message is prepared but never transmitted.
+    // The embedded backend remains the RX decoder on macOS, but must not arm
+    // its one-message sequencer while the native MAM mixer owns TX.
+    bool const bridgeOwnsMamTx = m_mamMultiStream
+        && isMamMultiStreamMode()
+        && (m_autoCqRepeat || m_multiAnswerMode)
+        && shouldUseBridgeAudioForLegacyDigitalTx();
     if (usingLegacyBackendForTx() && !m_suppressImmediateTxEnableDispatch) {
         syncLegacyBackendTxState();
-        m_legacyBackend->setTxEnabled(v);
+        m_legacyBackend->setTxEnabled(bridgeOwnsMamTx ? false : v);
         scheduleLegacyStateRefreshBurst();
     }
 
@@ -20309,6 +20410,39 @@ void DecodiumBridge::setAutoCqRepeat(bool v)
             bridgeLog("setAutoCqRepeat: forcing autoSeq=true");
         }
         if (!m_autoCqRepeat) {
+            // The legacy FT4/FT8 backend can turn AutoCQ off immediately
+            // after the operator's final 73, before its asynchronous
+            // end-of-transmission callback reaches noteTxPlaybackFinished().
+            // At this point a received RR73 plus a prepared local TX5 is an
+            // already complete exchange.  Do not clear its immutable snapshot
+            // first: that used to lose the only log opportunity (JA5JQH).
+            bool const final73WasStarted =
+                m_currentTx == 5
+                && m_ft2DeferredLogPending
+                && m_pendingAutoLogValid
+                && messageCarries73Payload(m_activeTxMessage.isEmpty()
+                                                ? m_lastTransmittedMessage
+                                                : m_activeTxMessage);
+            if (final73WasStarted && !m_qsoLogged) {
+                QString completedPartner = inferredPartnerForAutolog();
+                if (completedPartner.trimmed().isEmpty()) {
+                    completedPartner = m_pendingAutoLogCall;
+                }
+                QString const reason = QStringLiteral("AutoCQ disabled after final TX5 was started");
+                markWorldMapQsoClosed(completedPartner, reason);
+                rememberCompletedAutoCqPartner(completedPartner, true, reason);
+                bridgeLog(QStringLiteral("AutoCQ disable: logging completed final-TX5 QSO partner=%1")
+                              .arg(completedPartner));
+                logQso();
+                if (m_qsoProgress != 6) {
+                    m_qsoProgress = 6;
+                    emit qsoProgressChanged();
+                }
+                setDxCall(QString());
+                setDxGrid(QString());
+                m_logAfterOwn73 = false;
+                m_ft2DeferredLogPending = false;
+            }
             clearCallerQueue();
             clearAutoCqPartnerLock();
             clearCqAutoReplyWindow(QStringLiteral("autocq-disabled"));
@@ -20323,21 +20457,35 @@ void DecodiumBridge::setAutoCqRepeat(bool v)
             }
         }
         emit autoCqRepeatChanged();
+        // MAM's bridge dispatcher is the authoritative AutoCQ sequencer on
+        // macOS. Keeping legacy AutoCQ enabled starts a second mono
+        // sequencer, which can transmit only one active MAM stream.
+        bool const bridgeOwnsMamTx = m_mamMultiStream
+            && isMamMultiStreamMode()
+            && shouldUseBridgeAudioForLegacyDigitalTx();
         if (usingLegacyBackendForTx()) {
             syncLegacyBackendTxState();
-            m_legacyBackend->setAutoCq(v);
+            m_legacyBackend->setAutoCq(bridgeOwnsMamTx ? false : v);
             applyAutoCqBurstCadenceToLegacyBackend();
         }
         if (m_autoCqRepeat) {
             if (!m_txEnabled) {
                 bridgeLog(QStringLiteral("setAutoCqRepeat: arming TX for AutoCQ"));
                 setTxEnabled(true);
-            } else if (usingLegacyBackendForTx()) {
+            } else if (usingLegacyBackendForTx() && !bridgeOwnsMamTx) {
                 m_legacyBackend->setTxEnabled(true);
                 scheduleLegacyStateRefreshBurst();
             }
             scheduleTxAudioPrecompute(25);
             ensureSyncTxSchedulerActive(QStringLiteral("autocq-enable"));
+            if (bridgeOwnsMamTx && m_monitoring && m_periodTimer) {
+                // Legacy RX normally stops the bridge period timer. Native
+                // MAM still needs that UTC boundary to dispatch its composite
+                // FT4/FT8/FT2 waveform, so start it explicitly here.
+                quint64 const sessionId = ++m_periodTimerSessionId;
+                armPeriodTimerForCurrentMode(sessionId,
+                                             QStringLiteral("AutoCQ enable MAM bridge TX"));
+            }
             if (!usingLegacyBackendForTx()) {
                 QTimer::singleShot(0, this, [this]() {
                     if (m_shuttingDown || QCoreApplication::closingDown()
@@ -23431,6 +23579,7 @@ void DecodiumBridge::clearTxMessages()
     bridgeLog("clearTxMessages: reset QSO/TX state");
     // 1.0.364+ MAM multi-stream nativo (FASE 2): reset slot multi-QSO.
     m_mamSlots.clear();
+    m_mamLateReportRecoveries.clear();
     m_mamMessages.clear();
     m_mamF0sHz.clear();
     clearDeferredManualSyncTx(QStringLiteral("clear-tx-messages"));
@@ -23536,13 +23685,25 @@ void DecodiumBridge::startRx()
         }
 #endif
         bridgeLog("startRx: delegating monitoring to legacy backend");
-        m_periodTimer->stop();
+        bool const bridgeOwnsMamTx = m_mamMultiStream
+            && isMamMultiStreamMode()
+            && (m_autoCqRepeat || m_multiAnswerMode)
+            && shouldUseBridgeAudioForLegacyDigitalTx();
+        if (!bridgeOwnsMamTx) {
+            m_periodTimer->stop();
+        }
         m_asyncDecodeTimer->stop();
         m_asyncDecodePending = false;
         syncLegacyBackendState();
         syncLegacyBackendTxState();
         m_legacyBackend->setMonitoring(true);
         syncLegacyBackendState();
+        if (bridgeOwnsMamTx) {
+            // Legacy owns RX/decode; keep the UTC scheduler alive solely for
+            // the bridge-owned mixed MAM TX waveform.
+            armPeriodTimerForCurrentMode(monitorSessionId,
+                                         QStringLiteral("startRx legacy MAM bridge TX"));
+        }
         bool const nativeSstvCapture =
 #if DECODIUM_HAS_SSTV
             nativeSstvRxForcesDedicatedAudioCapture();
@@ -24418,12 +24579,24 @@ void DecodiumBridge::setMamMultiStream(bool on)
         // OFF: smonta tutto lo stato multi-stream. m_mamMessages/m_mamF0sHz
         // vuoti -> multiStreamActive() torna false -> seam TX mono invariato.
         m_mamSlots.clear();
+        m_mamLateReportRecoveries.clear();
         clearMamPendingTxPayload(QStringLiteral("multi-stream-disabled"));
     }
     // FASE 3: persisti nello store canonico Decodium3 (come i toggle FT2).
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
     decodium::beginActiveSettingsProfile(settings);
     settings.setValue(QStringLiteral("MamMultiStream"), on);
+    // A running AutoCQ session may have armed legacy AutoCQ before this toggle
+    // changed. Reapply it so macOS releases the legacy mono sequencer.
+    if (usingLegacyBackendForTx() && legacyBackendAvailable()) {
+        m_legacyBackend->setAutoCq(on ? false : m_autoCqRepeat);
+        m_legacyBackend->setTxEnabled(on ? false : m_txEnabled);
+        scheduleLegacyStateRefreshBurst();
+    }
+    if (on && m_monitoring && (m_autoCqRepeat || m_multiAnswerMode)) {
+        quint64 const sessionId = ++m_periodTimerSessionId;
+        armPeriodTimerForCurrentMode(sessionId, QStringLiteral("MAM multi-stream enabled"));
+    }
     emit mamMultiStreamChanged();
     emit mamActiveSlotsChanged();
     bridgeLog(QStringLiteral("MAM multi-stream sequencer toggled: %1").arg(on ? 1 : 0));
@@ -24576,11 +24749,15 @@ void DecodiumBridge::mamLogSlotNow(const QString& call)
 // 1.0.569+ - svuota tutti gli slot attivi (pulsante CLEAR). Non logga nulla.
 void DecodiumBridge::mamClearSlots()
 {
-    if (m_mamSlots.isEmpty() && m_mamMessages.isEmpty() && m_mamF0sHz.isEmpty()) {
+    if (m_mamSlots.isEmpty()
+        && m_mamLateReportRecoveries.isEmpty()
+        && m_mamMessages.isEmpty()
+        && m_mamF0sHz.isEmpty()) {
         return;
     }
     int const n = m_mamSlots.size();
     m_mamSlots.clear();
+    m_mamLateReportRecoveries.clear();
     clearMamPendingTxPayload(QStringLiteral("slots-cleared"));
     bridgeLog(QStringLiteral("MAM slots cleared by operator: %1 removed").arg(n));
     emit mamActiveSlotsChanged();
@@ -24590,11 +24767,13 @@ void DecodiumBridge::mamClearSlots()
 // intatti gli slot gia' attivi.
 void DecodiumBridge::mamClearQueue()
 {
-    if (m_callerQueue.isEmpty()) {
+    int const lateCount = static_cast<int>(m_mamLateReportRecoveries.size());
+    if (m_callerQueue.isEmpty() && lateCount == 0) {
         return;
     }
-    int const n = m_callerQueue.size();
+    int const n = m_callerQueue.size() + lateCount;
     m_callerQueue.clear();
+    m_mamLateReportRecoveries.clear();
     bridgeLog(QStringLiteral("MAM caller queue cleared by operator: %1 removed").arg(n));
     emit callerQueueChanged();
 }
@@ -24667,6 +24846,39 @@ void DecodiumBridge::mamEnqueueClickedStation(const QString& callFull, int audio
     bridgeLog(QStringLiteral("MAM click-enqueue: %1 @ %2Hz slot=%3")
                   .arg(s.callFull).arg(s.audioFreqHz).arg(m_mamSlots.size()));
     emit mamActiveSlotsChanged();
+}
+
+void DecodiumBridge::mamPromoteQueuedCaller(const QString& callFull)
+{
+    if (!mamMultiStreamSequencerActive() || m_mamSlots.size() >= m_mamMaxStreams) {
+        return;
+    }
+
+    QString const target = normalizedBaseCall(callFull);
+    if (target.isEmpty()) {
+        return;
+    }
+
+    int queueIndex = -1;
+    for (int i = 0; i < m_callerQueue.size(); ++i) {
+        QStringList const parts = m_callerQueue.at(i).split(' ', Qt::SkipEmptyParts);
+        if (!parts.isEmpty() && normalizedBaseCall(parts.constFirst()) == target) {
+            queueIndex = i;
+            break;
+        }
+    }
+    if (queueIndex < 0) {
+        return;
+    }
+
+    // mamPromoteFromQueue() contiene la singola fonte di verita' per creare
+    // uno slot da un caller in attesa (TX2, report e frequenza). Portiamo la
+    // riga scelta in testa e riutilizziamo esattamente quel percorso.
+    if (queueIndex > 0) {
+        m_callerQueue.move(queueIndex, 0);
+        emit callerQueueChanged();
+    }
+    mamPromoteFromQueue();
 }
 
 int DecodiumBridge::mamSlotIndexForCall(const QString& base) const
@@ -24767,44 +24979,135 @@ void DecodiumBridge::mamIngestDecode(const QStringList& f)
         : 0;
 
     int idx = mamSlotIndexForCall(partnerBase);
+    if (idx >= 0) {
+        // A new live slot always takes precedence over an older recovery
+        // snapshot for the same station.
+        m_mamLateReportRecoveries.remove(partnerBase);
+    }
     if (idx < 0) {
-        // Slot nuovo solo se il partner sta APRENDO il QSO (mi manda la grid in
-        // risposta al CQ) e c'e' capacita'. Un signoff/report orfano senza slot
-        // non apre nulla.
-        if (!hasGrid || m_mamSlots.size() >= m_mamMaxStreams) {
+        // A delayed R+report is valid only if it proves that this exact
+        // station has just decoded a report from an MAM slot that expired.
+        // Restore the complete exchange at TX4 instead of treating the R as a
+        // new caller (which has neither grid nor enough state to log safely).
+        if (hasRogerReport && receivedReportValid) {
+            for (auto it = m_mamLateReportRecoveries.begin();
+                 it != m_mamLateReportRecoveries.end();) {
+                if (it->expiresMs <= nowMs) {
+                    it = m_mamLateReportRecoveries.erase(it);
+                } else {
+                    ++it;
+                }
+            }
+            auto recoveryIt = m_mamLateReportRecoveries.find(partnerBase);
+            if (recoveryIt != m_mamLateReportRecoveries.end()) {
+                MamLateReportRecovery& recovery = recoveryIt.value();
+                recovery.slot.lastHeardMs = nowMs;
+                recovery.slot.partnerSnrDb = (decodedSnr != 127) ? decodedSnr : recovery.slot.partnerSnrDb;
+                recovery.slot.reportReceived = formatSignalReport(receivedReportDb);
+                recovery.slot.currentTx = 4; // partner has acknowledged our report: RR73 next
+                recovery.slot.progress = 4;
+                recovery.slot.lastNtx = -1;
+                recovery.slot.retryCount = 0;
+                recovery.slot.nTx73 = 0;
+                recovery.slot.state = MamQsoSlot::State::Active;
+                if (m_mamSlots.size() >= m_mamMaxStreams) {
+                    recovery.readyForSlot = true;
+                    bridgeLog(QStringLiteral("MAM late report held for free slot: %1 rcvd=%2")
+                                  .arg(recovery.slot.callFull, recovery.slot.reportReceived));
+                    emit callerQueueChanged();
+                } else {
+                    MamQsoSlot restored = recovery.slot;
+                    m_mamLateReportRecoveries.erase(recoveryIt);
+                    m_mamSlots.append(restored);
+                    bridgeLog(QStringLiteral("MAM late report resumed: %1 -> TX4 RR73 (slots=%2)")
+                                  .arg(restored.callFull)
+                                  .arg(m_mamSlots.size()));
+                    emit mamActiveSlotsChanged();
+                }
+                return;
+            }
+        }
+        // A normal first reply contains the caller's grid.  Some FT4 clients
+        // use a plain report instead; it remains a valid direct answer even
+        // when another MAM stream has been sent in the meantime.  R+reports
+        // and signoffs without an existing/recoverable slot stay orphan
+        // traffic and must never manufacture a QSO.
+        bool const plainReportReply =
+            !hasGrid
+            && hasPlainReport
+            && !hasRogerReport
+            && !hasSignoff;
+        if (!hasGrid && !plainReportReply) {
             return;
         }
         MamQsoSlot s;
         s.call = partnerBase;
         s.callFull = normalizeCallToken(partner).toUpper();
-        // grid: primo token grid valido.
         for (QString const& tk : tokens) {
             if (isGridTokenStrict(tk)) { s.grid = tk.toUpper(); break; }
         }
-        // Freq audio del chiamante (MSHV): clamp 200..4000 + de-dup ~50Hz vs
-        // gli altri slot attivi (evita due stream sovrapposti).
-        int fHz = qBound(200, partnerFreqHz > 0 ? partnerFreqHz : m_rxFrequency, 4000);
-        for (int guard = 0; guard < m_mamSlots.size() + 2; ++guard) {
-            bool collision = false;
-            for (MamQsoSlot const& other : m_mamSlots) {
-                if (qAbs(other.audioFreqHz - fHz) < 50) { collision = true; break; }
-            }
-            if (!collision) break;
-            fHz = qBound(200, fHz + 60, 4000);
-        }
-        s.audioFreqHz = fHz;
-        s.progress = 2;     // REPLY
-        s.currentTx = 2;    // io rispondo con il report
+        // A reply must always stay on the caller's original audio frequency.
+        // It is better to wait for that channel than silently move a station
+        // elsewhere, which IU1TRT cannot reasonably be expected to follow.
+        s.audioFreqHz = qBound(200, partnerFreqHz > 0 ? partnerFreqHz : m_rxFrequency, 4000);
+        s.progress = plainReportReply ? 3 : 2;
+        s.currentTx = plainReportReply ? 3 : 2;
         s.partnerSnrDb = (decodedSnr != 127) ? decodedSnr : 127;
         s.reportSent = formatSignalReport((decodedSnr != 127) ? decodedSnr : -10);
-        s.reportReceived = QStringLiteral("-10");
+        s.reportReceived = plainReportReply && receivedReportValid
+            ? formatSignalReport(receivedReportDb)
+            : QStringLiteral("-10");
         s.startedOnMs = nowMs;
         s.lastHeardMs = nowMs;
+
+        auto deferPlainReportReply = [&]() {
+            MamLateReportRecovery deferred;
+            deferred.slot = s;
+            deferred.expiresMs = nowMs + 2 * 60 * 1000;
+            deferred.readyForSlot = true;
+            m_mamLateReportRecoveries.insert(partnerBase, deferred);
+            bridgeLog(QStringLiteral("MAM plain report queued: %1 freq=%2Hz tx=3 rcvd=%3")
+                          .arg(s.callFull)
+                          .arg(s.audioFreqHz)
+                          .arg(s.reportReceived));
+            emit callerQueueChanged();
+        };
+        if (m_mamSlots.size() >= m_mamMaxStreams) {
+            if (plainReportReply) {
+                deferPlainReportReply();
+                return;
+            }
+            if (enqueueCallerInternal(partnerBase, s.audioFreqHz, decodedSnr, true)) {
+                bridgeLog(QStringLiteral("MAM slot capacity full: queued initial caller %1 @ %2Hz")
+                              .arg(partnerBase)
+                              .arg(s.audioFreqHz));
+            }
+            return;
+        }
+        bool frequencyBusy = false;
+        for (MamQsoSlot const& other : m_mamSlots) {
+            if (qAbs(other.audioFreqHz - s.audioFreqHz) < 50) {
+                frequencyBusy = true;
+                break;
+            }
+        }
+        if (frequencyBusy) {
+            if (plainReportReply) {
+                deferPlainReportReply();
+            } else if (enqueueCallerInternal(partnerBase, s.audioFreqHz, decodedSnr, true)) {
+                bridgeLog(QStringLiteral("MAM initial caller queued: occupied frequency %1 @ %2Hz")
+                              .arg(partnerBase)
+                              .arg(s.audioFreqHz));
+            }
+            return;
+        }
         m_mamSlots.append(s);
-        bridgeLog(QStringLiteral("MAM slot opened: %1 grid=%2 freq=%3Hz rpt=%4 (slots=%5)")
+        bridgeLog(QStringLiteral("MAM slot opened: %1 grid=%2 freq=%3Hz tx=%4 sent=%5 rcvd=%6 (slots=%7)")
                       .arg(s.callFull, s.grid.isEmpty() ? QStringLiteral("-") : s.grid)
                       .arg(s.audioFreqHz)
+                      .arg(s.currentTx)
                       .arg(s.reportSent)
+                      .arg(s.reportReceived)
                       .arg(m_mamSlots.size()));
         emit mamActiveSlotsChanged();
         return;
@@ -24859,10 +25162,25 @@ void DecodiumBridge::mamIngestDecode(const QStringList& f)
 // oppure nessun ascolto da >6 periodi.
 void DecodiumBridge::mamPruneSlots()
 {
+    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+    bool lateQueueChanged = false;
+    for (auto it = m_mamLateReportRecoveries.begin();
+         it != m_mamLateReportRecoveries.end();) {
+        if (it->expiresMs <= nowMs) {
+            bridgeLog(QStringLiteral("MAM late report recovery expired: %1")
+                          .arg(it->slot.callFull));
+            lateQueueChanged = lateQueueChanged || it->readyForSlot;
+            it = m_mamLateReportRecoveries.erase(it);
+        } else {
+            ++it;
+        }
+    }
     if (m_mamSlots.isEmpty()) {
+        if (lateQueueChanged) {
+            emit callerQueueChanged();
+        }
         return;
     }
-    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
     qint64 const periodMs = qMax<qint64>(1, periodMsForMode(QStringLiteral("FT8")));
     int const maxRetry = maxCallerRetries();
     int removed = 0;
@@ -24893,6 +25211,20 @@ void DecodiumBridge::mamPruneSlots()
                               .arg(s.currentTx));
                 mamLogSlot(s);
             } else {
+                // Keep only a pre-confirmation exchange that we actually
+                // reached at TX2/TX3.  A later R+report can then unambiguously
+                // resume at TX4/RR73; a bare late 73 or arbitrary report
+                // cannot manufacture a QSO.
+                if (!s.logged && s.progress >= 2 && s.progress <= 3) {
+                    MamLateReportRecovery recovery;
+                    recovery.slot = s;
+                    recovery.slot.lastNtx = -1;
+                    recovery.slot.retryCount = 0;
+                    recovery.expiresMs = nowMs + 2 * 60 * 1000;
+                    m_mamLateReportRecoveries.insert(s.call, recovery);
+                    bridgeLog(QStringLiteral("MAM slot %1 retained for late report recovery (120s)")
+                                  .arg(s.callFull));
+                }
                 bridgeLog(QStringLiteral("MAM slot %1 dropped: %2").arg(s.callFull, dropReason));
             }
         }
@@ -24905,6 +25237,57 @@ void DecodiumBridge::mamPruneSlots()
         bridgeLog(QStringLiteral("MAM prune: removed %1 slot(s), %2 active").arg(removed).arg(m_mamSlots.size()));
         emit mamActiveSlotsChanged();
     }
+    if (lateQueueChanged) {
+        emit callerQueueChanged();
+    }
+}
+
+void DecodiumBridge::mamPromoteLateReportRecoveries()
+{
+    if (m_mamSlots.size() >= m_mamMaxStreams || m_mamLateReportRecoveries.isEmpty()) {
+        return;
+    }
+    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+    int promoted = 0;
+    bool queueChanged = false;
+    for (auto it = m_mamLateReportRecoveries.begin();
+         it != m_mamLateReportRecoveries.end() && m_mamSlots.size() < m_mamMaxStreams;) {
+        if (it->expiresMs <= nowMs) {
+            it = m_mamLateReportRecoveries.erase(it);
+            continue;
+        }
+        if (!it->readyForSlot) {
+            ++it;
+            continue;
+        }
+        MamQsoSlot restored = it->slot;
+        bool frequencyBusy = false;
+        for (MamQsoSlot const& other : m_mamSlots) {
+            if (qAbs(other.audioFreqHz - restored.audioFreqHz) < 50) {
+                frequencyBusy = true;
+                break;
+            }
+        }
+        if (frequencyBusy) {
+            ++it;
+            continue;
+        }
+        QString const call = restored.callFull;
+        queueChanged = queueChanged || it->readyForSlot;
+        it = m_mamLateReportRecoveries.erase(it);
+        m_mamSlots.append(restored);
+        ++promoted;
+        bridgeLog(QStringLiteral("MAM deferred reply promoted: %1 -> TX%2 (slots=%3)")
+                      .arg(call)
+                      .arg(restored.currentTx)
+                      .arg(m_mamSlots.size()));
+    }
+    if (promoted > 0) {
+        emit mamActiveSlotsChanged();
+    }
+    if (queueChanged) {
+        emit callerQueueChanged();
+    }
 }
 
 // Promuove i caller in coda a slot attivi finche' c'e' capacita'. Usa la coda
@@ -24912,22 +25295,30 @@ void DecodiumBridge::mamPruneSlots()
 // maybeEnqueueMamCallerFromMessage in caso di overflow.
 void DecodiumBridge::mamPromoteFromQueue()
 {
+    // Signoffs proven by a late R+report have priority over new callers and
+    // retain their original exchange state; the compact normal queue does not.
+    mamPromoteLateReportRecoveries();
     qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
     int const slotsBefore = m_mamSlots.size();
     while (m_mamSlots.size() < m_mamMaxStreams && !m_callerQueue.isEmpty()) {
-        QString const entry = m_callerQueue.takeFirst();
-        emit callerQueueChanged();
+        QString const entry = m_callerQueue.constFirst();
         QStringList const parts = entry.split(' ', Qt::SkipEmptyParts);
         if (parts.isEmpty()) {
+            m_callerQueue.takeFirst();
+            emit callerQueueChanged();
             continue;
         }
         QString const base = normalizedBaseCall(parts.first());
         if (base.isEmpty() || base == normalizedBaseCall(m_callsign)) {
+            m_callerQueue.takeFirst();
+            emit callerQueueChanged();
             continue;
         }
         if (mamSlotIndexForCall(base) >= 0
             || isRecentAutoCqDuplicate(base, m_frequency, m_mode)
             || m_qsoCooldown.contains(base)) {
+            m_callerQueue.takeFirst();
+            emit callerQueueChanged();
             continue;
         }
         int const qFreq = parts.size() >= 2 ? parts.at(1).toInt() : m_rxFrequency;
@@ -24935,15 +25326,22 @@ void DecodiumBridge::mamPromoteFromQueue()
         MamQsoSlot s;
         s.call = base;
         s.callFull = base; // dalla coda abbiamo solo la base
-        int fHz = qBound(200, qFreq > 0 ? qFreq : m_rxFrequency, 4000);
-        for (int guard = 0; guard < m_mamSlots.size() + 2; ++guard) {
-            bool collision = false;
-            for (MamQsoSlot const& other : m_mamSlots) {
-                if (qAbs(other.audioFreqHz - fHz) < 50) { collision = true; break; }
+        int const fHz = qBound(200, qFreq > 0 ? qFreq : m_rxFrequency, 4000);
+        bool frequencyBusy = false;
+        for (MamQsoSlot const& other : m_mamSlots) {
+            if (qAbs(other.audioFreqHz - fHz) < 50) {
+                frequencyBusy = true;
+                break;
             }
-            if (!collision) break;
-            fHz = qBound(200, fHz + 60, 4000);
         }
+        if (frequencyBusy) {
+            bridgeLog(QStringLiteral("MAM queue waiting for caller frequency: %1 @ %2Hz")
+                          .arg(base)
+                          .arg(fHz));
+            break;
+        }
+        m_callerQueue.takeFirst();
+        emit callerQueueChanged();
         s.audioFreqHz = fHz;
         s.progress = 2;
         s.currentTx = 2;
@@ -25060,6 +25458,7 @@ void DecodiumBridge::mamDispatchPeriod()
         }
         m_mamMessages.append(msg);
         m_mamF0sHz.append(s.audioFreqHz);
+        s.lastTransmittedMessage = msg;
         txSlotIdx.append(i);
         s.lastTxSlotMs = nowMs;
         if (s.currentTx == s.lastNtx) {
@@ -25275,6 +25674,16 @@ bool DecodiumBridge::ensureTxAudioPrepared(const QString& msg, int txAudioFreque
             buildError = QStringLiteral("Generazione onda CW fallita");
         }
     } else if (useMultiStream) {
+        QStringList streamDescription;
+        streamDescription.reserve(m_mamMessages.size());
+        for (int i = 0; i < m_mamMessages.size(); ++i) {
+            streamDescription.append(QStringLiteral("%1Hz:[%2]")
+                                         .arg(m_mamF0sHz.value(i))
+                                         .arg(m_mamMessages.at(i)));
+        }
+        bridgeLog(QStringLiteral("MAM composite audio build: streams=%1 %2")
+                      .arg(m_mamMessages.size())
+                      .arg(streamDescription.join(QStringLiteral(" | "))));
         wave = generateMultiStreamFtxWave(mode, m_mamMessages, m_mamF0sHz, &buildError);
     } else {
         wave = buildTxWaveformForMessage(mode, message, txAudioFrequency,
@@ -25379,11 +25788,13 @@ void DecodiumBridge::saveTxRecordingAsync(const QString& path, QVector<float> wa
 
 void DecodiumBridge::suspendNonAudioTxWork(const QString& reason)
 {
-    if (m_spectrumTimer && m_spectrumTimer->isActive()) {
-        m_spectrumTimer->stop();
-        m_spectrumTimerPausedForTx = true;
-        bridgeLog(QStringLiteral("TX workload: spectrum timer paused (%1)").arg(reason));
-    }
+    // The spectrum timer is also the producer for the panadapter and
+    // waterfall. Stopping it during legacy TX leaves the UI presenting a
+    // frozen frame for the whole PTT/audio tail (and longer after a delayed
+    // PTT confirmation). Keep visual acquisition alive; TX-specific audio
+    // priority is handled separately by applyTxAudioSchedulingBoost().
+    Q_UNUSED(reason);
+    m_spectrumTimerPausedForTx = false;
 }
 
 void DecodiumBridge::resumeNonAudioTxWork(const QString& reason)
@@ -25514,6 +25925,31 @@ bool DecodiumBridge::noteTxPlaybackFinished(const QString& reason, bool error)
         m_lastTransmittedMessage = finishedMessage;
         finishAutoSequenceQsoFromCompletedSignoff(
             QStringLiteral("tx-playback-finished: completed final TX5 73 once -> QSO complete"),
+            true);
+        return true;
+    }
+
+    // The embedded legacy FT4/FT8 sequencer can continue to request its TX4
+    // RR73 after bridge state has already scheduled the normal completion
+    // check.  That path used to bypass the caller-retry limit entirely: the
+    // playback counter visibly reached 11 for YC2ULK with MaxCallerRetries=3.
+    // Enforce the same definition used by the normal retry path here: one
+    // first TX plus at most MaxCallerRetries repeats.  A received report has
+    // already completed the exchange, so at the limit we log and release the
+    // partner instead of transmitting RR73 indefinitely.
+    if (finishedTx == 4
+        && (normalizedMode == QStringLiteral("FT2")
+            || normalizedMode == QStringLiteral("FT4")
+            || normalizedMode == QStringLiteral("FT8"))
+        && m_autoCqRepeat
+        && m_nTx73 > m_maxCallerRetries) {
+        capturePendingAutoLogSnapshot();
+        m_ft2DeferredLogPending = false;
+        bridgeLog(QStringLiteral("tx-playback-finished: TX4 RR73 retry cap reached %1/%2 -> log and release partner")
+                      .arg(m_nTx73)
+                      .arg(m_maxCallerRetries + 1));
+        finishAutoSequenceQsoFromCompletedSignoff(
+            QStringLiteral("tx-playback-finished: TX4 RR73 retry cap reached -> QSO complete"),
             true);
         return true;
     }
@@ -27089,7 +27525,13 @@ void DecodiumBridge::startTx()
     // Ora settato solo dopo ensureTxAudioPrepared OK.
     m_lastTxActivityUtc = QDateTime::currentDateTimeUtc();
 
-    if (!customAudioTxActive && usingLegacyBackendForTx() && !catSuppressedByEnvironment()) {
+    // MAM multi-stream cannot be emitted by the embedded MainWindow: it owns
+    // one FTX message only. Retain legacy RX/CAT, but route the composite PCM
+    // through the bridge audio/PTT path on macOS.
+    bool const bridgeOwnsMamTx = multiStreamActive()
+        && shouldUseBridgeAudioForLegacyDigitalTx();
+    if (!customAudioTxActive && usingLegacyBackendForTx()
+        && !bridgeOwnsMamTx && !catSuppressedByEnvironment()) {
         bridgeLog("startTx: delegating to legacy backend");
         if (m_recordTxEnabled) {
             QString recordingError;
@@ -27109,6 +27551,9 @@ void DecodiumBridge::startTx()
         scheduleLegacyStateRefreshBurst();
         emit statusMessage("TX armato via backend legacy: " + msg.trimmed());
         return;
+    }
+    if (bridgeOwnsMamTx) {
+        bridgeLog(QStringLiteral("startTx: MAM multi-stream using bridge composite audio instead of legacy mono TX"));
     }
     if (!customAudioTxActive && usingLegacyBackendForTx() && catSuppressedByEnvironment()) {
         bridgeLog(QStringLiteral("startTx: CAT disabled, using bridge audio-only TX path instead of legacy PTT"));
@@ -33277,7 +33722,7 @@ bool DecodiumBridge::udpTrafficEnabled(const QString& destinationPrefix,
     return getSetting(key, true).toBool();
 }
 
-void DecodiumBridge::initUdpMessageClient()
+void DecodiumBridge::initUdpMessageClient(bool forceForBridgeCommittedQso)
 {
     // Read UDP settings from the legacy INI (canonical source)
     QString serverName = getSetting(QStringLiteral("UDPServer"), QStringLiteral("127.0.0.1")).toString();
@@ -33395,10 +33840,13 @@ void DecodiumBridge::initUdpMessageClient()
         m_legacyBackend->refreshUdpReporting(clientId, secondaryClientId, tertiaryClientId);
     }
 
-    if (usingLegacyBackendForTx()) {
+    if (usingLegacyBackendForTx() && !forceForBridgeCommittedQso) {
         bridgeLog(QStringLiteral("Standalone UDP MessageClient suppressed: legacy TX backend active"));
         shutdownUdpMessageClient();
         return;
+    }
+    if (usingLegacyBackendForTx()) {
+        bridgeLog(QStringLiteral("Standalone UDP MessageClient enabled for bridge-committed legacy QSO"));
     }
 
     QString const ver = version();
@@ -33805,12 +34253,19 @@ void DecodiumBridge::udpSendLoggedQso(const QString& dxCall, const QString& dxGr
                                       const QString& satMode,
                                       const QString& freqRx)
 {
+    // The embedded FT4/FT8 backend may generate and/or mirror the local ADIF
+    // record, but it does not own Decodium's external logger fan-out.  In
+    // particular, recovery paths that commit a QSO after TX5 has started can
+    // reach this function while the legacy backend is active.  Returning here
+    // used to leave those QSOs in decodium_log.adi only: DecoDXLog never saw
+    // the QSOLogged/LoggedADIF datagrams.  The caller-side duplicate guards
+    // already ensure that one committed QSO is emitted once.
     if (usingLegacyBackendForTx()) {
-        return;
+        bridgeLog(QStringLiteral("UDP logged QSO: forwarding bridge-committed legacy QSO to external loggers"));
     }
 
     if (!m_udpMessageClient && !m_udpSecondaryMessageClient && !m_udpTertiaryMessageClient) {
-        initUdpMessageClient();
+        initUdpMessageClient(usingLegacyBackendForTx());
     }
     bool const wsjtxUdpAvailable = m_udpMessageClient || m_udpSecondaryMessageClient || m_udpTertiaryMessageClient;
     if (!wsjtxUdpAvailable) {
@@ -36272,6 +36727,13 @@ QString DecodiumBridge::inferredPartnerForAutolog() const
     QString snapshotCall = m_dxCall.trimmed();
     if (snapshotCall.isEmpty()) {
         snapshotCall = m_autoCqLockedCall.trimmed();
+    }
+    // The final TX5 playback callback can run after AutoCQ has already
+    // re-armed CQ and cleared the active DX.  A pending snapshot was captured
+    // from the accepted RR73/73 and is therefore a stronger source than an
+    // unrelated current CQ payload.
+    if (snapshotCall.isEmpty() && m_pendingAutoLogValid) {
+        snapshotCall = m_pendingAutoLogCall.trimmed();
     }
     if (!snapshotCall.isEmpty()) {
         return snapshotCall;
@@ -38836,6 +39298,13 @@ void DecodiumBridge::checkAndStartPeriodicTx()
             // Il QSO ha completato lo scambio bidirezionale di report; il 73
             // finale del partner e' optional in FT8/FT2. Non loggare era un bug
             // che faceva perdere QSO validi con stazioni forti / DX rari.
+            // Mantieni anche uno snapshot per il 73 tardivo: se il primo
+            // tentativo di scrittura log non riesce (o resta in attesa della
+            // conferma utente), il successivo 73 del partner deve poter
+            // ripetere il solo log senza riaprire il QSO o fermare AutoCQ.
+            if (m_autoCqRepeat) {
+                armLateAutoLogSnapshot();
+            }
             finishAutoSequenceQso(QStringLiteral("checkAndStartPeriodicTx: deferred signoff TX%1 mode=%2 retry cap %3/%4 -> log anyway, partner left")
                                       .arg(m_currentTx)
                                       .arg(m_mode)
@@ -39780,29 +40249,11 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
     QString const cooldownKey = !messagePartnerBase.isEmpty()
         ? messagePartnerBase
         : Radio::base_callsign(from).trimmed().toUpper();
-    if (is_73 && !cooldownKey.isEmpty()) {
-        qint64 nowMs = QDateTime::currentMSecsSinceEpoch();
-        int cooldownMs = 30000;
-        // purge entries scadute
-        for (auto it = m_qsoCooldown.begin(); it != m_qsoCooldown.end(); ) {
-            if (nowMs - it.value() > cooldownMs) it = m_qsoCooldown.erase(it);
-            else ++it;
-        }
-        // FIX 1.0.360 (9H1SR): un 73/RR73 da un nominativo APPENA LOGGATO/lavorato non
-        // deve riaprire un QSO (nuova chiamata/TX1). m_qsoCooldown viene azzerato da
-        // vari reset di stato (clearTxMessages, resetStartupTransientQsoState, cambio
-        // modo) e l'entry appena inserita sul log puo' sparire -> il repeat RR73 sfuggiva
-        // e ripartiva un TX1. Aggiungo il check resiliente isRecentAutoCqWorkedOrLogged
-        // Duplicate (QHash call|band|mode popolato sul log, age-pruned, NON azzerato dai
-        // reset di stato).
-        if (m_qsoCooldown.contains(cooldownKey)
-            || isRecentAutoCqWorkedOrLoggedDuplicate(cooldownKey, m_frequency, m_mode)) {
-            bridgeLog("QSO cooldown: ignoro " + last_word + " da " + cooldownKey
-                      + " (recently worked/logged)");
-            return;
-        }
-    }
 
+    // A late final 73 is a recovery path, not a new QSO.  It must be checked
+    // before the generic cooldown/recent-worked gates: those gates correctly
+    // suppress ordinary duplicate traffic, but used to discard a valid 73
+    // when AutoCQ had already left a retry-capped RR73 exchange.
     QString const latePartnerBase = Radio::base_callsign(m_lateAutoLogCall).trimmed().toUpper();
     bool const latePartnerWindowOpen =
         m_lateAutoLogValid
@@ -39836,6 +40287,29 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
         removeCallerFromQueue(latePartnerBase);
         bridgeLog("late-signoff-skip: " + latePartnerBase + " msg=" + msg);
         return;
+    }
+
+    if (is_73 && !cooldownKey.isEmpty()) {
+        qint64 nowMs = QDateTime::currentMSecsSinceEpoch();
+        int cooldownMs = 30000;
+        // purge entries scadute
+        for (auto it = m_qsoCooldown.begin(); it != m_qsoCooldown.end(); ) {
+            if (nowMs - it.value() > cooldownMs) it = m_qsoCooldown.erase(it);
+            else ++it;
+        }
+        // FIX 1.0.360 (9H1SR): un 73/RR73 da un nominativo APPENA LOGGATO/lavorato non
+        // deve riaprire un QSO (nuova chiamata/TX1). m_qsoCooldown viene azzerato da
+        // vari reset di stato (clearTxMessages, resetStartupTransientQsoState, cambio
+        // modo) e l'entry appena inserita sul log puo' sparire -> il repeat RR73 sfuggiva
+        // e ripartiva un TX1. Aggiungo il check resiliente isRecentAutoCqWorkedOrLogged
+        // Duplicate (QHash call|band|mode popolato sul log, age-pruned, NON azzerato dai
+        // reset di stato).
+        if (m_qsoCooldown.contains(cooldownKey)
+            || isRecentAutoCqWorkedOrLoggedDuplicate(cooldownKey, m_frequency, m_mode)) {
+            bridgeLog("QSO cooldown: ignoro " + last_word + " da " + cooldownKey
+                      + " (recently worked/logged)");
+            return;
+        }
     }
 
     QString duplicateActivePartner = m_dxCall.trimmed();
@@ -40249,6 +40723,13 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
             m_qsoCooldown[cooldownKey] = QDateTime::currentMSecsSinceEpoch();
         if (partnerSignoffNeedsOwn73) {
             bridgeLog("autoSeq: ricevuto 73 da " + (messagePartner.isEmpty() ? from : messagePartner) + " → invio nostro 73 prima del log");
+            // Preserve the confirmed exchange before scheduling TX5.  The
+            // audio-complete callback is asynchronous and AutoCQ may have
+            // already re-armed CQ by the time it asks for the log partner.
+            capturePendingAutoLogSnapshot();
+            if (m_autoCqRepeat) {
+                armLateAutoLogSnapshot();
+            }
             m_ft2DeferredLogPending = false;
             m_nTx73 = 0;
             m_autoSeqRogerReportBase.clear();
@@ -40295,6 +40776,16 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
                 m_qsoCooldown[cooldownKey] = QDateTime::currentMSecsSinceEpoch();
             if (partnerSignoffNeedsOwn73) {
                 bridgeLog("autoSeq: ricevuto RR73 da " + (messagePartner.isEmpty() ? from : messagePartner) + " → invio nostro 73 prima del log");
+                // A received RR73 is the partner's final acknowledgement.
+                // Snapshot it before TX5 so PD2WL-style QSOs cannot lose the
+                // log identity if AutoCQ changes state during audio teardown.
+                capturePendingAutoLogSnapshot();
+                // The partner can repeat RR73 after our final 73 (IU1WKA
+                // case).  Arm recovery now, rather than only at the retry
+                // cap, so that repeat can repair a missed TX5 completion log.
+                if (m_autoCqRepeat) {
+                    armLateAutoLogSnapshot();
+                }
                 m_ft2DeferredLogPending = false;
                 m_nTx73 = 0;
                 m_autoSeqRogerReportBase.clear();
@@ -40332,11 +40823,19 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
         // viene memorizzato — senza, l'ADIF loggerebbe RST_RCVD vuoto/stale.
         // (Parallelismo con i rami report-nudo e Quick-QSO TU qui sotto.)
         QString const rptValue = last.mid(1);
-        bool const priorReportSentToPartner =
-            !cqModeAcceptedFreshCaller
-            && !messagePartnerBase.isEmpty()
+        bool const ownReportWasSentToSamePartner =
+            !messagePartnerBase.isEmpty()
             && (m_lastNtx == 2 || m_lastNtx == 3)
             && lastPayloadMentionsMessagePartner;
+        // A R+report cannot be trusted as a continuation merely because a
+        // stale TX number/message survived a prior QSO.  The current partner
+        // must already have produced an accepted reply in this QSO; otherwise
+        // this is its first useful decode and we restart conservatively at TX3.
+        bool const priorReportSentToPartner =
+            decodium::seq::mayAdvanceRogerReportToRr73(
+                cqModeAcceptedFreshCaller,
+                ownReportWasSentToSamePartner,
+                m_qsoFirstReplyOn.isValid());
         if (!priorReportSentToPartner) {
             bridgeLog(QStringLiteral("autoSeq: R+report %1 from fresh/unsent caller %2 -> TX3, not RR73")
                           .arg(last,

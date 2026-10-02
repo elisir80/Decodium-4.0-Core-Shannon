@@ -103,6 +103,20 @@ private slots:
     QVERIFY (r.reason == TxStepRemapReason::None);
   }
 
+  void freshAutoCqCallerCannotInheritRogerReportState ()
+  {
+    using decodium::seq::mayAdvanceRogerReportToRr73;
+
+    // UX2QX case: a first AutoCQ decode R+08 must never jump to RR73,
+    // even if old TX bookkeeping incorrectly looks like TX2/TX3.
+    QVERIFY (!mayAdvanceRogerReportToRr73 (true, true, false));
+    QVERIFY (!mayAdvanceRogerReportToRr73 (false, true, false));
+    QVERIFY (!mayAdvanceRogerReportToRr73 (false, false, true));
+
+    // Normal exchange: same partner already replied and received our report.
+    QVERIFY (mayAdvanceRogerReportToRr73 (false, true, true));
+  }
+
   void txStepRemapTx1Disabled ()
   {
     // 1.0.379: Tx1 off + Tx2 on -> risposta parte da TX2
