@@ -420,7 +420,7 @@ Item {
     // o quando cambia la dial (cambia anche il filtro audio offset).
     Connections {
         target: bridge
-        function onDxClusterSpotsChanged() { waterfallPanel.scheduleDxClusterRefresh(250) }
+        function onDxClusterSpotsChanged() { waterfallPanel.scheduleDxClusterRefresh(1000) }
     }
     Connections {
         target: bridge

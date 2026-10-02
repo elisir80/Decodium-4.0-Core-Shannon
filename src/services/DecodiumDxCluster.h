@@ -8,7 +8,69 @@
 #include <QTcpSocket>
 #include <QSettings>
 
+#include <QAbstractListModel>
+
 class QTimer;
+
+// Gli spot come modello a righe, per le liste QML. Leggere la proprieta' spots
+// ricopia in JavaScript l'intero elenco (fino a 200 spot) e una ListView che
+// la usa come modello ricostruisce tutte le righe a ogni spot nuovo: 100-180 ms
+// di thread dell'interfaccia ogni volta, che durante un pile-up facevano
+// perdere campioni alla cattura audio. Qui una riga si aggiunge in fondo e
+// la piu' vecchia si toglie in testa, senza toccare le altre.
+// Un solo ruolo, "modelData": il delegato legge modelData["dxCall"] ecc.
+class DxClusterSpotModel : public QAbstractListModel
+{
+    Q_OBJECT
+    Q_PROPERTY(int count READ rowCount NOTIFY countChanged)
+public:
+    explicit DxClusterSpotModel(QObject* parent = nullptr) : QAbstractListModel(parent) {}
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override
+    {
+        return parent.isValid() ? 0 : static_cast<int>(m_rows.size());
+    }
+    QVariant data(const QModelIndex& index, int role) const override
+    {
+        if (!index.isValid() || index.row() < 0 || index.row() >= m_rows.size())
+            return {};
+        return role == SpotRole || role == Qt::DisplayRole ? m_rows.at(index.row()) : QVariant();
+    }
+    QHash<int, QByteArray> roleNames() const override { return {{SpotRole, "modelData"}}; }
+
+    void append(const QVariantMap& spot)
+    {
+        int const row = static_cast<int>(m_rows.size());
+        beginInsertRows(QModelIndex(), row, row);
+        m_rows.append(spot);
+        endInsertRows();
+        emit countChanged();
+    }
+    void removeAt(int row)
+    {
+        if (row < 0 || row >= m_rows.size())
+            return;
+        beginRemoveRows(QModelIndex(), row, row);
+        m_rows.removeAt(row);
+        endRemoveRows();
+        emit countChanged();
+    }
+    void clear()
+    {
+        if (m_rows.isEmpty())
+            return;
+        beginResetModel();
+        m_rows.clear();
+        endResetModel();
+        emit countChanged();
+    }
+
+signals:
+    void countChanged();
+
+private:
+    enum { SpotRole = Qt::UserRole + 1 };
+    QList<QVariant> m_rows;
+};
 
 // Full DX Cluster client (telnet ASCII, port 7300 or 23).
 // Replaces the empty DxClusterManager stub in DecodiumSubManagers.h.
@@ -22,6 +84,7 @@ class DecodiumDxCluster : public QObject
     Q_PROPERTY(QString     callsign  READ callsign   WRITE setCallsign   NOTIFY callsignChanged)
     Q_PROPERTY(QString     lastStatus READ lastStatus NOTIFY lastStatusChanged)
     Q_PROPERTY(QVariantList spots    READ spots      NOTIFY spotsChanged)
+    Q_PROPERTY(QObject*    spotModel READ spotModel  CONSTANT)
     Q_PROPERTY(bool        offlineMode READ offlineMode WRITE setOfflineMode NOTIFY offlineModeChanged)
 
 public:
@@ -53,6 +116,7 @@ public:
     QString     lastStatus() const { return m_lastStatus; }
 
     QVariantList spots() const { return m_spots; }
+    QObject*    spotModel() const { return m_spotModel; }
     bool offlineMode() const { return m_offlineMode; }
     void setOfflineMode(bool offline);
 
@@ -107,6 +171,9 @@ private:
     QString     bandFromFreq(double freqKhz) const;
     void        setLastStatus(const QString& msg);
     void        scheduleSpotsChanged(int delayMs = 200);
+    // Ogni modifica a m_spots passa da qui, cosi' il modello resta allineato.
+    void        appendSpot(const QVariantMap& spot);
+    void        removeSpotAt(int index);
 
     static constexpr int k_maxSpots = 200;
 
@@ -119,6 +186,7 @@ private:
     QString      m_callsign;
     QString      m_lastStatus;
     QVariantList m_spots;      // newest spot is appended at the back
+    DxClusterSpotModel* m_spotModel {nullptr};   // stesse righe di m_spots
     QList<QPair<QString, int>> m_connectionCandidates;
     int          m_connectionCandidateIndex {-1};
     QString      m_activeHost;

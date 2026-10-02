@@ -427,6 +427,8 @@ DecodiumDxCluster::DecodiumDxCluster(QObject* parent)
         connectCluster();
     });
 
+    m_spotModel = new DxClusterSpotModel(this);
+
     m_spotsChangedTimer = new QTimer(this);
     m_spotsChangedTimer->setSingleShot(true);
     connect(m_spotsChangedTimer, &QTimer::timeout, this, [this]() {
@@ -1118,7 +1120,28 @@ bool DecodiumDxCluster::submitSpotVerified(const QString& dxCall, double freqKhz
 void DecodiumDxCluster::clearSpots()
 {
     m_spots.clear();
+    if (m_spotModel)
+        m_spotModel->clear();
     scheduleSpotsChanged(0);
+}
+
+void DecodiumDxCluster::appendSpot(const QVariantMap& spot)
+{
+    // Elenco a capienza fissa: i piu' vecchi escono dalla testa.
+    while (m_spots.size() >= k_maxSpots)
+        removeSpotAt(0);
+    m_spots.append(spot);
+    if (m_spotModel)
+        m_spotModel->append(spot);
+}
+
+void DecodiumDxCluster::removeSpotAt(int index)
+{
+    if (index < 0 || index >= m_spots.size())
+        return;
+    m_spots.removeAt(index);
+    if (m_spotModel)
+        m_spotModel->removeAt(index);
 }
 
 void DecodiumDxCluster::injectSpot(const QVariantMap& spot)
@@ -1133,12 +1156,10 @@ void DecodiumDxCluster::injectSpot(const QVariantMap& spot)
         if (old.value(QStringLiteral("dxCall")).toString() == call
             && old.value(QStringLiteral("band")).toString() == band
             && old.value(QStringLiteral("mode")).toString() == mode) {
-            m_spots.removeAt(i);
+            removeSpotAt(i);
         }
     }
-    while (m_spots.size() >= k_maxSpots)
-        m_spots.removeFirst();
-    m_spots.append(spot);
+    appendSpot(spot);
     // Niente newSpot: quello e' per gli spot del nodo di Decodium (e per chi li
     // ritrasmette in rete locale), questi hanno gia' una loro strada.
     scheduleSpotsChanged();
@@ -1327,10 +1348,7 @@ void DecodiumDxCluster::processLine(const QString& line)
         QVariantMap spot = parseSpotLine(line);
         if (!spot.isEmpty()) {
             // Maintain a capped ring-buffer: remove oldest entries from front.
-            while (m_spots.size() >= k_maxSpots)
-                m_spots.removeFirst();
-
-            m_spots.append(spot);
+            appendSpot(spot);
             emit newSpot(spot);
             scheduleSpotsChanged();
         }
@@ -1379,9 +1397,7 @@ void DecodiumDxCluster::processLine(const QString& line)
             spot["mode"]      = mode;
             spot["timestamp"] = QDateTime::currentDateTimeUtc().toString(Qt::ISODate);
 
-            while (m_spots.size() >= k_maxSpots)
-                m_spots.removeFirst();
-            m_spots.append(spot);
+            appendSpot(spot);
             emit newSpot(spot);
             scheduleSpotsChanged();
             return;
