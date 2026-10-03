@@ -4884,6 +4884,10 @@ namespace
 {
 constexpr int kRecentDuplicateLogWindowSeconds {90};
 constexpr int kLateAutoLogGraceWindowSeconds {45};
+// The short in-memory QSO cooldown only breaks immediate 73/RR73 loops.  It
+// must never become a session-long "worked before" list, especially when the
+// native MAM sequencer is driving its own dispatch path.
+constexpr qint64 kQsoCooldownWindowMs {30 * 1000};
 
 void beginConfiguredBridgeSettingsGroup(QSettings& settings)
 {
@@ -18471,6 +18475,7 @@ void DecodiumBridge::setMode(const QString& v) {
         m_mamLateReportRecoveries.clear();
         m_mamMessages.clear();
         m_mamF0sHz.clear();
+        emit mamTxStreamsChanged();
         // A mode switch invalidates short-lived CAT/audio-frequency guards
         // from the previous mode. Leaving them active can make a later CAT
         // poll look stale and keep the displayed frequency stuck.
@@ -23582,6 +23587,7 @@ void DecodiumBridge::clearTxMessages()
     m_mamLateReportRecoveries.clear();
     m_mamMessages.clear();
     m_mamF0sHz.clear();
+    emit mamTxStreamsChanged();
     clearDeferredManualSyncTx(QStringLiteral("clear-tx-messages"));
 
     if (m_transmitting || m_tuning)
@@ -24306,6 +24312,7 @@ void DecodiumBridge::clearMamPendingTxPayload(const QString& reason)
     // already empty, so the next manual transmission is regenerated safely.
     invalidateTxAudioCache();
     if (hadPayload) {
+        emit mamTxStreamsChanged();
         bridgeLog(QStringLiteral("MAM pending TX payload cleared (%1): messages=%2 frequencies=%3")
                       .arg(reason.trimmed().isEmpty() ? QStringLiteral("unspecified")
                                                       : reason.trimmed())
@@ -24708,6 +24715,39 @@ QVariantList DecodiumBridge::mamActiveSlots() const
     return out;
 }
 
+// Snapshot read-only del payload che il generatore MAM passera' alla radio.
+// A differenza di mamActiveSlots(), qui compaiono anche i CQ creati per gli
+// slot liberi.  Il waterfall lo mostra solamente durante TX: in RX gli slot
+// QSO restano visibili tramite mamActiveSlots() senza far sembrare occupate
+// frequenze sulle quali non stiamo trasmettendo.
+QVariantList DecodiumBridge::mamTxStreams() const
+{
+    QVariantList out;
+    const int streamCount = qMin(m_mamMessages.size(), m_mamF0sHz.size());
+    out.reserve(streamCount);
+    for (int i = 0; i < streamCount; ++i) {
+        const QString message = m_mamMessages.at(i).trimmed();
+        const int frequency = m_mamF0sHz.at(i);
+        if (message.isEmpty() || frequency <= 0) {
+            continue;
+        }
+
+        const bool isCq = message.startsWith(QStringLiteral("CQ "), Qt::CaseInsensitive);
+        QVariantMap stream;
+        stream.insert(QStringLiteral("freq"), frequency);
+        stream.insert(QStringLiteral("message"), message);
+        stream.insert(QStringLiteral("call"),
+                      isCq ? QStringLiteral("CQ")
+                           : message.section(QLatin1Char(' '), 0, 0));
+        stream.insert(QStringLiteral("cq"), isCq);
+        // Keep the key shape compatible with mamActiveSlots, allowing the
+        // waterfall to switch models at TX start without a separate delegate.
+        stream.insert(QStringLiteral("tx"), 1);
+        out.append(stream);
+    }
+    return out;
+}
+
 // 1.0.569+ - FT2 e' l'unico modo in cui il multi-stream non e' mai stato
 // validato on-air (primo pileup reale fallito: i chiamanti non decodificavano
 // il report). Il pannello DX-Pedition usa questo flag per il banner di avviso;
@@ -24985,11 +25025,11 @@ void DecodiumBridge::mamIngestDecode(const QStringList& f)
         m_mamLateReportRecoveries.remove(partnerBase);
     }
     if (idx < 0) {
-        // A delayed R+report is valid only if it proves that this exact
-        // station has just decoded a report from an MAM slot that expired.
-        // Restore the complete exchange at TX4 instead of treating the R as a
-        // new caller (which has neither grid nor enough state to log safely).
-        if (hasRogerReport && receivedReportValid) {
+        // A delayed R+report or final 73 is valid only if it proves that this
+        // exact station belongs to an MAM exchange that just expired. A
+        // recovery snapshot is the evidence; without it we must never invent
+        // a QSO from orphan traffic.
+        if ((hasRogerReport && receivedReportValid) || isFinal73) {
             for (auto it = m_mamLateReportRecoveries.begin();
                  it != m_mamLateReportRecoveries.end();) {
                 if (it->expiresMs <= nowMs) {
@@ -25001,6 +25041,18 @@ void DecodiumBridge::mamIngestDecode(const QStringList& f)
             auto recoveryIt = m_mamLateReportRecoveries.find(partnerBase);
             if (recoveryIt != m_mamLateReportRecoveries.end()) {
                 MamLateReportRecovery& recovery = recoveryIt.value();
+                if (isFinal73) {
+                    MamQsoSlot completed = recovery.slot;
+                    completed.lastHeardMs = nowMs;
+                    completed.partnerSnrDb = (decodedSnr != 127)
+                        ? decodedSnr : completed.partnerSnrDb;
+                    m_mamLateReportRecoveries.erase(recoveryIt);
+                    mamLogSlot(completed);
+                    bridgeLog(QStringLiteral("MAM late final 73: %1 -> logged")
+                                  .arg(completed.callFull));
+                    emit callerQueueChanged();
+                    return;
+                }
                 recovery.slot.lastHeardMs = nowMs;
                 recovery.slot.partnerSnrDb = (decodedSnr != 127) ? decodedSnr : recovery.slot.partnerSnrDb;
                 recovery.slot.reportReceived = formatSignalReport(receivedReportDb);
@@ -25163,6 +25215,17 @@ void DecodiumBridge::mamIngestDecode(const QStringList& f)
 void DecodiumBridge::mamPruneSlots()
 {
     qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+    // MAM does not enter the legacy auto-sequencer's periodic cleanup.  Keep
+    // its shared signoff cooldown bounded here as well, otherwise an entry
+    // made hours earlier silently rejects a perfectly valid new caller.
+    for (auto it = m_qsoCooldown.begin(); it != m_qsoCooldown.end();) {
+        if (nowMs - it.value() > kQsoCooldownWindowMs) {
+            m_postLogReengageCount.remove(it.key());
+            it = m_qsoCooldown.erase(it);
+        } else {
+            ++it;
+        }
+    }
     bool lateQueueChanged = false;
     for (auto it = m_mamLateReportRecoveries.begin();
          it != m_mamLateReportRecoveries.end();) {
@@ -25198,35 +25261,22 @@ void DecodiumBridge::mamPruneSlots()
             dropReason = QStringLiteral("silent > 6 periods");
         }
         if (drop && !dropReason.isEmpty()) {
-            // Il corrispondente ci ha gia' confermato il rapporto (R+rapporto,
-            // quindi noi siamo al RR73, o RR73/RRR, quindi noi siamo al 73):
-            // lo scambio e' completo e il QSO va loggato anche se il suo ultimo
-            // saluto non arriva, come fa il sequencer normale ("log anyway").
-            // Prima lo slot veniva buttato senza log: QSO con F4MXE e PH2W del
-            // 18/9/2026 persi cosi' (MAM a 1 stream, R ripetuto 7 e 15 volte),
-            // riprodotto col corrispondente robot del laboratorio.
-            if (!s.logged && s.progress >= 4) {
-                bridgeLog(QStringLiteral("MAM slot %1: %2 after partner confirmation (TX%3) -> log anyway")
-                              .arg(s.callFull, dropReason)
-                              .arg(s.currentTx));
-                mamLogSlot(s);
-            } else {
-                // Keep only a pre-confirmation exchange that we actually
-                // reached at TX2/TX3.  A later R+report can then unambiguously
-                // resume at TX4/RR73; a bare late 73 or arbitrary report
-                // cannot manufacture a QSO.
-                if (!s.logged && s.progress >= 2 && s.progress <= 3) {
-                    MamLateReportRecovery recovery;
-                    recovery.slot = s;
-                    recovery.slot.lastNtx = -1;
-                    recovery.slot.retryCount = 0;
-                    recovery.expiresMs = nowMs + 2 * 60 * 1000;
-                    m_mamLateReportRecoveries.insert(s.call, recovery);
-                    bridgeLog(QStringLiteral("MAM slot %1 retained for late report recovery (120s)")
-                                  .arg(s.callFull));
-                }
-                bridgeLog(QStringLiteral("MAM slot %1 dropped: %2").arg(s.callFull, dropReason));
+            // A sent RR73 is not evidence that the partner received it. Do
+            // not log on retry/silence: retain the exchange briefly so only a
+            // subsequent decoded final 73 from this same station can close
+            // and log it.
+            if (!s.logged && s.progress >= 2 && s.progress <= 4) {
+                MamLateReportRecovery recovery;
+                recovery.slot = s;
+                recovery.slot.lastNtx = -1;
+                recovery.slot.retryCount = 0;
+                recovery.expiresMs = nowMs + 2 * 60 * 1000;
+                m_mamLateReportRecoveries.insert(s.call, recovery);
+                bridgeLog(QStringLiteral("MAM slot %1 retained pending final 73 (120s)")
+                              .arg(s.callFull));
             }
+            bridgeLog(QStringLiteral("MAM slot %1 dropped without log: %2")
+                          .arg(s.callFull, dropReason));
         }
         if (drop) {
             m_mamSlots.removeAt(i);
@@ -25405,8 +25455,12 @@ void DecodiumBridge::mamLogSlot(MamQsoSlot& s)
 void DecodiumBridge::mamDispatchPeriod()
 {
     if (!m_txEnabled) {
+        const bool hadTxStreams = !m_mamMessages.isEmpty() || !m_mamF0sHz.isEmpty();
         m_mamMessages.clear();
         m_mamF0sHz.clear();
+        if (hadTxStreams) {
+            emit mamTxStreamsChanged();
+        }
         bridgeLog(QStringLiteral("MAM dispatch blocked: TX disabled"));
         return;
     }
@@ -25437,6 +25491,7 @@ void DecodiumBridge::mamDispatchPeriod()
     mamPromoteFromQueue();
 
     // (4) Costruisci i payload per gli slot attivi (cap m_mamMaxStreams).
+    const bool hadPreviousTxStreams = !m_mamMessages.isEmpty() || !m_mamF0sHz.isEmpty();
     m_mamMessages.clear();
     m_mamF0sHz.clear();
     // A listening interval suppresses only new CQ streams. Existing MAM QSO
@@ -25529,6 +25584,9 @@ void DecodiumBridge::mamDispatchPeriod()
             bridgeLog(QStringLiteral("MAM dispatch: no active slots, sending CQ [%1]").arg(cqMessage));
         } else {
             // Niente da trasmettere: resto in ascolto.
+            if (hadPreviousTxStreams) {
+                emit mamTxStreamsChanged();
+            }
             return;
         }
     }
@@ -25541,6 +25599,10 @@ void DecodiumBridge::mamDispatchPeriod()
                   .arg(m_mamSlots.size())
                   .arg(pidx)
                   .arg(elapsedMs));
+    // The array is now exactly the one handed to startTx()/the composite
+    // generator. Notify before keying PTT so QML has every TX marker ready
+    // when transmitting becomes true.
+    emit mamTxStreamsChanged();
     emit mamActiveSlotsChanged();
     startTx();
 }
@@ -29569,6 +29631,14 @@ void DecodiumBridge::haltWithReason(const QString& reason)
 
 #if defined(Q_OS_MAC)
     cancelPendingLegacyBridgeAudioStart(haltReason);
+    // Native macOS PCM TX owns the physical CAT PTT, while HALT previously
+    // delegated only to the legacy backend.  That stops the UI/audio but can
+    // leave the rig keyed because no CAT PTT-OFF is queued.  Use the abort
+    // path first: it sends PTT-OFF immediately, then the existing backend
+    // stop remains harmless and is covered by the per-transition guard.
+    if (usingLegacyBackendForTx()) {
+        abortLegacyBridgeTxRequest(QStringLiteral("halt:%1").arg(haltReason));
+    }
     bool const bridgeTuneMaybeActive =
         m_bridgeAudioTuneActive || (m_tuning && m_modulator && m_modulator->isActive());
     if (m_bridgeAudioLegacyTxActive) {
@@ -40005,7 +40075,7 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
     {
         qint64 nowPurge = QDateTime::currentMSecsSinceEpoch();
         for (auto it = m_qsoCooldown.begin(); it != m_qsoCooldown.end(); ) {
-            if (nowPurge - it.value() > 30000) {
+            if (nowPurge - it.value() > kQsoCooldownWindowMs) {
                 m_postLogReengageCount.remove(it.key());  // 1.0.446 - pulisci contatore ri-aggancio
                 it = m_qsoCooldown.erase(it);
             } else {
@@ -40291,7 +40361,7 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
 
     if (is_73 && !cooldownKey.isEmpty()) {
         qint64 nowMs = QDateTime::currentMSecsSinceEpoch();
-        int cooldownMs = 30000;
+        qint64 const cooldownMs = kQsoCooldownWindowMs;
         // purge entries scadute
         for (auto it = m_qsoCooldown.begin(); it != m_qsoCooldown.end(); ) {
             if (nowMs - it.value() > cooldownMs) it = m_qsoCooldown.erase(it);

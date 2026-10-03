@@ -676,6 +676,10 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(int mamMaxStreams READ mamMaxStreams WRITE setMamMaxStreams NOTIFY mamMaxStreamsChanged)
     Q_PROPERTY(QVariantList mamActiveSlots READ mamActiveSlots NOTIFY mamActiveSlotsChanged)
     Q_PROPERTY(int mamActiveSlotCount READ mamActiveSlotCount NOTIFY mamActiveSlotsChanged)
+    // Snapshot del payload MAM appena composto: include sia i QSO attivi sia
+    // gli eventuali CQ paralleli sugli slot liberi. La UI waterfall lo usa
+    // solo mentre il PTT e' attivo, per indicare le portanti realmente inviate.
+    Q_PROPERTY(QVariantList mamTxStreams READ mamTxStreams NOTIFY mamTxStreamsChanged)
     // 1.0.569+ - DX-Pedition multi-slot: coda chiamanti in attesa di uno slot
     // libero (m_callerQueue) e stato del modo corrente rispetto al multi-stream.
     Q_PROPERTY(int mamQueueCount READ callerQueueSize NOTIFY callerQueueChanged)
@@ -2142,6 +2146,7 @@ signals:
     void mamMultiStreamChanged();      // 1.0.364+ — MAM multi-stream FASE 3
     void mamMaxStreamsChanged();       // 1.0.364+ — cap stream simultanei
     void mamActiveSlotsChanged();      // 1.0.364+ — lista slot QSO attivi per UI
+    void mamTxStreamsChanged();        // payload MAM composto per marker waterfall TX
     void mamCqSlotsChanged();          // 1.0.569+ — CQ paralleli sugli slot liberi
     void decoPortUseRemoteChanged();   // 1.0.574+ — radio remota come sorgente
     void decoPortMonitorChanged();     // 1.0.574+ — ascolto in altoparlante
@@ -4428,6 +4433,7 @@ public:
     void    setMamMaxStreams(int v);
     int     mamMaxStreams() const { return m_mamMaxStreams; }
     QVariantList mamActiveSlots() const;
+    QVariantList mamTxStreams() const;
     int     mamActiveSlotCount() const { return m_mamSlots.size(); }
     bool    mamMultiStreamSequencerActive() const;
     void    mamDispatchPeriod();

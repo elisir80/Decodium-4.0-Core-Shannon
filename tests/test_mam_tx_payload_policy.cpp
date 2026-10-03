@@ -40,6 +40,7 @@ private slots:
     void legacyMirrorRoutesMultiStreamDecodesToSlotState();
     void legacyMirrorCompletesExistingMamQsoAfterMamIsDisabled();
     void lateRogerReportResumesRetryExpiredMamSlot();
+    void waterfallUsesTheComposedMamPayloadDuringTx();
 };
 
 void TestMamTxPayloadPolicy::liveSequencerCanUseOnlyAValidPayload()
@@ -149,6 +150,7 @@ void TestMamTxPayloadPolicy::bridgeWiresCleanupAtEveryExit()
         QStringLiteral("void DecodiumBridge::refreshAudioDevices"));
     QVERIFY(halt.contains(QStringLiteral("clearMamPendingTxPayload(")));
     QVERIFY(halt.contains(QStringLiteral("emit mamActiveSlotsChanged()")));
+    QVERIFY(halt.contains(QStringLiteral("abortLegacyBridgeTxRequest(QStringLiteral(\"halt:%1\")")));
 
     const QString gate = functionBody(
         cpp,
@@ -213,6 +215,7 @@ void TestMamTxPayloadPolicy::lateRogerReportResumesRetryExpiredMamSlot()
         QStringLiteral("void DecodiumBridge::mamPruneSlots"));
     QVERIFY(ingest.contains(QStringLiteral("hasRogerReport && receivedReportValid")));
     QVERIFY(ingest.contains(QStringLiteral("MAM late report resumed")));
+    QVERIFY(ingest.contains(QStringLiteral("MAM late final 73: %1 -> logged")));
     QVERIFY(ingest.contains(QStringLiteral("recovery.slot.currentTx = 4")));
     QVERIFY(ingest.contains(QStringLiteral("MAM plain report queued")));
     QVERIFY(ingest.contains(QStringLiteral("A reply must always stay on the caller's original audio frequency")));
@@ -221,8 +224,14 @@ void TestMamTxPayloadPolicy::lateRogerReportResumesRetryExpiredMamSlot()
         cpp,
         QStringLiteral("void DecodiumBridge::mamPruneSlots"),
         QStringLiteral("void DecodiumBridge::mamPromoteLateReportRecoveries"));
-    QVERIFY(prune.contains(QStringLiteral("MAM slot %1 retained for late report recovery (120s)")));
-    QVERIFY(prune.contains(QStringLiteral("s.progress >= 2 && s.progress <= 3")));
+    QVERIFY(prune.contains(QStringLiteral("MAM slot %1 retained pending final 73 (120s)")));
+    QVERIFY(prune.contains(QStringLiteral("s.progress >= 2 && s.progress <= 4")));
+    QVERIFY(!prune.contains(QStringLiteral("-> log anyway")));
+    // Native MAM bypasses the legacy auto-sequencer cleanup.  Its signoff
+    // cooldown must therefore expire here instead of blocking the station for
+    // the rest of a long-running session.
+    QVERIFY(prune.contains(QStringLiteral("kQsoCooldownWindowMs")));
+    QVERIFY(prune.contains(QStringLiteral("m_qsoCooldown.erase(it)")));
 
     const QString promote = functionBody(
         cpp,
@@ -234,6 +243,41 @@ void TestMamTxPayloadPolicy::lateRogerReportResumesRetryExpiredMamSlot()
     const QString header = readSource(QStringLiteral("src/bridge/DecodiumBridge.h"));
     QVERIFY(header.contains(QStringLiteral("A late-report recovery has an exchange state")));
     QVERIFY(header.contains(QStringLiteral("callerQueueSize() const { return callerQueue().size(); }")));
+}
+
+void TestMamTxPayloadPolicy::waterfallUsesTheComposedMamPayloadDuringTx()
+{
+    const QString header = readSource(QStringLiteral("src/bridge/DecodiumBridge.h"));
+    const QString cpp = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
+    const QString waterfall = readSource(QStringLiteral("qml/decodium/components/Waterfall.qml"));
+    QVERIFY(!header.isEmpty());
+    QVERIFY(!cpp.isEmpty());
+    QVERIFY(!waterfall.isEmpty());
+
+    // Active QSO slots do not contain idle parallel CQ streams, so the
+    // bridge must expose the exact m_mamMessages/m_mamF0sHz payload separately.
+    QVERIFY(header.contains(QStringLiteral("Q_PROPERTY(QVariantList mamTxStreams READ mamTxStreams NOTIFY mamTxStreamsChanged)")));
+    const QString streams = functionBody(
+        cpp,
+        QStringLiteral("QVariantList DecodiumBridge::mamTxStreams() const"),
+        QStringLiteral("bool DecodiumBridge::mamModeExperimental() const"));
+    QVERIFY(streams.contains(QStringLiteral("m_mamMessages")));
+    QVERIFY(streams.contains(QStringLiteral("m_mamF0sHz")));
+    QVERIFY(streams.contains(QStringLiteral("stream.insert(QStringLiteral(\"cq\"), isCq)")));
+
+    const QString dispatch = functionBody(
+        cpp,
+        QStringLiteral("void DecodiumBridge::mamDispatchPeriod()"),
+        QStringLiteral("bool DecodiumBridge::ensureTxAudioPrepared("));
+    QVERIFY(dispatch.contains(QStringLiteral("emit mamTxStreamsChanged();")));
+    QVERIFY(dispatch.indexOf(QStringLiteral("emit mamTxStreamsChanged();"))
+            < dispatch.indexOf(QStringLiteral("startTx();")));
+
+    // The old generic guide is hidden during a composite TX and the cascade
+    // receives one marker per actual outgoing stream, including CQ streams.
+    QVERIFY(waterfall.contains(QStringLiteral("bridge.mamTxStreams")));
+    QVERIFY(waterfall.contains(QStringLiteral("id: mamTxWaterfallMarkers")));
+    QVERIFY(waterfall.contains(QStringLiteral("readonly property bool mamCompositeTx")));
 }
 
 QTEST_APPLESS_MAIN(TestMamTxPayloadPolicy)

@@ -1769,18 +1769,24 @@ Item {
                     }
                 }
 
-                // 1.0.365+ (fork) - MAM multi-stream: marker per ogni slot QSO
-                // attivo (modello Fox/hunter). Una linea verticale arancione +
-                // etichetta col call alla freq audio dello slot, mappata con la
-                // stessa xForFreq() di RX/TX/decode. Gated da bridge.mamMultiStream:
-                // con il MAM OFF mamActiveSlots e' vuoto e nulla viene disegnato.
+                // MAM multi-stream: in RX mostra gli slot QSO attivi; durante
+                // TX commuta invece al payload realmente composto dal bridge.
+                // Questo include i CQ paralleli sugli slot liberi, che non sono
+                // QSO attivi e quindi non possono comparire in mamActiveSlots.
                 Repeater {
                     id: mamSlotMarkers
-                    model: bridge && bridge.mamMultiStream ? bridge.mamActiveSlots : []
+                    model: {
+                        if (!bridge || !bridge.mamMultiStream)
+                            return []
+                        if (bridge.transmitting && bridge.mamTxStreams.length > 0)
+                            return bridge.mamTxStreams
+                        return bridge.mamActiveSlots
+                    }
                     delegate: Item {
                         readonly property real slotFreq: Number(modelData.freq)
                         readonly property string slotCall: String(modelData.call)
                         readonly property bool slotTx: modelData.tx !== undefined && Number(modelData.tx) > 0
+                        readonly property bool slotCq: modelData.cq !== undefined && Boolean(modelData.cq)
                         readonly property real markerX: spectrumGpuOverlay.xForFreq(slotFreq)
                         x: 0
                         y: 0
@@ -1789,13 +1795,14 @@ Item {
                         z: 40
                         visible: bridge && bridge.mamMultiStream
                                  && markerX >= 0 && markerX < spectrumGpuOverlay.width
-                        // Linea verticale arancione (distinta dal RX ciano e dal TX rosso).
+                        // Arancione: slot MAM. Durante TX rappresenta la
+                        // portante effettiva, non soltanto la frequenza TX base.
                         Rectangle {
                             x: Math.round(markerX) - 1
                             y: 0
                             width: 2
                             height: parent.height
-                            color: "#ffa000"
+                            color: slotCq ? "#ffb000" : "#ff8a00"
                             opacity: 0.92
                         }
                         // Etichetta col call dello slot, ancorata in alto.
@@ -1808,7 +1815,7 @@ Item {
                             height: mamSlotLabelText.implicitHeight + 4
                             color: "#331a00"
                             border.width: 1
-                            border.color: "#ffa000"
+                            border.color: slotCq ? "#ffb000" : "#ff8a00"
                             opacity: 0.92
                             radius: 2
                             Text {
@@ -2009,7 +2016,14 @@ Item {
                 width: waterfallDisplay.width
                 height: Math.max(0, waterfallDisplay.height - waterfallDisplay.spectrumHeight)
                 readonly property real markerX: waterfallDisplay.freqToPixel(waterfallDisplay.txFreq)
+                // A MAM composite has several real carriers.  The historical
+                // single-frequency guide would otherwise point at the stale
+                // base TX frequency and hide the other streams.
+                readonly property bool mamCompositeTx: bridge && bridge.transmitting
+                                                       && bridge.mamMultiStream
+                                                       && bridge.mamTxStreams.length > 0
                 visible: bridge && (bridge.transmitting || bridge.tuning)
+                         && !mamCompositeTx
                          && height > 0 && markerX >= 0 && markerX < width
 
                 // 1.0.288 — onda rossa che si propaga lateralmente dal centro e svanisce
@@ -2052,6 +2066,73 @@ Item {
                         color: "#ffffff"
                         font.pixelSize: 9
                         font.bold: true
+                    }
+                }
+            }
+
+            // One non-animated waterfall marker per carrier in the exact MAM
+            // payload that has just been handed to the transmitter.  This is
+            // deliberately separate from mamActiveSlots: empty capacity is not
+            // a carrier, whereas a parallel CQ is one.
+            Repeater {
+                id: mamTxWaterfallMarkers
+                model: bridge && bridge.transmitting && bridge.mamMultiStream
+                       ? bridge.mamTxStreams : []
+                delegate: Item {
+                    id: mamTxWaterfallMarker
+                    required property var modelData
+                    readonly property real streamFreq: Number(modelData.freq)
+                    readonly property string streamCall: String(modelData.call)
+                    readonly property bool streamCq: modelData.cq !== undefined && Boolean(modelData.cq)
+                    readonly property real markerX: waterfallDisplay.freqToPixel(streamFreq)
+                    x: 0
+                    y: waterfallDisplay.spectrumHeight
+                    z: 4
+                    width: waterfallDisplay.width
+                    height: Math.max(0, waterfallDisplay.height - waterfallDisplay.spectrumHeight)
+                    visible: height > 0 && markerX >= 0 && markerX < width
+
+                    // Keep these static: five markers must not add five more
+                    // animations to the already busy panadapter during TX.
+                    Rectangle {
+                        x: Math.round(mamTxWaterfallMarker.markerX) - 4
+                        width: 9
+                        height: parent.height
+                        color: mamTxWaterfallMarker.streamCq ? "#ffac00" : "#ff6d00"
+                        opacity: 0.20
+                    }
+                    Rectangle {
+                        x: Math.round(mamTxWaterfallMarker.markerX) - 1
+                        width: 3
+                        height: parent.height
+                        color: mamTxWaterfallMarker.streamCq ? "#ffd166" : "#ff8a00"
+                        opacity: 0.96
+                    }
+                    Rectangle {
+                        x: Math.round(mamTxWaterfallMarker.markerX)
+                        width: 1
+                        height: parent.height
+                        color: "#fff0c2"
+                    }
+
+                    Rectangle {
+                        y: 2
+                        width: mamTxCascadeLabel.implicitWidth + 10
+                        height: mamTxCascadeLabel.implicitHeight + 4
+                        radius: 3
+                        x: Math.max(0, Math.min(parent.width - width,
+                                   Math.round(mamTxWaterfallMarker.markerX) - width / 2))
+                        color: Qt.rgba(0.20, 0.09, 0.0, 0.95)
+                        border.color: mamTxWaterfallMarker.streamCq ? "#ffb000" : "#ff8a00"
+                        border.width: 1
+                        Text {
+                            id: mamTxCascadeLabel
+                            anchors.centerIn: parent
+                            text: mamTxWaterfallMarker.streamCall + " TX"
+                            color: "#fff0c2"
+                            font.pixelSize: 9
+                            font.bold: true
+                        }
                     }
                 }
             }
