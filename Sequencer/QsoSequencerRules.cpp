@@ -104,5 +104,11 @@ bool mayAdvanceRogerReportToRr73 (bool freshAutoCqCaller,
         && priorReplyFromSamePartnerAccepted;
 }
 
+bool specialOperationTransitionRequiresDeferral (bool ownFinal73Pending,
+                                                 bool logPromptOpen)
+{
+    return ownFinal73Pending || logPromptOpen;
+}
+
 }
 }

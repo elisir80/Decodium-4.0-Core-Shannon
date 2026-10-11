@@ -35,6 +35,7 @@ using decodium::seq::deferredSignoffRetryCapForMode;
 using decodium::seq::remapRequestedTxStep;
 using decodium::seq::qsoProgressForTxStep;
 using decodium::seq::isTxStepDisabledInMask;
+using decodium::seq::specialOperationTransitionRequiresDeferral;
 using decodium::seq::TxStepRemapReason;
 
 class TestQsoSequencerRules final : public QObject
@@ -115,6 +116,13 @@ private slots:
 
     // Normal exchange: same partner already replied and received our report.
     QVERIFY (mayAdvanceRogerReportToRr73 (false, true, true));
+  }
+
+  void specialOperationWaitsForQsoFinalisation ()
+  {
+    QVERIFY (specialOperationTransitionRequiresDeferral (true, false));
+    QVERIFY (specialOperationTransitionRequiresDeferral (false, true));
+    QVERIFY (!specialOperationTransitionRequiresDeferral (false, false));
   }
 
   void txStepRemapTx1Disabled ()

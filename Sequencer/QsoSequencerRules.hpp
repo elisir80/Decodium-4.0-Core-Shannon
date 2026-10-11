@@ -59,6 +59,11 @@ bool mayAdvanceRogerReportToRr73 (bool freshAutoCqCaller,
                                   bool ownReportWasSentToSamePartner,
                                   bool priorReplyFromSamePartnerAccepted);
 
+// A Fox/Hound backend change must not interrupt the final TX5/73 or an open
+// log confirmation. Both states still belong to the QSO being completed.
+bool specialOperationTransitionRequiresDeferral (bool ownFinal73Pending,
+                                                 bool logPromptOpen);
+
 }
 }
 

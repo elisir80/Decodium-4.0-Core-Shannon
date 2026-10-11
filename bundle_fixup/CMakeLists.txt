@@ -1,3 +1,7 @@
+if (POLICY CMP0177)
+  cmake_policy (SET CMP0177 NEW)
+endif ()
+
 get_target_property (QtCore_location Qt6::Core LOCATION)
 get_filename_component (QtCore_location ${QtCore_location} PATH)
 list (APPEND fixup_library_dirs ${QtCore_location})

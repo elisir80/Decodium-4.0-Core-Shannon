@@ -503,7 +503,10 @@ Item {
         var hz = engine ? Number(engine.frequency || 0) : 0
         if (hz <= 0)
             return qsTr("Freq")
-        return (hz / 1000000.0).toFixed(6).replace(/0+$/, "").replace(/\.$/, "")
+        // Keep the fixed six-decimal dial representation.  Removing trailing
+        // zeroes makes a valid working frequency such as 18.100000 appear as
+        // 18.1, which is ambiguous and inconsistent with the frequency list.
+        return (hz / 1000000.0).toFixed(6)
     }
 
     function refreshWorkingFrequencyOptions() {

@@ -15,11 +15,15 @@ Rectangle {
             || String(value).toLowerCase() === "true" || String(value) === "1"
     }
     property bool optionEnabled: engine ? asBool(engine.getSetting("SuperFox", false)) : false
+    readonly property bool transitionPending: !!(engine && engine.specialOperationChangePending)
     readonly property bool active: !!(engine && optionEnabled && engine.mode === "FT8"
                                       && (engine.houndMode || engine.foxMode))
     readonly property bool canToggle: !!(engine && !engine.transmitting && !engine.tuning
+                                         && !transitionPending
                                          && (engine.mode === "FT8" || optionEnabled))
-    readonly property string statusDescription: active
+    readonly property string statusDescription: transitionPending
+        ? qsTr("SuperFox will activate after the current QSO is logged")
+        : active
         ? (engine.houndMode ? qsTr("SuperHound reception active") : qsTr("SuperFox transmission mode active"))
         : !optionEnabled ? qsTr("Click to enable SuperFox reception in FT8")
         : !engine || engine.mode !== "FT8" ? qsTr("SuperFox requires FT8 mode")

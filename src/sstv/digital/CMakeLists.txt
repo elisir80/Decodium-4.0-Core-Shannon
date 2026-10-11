@@ -178,9 +178,9 @@ target_include_directories (decodium_sstv_hamdrm_runtime
 target_link_libraries (decodium_sstv_hamdrm_runtime
   PUBLIC
     Decodium::HamDrmUi
-    Decodium::SstvIntegration
     Qt6::Core
   PRIVATE
+    Decodium::SstvIntegration
     Threads::Threads
   )
 target_compile_features (decodium_sstv_hamdrm_runtime PUBLIC cxx_std_17)

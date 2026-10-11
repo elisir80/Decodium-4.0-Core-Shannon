@@ -54,6 +54,10 @@ if (POLICY CMP0079)
   cmake_policy (SET CMP0079 NEW) # allow target_link_libraries across directories
 endif ()
 
+if (POLICY CMP0156)
+  cmake_policy (SET CMP0156 NEW) # deduplicate static libraries per platform linker rules
+endif ()
+
 if (POLICY CMP0075)
   cmake_policy (SET CMP0075 NEW) # honour CMAKE_REQUIRED_LIBRARIES in config checks
 endif ()
@@ -1913,7 +1917,10 @@ set_target_properties (wsjtx PROPERTIES
   MACOSX_BUNDLE_GUI_IDENTIFIER "${WSJT_APP_GUI_IDENTIFIER}"
   )
 
-target_include_directories (wsjtx PRIVATE ${FFTW3_INCLUDE_DIRS})
+target_include_directories (wsjtx PRIVATE
+  ${FFTW3_INCLUDE_DIRS}
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cw
+  )
 if (OPENMP_FOUND)
   if (OpenMP_CXX_FLAGS)
     set_target_properties (wsjtx PROPERTIES
@@ -1936,6 +1943,7 @@ if (OPENMP_FOUND)
     endif ()
 endif ()
 target_link_libraries (wsjtx Qt6::SerialPort Qt6::Quick Qt6::Qml Qt6::QuickControls2 Qt6::Network Qt6::Sql Qt6::WebSockets Qt6::Concurrent wsjt_qtmm ${FFTW3_LIBRARIES} ${LIBM_LIBRARIES})
+target_link_libraries (wsjtx decodium_cw)
 if (TARGET Decodium::SstvIntegration)
   target_link_libraries (wsjtx Decodium::SstvIntegration)
   target_link_libraries (wsjtx Decodium::SstvGallery)
@@ -2242,7 +2250,6 @@ target_link_libraries (decodium_qml
   Qt6::WebSockets
   wsjt_qtmm
   wsjt_qt
-  wsjt_fort
   wsjt_cxx
   Hamlib::Hamlib
   Boost::log
