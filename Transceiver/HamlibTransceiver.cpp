@@ -2477,6 +2477,38 @@ void HamlibTransceiver::do_tune (bool on)
 #endif
 }
 
+bool HamlibTransceiver::request_atu_tune (QString * error)
+{
+  auto * rig = m_->rig_.data ();
+  if (!rig) { if (error) *error = tr ("Radio disconnected"); return false; }
+  if (ptt_on_) { if (error) *error = tr ("Cannot start ATU tune while transmitting"); return false; }
+  if (!rig_has_set_func (rig, RIG_FUNC_TUNER)) {
+    if (error) *error = tr ("This radio does not expose an ATU tuner control through Hamlib");
+    return false;
+  }
+  int rc = rig_set_func (rig, RIG_VFO_CURR, RIG_FUNC_TUNER, 1);
+  if (rc == RIG_OK)
+    rc = rig_vfo_op (rig, RIG_VFO_CURR, RIG_OP_TUNE);
+  if (rc != RIG_OK) {
+    if (error) *error = QString::fromLocal8Bit (rigerror (rc));
+    return false;
+  }
+  return true;
+}
+
+bool HamlibTransceiver::request_power_off (QString * error)
+{
+  auto * rig = m_->rig_.data ();
+  if (!rig) { if (error) *error = tr ("Radio disconnected"); return false; }
+  if (ptt_on_) { if (error) *error = tr ("Cannot power off while transmitting"); return false; }
+  int rc = rig_set_powerstat (rig, RIG_POWER_OFF);
+  if (rc != RIG_OK) {
+    if (error) *error = QString::fromLocal8Bit (rigerror (rc));
+    return false;
+  }
+  return true;
+}
+
 
 QVariantMap HamlibTransceiver::voice_controls(QString const& key, double value, bool write)
 {

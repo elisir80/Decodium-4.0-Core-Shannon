@@ -22,17 +22,39 @@ ApplicationWindow {
     property var voice: ssbModule
     property var controls: bridge.ssbControls
     property bool ready: bridge.mode === "SSB" && bridge.catConnected
+    property string radioActionStatus: ""
     function updateRadioMode() { bridge.ssbSetRadioMode(dataInput.checked ? (side.currentIndex ? "DIGL" : "DIGU") : (side.currentIndex ? "LSB" : "USB")) }
     onClosing: voice.stop()
     onActiveChanged: if (!active) voice.stop()
     Component.onDestruction: voice.stop()
     onVisibleChanged: if (visible) bridge.ssbRefreshControls()
     Shortcut { sequence: "Escape"; onActivated: voice.stop() }
+    Dialog {
+        id: powerOffDialog
+        title: qsTr("Power off radio?")
+        modal: true
+        standardButtons: Dialog.Yes | Dialog.No
+        anchors.centerIn: parent
+        Label {
+            text: qsTr("This will switch off the radio connected through Hamlib CAT and disconnect it from Decodium.")
+            wrapMode: Text.WordWrap
+            width: 340
+        }
+        onAccepted: if (bridge.hamlibCat) bridge.hamlibCat.requestRadioPowerOff()
+    }
     Connections {
         target: bridge
         function onCatConnectedChanged() { if (!bridge.catConnected) voice.stop(); if(win.visible) bridge.ssbRefreshControls() }
         function onModeChanged() { if (bridge.mode !== "SSB") voice.stop() }
         function onDecoPortUseRemoteChanged() { voice.stop(); bridge.ssbRefreshControls() }
+    }
+    Connections {
+        target: bridge.hamlibCat
+        function onRadioActionCompleted(action, ok, error) {
+            win.radioActionStatus = ok
+                ? (action.toLowerCase().indexOf("atu") >= 0 ? qsTr("Radio ATU command sent") : qsTr("Radio power-off command sent"))
+                : (error || qsTr("Radio command failed"))
+        }
     }
     footer: Frame {
         background: Rectangle { color: "#101923" }
@@ -132,6 +154,30 @@ ApplicationWindow {
                     Label { text: qsTr("Radio mic gain %") }
                     SpinBox { from: 0; to: 100; value: controls.mic === undefined ? 0 : Math.round(controls.mic); enabled: ready && controls.busy !== true && !voice.transmitting && controls.micSupported === true; onValueModified: bridge.ssbSetControl("mic",value) }
                     Button { text: qsTr("Read radio"); Layout.columnSpan: 2; enabled: ready && controls.busy !== true && !voice.transmitting; onClicked: bridge.ssbRefreshControls() }
+                    Button {
+                        text: qsTr("ATU Tune")
+                        Layout.columnSpan: 2
+                        enabled: ready && controls.busy !== true && !voice.transmitting
+                                 && !bridge.decoPortUseRemote && bridge.hamlibCat && bridge.hamlibCat.connected
+                        ToolTip.visible: hovered
+                        ToolTip.text: qsTr("Ask the radio to start its internal antenna tuner.")
+                        onClicked: bridge.hamlibCat.requestAtuTune()
+                    }
+                    Button {
+                        text: qsTr("Power off radio")
+                        Layout.columnSpan: 2
+                        enabled: ready && controls.busy !== true && !voice.transmitting
+                                 && !bridge.decoPortUseRemote && bridge.hamlibCat && bridge.hamlibCat.connected
+                        onClicked: powerOffDialog.open()
+                    }
+                    Label {
+                        text: win.radioActionStatus
+                        visible: text.length > 0
+                        color: text.indexOf(qsTr("failed")) >= 0 ? "#ffa971" : "#77e7a9"
+                        Layout.columnSpan: 4
+                        Layout.fillWidth: true
+                        wrapMode: Text.WordWrap
+                    }
                     Label { text: qsTr("AGC OFF enables manual reception gain using RF gain. Unavailable controls are disabled."); Layout.columnSpan: 4; Layout.fillWidth: true; wrapMode: Text.WordWrap; color: "#a9bac9" }
                     Label { text: controls.error || ""; visible: text.length>0; color: "#ffa971"; Layout.columnSpan: 4; Layout.fillWidth: true; wrapMode: Text.WordWrap }
                 }

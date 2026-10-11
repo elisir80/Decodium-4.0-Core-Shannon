@@ -29,6 +29,9 @@ Window {
     readonly property color cWarn:   tm ? tm.warningColor  : "#ffb84a"
     readonly property color cBad:    "#ff5c5c"
     readonly property string mono:   (typeof decodiumMonoFontFamily !== 'undefined') ? decodiumMonoFontFamily : "monospace"
+    property bool transmitWhileTyping: false
+    property string queuedTypedText: ""
+    property int lastTypedPosition: 0
 
     readonly property bool canSend: !!(cw && cw.canSend)
     readonly property bool tuneReady: !!(eng && eng.catConnected && !eng.transmitting && cw && !cw.sending)
@@ -67,6 +70,25 @@ Window {
         statusText.color = level === "warning" ? cWarn : cDim
         statusTimer.restart()
     }
+    function queueTypedInput(value) {
+        if (!transmitWhileTyping) return
+        if (value.length < lastTypedPosition) {
+            lastTypedPosition = value.length
+            return
+        }
+        var added = value.substring(lastTypedPosition)
+        lastTypedPosition = value.length
+        if (added.length > 0) {
+            queuedTypedText += added.toUpperCase()
+            liveTypingTimer.restart()
+        }
+    }
+    function flushTypedInput() {
+        if (!transmitWhileTyping || !cw || !canSend || queuedTypedText.length === 0) return
+        var chunk = queuedTypedText
+        queuedTypedText = ""
+        cw.sendText(chunk, ctx())
+    }
 
     Connections {
         target: win.cw
@@ -77,6 +99,14 @@ Window {
         function onDxCallChanged() { if (win.eng) callField.text = win.eng.dxCall }
     }
     Timer { id: statusTimer; interval: 7000; onTriggered: statusText.text = "" }
+    Timer { id: liveTypingTimer; interval: 650; onTriggered: win.flushTypedInput() }
+    Connections {
+        target: win.cw
+        function onSendingChanged() {
+            if (win.transmitWhileTyping && win.cw && !win.cw.sending && win.queuedTypedText.length > 0)
+                liveTypingTimer.restart()
+        }
+    }
 
     component Lbl: Text {
         color: win.cDim
@@ -558,18 +588,35 @@ Window {
             Layout.fillWidth: true
             Layout.minimumWidth: 0
             spacing: 6
+            CheckBox {
+                text: qsTr("TX while typing")
+                checked: win.transmitWhileTyping
+                ToolTip.visible: hovered
+                ToolTip.text: qsTr("Transmit new text automatically after a short pause while typing.")
+                onToggled: {
+                    win.transmitWhileTyping = checked
+                    liveTypingTimer.stop()
+                    win.queuedTypedText = ""
+                    win.lastTypedPosition = freeText.text.length
+                }
+            }
             Field {
                 id: freeText
                 Layout.fillWidth: true
                 font.capitalization: Font.AllUppercase
                 placeholderText: qsTr("write here and press Enter: it goes out in CW")
-                enabled: win.canSend
-                onAccepted: { win.cw.sendText(text, win.ctx()); text = "" }
+                enabled: win.canSend || (win.transmitWhileTyping && win.cw && win.cw.sending)
+                onTextEdited: win.queueTypedInput(text)
+                onAccepted: {
+                    if (win.transmitWhileTyping) { liveTypingTimer.stop(); win.flushTypedInput(); text = ""; win.lastTypedPosition = 0 }
+                    else if (win.canSend) { win.cw.sendText(text, win.ctx()); text = ""; win.lastTypedPosition = 0 }
+                }
             }
             Btn {
                 label: qsTr("Send")
+                visible: !win.transmitWhileTyping
                 live: win.canSend && freeText.text.trim().length > 0
-                onClicked: { win.cw.sendText(freeText.text, win.ctx()); freeText.text = "" }
+                onClicked: { win.cw.sendText(freeText.text, win.ctx()); freeText.text = ""; win.lastTypedPosition = 0 }
             }
         }
 

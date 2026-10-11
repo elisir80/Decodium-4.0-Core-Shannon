@@ -29,6 +29,8 @@ public:
   ~HamlibTransceiver ();
 
   QVariantMap voice_controls(QString const&, double, bool) override;
+  bool request_atu_tune(QString * error);
+  bool request_power_off(QString * error);
   void send_morse (QString const&, int) noexcept override;  // keying CW via Hamlib
 
 private:

@@ -200,6 +200,8 @@ public:
     Q_SIGNAL void voiceControlsReady(QVariantMap controls);
     Q_INVOKABLE void setRigAudio(bool on, double periodSeconds = 15.0, int blockSize = 6912 / 2);
     Q_INVOKABLE void setRigTune(bool on);
+    Q_INVOKABLE void requestAtuTune();
+    Q_INVOKABLE void requestRadioPowerOff();
     Q_INVOKABLE void startRigTxAudio(const QString& mode, unsigned symbolsLength,
                                      double framesPerSymbol, double frequency,
                                      double toneSpacing, bool synchronize,
@@ -255,6 +257,7 @@ signals:
     void hrdStrictRadioMatchChanged();
     void errorOccurred(const QString& msg);
     void statusUpdate(const QString& msg);
+    void radioActionCompleted(const QString& action, bool ok, const QString& error);
     // First producer boundary. Only bounded, DirectConnection consumers may
     // attach here; ordinary UI/decoder consumers use tciPcmSamplesReady.
     void tciPcmSamplesProduced(const QVector<short>& samples);
