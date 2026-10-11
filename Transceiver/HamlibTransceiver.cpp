@@ -2545,10 +2545,17 @@ QVariantMap HamlibTransceiver::voice_controls(QString const& key, double value, 
     QVariantMap result;
     auto* rig=m_->rig_.data();
     if(!rig || !rig->caps) return {{"error",QStringLiteral("Radio disconnected")}};
+    QString const modelName = QString::fromLatin1(rig->caps->model_name ? rig->caps->model_name : "");
+    QString const manufacturerName = QString::fromLatin1(rig->caps->mfg_name ? rig->caps->mfg_name : "");
+    bool const isIcomIc7300 = modelName.contains(QStringLiteral("IC-7300"), Qt::CaseInsensitive)
+        || (manufacturerName.contains(QStringLiteral("Icom"), Qt::CaseInsensitive)
+            && modelName.contains(QStringLiteral("7300"), Qt::CaseInsensitive));
     struct Level { const char* name; setting_t id; };
     const Level levels[]={{"power",RIG_LEVEL_RFPOWER},{"rf",RIG_LEVEL_RF},
                           {"mic",RIG_LEVEL_MICGAIN},{"agc",RIG_LEVEL_AGC}};
     QString error;
+    bool agcOffWriteSucceeded=false;
+    int writeRc=-RIG_EINVAL;
     if(write) {
         int rc=-RIG_EINVAL;
         if(!std::isfinite(value)) return {{"error",QStringLiteral("Invalid control value")}};
@@ -2559,32 +2566,130 @@ QVariantMap HamlibTransceiver::voice_controls(QString const& key, double value, 
                && value>=300 && value<=4000)
                 rc=rig_set_mode(rig,RIG_VFO_CURR,mode,pbwidth_t(value));
             else rc=-RIG_EINVAL;
+        } else if(key=="agc" && isIcomIc7300 && value==double(RIG_AGC_OFF)
+                  && rig_has_set_level(rig,RIG_LEVEL_AGC_TIME)) {
+            // On the IC-7300 the CI-V AGC preset command (16/12/00) is
+            // rejected by the rig. AGC OFF is represented by the AGC time
+            // constant command (14/04/00), which Hamlib exposes as
+            // RIG_LEVEL_AGC_TIME.
+            value_t agcTime{};
+            agcTime.f=0.0f;
+            rc=rig_set_level(rig,RIG_VFO_CURR,RIG_LEVEL_AGC_TIME,agcTime);
+            agcOffWriteSucceeded=(rc==RIG_OK);
+            qInfo().noquote() << "[CATDBG] Hamlib AGC write model=" << modelName
+                              << "value=" << value << "path=AGC_TIME(0)" << "rc=" << rc;
         } else for(const auto& l:levels) if(key==l.name && rig_has_set_level(rig,l.id)) {
             value_t v{};
             if(l.id==RIG_LEVEL_AGC) {
                 bool allowed=false;
                 for(int i=0;i<rig->caps->agc_level_count;++i) if(value==rig->caps->agc_levels[i])allowed=true;
+                // Some Hamlib IC-7300 profiles advertise only OFF/FAST/MEDIUM
+                // in agc_level_count even though the backend and the radio
+                // accept the SLOW preset (CI-V AGC value 03).  SLOW is added
+                // to the UI below for that case, so it must also bypass this
+                // incomplete capability list here.
+                if(isIcomIc7300 && value==double(RIG_AGC_SLOW))
+                    allowed=true;
                 if(rig->caps->agc_level_count==0)allowed=value>=0 && value<=8 && value==int(value);
                 if(!allowed)break;
                 v.i=int(value);
             } else {if(value<0 || value>100)break;v.f=float(value/100.);}
             rc=rig_set_level(rig,RIG_VFO_CURR,l.id,v);break;
         }
+        // An IC-7300 can acknowledge the AGC preset command while keeping a
+        // zero AGC time constant after AGC OFF.  Program the standard SSB
+        // time constant too, so active presets really leave OFF on the rig.
+        if(key=="agc" && isIcomIc7300 && rc==RIG_OK
+           && value!=double(RIG_AGC_OFF) && rig_has_set_level(rig,RIG_LEVEL_AGC_TIME)) {
+            float agcTime=-1.0f;
+            if(value==double(RIG_AGC_FAST)) agcTime=0.3f;
+            else if(value==double(RIG_AGC_MEDIUM)) agcTime=2.0f;
+            else if(value==double(RIG_AGC_SLOW)) agcTime=6.0f;
+            if(agcTime>0.0f) {
+                value_t time{};
+                time.f=agcTime;
+                int const timeRc=rig_set_level(rig,RIG_VFO_CURR,RIG_LEVEL_AGC_TIME,time);
+                qInfo().noquote() << "[CATDBG] Hamlib AGC time model=" << modelName
+                                  << "value=" << value << "time=" << agcTime
+                                  << "path=AGC_TIME" << "rc=" << timeRc;
+                if(timeRc!=RIG_OK)
+                    rc=timeRc;
+            }
+        }
+        if(key=="agc" && !(isIcomIc7300 && value==double(RIG_AGC_OFF)
+                            && rig_has_set_level(rig,RIG_LEVEL_AGC_TIME)))
+            qInfo().noquote() << "[CATDBG] Hamlib AGC write model=" << modelName
+                              << "value=" << value << "path=AGC" << "rc=" << rc;
+        writeRc=rc;
         if(rc!=RIG_OK)error=QStringLiteral("%1: %2").arg(key,QString::fromLatin1(rigerror(rc)));
     }
     for(const auto& l:levels) {
         bool canSet=rig_has_set_level(rig,l.id)!=0;
         result[QString::fromLatin1(l.name)+"Supported"]=canSet;
         value_t v{};
-        if(rig_has_get_level(rig,l.id) && rig_get_level(rig,RIG_VFO_CURR,l.id,&v)==RIG_OK)
+        bool const readOk=rig_has_get_level(rig,l.id)
+            && rig_get_level(rig,RIG_VFO_CURR,l.id,&v)==RIG_OK;
+        if(readOk) {
             result[l.name]=l.id==RIG_LEVEL_AGC ? double(v.i) : double(v.f)*100.;
+            if(write && (key==QString::fromLatin1(l.name))
+               && (l.id==RIG_LEVEL_RFPOWER || l.id==RIG_LEVEL_RF))
+                qInfo().noquote() << "[CATDBG] Hamlib level readback model=" << modelName
+                                  << "key=" << l.name << "requested=" << value
+                                  << "readback=" << result.value(l.name)
+                                  << "write_rc=" << writeRc;
+        } else if(write && key==QString::fromLatin1(l.name)
+                  && (l.id==RIG_LEVEL_RFPOWER || l.id==RIG_LEVEL_RF)) {
+            qInfo().noquote() << "[CATDBG] Hamlib level readback unavailable model=" << modelName
+                              << "key=" << l.name << "requested=" << value
+                              << "write_rc=" << writeRc;
+        }
     }
+
+    // AGC_TIME is not a reliable mode readback on every IC-7300 firmware:
+    // after FAST/MEDIUM/SLOW the radio may report 0 even though AGC itself
+    // correctly reports the selected preset.  Never overwrite a valid AGC
+    // read with that ambiguous AGC_TIME value.
+    if(isIcomIc7300 && rig_has_get_level(rig,RIG_LEVEL_AGC_TIME)) {
+        value_t agcTime{};
+        if(rig_get_level(rig,RIG_VFO_CURR,RIG_LEVEL_AGC_TIME,&agcTime)==RIG_OK
+           && agcTime.f<=0.0001f && !result.contains(QStringLiteral("agc")))
+            result["agc"]=double(RIG_AGC_OFF);
+    }
+    if(agcOffWriteSucceeded)
+        result["agc"]=double(RIG_AGC_OFF);
     QVariantList agc;
+    auto agcLabel = [&](int level) {
+        if(isIcomIc7300) {
+            switch(level) {
+            case RIG_AGC_FAST:   return QStringLiteral("FAST (0.3 s)");
+            case RIG_AGC_MEDIUM: return QStringLiteral("MID (2.0 s)");
+            case RIG_AGC_SLOW:   return QStringLiteral("SLOW (6.0 s)");
+            default: break;
+            }
+        }
+        return QString::fromLatin1(rig_stragclevel(agc_level_e(level)));
+    };
+    auto appendAgc = [&](int level) {
+        agc.append(QVariantMap{{"name",agcLabel(level)}, {"value",level}});
+    };
     for(int i=0;i<rig->caps->agc_level_count;++i) {
         const auto level=rig->caps->agc_levels[i];
-        agc.append(QVariantMap{{"name",QString::fromLatin1(rig_stragclevel(level))},{"value",int(level)}});
+        appendAgc(int(level));
     }
-    if(agc.isEmpty())for(int v:{0,2,3,5,6})agc.append(QVariantMap{{"name",QString::fromLatin1(rig_stragclevel(agc_level_e(v)))},{"value",v}});
+    if(agc.isEmpty())for(int v:{0,2,3,5,6})appendAgc(v);
+
+    // Hamlib 4.x profiles seen in the field can advertise only OFF/FAST/MEDIUM
+    // for the IC-7300 even though the rig and the CI-V protocol support SLOW.
+    // Do not add SLOW to every radio: for this specific model it is a valid
+    // control and omitting it makes the QML selector incomplete.
+    if(isIcomIc7300 && rig_has_set_level(rig,RIG_LEVEL_AGC)) {
+        constexpr int slowAgc = 3; // Hamlib's RIG_AGC_SLOW / CI-V 03.
+        bool hasSlow = false;
+        for(const auto& mode : agc)
+            if(mode.toMap().value(QStringLiteral("value")).toInt() == slowAgc) { hasSlow = true; break; }
+        if(!hasSlow)
+            appendAgc(slowAgc);
+    }
     result["agcModes"]=agc;
     result["filterSupported"]=rig->caps->set_mode!=nullptr;
     rmode_t mode=RIG_MODE_NONE;pbwidth_t width=0;

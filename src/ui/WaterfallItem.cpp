@@ -1,9 +1,21 @@
 #include "WaterfallItem.hpp"
 #include <QPainter>
 #include <QPainterPath>
+#include <QFontDatabase>
 #include <QMouseEvent>
 #include <algorithm>
 #include <cmath>
+
+namespace {
+QFont waterfallFixedFont(int pointSize, QFont::Weight weight = QFont::Normal)
+{
+    static QFont const systemFixedFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+    QFont font = systemFixedFont;
+    font.setPointSize(pointSize);
+    font.setWeight(weight);
+    return font;
+}
+}
 
 WaterfallItem::WaterfallItem(QQuickItem *parent)
     : QQuickPaintedItem(parent)
@@ -128,7 +140,7 @@ void WaterfallItem::paint(QPainter *painter)
         drawFoxSlotMarkers(painter, 0, h);
 
     painter->setPen(QColor("#808890"));
-    painter->setFont(QFont("Consolas", 8));
+    painter->setFont(waterfallFixedFont(8));
     int step = 500;
     if (m_bandwidth > 3000) step = 500;
     else if (m_bandwidth > 1000) step = 200;
@@ -155,7 +167,7 @@ void WaterfallItem::drawSpectrum(QPainter *painter, int y, int h)
     float range = (hi - lo) < 1e-6f ? 1e-6f : (hi - lo);
 
     // ── griglia dB orizzontale (stile deskHPSDR: 5 righe bianche trasp.) ──
-    painter->setFont(QFont("FreeSans", 8));
+    painter->setFont(waterfallFixedFont(8));
     for (int step = 1; step <= 4; ++step) {
         float norm = step / 5.0f;
         int gy = y + h - static_cast<int>(norm * (h - 2));
@@ -239,7 +251,7 @@ void WaterfallItem::drawMarkers(QPainter *painter, int y, int h)
     }
 
     painter->setPen(QColor("#ff3333"));
-    painter->setFont(QFont("Consolas", 9, QFont::Bold));
+    painter->setFont(waterfallFixedFont(9, QFont::Bold));
     painter->drawText(rxX + 3, y + 12, QString("RX %1").arg(m_rxFreq));
 
     if (m_txFreq != m_rxFreq) {
@@ -269,7 +281,7 @@ void WaterfallItem::drawTxBrackets(QPainter *painter, int y, int h)
     painter->drawLine(bracketRight, y + 2, bracketRight - 4, y + 2);
     painter->drawLine(bracketRight, y + bracketH, bracketRight - 4, y + bracketH);
 
-    painter->setFont(QFont("Consolas", 7));
+    painter->setFont(waterfallFixedFont(7));
     painter->drawText(bracketLeft + 6, y + bracketH - 3, "TX");
 }
 
@@ -285,7 +297,7 @@ void WaterfallItem::drawFoxSlotMarkers(QPainter *painter, int y, int h)
     }
 
     if (!m_foxSlotMarkers.isEmpty()) {
-        painter->setFont(QFont("Consolas", 7));
+        painter->setFont(waterfallFixedFont(7));
         painter->setPen(QColor("#FF9800"));
         int x0 = freqToX(m_foxSlotMarkers.first().toInt());
         painter->drawText(x0 + 3, y + m_spectrumHeight + 12, "FOX");

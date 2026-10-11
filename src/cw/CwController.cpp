@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <cmath>
+#include <QDateTime>
+#include <QDebug>
 
 namespace decodium::cw {
 
@@ -229,6 +231,7 @@ void CwController::feedRxAudio(const QVector<short>& samples, int sampleRate)
 {
     if (!m_decoderOn || samples.isEmpty())
         return;
+    m_decoderLogSamples += static_cast<quint64>(samples.size());
     if (m_decoder.sampleRate() != sampleRate) {
         m_decoder.setSampleRate(sampleRate);
         m_decoder.reset();
@@ -238,6 +241,18 @@ void CwController::feedRxAudio(const QVector<short>& samples, int sampleRate)
     m_lastRxClock.restart();
     const QString text = m_decoder.feed(reinterpret_cast<const qint16*>(samples.constData()),
                                         static_cast<int>(samples.size()));
+    if (!m_decoderLogClock.isValid() || m_decoderLogClock.elapsed() >= 2000) {
+        m_decoderLogClock.restart();
+        const auto& scope = m_decoder.scope();
+        qInfo().noquote() << QStringLiteral("[CW-DECODER] samples=%1 tone_hz=%2 wpm=%3 cost=%4 reading=%5 text_chars=%6")
+                             .arg(m_decoderLogSamples)
+                             .arg(scope.pitch, 0, 'f', 1)
+                             .arg(scope.speed, 0, 'f', 1)
+                             .arg(scope.cost, 0, 'f', 4)
+                             .arg(scope.reading ? 1 : 0)
+                             .arg(text.size());
+        m_decoderLogSamples = 0;
+    }
     if (!text.isEmpty()) {
         m_decoderText += text;
         // Non si tiene una giornata di CW in memoria: gli ultimi 4000
@@ -405,6 +420,11 @@ bool CwController::canSend() const
     if (backend == QLatin1String("rigkey"))
         return true;
     return m_hooks.sendAudio && (!m_hooks.canTransmit || m_hooks.canTransmit());
+}
+
+void CwController::refreshTransmitState()
+{
+    emit txChanged();
 }
 
 QStringList CwController::availablePorts() const

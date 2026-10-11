@@ -49,7 +49,8 @@ QtObject {
     readonly property int spacing: 12
     readonly property int padding: 16
 
-    readonly property string monoFamily: "Consolas"
+    readonly property string monoFamily: (typeof decodiumMonoFontFamily !== "undefined" && decodiumMonoFontFamily)
+        ? decodiumMonoFontFamily : "monospace"
     readonly property int fontSmall: 11
     readonly property int fontBody: 13
     readonly property int fontTitle: 15

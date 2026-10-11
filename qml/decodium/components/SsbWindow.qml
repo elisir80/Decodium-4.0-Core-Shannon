@@ -23,11 +23,25 @@ ApplicationWindow {
     property var controls: bridge.ssbControls
     property bool ready: bridge.mode === "SSB" && bridge.catConnected
     property string radioActionStatus: ""
+    property bool syncingRadioMode: false
+    function syncRadioModeFromCat() {
+        syncingRadioMode = true
+        var mode = (bridge.catMode || "").toString().toUpperCase()
+        if (mode === "LSB" || mode === "DIGL" || mode === "DATA-L" || mode === "PKTLSB") {
+            side.currentIndex = 1
+            dataInput.checked = mode !== "LSB"
+        } else if (mode === "USB" || mode === "DIGU" || mode === "DATA-U" || mode === "PKTUSB") {
+            side.currentIndex = 0
+            dataInput.checked = mode !== "USB"
+        }
+        syncingRadioMode = false
+    }
     function updateRadioMode() { bridge.ssbSetRadioMode(dataInput.checked ? (side.currentIndex ? "DIGL" : "DIGU") : (side.currentIndex ? "LSB" : "USB")) }
     onClosing: voice.stop()
     onActiveChanged: if (!active) voice.stop()
     Component.onDestruction: voice.stop()
-    onVisibleChanged: if (visible) bridge.ssbRefreshControls()
+    onVisibleChanged: if (visible) { syncRadioModeFromCat(); bridge.ssbRefreshControls() }
+    Component.onCompleted: syncRadioModeFromCat()
     Shortcut { sequence: "Escape"; onActivated: voice.stop() }
     Dialog {
         id: powerOffDialog
@@ -44,7 +58,8 @@ ApplicationWindow {
     }
     Connections {
         target: bridge
-        function onCatConnectedChanged() { if (!bridge.catConnected) voice.stop(); if(win.visible) bridge.ssbRefreshControls() }
+        function onCatConnectedChanged() { if (!bridge.catConnected) voice.stop(); if(win.visible) { syncRadioModeFromCat(); bridge.ssbRefreshControls() } }
+        function onCatModeChanged() { syncRadioModeFromCat() }
         function onModeChanged() { if (bridge.mode !== "SSB") voice.stop() }
         function onDecoPortUseRemoteChanged() { voice.stop(); bridge.ssbRefreshControls() }
     }
@@ -88,7 +103,11 @@ ApplicationWindow {
             }
             RowLayout {
                 TextField {
-                    id: dial; Layout.fillWidth: true; font.pixelSize: 24; font.family: "Consolas"
+                    id: dial; Layout.fillWidth: true; font.pixelSize: 24
+                    // Consolas is not installed by default on macOS/Linux and
+                    // makes Qt rebuild its font-family aliases at startup.
+                    font.family: (typeof decodiumMonoFontFamily !== "undefined" && decodiumMonoFontFamily)
+                                 ? decodiumMonoFontFamily : "monospace"
                     text: (bridge.frequency / 1000000).toFixed(6)
                     enabled: ready && controls.busy !== true && !voice.transmitting
                     onAccepted: { bridge.cwTuneFrequency(Number(text.replace(",","."))*1000000); focus=false }
@@ -100,7 +119,7 @@ ApplicationWindow {
             }
             RowLayout {
                 ComboBox { id: side; model: ["USB", "LSB"]; enabled: ready && controls.busy !== true && !voice.transmitting; onActivated: win.updateRadioMode() }
-                CheckBox { id: dataInput; text: qsTr("USB/data audio input"); checked: true; enabled: ready && controls.busy !== true && !voice.transmitting; onToggled: if(win.ready) win.updateRadioMode() }
+                CheckBox { id: dataInput; text: qsTr("USB/data audio input"); checked: true; enabled: ready && controls.busy !== true && !voice.transmitting; onToggled: if(win.ready && !win.syncingRadioMode) win.updateRadioMode() }
                 Item { Layout.fillWidth: true }
                 Button { text: qsTr("Activate SSB"); visible: bridge.mode !== "SSB"; onClicked: bridge.mode="SSB" }
             }
@@ -145,11 +164,20 @@ ApplicationWindow {
                     Label { text: qsTr("RX filter Hz") }
                     SpinBox { from: 300; to: 4000; stepSize: 100; value: controls.filter === undefined ? 2400 : controls.filter; enabled: ready && controls.busy !== true && !voice.transmitting && controls.filterSupported === true; onValueModified: bridge.ssbSetControl("filter",value) }
                     Label { text: qsTr("Radio AGC") }
-                    ComboBox {
+                    DecoComboBox {
                         model: controls.agcModes || []; textRole: "name"; valueRole: "value"
                         enabled: ready && controls.busy !== true && !voice.transmitting && controls.agcSupported === true
                         currentIndex: { var a=controls.agcModes || [];for(var i=0;i<a.length;i++)if(a[i].value===controls.agc)return i;return -1 }
-                        onActivated: bridge.ssbSetControl("agc",currentValue)
+                        onActivated: {
+                            // Read the numeric value from the selected model row.
+                            // This avoids relying on the style ComboBox's currentValue
+                            // property, which can briefly expose the row index while
+                            // a refreshed AGC model is being installed.
+                            var a = controls.agcModes || [];
+                            var row = a[currentIndex];
+                            var agcValue = row && row.value !== undefined ? Number(row.value) : Number(currentValue);
+                            bridge.ssbSetControl("agc", agcValue);
+                        }
                     }
                     Label { text: qsTr("RF gain %") }
                     SpinBox { from: 0; to: 100; value: controls.rf === undefined ? 0 : Math.round(controls.rf); enabled: ready && controls.busy !== true && !voice.transmitting && controls.rfSupported === true; onValueModified: bridge.ssbSetControl("rf",value) }

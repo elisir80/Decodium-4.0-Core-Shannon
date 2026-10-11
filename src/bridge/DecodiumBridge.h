@@ -1398,7 +1398,7 @@ public:
     void setCwMonitorDevice(const QString& device);
     Q_INVOKABLE QVariantList cwMonitorOutputs() const;
     Q_INVOKABLE void testCwMonitor();
-    void playCwMonitor(const QVector<CwKeyEvent>& events, int toneHz);
+    bool playCwMonitor(const QVector<CwKeyEvent>& events, int toneHz);
     Q_SIGNAL void cwMonitorChanged();
     bool   cwRemoteKeySupported();
     bool   cwRemoteSendKey(const QVector<CwKeyEvent>& events, int toneHz);
@@ -3364,6 +3364,8 @@ private:
     bool   m_spectrumVisible {true};
     bool   m_rttyInAscolto {false};
     bool   m_cwInAscolto {false};
+    qint64 m_lastCwAudioTapLogMs {0};
+    quint64 m_cwAudioTapSamples {0};
     bool m_ssbTxActive {false};
     bool m_ssbRemoteTx {false};
     bool m_ssbRestoreMonitor {false};

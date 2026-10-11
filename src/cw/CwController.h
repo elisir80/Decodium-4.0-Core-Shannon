@@ -164,6 +164,9 @@ public:
     void setWpm(int wpm);
     bool canSend() const;
     bool sending() const { return m_sending; }
+    // Lo stato del keyer CAT dipende dalla radio e puo' cambiare dopo che il
+    // controller CW e' stato avviato. Forza il refresh delle proprieta' QML.
+    void refreshTransmitState();
     Q_INVOKABLE QStringList availablePorts() const;
     // Un colpo di prova: la lettera "V" per sentire che il manipolatore
     // risponde.
@@ -216,6 +219,8 @@ private:
     QElapsedTimer m_scopeClock;
     QElapsedTimer m_lastRxClock;
     QElapsedTimer m_retuneClock;
+    QElapsedTimer m_decoderLogClock;
+    quint64 m_decoderLogSamples {0};
     bool m_tuningLowerSideband {false};
 
     CwKeyer m_keyer;

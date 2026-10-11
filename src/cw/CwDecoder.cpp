@@ -39,6 +39,10 @@ constexpr double kFlushSeconds = 3.2;
 // gli somiglia. Misurato: un segnale, anche sepolto nel rumore, sta sotto 0.01;
 // il solo rumore di banda sta fra 0.68 e 1.3.
 constexpr float kMaxCost = 0.2f;
+constexpr float kMaxCostJump = 0.15f;
+constexpr float kMaxToneDriftHz = 45.0f;
+constexpr float kMaxSpeedDriftWpm = 6.0f;
+constexpr int kRequiredQualityFrames = 3;
 
 } // namespace
 
@@ -112,6 +116,10 @@ void CwDecoder::rebuild()
     m_wpm = 0;
     m_scope = Scope();
     m_last = QChar();
+    m_qualityStreak = 0;
+    m_lastQualityTone = 0.0f;
+    m_lastQualitySpeed = 0.0f;
+    m_lastQualityCost = 1.0f;
     setTone(m_tone);
 }
 
@@ -159,10 +167,37 @@ QString CwDecoder::drain()
         // no: senza questo controllo il riquadro si riempie di lettere finte
         // appena la radio e' accesa e nessuno sta trasmettendo.
         const GGMorse::Statistics& stats = m_morse->getStatistics();
-        const bool reading = stats.costFunction < kMaxCost && stats.estimatedPitch_Hz > 0;
+        const float tone = stats.estimatedPitch_Hz;
+        const float speed = stats.estimatedSpeed_wpm;
+        const float cost = stats.costFunction;
+        const bool finiteQuality = std::isfinite(tone) && std::isfinite(speed)
+            && std::isfinite(cost);
+        const bool signalQuality = finiteQuality && cost < kMaxCost && tone > 0.0f
+            && speed >= 5.0f && speed <= 60.0f;
+        const bool stableTone = m_qualityStreak == 0
+            || std::abs(tone - m_lastQualityTone) <= kMaxToneDriftHz;
+        const bool stableSpeed = m_qualityStreak == 0
+            || std::abs(speed - m_lastQualitySpeed) <= kMaxSpeedDriftWpm;
+        const bool noSuddenCostJump = m_qualityStreak == 0
+            || cost <= m_lastQualityCost + kMaxCostJump;
+        const bool qualityFrame = signalQuality && stableTone && stableSpeed && noSuddenCostJump;
+        if (qualityFrame) {
+            ++m_qualityStreak;
+            m_lastQualityTone = tone;
+            m_lastQualitySpeed = speed;
+            m_lastQualityCost = cost;
+        } else {
+            // Il testo gia' accettato resta nel pannello; si azzera solo la
+            // continuita' necessaria per autorizzare il prossimo frammento.
+            m_qualityStreak = 0;
+            m_lastQualityTone = 0.0f;
+            m_lastQualitySpeed = 0.0f;
+            m_lastQualityCost = 1.0f;
+        }
+        const bool reading = qualityFrame && m_qualityStreak >= kRequiredQualityFrames;
         if (reading) {
-            m_toneHz = stats.estimatedPitch_Hz;
-            m_wpm = static_cast<int>(std::lround(stats.estimatedSpeed_wpm));
+            m_toneHz = tone;
+            m_wpm = static_cast<int>(std::lround(speed));
         }
 
         // Si svuota comunque: quello che non vale si butta, non si accumula.

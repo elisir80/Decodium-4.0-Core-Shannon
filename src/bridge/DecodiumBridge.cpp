@@ -11101,6 +11101,21 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
             if (!catSignalMatchesBackend(m_catBackend, backend)) return;
             QString m = catProp("mode").toString();
             if (m_catMode != m) { m_catMode = m; emit catModeChanged(); }
+            if (m_mode == QStringLiteral("SSB")) {
+                QString const upper = m.trimmed().toUpper();
+                QString ssbMode;
+                if (upper == QStringLiteral("LSB") || upper == QStringLiteral("DIGL")
+                    || upper == QStringLiteral("DATA-L") || upper == QStringLiteral("PKTLSB")) {
+                    ssbMode = upper == QStringLiteral("LSB") ? QStringLiteral("LSB") : QStringLiteral("DIGL");
+                } else if (upper == QStringLiteral("USB") || upper == QStringLiteral("DIGU")
+                           || upper == QStringLiteral("DATA-U") || upper == QStringLiteral("PKTUSB")) {
+                    ssbMode = upper == QStringLiteral("USB") ? QStringLiteral("USB") : QStringLiteral("DIGU");
+                }
+                if (!ssbMode.isEmpty() && m_ssbRadioMode != ssbMode) {
+                    m_ssbRadioMode = ssbMode;
+                    emit ssbStateChanged();
+                }
+            }
         });
         connect(mgr, &std::remove_pointer_t<decltype(mgr)>::splitModeChanged, this, [this, backend, catProp]() {
             if (m_shuttingDown) return;
@@ -43142,11 +43157,27 @@ QVariantList DecodiumBridge::cwMonitorOutputs() const {
     return outputs;
 }
 void DecodiumBridge::testCwMonitor() {
-    if (m_cwRemoteKeying || m_transmitting || m_tuning) return;
+    if (!cwMonitorEnabled()) {
+        bridgeLog(QStringLiteral("CW sidetone test ignored: local sidetone disabled"));
+        emit statusMessage(tr("CW tone test skipped: enable TX sidetone on this computer first."));
+        return;
+    }
+    if (m_cwRemoteKeying || m_transmitting || m_tuning) {
+        bridgeLog(QStringLiteral("CW sidetone test ignored: radio path busy remote_key=%1 tx=%2 tune=%3")
+                      .arg(m_cwRemoteKeying ? 1 : 0)
+                      .arg(m_transmitting ? 1 : 0)
+                      .arg(m_tuning ? 1 : 0));
+        emit statusMessage(tr("CW tone test skipped while the radio is transmitting or tuning."));
+        return;
+    }
+    bridgeLog(QStringLiteral("CW sidetone test requested: output_id=%1 volume=%2 tone_hz=700 message=V")
+                  .arg(cwMonitorDevice().isEmpty() ? QStringLiteral("default") : cwMonitorDevice())
+                  .arg(cwMonitorVolume()));
     QVector<CwKeyEvent> events;
     for (const auto& e : decodium::cw::timelineFor(QStringLiteral("V"), 20))
         events.append({e.deltaMs, e.down});
-    playCwMonitor(events, 700);
+    if (playCwMonitor(events, 700))
+        emit statusMessage(tr("CW tone test sent to the selected local audio output (V)."));
 }
 
 // SSB voice workspace.
@@ -43260,9 +43291,12 @@ bool DecodiumBridge::cwRemoteSendKey(const QVector<CwKeyEvent>& events, int tone
     return sent;
 }
 
-void DecodiumBridge::playCwMonitor(const QVector<CwKeyEvent>& events, int toneHz)
+bool DecodiumBridge::playCwMonitor(const QVector<CwKeyEvent>& events, int toneHz)
 {
-    if (cwMonitorEnabled()) {
+    if (!cwMonitorEnabled())
+        return false;
+
+    {
         // Il tono lo fa il gateway accanto alla radio: qui lo stesso ritmo
         // diventa il tono che sente chi sta davanti a Decodium.
         if (!m_cwSidetone) {
@@ -43278,8 +43312,9 @@ void DecodiumBridge::playCwMonitor(const QVector<CwKeyEvent>& events, int toneHz
             deltas.append(ev.deltaMs);
             down.append(ev.down);
         }
-        m_cwSidetone->enqueue(deltas, down, toneHz);
+        return m_cwSidetone->enqueue(deltas, down, toneHz);
     }
+    return false;
 }
 
 // Il PTT della radio remota per il CW a tasto. Mentre e' alzato nessun altro
@@ -52289,10 +52324,27 @@ void DecodiumBridge::ensureAudioSink()
             if (samples.isEmpty())
                 return;
             if (m_mode == "SSB" && !m_decoPortUseRemote) ssbMonitorAudio(samples);
-            // CW: lo stesso rubinetto, aperto solo mentre la finestra CW e' aperta
-            // e mai in trasmissione (si decodificherebbe il proprio sidetone).
-            if (m_cwInAscolto && !m_transmitting && !m_tuning)
+            // CW: in modalita' CW il decoder resta agganciato alla radio anche
+            // se la finestra viene nascosta o QML perde un aggiornamento di
+            // visibility. La finestra e' un controllo UI, non deve spegnere il
+            // ricevitore. In TX/tuning si scarta il sidetone locale.
+            const bool cwTap = (m_mode == QStringLiteral("CW") || m_cwInAscolto)
+                && !m_transmitting && !m_tuning;
+            if (cwTap) {
+                m_cwAudioTapSamples += static_cast<quint64>(samples.size());
+                const qint64 nowMs = QDateTime::currentMSecsSinceEpoch();
+                if (nowMs - m_lastCwAudioTapLogMs >= 2000) {
+                    m_lastCwAudioTapLogMs = nowMs;
+                    bridgeLog(QStringLiteral("[CW-RX] audio tap active samples=%1 total=%2 mode=%3 window=%4 tx=%5 tune=%6")
+                                  .arg(samples.size())
+                                  .arg(m_cwAudioTapSamples)
+                                  .arg(m_mode)
+                                  .arg(m_cwInAscolto ? 1 : 0)
+                                  .arg(m_transmitting ? 1 : 0)
+                                  .arg(m_tuning ? 1 : 0));
+                }
                 emit campioniRxCw(samples);
+            }
             // JTTY: il ricevitore ascolta sempre quando il modo e' attivo e
             // il monitor e' acceso, anche a finestra chiusa (le righe
             // complete vanno comunque nella lista dei decodificati).

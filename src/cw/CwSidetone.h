@@ -29,7 +29,7 @@ public:
 
     // `deltas`: durata in ms dello stato che PRECEDE ogni istante; `down`: lo
     // stato dopo l'istante (lo stesso modello degli eventi del tasto remoto).
-    void enqueue(const QList<int>& deltasMs, const QList<bool>& down, int toneHz);
+    bool enqueue(const QList<int>& deltasMs, const QList<bool>& down, int toneHz);
     void clear();
     void setDeviceId(const QByteArray& id);
 signals:
@@ -47,6 +47,7 @@ private:
     QPointer<QAudioSink> m_sink;
     QTimer m_idle;
     double m_volume {0.35};
+    int m_sampleRate {48000};
 };
 
 }  // namespace decodium::cw

@@ -94,6 +94,14 @@ private:
     // L'ultima lettera uscita: serve a non mettere due righe vuote di fila
     // quando il tono cambia fra una chiamata e l'altra.
     QChar m_last;
+
+    // Qualita' minima prima di accettare nuovo testo. Ggmorse analizza finestre
+    // consecutive: un singolo frame con costo basso non basta in una banda
+    // affollata, dove un altro segnale puo' sembrare Morse per poco tempo.
+    int m_qualityStreak{0};
+    float m_lastQualityTone{0.0f};
+    float m_lastQualitySpeed{0.0f};
+    float m_lastQualityCost{1.0f};
 };
 
 // La tavola del Morse, per chi deve scrivere e per chi deve leggere.

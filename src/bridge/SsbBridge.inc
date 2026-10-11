@@ -88,6 +88,7 @@ void DecodiumBridge::ssbRefreshControls()
 void DecodiumBridge::ssbSetControl(const QString& key,double value)
 {
     if(m_mode!="SSB" || m_ssbTxActive || m_transmitting || m_tuning || !m_catConnected || activeCatReportsPttActive())return;
+    qInfo().noquote() << "[CATDBG] SSB control request key=" << key << "value=" << value;
     if(m_decoPortUseRemote) {
         if(m_remoteIsDecolink)if(auto* link=qobject_cast<DecolinkLink*>(remoteLinkIfAny()))link->requestVoiceControl(key,value,true);
         return;

@@ -71,6 +71,21 @@ Window {
         statusText.color = level === "warning" ? cWarn : cDim
         statusTimer.restart()
     }
+    function transmitWarningText() {
+        if (!cw) return ""
+        var backend = cw.effectiveBackend
+        if (backend === "rigkey")
+            return qsTr("The radio CAT keyer is not currently available. Check the CAT connection and the radio's CW keyer support. The decoder works anyway.")
+        if (backend === "serial")
+            return qsTr("The serial keyer is not open: choose its port in Setup. The decoder works anyway.")
+        if (backend === "winkeyer")
+            return qsTr("The WinKeyer is not open: choose its port in Setup. The decoder works anyway.")
+        if (eng && eng.mode === "CW" && backend === "audio")
+            return qsTr("CW transmit is unavailable: choose a working serial keyer or WinKeyer in Setup, or use a radio with a supported CAT CW keyer.")
+        if (backend === "audio")
+            return qsTr("CW transmit is not ready: it needs the radio connected and a transmit audio output. The decoder works anyway, it only needs the radio audio.")
+        return qsTr("CW transmit is not ready. Check the selected keyer and its connection. The decoder works anyway.")
+    }
     function queueTypedInput(value) {
         if (!transmitWhileTyping) return
         // Track edits by their common prefix so inserting in the middle of the
@@ -345,6 +360,13 @@ Window {
                 onPressedChanged: if (pressed) refresh()
                 onActivated: win.eng.cwMonitorDevice = currentValue
             }
+            Text {
+                Layout.fillWidth: true
+                wrapMode: Text.Wrap
+                color: win.cDim
+                font.pixelSize: 10
+                text: qsTr("TX tone test plays a local V on the selected output; it does not key the radio. Use Test (V) below to test the configured CW transmitter.")
+            }
             // Con una radio remota la scelta di sopra non conta: si decide qui
             // come arriva il CW alla radio lontana.
             RowLayout {
@@ -476,12 +498,7 @@ Window {
             wrapMode: Text.Wrap
             color: win.cWarn
             font.pixelSize: 12
-            text: !win.cw ? ""
-                  : (win.eng && win.eng.mode === "CW" && win.cw.effectiveBackend === "audio"
-                     ? qsTr("CW transmit is unavailable: choose a working serial keyer or WinKeyer in Setup, or use a radio with a supported CAT CW keyer.")
-                     : (win.cw.effectiveBackend === "audio"
-                        ? qsTr("CW transmit is not ready: it needs the radio connected and a transmit audio output. The decoder works anyway, it only needs the radio audio.")
-                        : qsTr("The keyer is not open: choose its port in Setup. The decoder works anyway.")))
+            text: win.transmitWarningText()
         }
 
         // ── Con chi si parla ────────────────────────────────────────────

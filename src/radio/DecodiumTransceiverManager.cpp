@@ -163,6 +163,45 @@ QString sanitizeHamlibFailure(QString const& reason)
     return reason;
 }
 
+// voice_controls() returns the text supplied by rigerror(). With some
+// Hamlib 4.x builds that text can include the complete rig_debug() trace,
+// including frame.c/read_string_generic lines. Keep that trace in the
+// diagnostic log, but never render it as a multi-page error in QML.
+QVariantMap sanitizeVoiceControlResult(QVariantMap result, QString const& key)
+{
+    QString const raw = result.value(QStringLiteral("error")).toString().trimmed();
+    if (raw.isEmpty())
+        return result;
+
+    bool const containsHamlibTrace = raw.contains(QLatin1Char('\n'))
+        || raw.contains(QStringLiteral("frame.c("), Qt::CaseInsensitive)
+        || raw.contains(QStringLiteral("read_string_generic"), Qt::CaseInsensitive)
+        || raw.contains(QStringLiteral("icom_transaction"), Qt::CaseInsensitive);
+    if (containsHamlibTrace) {
+        result.insert(QStringLiteral("errorDetail"), raw);
+        qWarning().noquote()
+            << "[CATDBG] Voice control rejected"
+            << "key=" << key
+            << "detail=" << raw;
+    }
+
+    QString shown = raw;
+    if (raw.contains(QStringLiteral("Command rejected by the rig"), Qt::CaseInsensitive)
+        || raw.contains(QStringLiteral("returning(-9)"), Qt::CaseInsensitive)) {
+        shown = QObject::tr("The radio rejected the %1 CAT command; the CAT connection is still active.")
+            .arg(key);
+    } else if (containsHamlibTrace) {
+        // This is an operation-level result returned while the manager is
+        // still connected. The generic CAT failure sanitizer deliberately
+        // maps read_string_generic traces to a transport error, which would
+        // falsely tell the operator that CAT had been disconnected here.
+        shown = QObject::tr("The radio did not accept the %1 CAT command; the CAT connection is still active.")
+            .arg(key);
+    }
+    result.insert(QStringLiteral("error"), shown);
+    return result;
+}
+
 QString normalizeDevicePath(QString value)
 {
     value = value.trimmed();
@@ -2841,12 +2880,18 @@ void DecodiumTransceiverManager::loadSettings()
 void DecodiumTransceiverManager::requestVoiceControl(const QString& key, double value, bool write)
 {
     if(!m_connected || !d->transceiver){emit voiceControlsReady({{"error",tr("CAT disconnected")}});return;}
+    qInfo().noquote()
+        << "[CATDBG] Voice control request"
+        << "key=" << key
+        << "value=" << value
+        << "write=" << write;
     QPointer<DecodiumTransceiverManager> owner(this);
     auto* xcv=d->transceiver.data();
     QMetaObject::invokeMethod(xcv,[owner,xcv,key,value,write]{
         QVariantMap result;
         try {result=xcv->voice_controls(key,value,write);}
         catch(...) {result={{"error",QStringLiteral("Voice CAT request failed")}};}
+        result=sanitizeVoiceControlResult(result,key);
         if(owner)QMetaObject::invokeMethod(owner,[owner,xcv,result]{
             if(owner && owner->m_connected && owner->d->transceiver==xcv)emit owner->voiceControlsReady(result);
         },Qt::QueuedConnection);

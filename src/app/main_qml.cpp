@@ -4408,6 +4408,23 @@ int main(int argc, char* argv[])
                           &cwModule, &decodium::cw::CwController::invalidateTuningSignal);
         QObject::connect (&bridge, &DecodiumBridge::catConnectedChanged,
                           &cwModule, &decodium::cw::CwController::invalidateTuningSignal);
+        // Il CAT puo' connettersi dopo l'avvio del modulo CW. In quel caso
+        // effectiveBackend()/canSend() devono essere rivalutati, altrimenti
+        // la finestra resta sul messaggio iniziale "keyer non aperto".
+        QObject::connect (&bridge, &DecodiumBridge::catModeChanged,
+                          &cwModule, &decodium::cw::CwController::refreshTransmitState);
+        QObject::connect (&bridge, &DecodiumBridge::catConnectedChanged,
+                          &cwModule, &decodium::cw::CwController::refreshTransmitState);
+        QObject::connect (&bridge, &DecodiumBridge::modeChanged,
+                          &cwModule, &decodium::cw::CwController::refreshTransmitState);
+        QObject::connect (&bridge, &DecodiumBridge::decoPortUseRemoteChanged,
+                          &cwModule, &decodium::cw::CwController::refreshTransmitState);
+        QObject::connect (&bridge, &DecodiumBridge::catBackendChanged,
+                          &cwModule, &decodium::cw::CwController::refreshTransmitState);
+        QObject::connect (&bridge, &DecodiumBridge::transmittingChanged,
+                          &cwModule, &decodium::cw::CwController::refreshTransmitState);
+        QObject::connect (&bridge, &DecodiumBridge::tuningChanged,
+                          &cwModule, &decodium::cw::CwController::refreshTransmitState);
         // L'audio della radio, gia' a 12 kHz, dallo stesso rubinetto di RTTY e
         // JTTY: vale anche con la radio remota.
         QObject::connect (&bridge, &DecodiumBridge::campioniRxCw,
