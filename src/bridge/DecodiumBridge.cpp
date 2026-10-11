@@ -23016,7 +23016,8 @@ void DecodiumBridge::setFoxMode(bool v)
 {
     if (v) {
         setSpecialOperationActivity(kSpecialOpFox);
-    } else if (m_specialOperationActivity == kSpecialOpFox) {
+    } else if (m_specialOperationActivity == kSpecialOpFox
+               || m_deferredSpecialOperationActivity == kSpecialOpFox) {
         setSpecialOperationActivity(kSpecialOpNone);
     }
 }
@@ -23025,7 +23026,8 @@ void DecodiumBridge::setHoundMode(bool v)
 {
     if (v) {
         setSpecialOperationActivity(kSpecialOpHound);
-    } else if (m_specialOperationActivity == kSpecialOpHound) {
+    } else if (m_specialOperationActivity == kSpecialOpHound
+               || m_deferredSpecialOperationActivity == kSpecialOpHound) {
         setSpecialOperationActivity(kSpecialOpNone);
     }
 }
@@ -23707,6 +23709,30 @@ void DecodiumBridge::syncSpecialOperationToLegacyBackend()
     m_legacyBackend->setSpecialOperationActivity(requestedActivity);
 }
 
+bool DecodiumBridge::specialOperationTransitionBlockedByQsoFinalisation() const
+{
+    return decodium::seq::specialOperationTransitionRequiresDeferral(
+        m_logAfterOwn73, m_logPromptOpen);
+}
+
+bool DecodiumBridge::applyDeferredSpecialOperationActivityIfReady()
+{
+    if (m_deferredSpecialOperationActivity < kSpecialOpNone) {
+        return false;
+    }
+    if (m_transmitting || m_tuning || specialOperationTransitionBlockedByQsoFinalisation()) {
+        return true;
+    }
+
+    int const activity = m_deferredSpecialOperationActivity;
+    m_deferredSpecialOperationActivity = -1;
+    emit specialOperationChangePendingChanged();
+    bridgeLog(QStringLiteral("SpecialOp deferred transition applying after QSO finalisation: activity=%1")
+                  .arg(activity));
+    setSpecialOperationActivity(activity);
+    return true;
+}
+
 void DecodiumBridge::setSpecialOperationActivity(int activity)
 {
     if (m_transmitting || m_tuning) {
@@ -23714,8 +23740,32 @@ void DecodiumBridge::setSpecialOperationActivity(int activity)
                            QStringLiteral("Stop TX/Tune before changing operating activity"), QString());
         return;
     }
-    QScopedValueRollback<bool> stateGuard(m_syncingLegacyBackendState, true);
     activity = qBound(kSpecialOpNone, activity, kSpecialOpMax);
+    if (specialOperationTransitionBlockedByQsoFinalisation()) {
+        if (activity == m_specialOperationActivity) {
+            if (m_deferredSpecialOperationActivity >= kSpecialOpNone) {
+                bridgeLog(QStringLiteral("SpecialOp deferred transition cancelled during QSO finalisation: activity=%1")
+                              .arg(m_deferredSpecialOperationActivity));
+                m_deferredSpecialOperationActivity = -1;
+                emit specialOperationChangePendingChanged();
+            }
+            return;
+        }
+
+        if (m_deferredSpecialOperationActivity != activity) {
+            bridgeLog(QStringLiteral("SpecialOp transition deferred until QSO finalisation: requested=%1 current=%2 own73=%3 prompt=%4")
+                          .arg(activity)
+                          .arg(m_specialOperationActivity)
+                          .arg(m_logAfterOwn73 ? 1 : 0)
+                          .arg(m_logPromptOpen ? 1 : 0));
+            m_deferredSpecialOperationActivity = activity;
+            emit specialOperationChangePendingChanged();
+        }
+        emit statusMessage(QStringLiteral("Operating activity will change after the final 73 and QSO log"));
+        return;
+    }
+
+    QScopedValueRollback<bool> stateGuard(m_syncingLegacyBackendState, true);
     bool const wasLegacyTx = usingLegacyBackendForTx();
     bool const wasLegacyRx = usingLegacyBackendForRx();
     bool const wasForced = m_forceLegacyTxForSpecialOp;
@@ -31731,11 +31781,14 @@ void DecodiumBridge::setSetting(const QString& key, const QVariant& value)
     }
     if (key == QStringLiteral("SelectedActivity")) {
         int const activity = qBound(kSpecialOpNone, value.toInt(), kSpecialOpMax);
-        if (activity != m_specialOperationActivity) {
+        if (activity != m_specialOperationActivity
+            || m_deferredSpecialOperationActivity >= kSpecialOpNone) {
             setSpecialOperationActivity(activity);
         }
     } else if (key == QStringLiteral("SpecialOpActivity")) {
-        if (!value.toBool() && m_specialOperationActivity != kSpecialOpNone) {
+        if (!value.toBool()
+            && (m_specialOperationActivity != kSpecialOpNone
+                || m_deferredSpecialOperationActivity > kSpecialOpNone)) {
             setSpecialOperationActivity(kSpecialOpNone);
         }
     } else if (key == QStringLiteral("SuperFox") && legacyBackendAvailable()) {
@@ -39264,6 +39317,9 @@ bool DecodiumBridge::finishAutoSequenceQsoFromCompletedSignoff(const QString& re
     bool const continueAutoCq = autoCqCanRestartTx6();
     bool const preserveAutoTx = continueQueuedCaller || continueAutoCq;
     resetQsoStateForNextSequence(preserveAutoTx);
+    if (applyDeferredSpecialOperationActivityIfReady()) {
+        return true;
+    }
     if (continueQueuedCaller) {
         processNextInQueue();
     } else if (continueAutoCq) {
@@ -39425,6 +39481,9 @@ void DecodiumBridge::checkAndStartPeriodicTx()
         bool const continueAutoCq = autoCqCanRestartTx6();
         bool const preserveAutoTx = continueQueuedCaller || continueAutoCq;
         resetQsoStateForNextSequence(preserveAutoTx);
+        if (applyDeferredSpecialOperationActivityIfReady()) {
+            return;
+        }
         if (continueQueuedCaller) {
             processNextInQueue();
         } else if (continueAutoCq) {
@@ -40357,6 +40416,9 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
         bool const continueAutoCq = autoCqCanRestartTx6();
         bool const preserveAutoTx = continueQueuedCaller || continueAutoCq;
         resetQsoStateForNextSequence(preserveAutoTx);
+        if (applyDeferredSpecialOperationActivityIfReady()) {
+            return;
+        }
         if (continueQueuedCaller) {
             processNextInQueue();
         } else if (continueAutoCq) {
@@ -44254,6 +44316,7 @@ void DecodiumBridge::confirmLogQso()
     m_logPromptOpen = false;
     QTimer::singleShot(0, this, [this]() {
         logQsoNow();
+        applyDeferredSpecialOperationActivityIfReady();
     });
 }
 
@@ -44280,6 +44343,7 @@ void DecodiumBridge::rejectPromptedLogQso()
     clearLateAutoLogSnapshot();
     m_qsoLogged = true;
     clearTxArmedAfterCompletedQso(skippedCall, QStringLiteral("prompt-skip"));
+    applyDeferredSpecialOperationActivityIfReady();
     emit statusMessage(QStringLiteral("Log QSO skipped"));
 }
 

@@ -565,6 +565,7 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(bool singleDecode READ singleDecode WRITE setSingleDecode NOTIFY singleDecodeChanged)
     Q_PROPERTY(int ncontest READ ncontest WRITE setNcontest NOTIFY ncontestChanged)
     Q_PROPERTY(int specialOperationActivity READ specialOperationActivity WRITE setSpecialOperationActivity NOTIFY specialOperationActivityChanged)
+    Q_PROPERTY(bool specialOperationChangePending READ specialOperationChangePending NOTIFY specialOperationChangePendingChanged)
 
     // === SPECTRUM / WATERFALL ===
     Q_PROPERTY(int   spectrumColorPalette READ spectrumColorPalette WRITE setSpectrumColorPalette NOTIFY spectrumColorPaletteChanged)
@@ -1337,6 +1338,7 @@ public:
     bool singleDecode() const; void setSingleDecode(bool);
     int ncontest() const; void setNcontest(int);
     int specialOperationActivity() const { return m_specialOperationActivity; }
+    bool specialOperationChangePending() const { return m_deferredSpecialOperationActivity >= 0; }
     void setSpecialOperationActivity(int activity);
 
     // Spectrum
@@ -2286,6 +2288,7 @@ signals:
     void ndepthChanged(); void ncontestChanged();
     void singleDecodeChanged();
     void specialOperationActivityChanged();
+    void specialOperationChangePendingChanged();
     void spectrumColorPaletteChanged();
     void spectrumRefLevelChanged();
     void spectrumDynRangeChanged();
@@ -3346,6 +3349,9 @@ private:
     bool m_singleDecode {false};
     int m_specialOperationActivity {0};
     bool m_forceLegacyTxForSpecialOp {false};
+    // Requested while the current QSO is still sending its mandatory final
+    // 73 or awaiting a log confirmation. -1 means no deferred change.
+    int m_deferredSpecialOperationActivity {-1};
 
     // Spectrum/Waterfall settings
     int    m_spectrumColorPalette {0};
@@ -4859,6 +4865,8 @@ private:
     bool usingLegacyBackendForTx() const;
     bool usingLegacyBackendForRx() const;
     bool shouldUseBridgeAudioForLegacyDigitalTx() const;
+    bool specialOperationTransitionBlockedByQsoFinalisation() const;
+    bool applyDeferredSpecialOperationActivityIfReady();
     bool legacyBridgeAudioTxInFlight() const;
     void mirrorLegacyLoggedAdif(QByteArray const& adif);
     bool preflightLegacyBridgeTxBeforePtt(const QString& reason);

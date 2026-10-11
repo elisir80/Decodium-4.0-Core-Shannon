@@ -54,6 +54,10 @@ if (POLICY CMP0079)
   cmake_policy (SET CMP0079 NEW) # allow target_link_libraries across directories
 endif ()
 
+if (POLICY CMP0156)
+  cmake_policy (SET CMP0156 NEW) # deduplicate static libraries per platform linker rules
+endif ()
+
 if (POLICY CMP0075)
   cmake_policy (SET CMP0075 NEW) # honour CMAKE_REQUIRED_LIBRARIES in config checks
 endif ()
@@ -2242,7 +2246,6 @@ target_link_libraries (decodium_qml
   Qt6::WebSockets
   wsjt_qtmm
   wsjt_qt
-  wsjt_fort
   wsjt_cxx
   Hamlib::Hamlib
   Boost::log
