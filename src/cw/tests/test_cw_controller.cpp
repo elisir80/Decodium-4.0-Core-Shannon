@@ -286,6 +286,82 @@ private slots:
         QCOMPARE(c.txBackend(), QString("audio"));
     }
 
+    void tcpEndpointsAreRejectedAsKeyerPorts()
+    {
+        QSettings s(iniPath(), QSettings::IniFormat);
+        CwController c;
+        c.start(&s);
+        QSignalSpy messages(&c, &CwController::message);
+
+        c.setKeyerPort(QStringLiteral("127.0.0.1:4533"));
+        QVERIFY(c.keyerPort().isEmpty());
+        QVERIFY(c.txSetupError().contains(QStringLiteral("TCP CAT/rigctld")));
+        QCOMPARE(messages.size(), 1);
+
+        c.setWinKeyerPort(QStringLiteral("tcp://localhost:4532"));
+        QVERIFY(c.winKeyerPort().isEmpty());
+        QVERIFY(c.txSetupError().contains(QStringLiteral("localhost:4532")));
+        QCOMPARE(messages.size(), 2);
+
+        c.setKeyerPort(QStringLiteral("COM7"));
+        QCOMPARE(c.keyerPort(), QStringLiteral("COM7"));
+        QVERIFY(c.txSetupError().isEmpty());
+    }
+
+    void savedTcpKeyerEndpointIsDiscardedBeforeOpening()
+    {
+        QSettings s(iniPath(), QSettings::IniFormat);
+        s.beginGroup(QStringLiteral("CW"));
+        s.setValue(QStringLiteral("backend"), QStringLiteral("winkeyer"));
+        s.setValue(QStringLiteral("winKeyerPort"), QStringLiteral("127.0.0.1:4533"));
+        s.endGroup();
+        s.sync();
+
+        CwController c;
+        c.start(&s);
+        QVERIFY(c.winKeyerPort().isEmpty());
+        QVERIFY(c.txSetupError().contains(QStringLiteral("127.0.0.1:4533")));
+
+        s.beginGroup(QStringLiteral("CW"));
+        QCOMPARE(s.value(QStringLiteral("winKeyerPort")).toString(), QString());
+        s.endGroup();
+    }
+
+    void catReservedPortIsNeverOpenedAsASerialCwKeyer()
+    {
+        QSettings s(iniPath(), QSettings::IniFormat);
+        s.beginGroup(QStringLiteral("CW"));
+        s.setValue(QStringLiteral("backend"), QStringLiteral("serial"));
+        s.setValue(QStringLiteral("keyerPort"), QStringLiteral("COM5"));
+        s.endGroup();
+        s.sync();
+
+        CwController c;
+        CwController::Hooks h;
+        h.serialPortReservation = [](const QString& port) {
+            return port.compare(QStringLiteral("COM5"), Qt::CaseInsensitive) == 0
+                       ? QStringLiteral("the Hamlib CAT port COM5")
+                       : QString();
+        };
+        c.setHooks(h);
+        QSignalSpy messages(&c, &CwController::message);
+        c.start(&s);
+
+        QCOMPARE(c.txBackend(), QStringLiteral("serial"));
+        QCOMPARE(c.keyerPort(), QStringLiteral("COM5"));
+        QVERIFY(!c.keyerOn());
+        QVERIFY(!c.canSend());
+        QVERIFY(c.txSetupError().contains(QStringLiteral("COM5")));
+        QVERIFY(c.txSetupError().contains(QStringLiteral("Hamlib CAT")));
+        QCOMPARE(messages.size(), 1);
+
+        // Selecting audio clears the actionable warning but does not mutate
+        // the saved serial-port choice behind the operator's back.
+        c.setTxBackend(QStringLiteral("audio"));
+        QVERIFY(c.txSetupError().isEmpty());
+        QCOMPARE(c.keyerPort(), QStringLiteral("COM5"));
+    }
+
     void aRemoteRadioAlwaysUsesTheAudioPath()
     {
         QSettings s(iniPath(), QSettings::IniFormat);

@@ -4386,6 +4386,9 @@ int main(int argc, char* argv[])
         h.remoteRadio = [&bridge] { return bridge.decoPortUseRemote (); };
         h.remoteKeySupported = [&bridge] { return bridge.cwRemoteKeySupported (); };
         h.rigKeyerAvailable = [&bridge] { return bridge.cwRigKeyerAvailable (); };
+        h.serialPortReservation = [&bridge] (QString const& port) {
+            return bridge.cwSerialKeyerPortReservation(port);
+        };
         h.sendRigMorse = [&bridge] (QString const& t, int wpm) { return bridge.cwSendRigMorse (t, wpm); };
         h.stopRigMorse = [&bridge] { bridge.cwStopRigMorse (); };
         h.rigPtt       = [&bridge] (bool on) { bridge.cwRigPtt (on); };
@@ -4421,6 +4424,19 @@ int main(int argc, char* argv[])
                           &cwModule, &decodium::cw::CwController::refreshTransmitState);
         QObject::connect (&bridge, &DecodiumBridge::catBackendChanged,
                           &cwModule, &decodium::cw::CwController::refreshTransmitState);
+        // The CAT configuration is loaded before CW, but can be edited while
+        // the CW window is open.  Revalidate the local keyer immediately so a
+        // newly selected CAT/PTT COM port is never opened by both subsystems.
+        if (auto* hamlibCat = bridge.hamlibCat ()) {
+            QObject::connect (hamlibCat, &DecodiumTransceiverManager::serialPortChanged,
+                              &cwModule, &decodium::cw::CwController::refreshKeyerSetup);
+            QObject::connect (hamlibCat, &DecodiumTransceiverManager::portTypeChanged,
+                              &cwModule, &decodium::cw::CwController::refreshKeyerSetup);
+            QObject::connect (hamlibCat, &DecodiumTransceiverManager::pttMethodChanged,
+                              &cwModule, &decodium::cw::CwController::refreshKeyerSetup);
+            QObject::connect (hamlibCat, &DecodiumTransceiverManager::pttPortChanged,
+                              &cwModule, &decodium::cw::CwController::refreshKeyerSetup);
+        }
         QObject::connect (&bridge, &DecodiumBridge::transmittingChanged,
                           &cwModule, &decodium::cw::CwController::refreshTransmitState);
         QObject::connect (&bridge, &DecodiumBridge::tuningChanged,

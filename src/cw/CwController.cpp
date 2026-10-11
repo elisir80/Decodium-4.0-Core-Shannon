@@ -4,6 +4,7 @@
 #include <cmath>
 #include <QDateTime>
 #include <QDebug>
+#include <QRegularExpression>
 
 namespace decodium::cw {
 
@@ -11,6 +12,35 @@ namespace {
 constexpr int kMinWpm = 5;
 constexpr int kMaxWpm = 60;
 const char kGroup[] = "CW";
+
+// A serial keyer and a K1EL WinKeyer are local devices opened through
+// QSerialPort.  rigctld endpoints are commonly written as host:port, which
+// QSerialPort otherwise tries to open as a (non-existent) device name and
+// leaves the operator with the misleading "keyer is not open" message.
+bool looksLikeTcpEndpoint(const QString& candidate)
+{
+    const QString value = candidate.trimmed();
+    if (value.isEmpty())
+        return false;
+
+    static const QRegularExpression uriScheme(
+        QStringLiteral(R"(^(?:tcp|rigctld|http|https|ws|wss)://)"),
+        QRegularExpression::CaseInsensitiveOption);
+    if (uriScheme.match(value).hasMatch())
+        return true;
+
+    // IPv6 endpoints use the conventional [address]:port spelling.
+    static const QRegularExpression ipv6Endpoint(
+        QStringLiteral(R"(^\[[0-9A-Fa-f:.]+\]:\d{1,5}$)"));
+    if (ipv6Endpoint.match(value).hasMatch())
+        return true;
+
+    // Covers localhost:4533, 127.0.0.1:4533 and DNS names.  A real serial
+    // device such as COM5, \\.\COM12 or /dev/ttyUSB0 cannot match this form.
+    static const QRegularExpression hostPort(
+        QStringLiteral(R"(^(?:(?:\d{1,3}\.){3}\d{1,3}|[A-Za-z0-9][A-Za-z0-9.-]*):\d{1,5}$)"));
+    return hostPort.match(value).hasMatch();
+}
 }  // namespace
 
 CwController::CwController(QObject* parent)
@@ -91,6 +121,22 @@ void CwController::start(QSettings* settings)
     }
     if (m_backend != QLatin1String("serial") && m_backend != QLatin1String("winkeyer"))
         m_backend = QStringLiteral("audio");
+
+    // Never retry a saved rigctld address as a local COM/tty device.  Clear
+    // it from the persisted CW setup as well, so every launch is safe and the
+    // user can choose a real device once without fighting the old value.
+    bool removedNetworkEndpoint = false;
+    if (rejectNetworkKeyerPort(m_keyerPort, tr("serial keyer"))) {
+        m_keyerPort.clear();
+        removedNetworkEndpoint = true;
+    }
+    if (rejectNetworkKeyerPort(m_winKeyerPort, tr("WinKeyer"))) {
+        m_winKeyerPort.clear();
+        removedNetworkEndpoint = true;
+    }
+    if (removedNetworkEndpoint)
+        save();
+
     m_decoder.setTone(m_decoderToneLock);
     m_decoder.setSpeed(m_decoderSpeedLock);
     applyBackend();
@@ -312,6 +358,8 @@ void CwController::setTxBackend(const QString& backend)
         return;
     stop();
     m_backend = b;
+    if (m_backend == QLatin1String("audio"))
+        clearTxSetupError();
     applyBackend();
     save();
     emit txChanged();
@@ -319,9 +367,13 @@ void CwController::setTxBackend(const QString& backend)
 
 void CwController::setKeyerPort(const QString& port)
 {
-    if (m_keyerPort == port)
+    const QString clean = port.trimmed();
+    if (rejectNetworkKeyerPort(clean, tr("serial keyer")))
         return;
-    m_keyerPort = port;
+    if (m_keyerPort == clean)
+        return;
+    m_keyerPort = clean;
+    clearTxSetupError();
     applyBackend();
     save();
     emit txChanged();
@@ -340,9 +392,13 @@ void CwController::setKeyerLine(const QString& line)
 
 void CwController::setWinKeyerPort(const QString& port)
 {
-    if (m_winKeyerPort == port)
+    const QString clean = port.trimmed();
+    if (rejectNetworkKeyerPort(clean, tr("WinKeyer")))
         return;
-    m_winKeyerPort = port;
+    if (m_winKeyerPort == clean)
+        return;
+    m_winKeyerPort = clean;
+    clearTxSetupError();
     applyBackend();
     save();
     emit txChanged();
@@ -391,21 +447,89 @@ void CwController::setWpm(int wpm)
     emit txChanged();
 }
 
-// Apre solo il manipolatore scelto: due strade aperte insieme vorrebbero dire
-// due mani sullo stesso tasto.
+// Apre solo il manipolatore locale che verra' davvero usato: due strade aperte
+// insieme vorrebbero dire due mani sullo stesso tasto.  In particolare non si
+// deve lasciare una COM aperta quando il CAT nativo, una radio remota o l'audio
+// hanno gia' scelto un'altra strada.
 void CwController::applyBackend()
 {
     m_keyer.close();
     m_winKeyer.close();
-    if (m_backend == QLatin1String("serial") && !m_keyerPort.isEmpty()) {
+
+    const QString active = effectiveBackend();
+    if (active != QLatin1String("serial") && active != QLatin1String("winkeyer")) {
+        // The selected local keyer is not the active transmit path (for
+        // example a supported CAT keyer took over).  Do not keep a stale
+        // port-conflict warning in front of a now-working transmit path.
+        clearTxSetupError();
+        return;
+    }
+    if (active == QLatin1String("serial") && !m_keyerPort.isEmpty()) {
+        if (rejectNetworkKeyerPort(m_keyerPort, tr("serial keyer")))
+            return;
+        if (rejectReservedKeyerPort(m_keyerPort, tr("serial keyer")))
+            return;
         if (!m_keyer.open(m_keyerPort, m_keyerLine))
             emit message(tr("The keyer port %1 did not open").arg(m_keyerPort), QStringLiteral("warning"));
-    } else if (m_backend == QLatin1String("winkeyer") && !m_winKeyerPort.isEmpty()) {
+        else
+            clearTxSetupError();
+    } else if (active == QLatin1String("winkeyer") && !m_winKeyerPort.isEmpty()) {
+        if (rejectNetworkKeyerPort(m_winKeyerPort, tr("WinKeyer")))
+            return;
+        if (rejectReservedKeyerPort(m_winKeyerPort, tr("WinKeyer")))
+            return;
         if (!m_winKeyer.open(m_winKeyerPort))
             emit message(tr("The WinKeyer on %1 did not open").arg(m_winKeyerPort), QStringLiteral("warning"));
-        else
+        else {
             m_winKeyer.setSpeed(m_wpm);
+            clearTxSetupError();
+        }
     }
+}
+
+bool CwController::rejectNetworkKeyerPort(const QString& port, const QString& keyerName)
+{
+    const QString endpoint = port.trimmed();
+    if (!looksLikeTcpEndpoint(endpoint))
+        return false;
+
+    m_txSetupError = tr("%1 is a TCP CAT/rigctld address, not a local %2 port. "
+                        "Configure it under CAT and select a real COM or tty device here.")
+                         .arg(endpoint, keyerName);
+    qWarning().noquote() << "[CW] rejected TCP endpoint for" << keyerName << ':' << endpoint;
+    emit message(m_txSetupError, QStringLiteral("warning"));
+    emit txChanged();
+    return true;
+}
+
+bool CwController::rejectReservedKeyerPort(const QString& port, const QString& keyerName)
+{
+    if (!m_hooks.serialPortReservation)
+        return false;
+
+    const QString owner = m_hooks.serialPortReservation(port).trimmed();
+    if (owner.isEmpty())
+        return false;
+
+    const QString error = tr("%1 cannot be used for the %2 because it is already reserved by %3. "
+                             "A serial CW keyer needs a different local COM or tty port. "
+                             "Select Audio tone, the radio CAT keyer, or a separate keyer port.")
+                              .arg(port.trimmed(), keyerName, owner);
+    if (m_txSetupError != error) {
+        m_txSetupError = error;
+        qWarning().noquote() << "[CW] rejected reserved serial port for" << keyerName << ':' << port
+                             << "owner=" << owner;
+        emit message(m_txSetupError, QStringLiteral("warning"));
+        emit txChanged();
+    }
+    return true;
+}
+
+void CwController::clearTxSetupError()
+{
+    if (m_txSetupError.isEmpty())
+        return;
+    m_txSetupError.clear();
 }
 
 bool CwController::canSend() const
@@ -424,6 +548,18 @@ bool CwController::canSend() const
 
 void CwController::refreshTransmitState()
 {
+    const QString active = effectiveBackend();
+    const bool wantsSerial = active == QLatin1String("serial");
+    const bool wantsWinKeyer = active == QLatin1String("winkeyer");
+    if ((wantsSerial != m_keyer.isOpen()) || (wantsWinKeyer != m_winKeyer.isOpen()))
+        applyBackend();
+    emit txChanged();
+}
+
+void CwController::refreshKeyerSetup()
+{
+    if (m_backend == QLatin1String("serial") || m_backend == QLatin1String("winkeyer"))
+        applyBackend();
     emit txChanged();
 }
 

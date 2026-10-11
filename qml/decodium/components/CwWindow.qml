@@ -73,6 +73,8 @@ Window {
     }
     function transmitWarningText() {
         if (!cw) return ""
+        if (cw.txSetupError.length > 0)
+            return cw.txSetupError
         var backend = cw.effectiveBackend
         if (backend === "rigkey")
             return qsTr("The radio CAT keyer is not currently available. Check the CAT connection and the radio's CW keyer support. The decoder works anyway.")
@@ -296,6 +298,11 @@ Window {
                             qsTr("K1EL WinKeyer")]
                     currentIndex: Math.max(0, keys.indexOf(win.cw ? win.cw.txBackend : "audio"))
                     onActivated: (i) => win.cw.txBackend = keys[i]
+                    onCurrentIndexChanged: Qt.callLater(function() {
+                        if (!win.cw || !portBox)
+                            return
+                        portBox.editText = currentIndex === 1 ? win.cw.keyerPort : win.cw.winKeyerPort
+                    })
                 }
                 Lbl { text: qsTr("Port"); visible: backendBox.currentIndex > 0 }
                 RowLayout {
@@ -311,13 +318,27 @@ Window {
                         onAccepted: apply(editText)
                         onActivated: apply(currentText)
                         function apply(p) {
-                            if (backendBox.currentIndex === 1) win.cw.keyerPort = p
+                            const serial = backendBox.currentIndex === 1
+                            if (serial) win.cw.keyerPort = p
                             else win.cw.winKeyerPort = p
+                            // The controller rejects TCP endpoints.  Restore the
+                            // actual accepted value instead of leaving a fake
+                            // host:port visible in this editable ComboBox.
+                            editText = serial ? win.cw.keyerPort : win.cw.winKeyerPort
                         }
                         Component.onCompleted: editText = backendBox.currentIndex === 1
                                                           ? win.cw.keyerPort : win.cw.winKeyerPort
                     }
                     Btn { label: qsTr("Refresh"); onClicked: portBox.refresh() }
+                }
+                Text {
+                    Layout.columnSpan: 2
+                    Layout.fillWidth: true
+                    visible: !!win.cw && win.cw.txSetupError.length > 0
+                    wrapMode: Text.Wrap
+                    color: win.cWarn
+                    font.pixelSize: 11
+                    text: win.cw ? win.cw.txSetupError : ""
                 }
                 Lbl { text: qsTr("Key line"); visible: backendBox.currentIndex === 1 }
                 ComboBox {
@@ -408,6 +429,15 @@ Window {
                       : (win.cw && win.cw.effectiveBackend === "rigkey"
                          ? qsTr("The radio's built-in CAT keyer sends CW while the rig stays in CW mode.")
                          : qsTr("The audio tone needs the radio in USB or DATA-U. A serial keyer or a WinKeyer keys the radio's own key input and needs the radio in CW."))
+            }
+            Text {
+                Layout.fillWidth: true
+                visible: !!win.cw && !win.remote && !!win.eng && win.eng.catConnected
+                         && !win.cw.catCwKeyerAvailable
+                wrapMode: Text.Wrap
+                color: win.cWarn
+                font.pixelSize: 11
+                text: qsTr("CW via the current CAT connection is unavailable: the radio or rigctld server does not expose Hamlib send_morse. A rigctld host:port belongs in CAT settings, not in Serial keyer or WinKeyer.")
             }
             RowLayout {
                 spacing: 8

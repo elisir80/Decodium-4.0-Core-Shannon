@@ -724,7 +724,10 @@ ApplicationWindow {
         // Stadio 1+2: applica l'ordine pannelli persistito re-parentando i 4 pannelli
         // (3 colonne + TX area) negli slot-host indicati dalla mappa (default = ordine
         // attuale -> no-op; una mappa salvata a 3 elementi migra con "txpanel" in slot 3).
-        Qt.callLater(applyClassicColumnOrder)
+        // Il primo layout di SplitView non è ancora affidabile in questo punto: su
+        // macOS/Windows il re-parent immediato può lasciare la LiveMap con la geometria
+        // provvisoria (0,0) dello slot e farla apparire nell'angolo superiore sinistro.
+        classicColumnOrderApplyTimer.restart()
         // Tell the native stall watchdog whether this top-level window can
         // actually present frames before it starts sampling the event loop.
         bridge.setMainWindowRenderActive(visibility !== Window.Hidden
@@ -835,6 +838,13 @@ ApplicationWindow {
         repeat: false
         running: false
         onTriggered: mainWindow.restoreLiveMapPopoutAfterStartup()
+    }
+    Timer {
+        id: classicColumnOrderApplyTimer
+        interval: 120
+        repeat: false
+        running: false
+        onTriggered: mainWindow.applyClassicColumnOrder()
     }
     // Funzione helper chiamabile da qualsiasi parte del QML
     function scheduleSave() {
@@ -2575,6 +2585,45 @@ ApplicationWindow {
         return null
     }
 
+    // Re-parenting a panel before the restored window and both SplitViews have
+    // received their first real geometry is unsafe. In particular, an Item
+    // moved while its host still has a zero/temporary size can retain the
+    // top-left position until the next complete layout pass. Wait for the
+    // actual hosts rather than only checking that the QML objects exist.
+    function classicColumnOrderLayoutReady() {
+        if (typeof contentArea === "undefined" || !contentArea
+                || contentArea.width <= 1 || contentArea.height <= 1)
+            return false
+        if (typeof mainVerticalSplit === "undefined" || !mainVerticalSplit
+                || mainVerticalSplit.width <= 1 || mainVerticalSplit.height <= 1)
+            return false
+        if (typeof decodePanelsSplit === "undefined" || !decodePanelsSplit
+                || decodePanelsSplit.width <= 1 || decodePanelsSplit.height <= 1)
+            return false
+
+        // The first four hosts are horizontal SplitView columns. Collapsed
+        // hosts are intentionally allowed to remain at zero width.
+        for (var i = 0; i < 4; ++i) {
+            var column = classicSlotForIndex(i)
+            if (!column)
+                return false
+            if (!classicSlotCollapsed(i) && column.width <= 1)
+                return false
+        }
+
+        var txHost = classicSlotForIndex(4)
+        var waterfallHost = classicSlotForIndex(5)
+        var waterfallReady = !!waterfallHost && waterfallHost.width > 1
+                && (waterfallHost.height > 1
+                    // A deliberately hidden default waterfall has no height
+                    // to wait for, but its slot is already in its final state.
+                    || (mainWindow.classicIdInSlot(5) === "waterfall"
+                        && !mainWindow.waterfallPanelVisible))
+        return !!txHost && !!waterfallHost
+                && txHost.width > 1 && txHost.height > 1
+                && waterfallReady
+    }
+
     // Assegna ad ogni pannello il parent = slot-host nella posizione indicata dalla mappa.
     // Operazione che preserva id/stato/binding (re-parent, come applyWorldClockSlot).
     // I pannelli usano anchors.fill: parent → riempiono lo slot che li ospita.
@@ -2588,8 +2637,13 @@ ApplicationWindow {
     // Waterfall e il suo PanadapterItem NON vengono mai distrutti/ricreati -> feed PCM e
     // Connections col bridge restano vivi, nessun "freeze waterfall".
     function applyClassicColumnOrder() {
-        if (typeof decodePanelsSplit === "undefined" || !decodePanelsSplit) {
-            Qt.callLater(applyClassicColumnOrder)
+        if (!classicColumnOrderLayoutReady()) {
+            // Keep retrying without creating an unbounded Qt.callLater loop.
+            // This also covers a slow first show or a delayed restored window
+            // geometry on platforms with asynchronous window managers.
+            if (typeof classicColumnOrderApplyTimer !== "undefined"
+                    && classicColumnOrderApplyTimer)
+                classicColumnOrderApplyTimer.restart()
             return
         }
         for (var i = 0; i < uiClassicColumnOrder.length; ++i) {
@@ -2598,6 +2652,22 @@ ApplicationWindow {
             if (panel && slot && panel.parent !== slot)
                 panel.parent = slot
         }
+
+        // Let the new parent/anchors settle once more. This is deliberately a
+        // single deferred pass; it is not a continuous relayout loop.
+        Qt.callLater(function() {
+            if (classicColumnOrderLayoutReady()) {
+                for (var j = 0; j < uiClassicColumnOrder.length; ++j) {
+                    var deferredPanel = classicPanelForId(uiClassicColumnOrder[j])
+                    var deferredSlot = classicSlotForIndex(j)
+                    if (deferredPanel && deferredSlot && deferredPanel.parent !== deferredSlot)
+                        deferredPanel.parent = deferredSlot
+                }
+            } else if (typeof classicColumnOrderApplyTimer !== "undefined"
+                       && classicColumnOrderApplyTimer) {
+                classicColumnOrderApplyTimer.restart()
+            }
+        })
     }
 
     // Indice (0/1/2) della posizione che ospita il panelId nella mappa corrente; -1 se assente.

@@ -1370,6 +1370,10 @@ public:
     void   setCwInAscolto(bool v);
     bool   cwCanTransmit();
     bool   cwRigKeyerAvailable() const;
+    // Se la porta e' gia' configurata per il CAT/PTT Hamlib, un keyer CW
+    // QSerialPort non deve aprirla: Windows la rende esclusiva e bloccherebbe
+    // il collegamento CAT prima ancora del primo comando al rig.
+    QString cwSerialKeyerPortReservation(const QString& port) const;
     bool   cwSendRigMorse(const QString& text, int wpm);
     void   cwStopRigMorse();
     void   cwRigPtt(bool on);

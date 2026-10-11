@@ -19738,6 +19738,22 @@ void DecodiumBridge::setAudioInputDevice(const QString& v) {
                            audioDeviceIdSettingForLog(m_audioInputDeviceId),
                            matchReason,
                            audioDeviceIdSettingForLog(previousId)));
+#ifdef Q_OS_LINUX
+        const QString pulseSourceName = linuxPulseSourceNameFromDisplay(m_audioInputDevice);
+        if (!pulseSourceName.isEmpty()) {
+            QString pulseError;
+            if (linuxSetDefaultPulseSource(pulseSourceName, &pulseError)) {
+                bridgeLog(QStringLiteral("audioInputDevice: selected Linux Pulse/PipeWire source [%1]")
+                              .arg(pulseSourceName));
+                qInfo().noquote() << "[AUDIODEV] selected Pulse/PipeWire source:" << pulseSourceName;
+            } else {
+                bridgeLog(QStringLiteral("audioInputDevice: failed to select Linux Pulse/PipeWire source [%1]: %2")
+                              .arg(pulseSourceName, pulseError));
+                qWarning().noquote() << "[AUDIODEV] failed to select Pulse/PipeWire source:"
+                                     << pulseSourceName << pulseError;
+            }
+        }
+#endif
         syncAudioDeviceSettingsToLegacyIni();
         if (legacyBackendAvailable()) {
             m_legacyBackend->setAudioInputDeviceName(value);
@@ -43244,6 +43260,56 @@ bool DecodiumBridge::cwRigKeyerAvailable() const
         && m_hamlibCat->rigMorseAvailable();
 }
 
+QString DecodiumBridge::cwSerialKeyerPortReservation(const QString& port) const
+{
+    if (!m_hamlibCat || m_catBackend != QLatin1String("hamlib"))
+        return {};
+
+    // A network/TCI CAT has no local COM/tty to contend with.  USB models may
+    // still expose one through Hamlib, hence they use the same comparison as a
+    // conventional serial model.
+    const QString transport = m_hamlibCat->portType().trimmed().toLower();
+    if (transport != QLatin1String("serial") && transport != QLatin1String("usb"))
+        return {};
+
+    auto comparablePort = [](QString value) {
+        value = value.trimmed();
+        if (value.startsWith(QStringLiteral("\\\\.\\")))
+            value.remove(0, 4); // Windows permits both COM5 and \\.\COM5.
+        if (value.isEmpty()
+            || value.compare(QStringLiteral("CAT"), Qt::CaseInsensitive) == 0
+            || value.compare(QStringLiteral("None"), Qt::CaseInsensitive) == 0) {
+            return QString {};
+        }
+#if !defined(Q_OS_WIN)
+        QFileInfo const info(value);
+        const QString canonical = info.canonicalFilePath();
+        if (!canonical.isEmpty())
+            value = canonical;
+#endif
+        return QDir::cleanPath(value).toCaseFolded();
+    };
+
+    const QString candidate = comparablePort(port);
+    if (candidate.isEmpty())
+        return {};
+
+    const QString catPort = m_hamlibCat->serialPort().trimmed();
+    if (!catPort.isEmpty() && candidate == comparablePort(catPort)) {
+        return tr("the Hamlib CAT port %1").arg(catPort);
+    }
+
+    // A separate DTR/RTS PTT port is opened by Hamlib too.  It is just as
+    // exclusive as the CAT port and must not be reused by the CW keyer.
+    const QString pttMethod = m_hamlibCat->pttMethod().trimmed().toUpper();
+    const QString pttPort = m_hamlibCat->pttPort().trimmed();
+    if ((pttMethod == QLatin1String("DTR") || pttMethod == QLatin1String("RTS"))
+        && !pttPort.isEmpty() && candidate == comparablePort(pttPort)) {
+        return tr("the Hamlib PTT port %1").arg(pttPort);
+    }
+    return {};
+}
+
 bool DecodiumBridge::cwSendRigMorse(const QString& text, int wpm)
 {
     return cwRigKeyerAvailable() && m_hamlibCat->sendRigMorse(text, wpm);
@@ -55837,6 +55903,13 @@ void DecodiumBridge::refreshAudioDeviceCache(const QString& reason,
     }
 
 #ifdef Q_OS_LINUX
+    // QMediaDevices may expose only the ALSA-facing names on Linux Mint/
+    // PipeWire systems.  MSHV and other PulseAudio clients also show the
+    // logical Pulse/PipeWire sources and sinks, so enumerate those for every
+    // normal refresh, not only while verbose diagnostics are enabled.
+    const QStringList pulseSources = linuxPulseSourcesForLog();
+    const QStringList pulseSinks = linuxPulseSinksForLog();
+
     if (verboseLog) {
         const QStringList alsaCards = linuxAlsaCardsForLog();
         if (!alsaCards.isEmpty()) {
@@ -55852,35 +55925,44 @@ void DecodiumBridge::refreshAudioDeviceCache(const QString& reason,
         } else {
             bridgeLog(QStringLiteral("Linux ALSA cards: /proc/asound/cards unavailable or empty"));
         }
-        const QStringList pulseSources = linuxPulseSourcesForLog();
         bridgeLog(QStringLiteral("=== Linux PulseAudio/PipeWire sources via pactl (%1 lines) ===")
                       .arg(pulseSources.size()));
         for (const QString& line : pulseSources) {
             bridgeLog(QStringLiteral("  PULSE: %1").arg(line));
             qInfo().noquote() << QStringLiteral("[AUDIODEV] PULSE SOURCE %1").arg(line);
-            const QString pulseSourceName = linuxPulseSourceNameFromShortLine(line);
-            if (!pulseSourceName.isEmpty()) {
-                const QString displayName = linuxPulseSourceDisplayName(pulseSourceName);
-                if (!inputNames.contains(displayName, Qt::CaseInsensitive)) {
-                    inputNames.append(displayName);
-                }
-            }
         }
-        const QStringList pulseSinks = linuxPulseSinksForLog();
         bridgeLog(QStringLiteral("=== Linux PulseAudio/PipeWire sinks via pactl (%1 lines) ===")
                       .arg(pulseSinks.size()));
         for (const QString& line : pulseSinks) {
             bridgeLog(QStringLiteral("  PULSE OUT: %1").arg(line));
             qInfo().noquote() << QStringLiteral("[AUDIODEV] PULSE SINK %1").arg(line);
-            const QString pulseSinkName = linuxPulseSinkNameFromShortLine(line);
-            if (!pulseSinkName.isEmpty()) {
-                const QString displayName =
-                    QString::fromLatin1(kLinuxPulseSinkPrefix) + pulseSinkName;
-                if (!outputNames.contains(displayName, Qt::CaseInsensitive)) {
-                    outputNames.append(displayName);
-                }
+        }
+    }
+
+    // Keep the display names separate from QAudioDevice objects: the bridge
+    // resolves these entries later through pactl and switches the current
+    // Pulse/PipeWire default source/sink before opening Qt's stream.
+    for (const QString& line : pulseSources) {
+        const QString pulseSourceName = linuxPulseSourceNameFromShortLine(line);
+        if (!pulseSourceName.isEmpty()) {
+            const QString displayName = linuxPulseSourceDisplayName(pulseSourceName);
+            if (!inputNames.contains(displayName, Qt::CaseInsensitive)) {
+                inputNames.append(displayName);
             }
         }
+    }
+    for (const QString& line : pulseSinks) {
+        const QString pulseSinkName = linuxPulseSinkNameFromShortLine(line);
+        if (!pulseSinkName.isEmpty()) {
+            const QString displayName =
+                QString::fromLatin1(kLinuxPulseSinkPrefix) + pulseSinkName;
+            if (!outputNames.contains(displayName, Qt::CaseInsensitive)) {
+                outputNames.append(displayName);
+            }
+        }
+    }
+
+    if (verboseLog) {
         if (!qtExposesLikelyUsbOutput) {
             for (const QString& line : pulseSinks) {
                 if (line.contains(QStringLiteral("usb-"), Qt::CaseInsensitive)) {

@@ -59,6 +59,9 @@ class CwController : public QObject {
     // La strada davvero in uso: con una radio remota e' sempre "audio", perche' un
     // manipolatore su una porta di questo computer non comanda la radio lontana.
     Q_PROPERTY(QString effectiveBackend READ effectiveBackend NOTIFY txChanged)
+    // Disponibile solo quando la CAT corrente espone davvero Hamlib send_morse.
+    // Una connessione rigctld riuscita non implica automaticamente un keyer CW.
+    Q_PROPERTY(bool catCwKeyerAvailable READ catCwKeyerAvailable NOTIFY txChanged)
     Q_PROPERTY(bool remoteRadio READ remoteRadio NOTIFY txChanged)
     // Con una radio Decolink: mandare gli istanti del tasto (vero, predefinito) o il tono audio.
     Q_PROPERTY(bool remoteKey READ remoteKey WRITE setRemoteKey NOTIFY txChanged)
@@ -67,6 +70,9 @@ class CwController : public QObject {
     Q_PROPERTY(QString keyerPort READ keyerPort WRITE setKeyerPort NOTIFY txChanged)
     Q_PROPERTY(QString keyerLine READ keyerLine WRITE setKeyerLine NOTIFY txChanged)
     Q_PROPERTY(QString winKeyerPort READ winKeyerPort WRITE setWinKeyerPort NOTIFY txChanged)
+    // Errore persistente di configurazione mostrato anche se era stato salvato
+    // prima che la finestra QML venisse aperta.
+    Q_PROPERTY(QString txSetupError READ txSetupError NOTIFY txChanged)
     Q_PROPERTY(int winKeyerVersion READ winKeyerVersion NOTIFY txChanged)
     Q_PROPERTY(bool keyerOn READ keyerOn NOTIFY txChanged)
     Q_PROPERTY(int wpm READ wpm WRITE setWpm NOTIFY txChanged)
@@ -104,6 +110,11 @@ public:
         std::function<void()> stopRigMorse;
         // Il keyer CAT nativo spesso richiede PTT esplicito (es. Yaesu FT-991A).
         std::function<void(bool on)> rigPtt;
+        // Restituisce chi sta gia' riservando una porta seriale locale, oppure
+        // una stringa vuota se il keyer la puo' aprire.  In particolare, una
+        // porta CAT Hamlib non puo' essere condivisa con QSerialPort su
+        // Windows: il keyer deve fermarsi prima di rubarla al CAT.
+        std::function<QString(const QString&)> serialPortReservation;
         // ...manda un pezzo di traccia (false se non e' partito)...
         std::function<bool(const QVector<KeyEvent>& events, int toneHz)> sendKey;
         // ...alza e abbassa il PTT della radio remota...
@@ -147,6 +158,10 @@ public:
     QString txBackend() const { return m_backend; }
     bool remoteRadio() const { return m_hooks.remoteRadio && m_hooks.remoteRadio(); }
     QString effectiveBackend() const;
+    bool catCwKeyerAvailable() const
+    {
+        return m_hooks.rigKeyerAvailable && m_hooks.rigKeyerAvailable();
+    }
     bool remoteKey() const { return m_remoteKey; }
     void setRemoteKey(bool on);
     int toneHz() const { return m_toneHz; }
@@ -158,6 +173,7 @@ public:
     void setKeyerLine(const QString& line);
     QString winKeyerPort() const { return m_winKeyerPort; }
     void setWinKeyerPort(const QString& port);
+    QString txSetupError() const { return m_txSetupError; }
     int winKeyerVersion() const { return m_winKeyer.version(); }
     bool keyerOn() const { return m_keyer.isOpen() || m_winKeyer.isOpen(); }
     int wpm() const { return m_wpm; }
@@ -167,6 +183,10 @@ public:
     // Lo stato del keyer CAT dipende dalla radio e puo' cambiare dopo che il
     // controller CW e' stato avviato. Forza il refresh delle proprieta' QML.
     void refreshTransmitState();
+    // Le impostazioni CAT possono cambiare mentre la finestra CW e' aperta.
+    // Richiudi e rivalida il keyer locale prima che due sottosistemi provino
+    // ad aprire la stessa COM/tty.
+    void refreshKeyerSetup();
     Q_INVOKABLE QStringList availablePorts() const;
     // Un colpo di prova: la lettera "V" per sentire che il manipolatore
     // risponde.
@@ -198,6 +218,9 @@ signals:
 
 private:
     void applyBackend();
+    bool rejectNetworkKeyerPort(const QString& port, const QString& keyerName);
+    bool rejectReservedKeyerPort(const QString& port, const QString& keyerName);
+    void clearTxSetupError();
     void sendExpanded(const QString& ready);
     void startRemoteKey(const QString& text);
     void pumpRemoteKey();
@@ -229,6 +252,7 @@ private:
     QString m_keyerPort;
     QString m_keyerLine {QStringLiteral("DTR")};
     QString m_winKeyerPort;
+    QString m_txSetupError;
     int m_wpm {20};
 
     // CW a tasto verso la radio remota
