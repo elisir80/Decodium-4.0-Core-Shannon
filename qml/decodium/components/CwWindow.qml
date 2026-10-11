@@ -84,7 +84,7 @@ Window {
         }
     }
     function flushTypedInput() {
-        if (!transmitWhileTyping || !cw || !canSend || queuedTypedText.length === 0) return
+        if (!transmitWhileTyping || !cw || cw.sending || !canSend || queuedTypedText.length === 0) return
         var chunk = queuedTypedText
         queuedTypedText = ""
         cw.sendText(chunk, ctx())
