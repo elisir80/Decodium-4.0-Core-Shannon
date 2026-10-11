@@ -24,6 +24,14 @@ CwController::CwController(QObject* parent)
             pumpRemoteKey();
     });
     connect(&m_audioDone, &QTimer::timeout, this, [this] {
+        // Per il keyer CAT il PTT alto e' lo stato atteso durante l'invio:
+        // non passare da canTransmit(), che in TX risulta correttamente falso.
+        if (effectiveBackend() == QLatin1String("rigkey")) {
+            if (m_hooks.rigPtt)
+                m_hooks.rigPtt(false);
+            setSending(false, -1);
+            return;
+        }
         // The bridge may still be draining its audio device after the Morse
         // timeline ends. Poll its real transmit gate instead of imposing a
         // long fixed delay or declaring the controller idle too early.
@@ -462,7 +470,11 @@ void CwController::sendExpanded(const QString& ready)
     const int ms = CwKeyer::millisFor(ready, m_wpm);
     const QString backend = effectiveBackend();
     if (backend == QLatin1String("rigkey")) {
+        if (m_hooks.rigPtt)
+            m_hooks.rigPtt(true);
         if (!m_hooks.sendRigMorse || !m_hooks.sendRigMorse(ready, m_wpm)) {
+            if (m_hooks.rigPtt)
+                m_hooks.rigPtt(false);
             setSending(false, -1);
             emit message(tr("The radio CAT keyer did not accept the CW text"), QStringLiteral("warning"));
             return;
@@ -568,8 +580,12 @@ void CwController::finishRemoteKey(bool immediate)
 
 void CwController::stop()
 {
-    if (m_sending && effectiveBackend() == QLatin1String("rigkey") && m_hooks.stopRigMorse)
-        m_hooks.stopRigMorse();
+    if (m_sending && effectiveBackend() == QLatin1String("rigkey")) {
+        if (m_hooks.stopRigMorse)
+            m_hooks.stopRigMorse();
+        if (m_hooks.rigPtt)
+            m_hooks.rigPtt(false);
+    }
     finishRemoteKey(true);
     m_audioDone.stop();
     m_keyer.stop();

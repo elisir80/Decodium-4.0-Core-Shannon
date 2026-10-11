@@ -4388,6 +4388,7 @@ int main(int argc, char* argv[])
         h.rigKeyerAvailable = [&bridge] { return bridge.cwRigKeyerAvailable (); };
         h.sendRigMorse = [&bridge] (QString const& t, int wpm) { return bridge.cwSendRigMorse (t, wpm); };
         h.stopRigMorse = [&bridge] { bridge.cwStopRigMorse (); };
+        h.rigPtt       = [&bridge] (bool on) { bridge.cwRigPtt (on); };
         h.sendKey = [&bridge] (QVector<decodium::cw::KeyEvent> const& events, int toneHz) {
             QVector<CwKeyEvent> out;
             out.reserve (events.size ());

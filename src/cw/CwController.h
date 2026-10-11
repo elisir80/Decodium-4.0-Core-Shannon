@@ -102,6 +102,8 @@ public:
         std::function<bool()> rigKeyerAvailable;
         std::function<bool(const QString&, int)> sendRigMorse;
         std::function<void()> stopRigMorse;
+        // Il keyer CAT nativo spesso richiede PTT esplicito (es. Yaesu FT-991A).
+        std::function<void(bool on)> rigPtt;
         // ...manda un pezzo di traccia (false se non e' partito)...
         std::function<bool(const QVector<KeyEvent>& events, int toneHz)> sendKey;
         // ...alza e abbassa il PTT della radio remota...

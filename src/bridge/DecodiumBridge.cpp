@@ -43223,6 +43223,13 @@ void DecodiumBridge::cwStopRigMorse()
     if (m_hamlibCat) m_hamlibCat->stopRigMorse();
 }
 
+void DecodiumBridge::cwRigPtt(bool on)
+{
+    if (m_mode != QStringLiteral("CW") || m_decoPortUseRemote || !m_hamlibCat)
+        return;
+    m_hamlibCat->setRigPtt(on);
+}
+
 bool DecodiumBridge::cwSendAudio(const QString& text, int wpm)
 {
     if (!cwCanTransmit())
