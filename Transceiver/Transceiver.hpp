@@ -290,6 +290,7 @@ public:
   // Trasmissione CW: invia 'text' al keyer della radio a 'wpm' parole/min.
   // Default no-op: i transceiver che non supportano il keying CAT lo ignorano.
   Q_SLOT virtual void send_morse (QString const& /*text*/, int /*wpm*/) noexcept {}
+  Q_SLOT virtual void stop_morse () noexcept {}
 
   //
   virtual QVariantMap voice_controls(QString const&, double, bool) { return {{"error", QStringLiteral("Voice CAT controls unavailable for this backend")}}; }

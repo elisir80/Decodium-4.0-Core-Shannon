@@ -18598,7 +18598,9 @@ void DecodiumBridge::setMode(const QString& v) {
         QString const configuredRigMode = configuredCatRigMode();
         QString const rttyRestoreMode = m_rttyRigModeState.restoreTarget(
             rttyCatContext(), configuredRigMode, QDateTime::currentMSecsSinceEpoch());
-        if (normalizedMode == QStringLiteral("SSB") || !configuredRigMode.isEmpty() || !rttyRestoreMode.isEmpty()) {
+        if (normalizedMode == QStringLiteral("SSB")
+            || normalizedMode == QStringLiteral("CW")
+            || !configuredRigMode.isEmpty() || !rttyRestoreMode.isEmpty()) {
             applyConfiguredCatRigMode(QStringLiteral("mode-change"));
         } else if (m_catBackend == QStringLiteral("tci")
             && m_hamlibCat
@@ -30990,7 +30992,11 @@ void DecodiumBridge::applyRttyRigMode(const QString& reason)
 
 void DecodiumBridge::applyConfiguredCatRigMode(const QString& reason)
 {
-    QString rigMode = m_mode == QStringLiteral("SSB") ? m_ssbRadioMode : configuredCatRigMode();
+    // CW is a radio mode, not a digital audio mode. DATA-U/DIGU remains the
+    // configured path for digital application modes; the CW workspace asks
+    // the local rig or remote gateway for CW so its carrier stays on the dial.
+    QString rigMode = m_mode == QStringLiteral("SSB") ? m_ssbRadioMode
+        : (m_mode == QStringLiteral("CW") ? QStringLiteral("CW") : configuredCatRigMode());
     if (rigMode.isEmpty() && m_mode != QStringLiteral("RTTY")) {
         rigMode = m_rttyRigModeState.restoreTarget(
             rttyCatContext(), rigMode, QDateTime::currentMSecsSinceEpoch());
@@ -31022,14 +31028,13 @@ void DecodiumBridge::applyConfiguredCatRigMode(const QString& reason)
         // invece come quel modo si scrive su UNA radio locale — "USB",
         // "DATA-U" — e su DecoPort quella traduzione spetta al gateway.
         //
-        // Mandarla tale e quale metteva la radio remota in USB, cioe' sul
-        // microfono: da li' si trasmetterebbe il silenzio della stanza. Con una
-        // radio in rete l'audio arriva sempre dal codec USB, quindi il modo da
-        // chiedere e' sempre quello dei dati.
-        QString const wanted = m_mode == QStringLiteral("SSB") ? m_ssbRadioMode : rigMode.contains(QStringLiteral("-L"), Qt::CaseInsensitive)
-                               || rigMode.compare(QStringLiteral("LSB"), Qt::CaseInsensitive) == 0
-                                   ? QStringLiteral("DIGL")
-                                   : QStringLiteral("DIGU");
+        // Mandare USB metterebbe la radio remota sul microfono. I modi digitali
+        // usano DIGU/DIGL e il codec USB; il CW usa il keying remoto nativo.
+        QString const wanted = m_mode == QStringLiteral("SSB") ? m_ssbRadioMode
+            : (m_mode == QStringLiteral("CW") ? QStringLiteral("CW")
+               : (rigMode.contains(QStringLiteral("-L"), Qt::CaseInsensitive)
+                  || rigMode.compare(QStringLiteral("LSB"), Qt::CaseInsensitive) == 0
+                      ? QStringLiteral("DIGL") : QStringLiteral("DIGU")));
         if (m_catMode.compare(wanted, Qt::CaseInsensitive) == 0)
             return;
         bridgeLog(QStringLiteral("CAT rig mode sync (%1): decoport -> %2 (configurato: %3)")
@@ -43178,6 +43183,17 @@ bool DecodiumBridge::cwCanTransmit()
     if (m_ssbTxActive) return false;
     if (m_transmitting || m_tuning || sstvTxActive() || m_rttyTxActive)
         return false;
+    if (m_mode == QStringLiteral("CW")) {
+        if (!m_decoPortUseRemote)
+            return cwRigKeyerAvailable();
+        // In the CW application mode, do not send an audio sidetone as DATA-U:
+        // use an opened local keyer or the supported remote CW-key path.
+        QSettings cwSettings(QSettings::IniFormat, QSettings::UserScope,
+                             QStringLiteral("Decodium"), QStringLiteral("Decodium"));
+        if (!cwSettings.value(QStringLiteral("CW/remoteKey"), true).toBool()
+            || !cwRemoteKeySupported())
+            return false;
+    }
     if (m_decoPortUseRemote) {
         RemoteRadioLink* link = remoteLinkIfAny();
         return link && link->isLinked() && link->canTransmit()
@@ -43186,6 +43202,25 @@ bool DecodiumBridge::cwCanTransmit()
     bool found = false;
     const QAudioDevice device = resolveTxOutputDevice(&found);
     return found && !device.isNull();
+}
+
+bool DecodiumBridge::cwRigKeyerAvailable() const
+{
+    return m_mode == QStringLiteral("CW")
+        && !m_decoPortUseRemote
+        && m_catBackend == QStringLiteral("hamlib")
+        && m_hamlibCat
+        && m_hamlibCat->rigMorseAvailable();
+}
+
+bool DecodiumBridge::cwSendRigMorse(const QString& text, int wpm)
+{
+    return cwRigKeyerAvailable() && m_hamlibCat->sendRigMorse(text, wpm);
+}
+
+void DecodiumBridge::cwStopRigMorse()
+{
+    if (m_hamlibCat) m_hamlibCat->stopRigMorse();
 }
 
 bool DecodiumBridge::cwSendAudio(const QString& text, int wpm)

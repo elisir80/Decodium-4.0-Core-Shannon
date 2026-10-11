@@ -32,7 +32,9 @@ public:
   bool request_atu_tune(QString * error);
   bool request_power_on(QString * error);
   bool request_power_off(QString * error);
+  bool supports_morse () const noexcept;
   void send_morse (QString const&, int) noexcept override;  // keying CW via Hamlib
+  void stop_morse () noexcept override;
 
 private:
   void load_user_settings ();

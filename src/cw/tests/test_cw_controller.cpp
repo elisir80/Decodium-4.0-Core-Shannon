@@ -200,6 +200,45 @@ private slots:
         QTRY_VERIFY_WITH_TIMEOUT(!c.sending(), 4000);
     }
 
+    void shortAudioChunkDoesNotAddLongTypingPause()
+    {
+        QSettings s(iniPath(), QSettings::IniFormat);
+        CwController c;
+        CwController::Hooks h;
+        bool radioReady = true;
+        h.canTransmit = [&] { return radioReady; };
+        h.sendAudio = [](const QString&, int) { return true; };
+        c.setHooks(h);
+        c.start(&s);
+        c.setWpm(20);
+
+        QElapsedTimer elapsed;
+        elapsed.start();
+        c.sendText(QStringLiteral("E"), {});
+        QVERIFY(c.sending());
+        QTRY_VERIFY_WITH_TIMEOUT(!c.sending(), 300);
+        QVERIFY2(elapsed.elapsed() < 300,
+                 qPrintable(QStringLiteral("short typed chunk held for %1 ms").arg(elapsed.elapsed())));
+    }
+
+    void audioCompletionWaitsForTheRadioGate()
+    {
+        QSettings s(iniPath(), QSettings::IniFormat);
+        CwController c;
+        bool radioReady = true;
+        CwController::Hooks h;
+        h.canTransmit = [&] { return radioReady; };
+        h.sendAudio = [&](const QString&, int) { radioReady = false; return true; };
+        c.setHooks(h);
+        c.start(&s);
+        c.setWpm(60);
+        c.sendText(QStringLiteral("E"), {});
+        QTest::qWait(180);
+        QVERIFY(c.sending());
+        radioReady = true;
+        QTRY_VERIFY_WITH_TIMEOUT(!c.sending(), 200);
+    }
+
     void refusesToSendWhenTheRadioCannotTransmit()
     {
         QSettings s(iniPath(), QSettings::IniFormat);
@@ -288,6 +327,33 @@ private slots:
         QCOMPARE(c.effectiveBackend(), QString("audio"));
         rig.supported = true;
         rig.remote = false;                                     // radio locale: la scelta e' del tipo di keyer
+        QCOMPARE(c.effectiveBackend(), QString("audio"));
+    }
+
+    void localRigKeyerIsPreferredWhenAvailable()
+    {
+        QSettings s(iniPath(), QSettings::IniFormat);
+        CwController c;
+        bool available = true;
+        bool stopped = false;
+        QString sent;
+        CwController::Hooks h;
+        h.canTransmit = [] { return true; };
+        h.remoteRadio = [] { return false; };
+        h.rigKeyerAvailable = [&] { return available; };
+        h.sendRigMorse = [&](const QString& text, int) { sent = text; return true; };
+        h.stopRigMorse = [&] { stopped = true; };
+        c.setHooks(h);
+        c.start(&s);
+        QCOMPARE(c.effectiveBackend(), QString("rigkey"));
+        QVERIFY(c.canSend());
+        c.sendText(QStringLiteral("CQ TEST"), {});
+        QCOMPARE(sent, QStringLiteral("CQ TEST"));
+        QVERIFY(c.sending());
+        c.stop();
+        QVERIFY(stopped);
+        QVERIFY(!c.sending());
+        available = false;
         QCOMPARE(c.effectiveBackend(), QString("audio"));
     }
 

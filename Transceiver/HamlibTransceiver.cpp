@@ -2431,6 +2431,11 @@ void HamlibTransceiver::do_ptt (bool on)
 }
 
 // pass in false if any post_action is needed for a rig -- don't know of any as of 2024-04-14
+bool HamlibTransceiver::supports_morse () const noexcept
+{
+  return m_->rig_ && m_->rig_->caps && m_->rig_->caps->send_morse;
+}
+
 void HamlibTransceiver::send_morse (QString const& text, int wpm) noexcept
 {
   try
@@ -2447,6 +2452,18 @@ void HamlibTransceiver::send_morse (QString const& text, int wpm) noexcept
   catch (...)
     {
       // slot noexcept: non propagare eccezioni fuori dal thread del transceiver
+    }
+}
+
+void HamlibTransceiver::stop_morse () noexcept
+{
+  try
+    {
+      if (m_->rig_ && m_->rig_->caps && m_->rig_->caps->stop_morse)
+        rig_stop_morse (m_->rig_.data (), RIG_VFO_CURR);
+    }
+  catch (...)
+    {
     }
 }
 

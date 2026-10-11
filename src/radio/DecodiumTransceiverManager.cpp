@@ -2565,6 +2565,33 @@ void DecodiumTransceiverManager::setRigMode(const QString& mode)
     sendState(d.get());
 }
 
+bool DecodiumTransceiverManager::rigMorseAvailable() const
+{
+    if (!m_connected || !d->transceiver) return false;
+    auto const *hamlib = dynamic_cast<HamlibTransceiver *>(d->transceiver.data());
+    return hamlib && hamlib->supports_morse();
+}
+
+bool DecodiumTransceiverManager::sendRigMorse(const QString& text, int wpm)
+{
+    if (text.trimmed().isEmpty() || !rigMorseAvailable() || !d->transceiver)
+        return false;
+    QPointer<Transceiver> xcv = d->transceiver;
+    QMetaObject::invokeMethod(xcv, [xcv, text, wpm]() {
+        if (xcv) xcv->send_morse(text, wpm);
+    }, Qt::QueuedConnection);
+    return true;
+}
+
+void DecodiumTransceiverManager::stopRigMorse()
+{
+    if (!m_connected || !d->transceiver) return;
+    QPointer<Transceiver> xcv = d->transceiver;
+    QMetaObject::invokeMethod(xcv, [xcv]() {
+        if (xcv) xcv->stop_morse();
+    }, Qt::QueuedConnection);
+}
+
 void DecodiumTransceiverManager::setTciRxGainDb(double db)
 {
     double const bounded = qBound(-60.0, db, 20.0);

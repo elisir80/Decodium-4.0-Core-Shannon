@@ -99,6 +99,9 @@ public:
         std::function<bool()> remoteRadio;
         // Il CW a tasto verso una radio remota: vero se la strada sa farlo...
         std::function<bool()> remoteKeySupported;
+        std::function<bool()> rigKeyerAvailable;
+        std::function<bool(const QString&, int)> sendRigMorse;
+        std::function<void()> stopRigMorse;
         // ...manda un pezzo di traccia (false se non e' partito)...
         std::function<bool(const QVector<KeyEvent>& events, int toneHz)> sendKey;
         // ...alza e abbassa il PTT della radio remota...

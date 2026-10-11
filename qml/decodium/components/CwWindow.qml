@@ -32,6 +32,7 @@ Window {
     property bool transmitWhileTyping: false
     property string queuedTypedText: ""
     property int lastTypedPosition: 0
+    property string lastTypedText: ""
 
     readonly property bool canSend: !!(cw && cw.canSend)
     readonly property bool tuneReady: !!(eng && eng.catConnected && !eng.transmitting && cw && !cw.sending)
@@ -72,11 +73,17 @@ Window {
     }
     function queueTypedInput(value) {
         if (!transmitWhileTyping) return
-        if (value.length < lastTypedPosition) {
-            lastTypedPosition = value.length
-            return
-        }
-        var added = value.substring(lastTypedPosition)
+        // Track edits by their common prefix so inserting in the middle of the
+        // field does not silently skip the new characters.
+        var prefix = 0
+        var limit = Math.min(lastTypedText.length, value.length)
+        while (prefix < limit && lastTypedText.charAt(prefix) === value.charAt(prefix)) prefix++
+        var suffix = 0
+        while (suffix < limit - prefix
+               && lastTypedText.charAt(lastTypedText.length - 1 - suffix)
+                    === value.charAt(value.length - 1 - suffix)) suffix++
+        var added = value.substring(prefix, value.length - suffix)
+        lastTypedText = value
         lastTypedPosition = value.length
         if (added.length > 0) {
             queuedTypedText += added.toUpperCase()
@@ -376,7 +383,9 @@ Window {
                       ? (win.cw && win.cw.effectiveBackend === "remotekey"
                          ? qsTr("A remote radio is in use: only the key timing goes over the link, and the gateway next to the radio makes the tone.")
                          : qsTr("A remote radio is in use: the CW goes out as an audio tone through the link, whatever is chosen above."))
-                      : qsTr("The audio tone needs the radio in USB or DATA-U. A serial keyer or a WinKeyer keys the radio's own key input and needs the radio in CW.")
+                      : (win.cw && win.cw.effectiveBackend === "rigkey"
+                         ? qsTr("The radio's built-in CAT keyer sends CW while the rig stays in CW mode.")
+                         : qsTr("The audio tone needs the radio in USB or DATA-U. A serial keyer or a WinKeyer keys the radio's own key input and needs the radio in CW."))
             }
             RowLayout {
                 spacing: 8
@@ -419,6 +428,7 @@ Window {
                        : qsTr("no CAT")) + "   ·   "
                       + (win.cw ? (win.cw.effectiveBackend === "audio" ? qsTr("audio tone")
                                    : win.cw.effectiveBackend === "remotekey" ? qsTr("remote key")
+                                   : win.cw.effectiveBackend === "rigkey" ? qsTr("radio CAT keyer")
                                    : win.cw.effectiveBackend === "serial" ? qsTr("serial keyer") : "WinKeyer") : "")
                       + (win.remote ? "   ·   " + qsTr("remote radio") : "")
             }
@@ -467,9 +477,11 @@ Window {
             color: win.cWarn
             font.pixelSize: 12
             text: !win.cw ? ""
-                  : (win.cw.effectiveBackend === "audio"
-                     ? qsTr("CW transmit is not ready: it needs the radio connected and a transmit audio output. The decoder works anyway, it only needs the radio audio.")
-                     : qsTr("The keyer is not open: choose its port in Setup. The decoder works anyway."))
+                  : (win.eng && win.eng.mode === "CW" && win.cw.effectiveBackend === "audio"
+                     ? qsTr("CW transmit is unavailable: choose a working serial keyer or WinKeyer in Setup, or use a radio with a supported CAT CW keyer.")
+                     : (win.cw.effectiveBackend === "audio"
+                        ? qsTr("CW transmit is not ready: it needs the radio connected and a transmit audio output. The decoder works anyway, it only needs the radio audio.")
+                        : qsTr("The keyer is not open: choose its port in Setup. The decoder works anyway.")))
         }
 
         // ── Con chi si parla ────────────────────────────────────────────
@@ -596,6 +608,7 @@ Window {
                     win.transmitWhileTyping = checked
                     win.queuedTypedText = ""
                     win.lastTypedPosition = freeText.text.length
+                    win.lastTypedText = freeText.text
                 }
             }
             Field {
@@ -606,15 +619,15 @@ Window {
                 enabled: win.canSend || (win.transmitWhileTyping && win.cw && win.cw.sending)
                 onTextEdited: win.queueTypedInput(text)
                 onAccepted: {
-                    if (win.transmitWhileTyping) { win.flushTypedInput(); text = ""; win.lastTypedPosition = 0 }
-                    else if (win.canSend) { win.cw.sendText(text, win.ctx()); text = ""; win.lastTypedPosition = 0 }
+                    if (win.transmitWhileTyping) { win.flushTypedInput(); text = ""; win.lastTypedPosition = 0; win.lastTypedText = "" }
+                    else if (win.canSend) { win.cw.sendText(text, win.ctx()); text = ""; win.lastTypedPosition = 0; win.lastTypedText = "" }
                 }
             }
             Btn {
                 label: qsTr("Send")
                 visible: !win.transmitWhileTyping
                 live: win.canSend && freeText.text.trim().length > 0
-                onClicked: { win.cw.sendText(freeText.text, win.ctx()); freeText.text = ""; win.lastTypedPosition = 0 }
+                onClicked: { win.cw.sendText(freeText.text, win.ctx()); freeText.text = ""; win.lastTypedPosition = 0; win.lastTypedText = "" }
             }
         }
 

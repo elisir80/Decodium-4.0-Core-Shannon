@@ -23,7 +23,16 @@ CwController::CwController(QObject* parent)
         else
             pumpRemoteKey();
     });
-    connect(&m_audioDone, &QTimer::timeout, this, [this] { setSending(false, -1); });
+    connect(&m_audioDone, &QTimer::timeout, this, [this] {
+        // The bridge may still be draining its audio device after the Morse
+        // timeline ends. Poll its real transmit gate instead of imposing a
+        // long fixed delay or declaring the controller idle too early.
+        if (m_hooks.canTransmit && !m_hooks.canTransmit()) {
+            m_audioDone.start(25);
+            return;
+        }
+        setSending(false, -1);
+    });
 
     connect(&m_keyer, &CwKeyer::finished, this, [this] { setSending(false, -1); });
     connect(&m_keyer, &CwKeyer::failed, this, [this](const QString& why) {
@@ -318,8 +327,11 @@ void CwController::setWinKeyerPort(const QString& port)
 
 QString CwController::effectiveBackend() const
 {
-    if (!remoteRadio())
+    if (!remoteRadio()) {
+        if (m_hooks.rigKeyerAvailable && m_hooks.rigKeyerAvailable())
+            return QStringLiteral("rigkey");
         return m_backend;
+    }
     if (m_remoteKey && m_hooks.remoteKeySupported && m_hooks.remoteKeySupported())
         return QStringLiteral("remotekey");
     return QStringLiteral("audio");
@@ -382,6 +394,8 @@ bool CwController::canSend() const
         return m_winKeyer.isOpen();
     if (backend == QLatin1String("remotekey"))
         return true;     // effectiveBackend() l'ha scelto perche' la strada c'e'
+    if (backend == QLatin1String("rigkey"))
+        return true;
     return m_hooks.sendAudio && (!m_hooks.canTransmit || m_hooks.canTransmit());
 }
 
@@ -447,6 +461,15 @@ void CwController::sendExpanded(const QString& ready)
     // (non lo dice nessuno) e a non lasciare un tasto acceso per sempre.
     const int ms = CwKeyer::millisFor(ready, m_wpm);
     const QString backend = effectiveBackend();
+    if (backend == QLatin1String("rigkey")) {
+        if (!m_hooks.sendRigMorse || !m_hooks.sendRigMorse(ready, m_wpm)) {
+            setSending(false, -1);
+            emit message(tr("The radio CAT keyer did not accept the CW text"), QStringLiteral("warning"));
+            return;
+        }
+        m_audioDone.start(ms + 100);
+        return;
+    }
     if (backend == QLatin1String("remotekey")) {
         startRemoteKey(ready);
         return;
@@ -464,7 +487,11 @@ void CwController::sendExpanded(const QString& ready)
         emit message(tr("The CW audio did not start"), QStringLiteral("warning"));
         return;
     }
-    m_audioDone.start(ms + 800);
+    // Begin checking as soon as the Morse timeline has played. The audio
+    // backend's PTT/audio tail is variable, so the timer callback waits on the
+    // real canTransmit hook in short intervals instead of adding a fixed 800 ms
+    // pause after every short typed chunk.
+    m_audioDone.start(ms + 100);
 }
 
 // ── CW a tasto verso la radio remota ───────────────────────────────────────
@@ -541,6 +568,8 @@ void CwController::finishRemoteKey(bool immediate)
 
 void CwController::stop()
 {
+    if (m_sending && effectiveBackend() == QLatin1String("rigkey") && m_hooks.stopRigMorse)
+        m_hooks.stopRigMorse();
     finishRemoteKey(true);
     m_audioDone.stop();
     m_keyer.stop();

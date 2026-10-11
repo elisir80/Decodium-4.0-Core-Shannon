@@ -4385,6 +4385,9 @@ int main(int argc, char* argv[])
         h.canTransmit = [&bridge] { return bridge.cwCanTransmit (); };
         h.remoteRadio = [&bridge] { return bridge.decoPortUseRemote (); };
         h.remoteKeySupported = [&bridge] { return bridge.cwRemoteKeySupported (); };
+        h.rigKeyerAvailable = [&bridge] { return bridge.cwRigKeyerAvailable (); };
+        h.sendRigMorse = [&bridge] (QString const& t, int wpm) { return bridge.cwSendRigMorse (t, wpm); };
+        h.stopRigMorse = [&bridge] { bridge.cwStopRigMorse (); };
         h.sendKey = [&bridge] (QVector<decodium::cw::KeyEvent> const& events, int toneHz) {
             QVector<CwKeyEvent> out;
             out.reserve (events.size ());

@@ -1369,6 +1369,9 @@ public:
     bool   cwInAscolto() const { return m_cwInAscolto; }
     void   setCwInAscolto(bool v);
     bool   cwCanTransmit();
+    bool   cwRigKeyerAvailable() const;
+    bool   cwSendRigMorse(const QString& text, int wpm);
+    void   cwStopRigMorse();
     void ssbMonitorAudio(const QVector<short>& samples);
     bool ssbTxActive() const { return m_ssbTxActive; }
     QVariantMap ssbControls() const { return m_ssbControls; }

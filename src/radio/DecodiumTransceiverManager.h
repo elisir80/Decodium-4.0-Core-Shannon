@@ -196,6 +196,9 @@ public:
     void setRigTxFrequencyAndPttAsync(double hz, bool on);
     Q_INVOKABLE void setRigPtt(bool on);
     Q_INVOKABLE void setRigMode(const QString& mode);
+    bool rigMorseAvailable() const;
+    bool sendRigMorse(const QString& text, int wpm);
+    void stopRigMorse();
     void requestVoiceControl(const QString& key = {}, double value = 0, bool write = false);
     Q_SIGNAL void voiceControlsReady(QVariantMap controls);
     Q_INVOKABLE void setRigAudio(bool on, double periodSeconds = 15.0, int blockSize = 6912 / 2);
