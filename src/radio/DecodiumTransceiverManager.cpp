@@ -2621,6 +2621,27 @@ void DecodiumTransceiverManager::requestAtuTune()
     }, Qt::QueuedConnection);
 }
 
+void DecodiumTransceiverManager::requestRadioPowerOn()
+{
+    const QString action = QStringLiteral("Power on");
+    if (!m_connected || !d->transceiver) {
+        emit radioActionCompleted(action, false, tr("CAT disconnected"));
+        return;
+    }
+    QPointer<DecodiumTransceiverManager> owner(this);
+    QPointer<Transceiver> xcv = d->transceiver;
+    QMetaObject::invokeMethod(xcv, [owner, xcv, action]() {
+        auto *hamlib = dynamic_cast<HamlibTransceiver *>(xcv.data());
+        QString error;
+        bool const ok = hamlib && hamlib->request_power_on(&error);
+        if (!hamlib) error = QStringLiteral("Power control is available only for Hamlib radios");
+        if (owner) QMetaObject::invokeMethod(owner, [owner, xcv, action, ok, error]() {
+            if (owner && owner->m_connected && owner->d->transceiver == xcv)
+                emit owner->radioActionCompleted(action, ok, error);
+        }, Qt::QueuedConnection);
+    }, Qt::QueuedConnection);
+}
+
 void DecodiumTransceiverManager::requestRadioPowerOff()
 {
     const QString action = QStringLiteral("Power off");
@@ -2638,8 +2659,6 @@ void DecodiumTransceiverManager::requestRadioPowerOff()
         if (owner) QMetaObject::invokeMethod(owner, [owner, xcv, action, ok, error]() {
             if (owner && owner->m_connected && owner->d->transceiver == xcv)
                 emit owner->radioActionCompleted(action, ok, error);
-            if (owner && ok)
-                owner->disconnectRig();
         }, Qt::QueuedConnection);
     }, Qt::QueuedConnection);
 }

@@ -201,6 +201,7 @@ public:
     Q_INVOKABLE void setRigAudio(bool on, double periodSeconds = 15.0, int blockSize = 6912 / 2);
     Q_INVOKABLE void setRigTune(bool on);
     Q_INVOKABLE void requestAtuTune();
+    Q_INVOKABLE void requestRadioPowerOn();
     Q_INVOKABLE void requestRadioPowerOff();
     Q_INVOKABLE void startRigTxAudio(const QString& mode, unsigned symbolsLength,
                                      double framesPerSymbol, double frequency,

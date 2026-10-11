@@ -30,6 +30,70 @@ ApplicationWindow {
     flags: Qt.Window | Qt.WindowTitleHint | Qt.WindowSystemMenuHint
          | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint
     property bool superFoxOptionEnabled: bridge ? settingBool("SuperFox", false) : false
+    readonly property bool dashboardRadioControlsEnabled: !!(bridge && bridge.hamlibCat
+        && bridge.hamlibCat.connected && !bridge.decoPortUseRemote
+        && !bridge.transmitting && !bridge.tuning)
+    property string dashboardRadioActionStatus: ""
+    Dialog {
+        id: dashboardPowerOffDialog
+        title: qsTr("Power off radio?")
+        modal: true
+        standardButtons: Dialog.Yes | Dialog.No
+        anchors.centerIn: parent
+        Label {
+            text: qsTr("Switch off the radio connected through Hamlib CAT?")
+            wrapMode: Text.WordWrap
+            width: 320
+        }
+        onAccepted: if (bridge && bridge.hamlibCat) bridge.hamlibCat.requestRadioPowerOff()
+    }
+    Timer { id: dashboardRadioStatusTimer; interval: 6000; onTriggered: mainWindow.dashboardRadioActionStatus = "" }
+    Connections {
+        target: bridge ? bridge.hamlibCat : null
+        function onRadioActionCompleted(action, ok, error) {
+            mainWindow.dashboardRadioActionStatus = ok
+                ? qsTr("%1 command sent").arg(action)
+                : (error || qsTr("Radio command failed"))
+            dashboardRadioStatusTimer.restart()
+        }
+    }
+    component RadioQuickButton: Rectangle {
+        required property string label
+        required property string action
+        required property color activeColor
+        Layout.fillWidth: true
+        Layout.preferredHeight: 16
+        radius: 2
+        color: radioQuickMouse.containsMouse && mainWindow.dashboardRadioControlsEnabled
+               ? Qt.rgba(activeColor.r, activeColor.g, activeColor.b, 0.24)
+               : Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.9)
+        border.color: mainWindow.dashboardRadioControlsEnabled ? activeColor : glassBorder
+        opacity: mainWindow.dashboardRadioControlsEnabled ? 1.0 : 0.45
+        Text {
+            anchors.centerIn: parent
+            text: parent.label
+            color: textPrimary
+            font.pixelSize: 7
+            font.bold: true
+        }
+        MouseArea {
+            id: radioQuickMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            enabled: mainWindow.dashboardRadioControlsEnabled
+            cursorShape: Qt.PointingHandCursor
+            onClicked: {
+                if (!bridge || !bridge.hamlibCat) return
+                if (parent.action === "atu") bridge.hamlibCat.requestAtuTune()
+                else if (parent.action === "on") bridge.hamlibCat.requestRadioPowerOn()
+                else dashboardPowerOffDialog.open()
+            }
+        }
+        ToolTip.visible: radioQuickMouse.containsMouse
+        ToolTip.text: action === "atu" ? qsTr("Start the radio ATU")
+                       : action === "on" ? qsTr("Power on the radio")
+                       : qsTr("Power off the radio")
+    }
     readonly property string dxpeditionModeLabel: !bridge || bridge.mode !== "FT8" ? ""
         : bridge.houndMode ? (superFoxOptionEnabled ? "SuperHound" : "Hound")
         : bridge.foxMode ? (superFoxOptionEnabled ? "SuperFox" : "Fox") : ""
@@ -5236,7 +5300,7 @@ ApplicationWindow {
                 // RX/TX Sliders + LVL/Monitor
                 Item {
                     width: 200
-                    height: 74
+                    height: 84
 
                     ColumnLayout {
                         anchors.fill: parent
@@ -5480,6 +5544,27 @@ ApplicationWindow {
                                 ToolTip.visible: fastLdpcMA.containsMouse
                                 ToolTip.text: qsTr("Fast LDPC — vectorized FT2 decoder (NEON on Apple Silicon/ARM64, AVX2 on x86).\nDecodes the same words far quicker than the original decoder,\nfreeing CPU for the rest of the cycle. Falls back to the original\ndecoder automatically when the required SIMD backend is unavailable.\nTurn it off if you see decodes that look wrong.")
                             }
+                        }
+
+                        // Radio CAT controls directly below audio levels and monitor.
+                        RowLayout {
+                            spacing: 2
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 16
+
+                            RadioQuickButton { label: "ATU"; action: "atu"; activeColor: secondaryCyan }
+                            RadioQuickButton { label: "PWR ON"; action: "on"; activeColor: accentGreen }
+                            RadioQuickButton { label: "PWR OFF"; action: "off"; activeColor: bridge.themeManager.warningColor }
+                        }
+                        Label {
+                            text: mainWindow.dashboardRadioActionStatus
+                            visible: text.length > 0
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: visible ? 12 : 0
+                            Layout.minimumHeight: 0
+                            font.pixelSize: 7
+                            color: text.toLowerCase().indexOf("failed") >= 0 ? bridge.themeManager.warningColor : accentGreen
+                            elide: Text.ElideRight
                         }
                     }
                 } // End Sliders Item

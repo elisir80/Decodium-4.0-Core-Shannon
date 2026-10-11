@@ -2496,6 +2496,19 @@ bool HamlibTransceiver::request_atu_tune (QString * error)
   return true;
 }
 
+bool HamlibTransceiver::request_power_on (QString * error)
+{
+  auto * rig = m_->rig_.data ();
+  if (!rig) { if (error) *error = tr ("Radio disconnected"); return false; }
+  if (ptt_on_) { if (error) *error = tr ("Cannot power on while transmitting"); return false; }
+  int rc = rig_set_powerstat (rig, RIG_POWER_ON);
+  if (rc != RIG_OK) {
+    if (error) *error = QString::fromLocal8Bit (rigerror (rc));
+    return false;
+  }
+  return true;
+}
+
 bool HamlibTransceiver::request_power_off (QString * error)
 {
   auto * rig = m_->rig_.data ();

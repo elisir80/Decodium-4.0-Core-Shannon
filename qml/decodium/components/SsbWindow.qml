@@ -36,7 +36,7 @@ ApplicationWindow {
         standardButtons: Dialog.Yes | Dialog.No
         anchors.centerIn: parent
         Label {
-            text: qsTr("This will switch off the radio connected through Hamlib CAT and disconnect it from Decodium.")
+            text: qsTr("This will switch off the radio connected through Hamlib CAT. The CAT session is kept open so you can try Power On afterward.")
             wrapMode: Text.WordWrap
             width: 340
         }
@@ -52,7 +52,9 @@ ApplicationWindow {
         target: bridge.hamlibCat
         function onRadioActionCompleted(action, ok, error) {
             win.radioActionStatus = ok
-                ? (action.toLowerCase().indexOf("atu") >= 0 ? qsTr("Radio ATU command sent") : qsTr("Radio power-off command sent"))
+                ? (action.toLowerCase().indexOf("atu") >= 0 ? qsTr("Radio ATU command sent")
+                   : action.toLowerCase().indexOf("on") >= 0 ? qsTr("Radio power-on command sent")
+                   : qsTr("Radio power-off command sent"))
                 : (error || qsTr("Radio command failed"))
         }
     }
@@ -162,6 +164,15 @@ ApplicationWindow {
                         ToolTip.visible: hovered
                         ToolTip.text: qsTr("Ask the radio to start its internal antenna tuner.")
                         onClicked: bridge.hamlibCat.requestAtuTune()
+                    }
+                    Button {
+                        text: qsTr("Power on radio")
+                        Layout.columnSpan: 2
+                        enabled: ready && controls.busy !== true && !voice.transmitting
+                                 && !bridge.decoPortUseRemote && bridge.hamlibCat && bridge.hamlibCat.connected
+                        ToolTip.visible: hovered
+                        ToolTip.text: qsTr("Ask the radio to power on through Hamlib CAT, if supported by the model.")
+                        onClicked: bridge.hamlibCat.requestRadioPowerOn()
                     }
                     Button {
                         text: qsTr("Power off radio")

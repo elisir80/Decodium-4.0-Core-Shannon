@@ -80,7 +80,7 @@ Window {
         lastTypedPosition = value.length
         if (added.length > 0) {
             queuedTypedText += added.toUpperCase()
-            liveTypingTimer.restart()
+            flushTypedInput()
         }
     }
     function flushTypedInput() {
@@ -99,12 +99,11 @@ Window {
         function onDxCallChanged() { if (win.eng) callField.text = win.eng.dxCall }
     }
     Timer { id: statusTimer; interval: 7000; onTriggered: statusText.text = "" }
-    Timer { id: liveTypingTimer; interval: 650; onTriggered: win.flushTypedInput() }
     Connections {
         target: win.cw
         function onSendingChanged() {
             if (win.transmitWhileTyping && win.cw && !win.cw.sending && win.queuedTypedText.length > 0)
-                liveTypingTimer.restart()
+                win.flushTypedInput()
         }
     }
 
@@ -595,7 +594,6 @@ Window {
                 ToolTip.text: qsTr("Transmit new text automatically after a short pause while typing.")
                 onToggled: {
                     win.transmitWhileTyping = checked
-                    liveTypingTimer.stop()
                     win.queuedTypedText = ""
                     win.lastTypedPosition = freeText.text.length
                 }
@@ -608,7 +606,7 @@ Window {
                 enabled: win.canSend || (win.transmitWhileTyping && win.cw && win.cw.sending)
                 onTextEdited: win.queueTypedInput(text)
                 onAccepted: {
-                    if (win.transmitWhileTyping) { liveTypingTimer.stop(); win.flushTypedInput(); text = ""; win.lastTypedPosition = 0 }
+                    if (win.transmitWhileTyping) { win.flushTypedInput(); text = ""; win.lastTypedPosition = 0 }
                     else if (win.canSend) { win.cw.sendText(text, win.ctx()); text = ""; win.lastTypedPosition = 0 }
                 }
             }
