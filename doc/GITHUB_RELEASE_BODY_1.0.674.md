@@ -13,6 +13,7 @@ This release brings the changes accumulated since 1.0.660, including the new rem
 - Improved FT2 telemetry timing and split-frequency command handling.
 - Updated the Windows package to include the complete Decolink installation path and remote-radio support.
 - Cleaned up compiler and linker diagnostics: corrected legacy C conversion warnings, fixed invalid fixed-width grid initialisers, enabled CMake policy handling for modern static-library deduplication, and removed duplicate link interfaces without suppressing real errors.
+- Fixed the legacy Linux `wsjtx` build by exposing the CW include path and linking the CW module required by `DecodiumBridge`.
 - Preserved the existing multi-stream, SSTV, SuperFox, QSO logging, and QML changes accumulated in the local main branch.
 
 The Windows installer, macOS Intel and Apple Silicon DMG packages, and Linux AppImage packages are produced by the GitHub Actions release runners.
@@ -30,6 +31,7 @@ Questa release raccoglie le modifiche introdotte dalla 1.0.660, comprese le nuov
 - Migliorata la temporizzazione della telemetria FT2 e la gestione dei comandi di split quando cambia soltanto la frequenza TX.
 - Aggiornato il pacchetto Windows con il percorso completo di installazione Decolink e del supporto radio remoto.
 - Ripuliti i warning di compilazione e linking: corretti i warning di conversione nel C legacy, sistemati gli inizializzatori delle griglie a larghezza fissa, abilitate le policy CMake moderne per la deduplicazione delle librerie statiche e rimosse le interfacce di linking duplicate senza nascondere errori reali.
+- Corretto il build Linux del target legacy `wsjtx`, rendendo disponibile il percorso degli header CW e collegando il modulo CW richiesto da `DecodiumBridge`.
 - Conservate le modifiche già presenti nel main locale relative a multi-stream, SSTV, SuperFox, logging dei QSO e interfaccia QML.
 
 Gli installer Windows, i pacchetti DMG per macOS Intel e Apple Silicon e i pacchetti AppImage Linux vengono prodotti dai runner GitHub Actions dedicati.
