@@ -134,36 +134,44 @@
 <context>
     <name>ActiveStationsPanel</name>
     <message>
+        <location filename="../qml/panels/ActiveStationsPanel.qml" line="+95"/>
         <source>ACTIVE STATIONS</source>
-        <translation type="vanished">STAZIONI ATTIVE</translation>
+        <translation>STAZIONI ATTIVE</translation>
     </message>
     <message>
+        <location line="+59"/>
         <source>CQ Only</source>
-        <translation type="vanished">Solo CQ</translation>
+        <translation>Solo CQ</translation>
     </message>
     <message>
+        <location line="+17"/>
         <source>Wanted</source>
-        <translation type="vanished">Cercata</translation>
+        <translation>Cercata</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>Clear</source>
-        <translation type="vanished">Cancella</translation>
+        <translation>Cancella</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>Call</source>
-        <translation type="vanished">Nominativo</translation>
+        <translation>Nominativo</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Freq</source>
-        <translation type="vanished">Freq</translation>
+        <translation>Freq</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Grid</source>
-        <translation type="vanished">Griglia</translation>
+        <translation>Griglia</translation>
     </message>
     <message>
+        <location line="+91"/>
         <source>No active stations</source>
-        <translation type="vanished">Nessuna stazione attiva</translation>
+        <translation>Nessuna stazione attiva</translation>
     </message>
 </context>
 <context>
@@ -351,175 +359,217 @@ Searched paths:
 <context>
     <name>AstroPanel</name>
     <message>
+        <location filename="../qml/panels/AstroPanel.qml" line="+156"/>
         <source>ASTRO / EME</source>
-        <translation type="vanished">ASTRO / EME</translation>
+        <translation>ASTRO / EME</translation>
     </message>
     <message>
+        <location line="+49"/>
         <source>Az</source>
-        <translation type="vanished">Az</translation>
+        <translation>Az</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>El</source>
-        <translation type="vanished">El</translation>
+        <translation>El</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Doppler</source>
-        <translation type="vanished">Doppler</translation>
+        <translation>Doppler</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Sun El</source>
-        <translation type="vanished">Elev. sole</translation>
+        <translation>Elev. sole</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Phase</source>
-        <translation type="vanished">Fase</translation>
+        <translation>Fase</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Illum</source>
-        <translation type="vanished">Illum.</translation>
+        <translation>Illum.</translation>
     </message>
 </context>
 <context>
     <name>AstroWindow</name>
     <message>
+        <location filename="../qml/decodium/components/AstroWindow.qml" line="+193"/>
         <source>🌙 Astronomical Data</source>
-        <translation type="vanished">🌙 Dati astronomici</translation>
+        <translation>🌙 Dati astronomici</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>Satellite tracking</source>
-        <translation type="vanished">Inseguimento satelliti</translation>
+        <translation>Inseguimento satelliti</translation>
     </message>
     <message>
+        <location line="-192"/>
         <source>Astronomical Data</source>
-        <translation type="vanished">Dati Astronomici</translation>
+        <translation>Dati Astronomici</translation>
     </message>
     <message>
+        <location line="+227"/>
         <source>Minimize</source>
-        <translation type="vanished">Riduci a icona</translation>
+        <translation>Riduci a icona</translation>
     </message>
     <message>
+        <location line="+31"/>
         <source>Close</source>
-        <translation type="vanished">Chiudi</translation>
+        <translation>Chiudi</translation>
     </message>
     <message>
+        <location line="+65"/>
         <source>Location:</source>
-        <translation type="vanished">Posizione:</translation>
+        <translation>Posizione:</translation>
     </message>
     <message>
+        <location line="+92"/>
         <source>Moon</source>
-        <translation type="vanished">Luna</translation>
+        <translation>Luna</translation>
     </message>
     <message>
+        <location line="+42"/>
         <source>Distance:</source>
-        <translation type="vanished">Distanza:</translation>
+        <translation>Distanza:</translation>
     </message>
     <message>
+        <location line="+16"/>
         <source>Rise:</source>
-        <translation type="vanished">Sorgere:</translation>
+        <translation>Sorgere:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Set:</source>
-        <translation type="vanished">Tramonto:</translation>
+        <translation>Tramonto:</translation>
     </message>
     <message>
+        <location line="+25"/>
         <source>Sun</source>
-        <translation type="vanished">Sole</translation>
+        <translation>Sole</translation>
     </message>
     <message>
+        <location line="+27"/>
         <source>Sunrise:</source>
-        <translation type="vanished">Alba:</translation>
+        <translation>Alba:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Sunset:</source>
-        <translation type="vanished">Tramonto:</translation>
+        <translation>Tramonto:</translation>
     </message>
     <message>
+        <location line="+26"/>
         <source>EME (Earth-Moon-Earth)</source>
-        <translation type="vanished">EME (Terra-Luna-Terra)</translation>
+        <translation>EME (Terra-Luna-Terra)</translation>
     </message>
     <message>
+        <location line="+36"/>
         <source>Status:</source>
-        <translation type="vanished">Stato:</translation>
+        <translation>Stato:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Path Loss:</source>
-        <translation type="vanished">Attenuazione:</translation>
+        <translation>Attenuazione:</translation>
     </message>
     <message>
+        <location line="+18"/>
         <source>Frequency:</source>
-        <translation type="vanished">Frequenza:</translation>
+        <translation>Frequenza:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Window:</source>
-        <translation type="vanished">Finestra:</translation>
+        <translation>Finestra:</translation>
     </message>
     <message>
+        <location line="+29"/>
         <source>Propagation (HamQSL)</source>
-        <translation type="vanished">Propagazione (HamQSL)</translation>
+        <translation>Propagazione (HamQSL)</translation>
     </message>
     <message>
+        <location line="+25"/>
         <source>Solar Flux:</source>
-        <translation type="vanished">Flusso solare:</translation>
+        <translation>Flusso solare:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>A-Index:</source>
-        <translation type="vanished">Indice A:</translation>
+        <translation>Indice A:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>K-Index:</source>
-        <translation type="vanished">Indice K:</translation>
+        <translation>Indice K:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>X-Ray:</source>
-        <translation type="vanished">Raggi X:</translation>
+        <translation>Raggi X:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Sunspots:</source>
-        <translation type="vanished">Macchie solari:</translation>
+        <translation>Macchie solari:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Solar Wind:</source>
-        <translation type="vanished">Vento solare:</translation>
+        <translation>Vento solare:</translation>
     </message>
     <message>
+        <location line="+16"/>
         <source>Geomagnetic:</source>
-        <translation type="vanished">Geomagnetismo:</translation>
+        <translation>Geomagnetismo:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Signal Noise:</source>
-        <translation type="vanished">Rumore:</translation>
+        <translation>Rumore:</translation>
     </message>
     <message>
+        <location line="+46"/>
         <source>HF Band Conditions</source>
-        <translation type="vanished">Condizioni delle bande HF</translation>
+        <translation>Condizioni delle bande HF</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>Band</source>
-        <translation type="vanished">Banda</translation>
+        <translation>Banda</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Day</source>
-        <translation type="vanished">Giorno</translation>
+        <translation>Giorno</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Night</source>
-        <translation type="vanished">Notte</translation>
+        <translation>Notte</translation>
     </message>
     <message>
+        <location line="+58"/>
         <source>No HF condition data available yet.</source>
-        <translation type="vanished">Nessun dato sulle condizioni HF disponibile.</translation>
+        <translation>Nessun dato sulle condizioni HF disponibile.</translation>
     </message>
     <message>
+        <location line="+23"/>
         <source>VHF Conditions</source>
-        <translation type="vanished">Condizioni VHF</translation>
+        <translation>Condizioni VHF</translation>
     </message>
     <message>
+        <location line="+32"/>
         <source>No VHF condition data available yet.</source>
-        <translation type="vanished">Nessun dato sulle condizioni VHF disponibile.</translation>
+        <translation>Nessun dato sulle condizioni VHF disponibile.</translation>
     </message>
     <message>
+        <location line="+27"/>
         <source>Refresh</source>
-        <translation type="vanished">Aggiorna</translation>
+        <translation>Aggiorna</translation>
     </message>
 </context>
 <context>
@@ -543,14 +593,66 @@ Searched paths:
 <context>
     <name>BandBar</name>
     <message>
+        <location filename="../qml/decodium/rtty/BandBar.qml" line="+44"/>
         <source>No radio connected.</source>
-        <translation type="vanished">Nessuna radio collegata.</translation>
+        <translation>Nessuna radio collegata.</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Decodium&apos;s CAT is not connected, so the radio takes
 no commands. Connect it in Decodium.</source>
-        <translation type="vanished">Il CAT di Decodium non e&apos; connesso, quindi la radio non
+        <translation>Il CAT di Decodium non e&apos; connesso, quindi la radio non
 accetta comandi. Connettilo da Decodium.</translation>
+    </message>
+    <message>
+        <location line="+49"/>
+        <source>DIGU · AFSK</source>
+        <translation>DIGU · AFSK</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>DIGL · AFSK</source>
+        <translation>DIGL · AFSK</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source> · FSK</source>
+        <translation> · FSK</translation>
+    </message>
+    <message>
+        <location line="+23"/>
+        <source>QMX USB-audio FSK: Decodium selects its Digi/PKTUSB mode for transmission.</source>
+        <translation>FSK audio USB QMX: Decodium seleziona il modo Digi/PKTUSB per la trasmissione.</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>True RTTY, upper sideband: the radio narrows
+its filter around the tones. Best for copying — but
+the radio waits for FSK keying, so transmitting from
+here sends nothing.</source>
+        <translation>RTTY vero, banda laterale superiore: la radio restringe
+il filtro attorno ai toni. Ideale per la ricezione, ma
+la radio attende la manipolazione FSK, quindi trasmettere
+da qui non invia nulla.</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>QMX reverse USB-audio FSK: Decodium selects its Digi/PKTLSB mode.</source>
+        <translation>FSK audio USB invertito QMX: Decodium seleziona il modo Digi/PKTLSB.</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>True RTTY, lower sideband. Same as RTTY-U:
+receive only, the radio expects FSK keying to
+transmit.</source>
+        <translation>RTTY vero, banda laterale inferiore. Come RTTY-U:
+solo ricezione, la radio attende la manipolazione
+FSK per trasmettere.</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>DIGU — RTTY via audio/AFSK. Selects upper-sideband data mode (DATA-U / USB-D). Configure the radio to accept computer audio. Use this for audio-based RTTY transmission.</source>
+        <translation>DIGU — RTTY via audio/AFSK. Seleziona il modo dati in banda laterale superiore (DATA-U / USB-D). Configura la radio perché accetti l&apos;audio del computer. Usalo per la trasmissione RTTY basata su audio.</translation>
     </message>
     <message>
         <source>%1 — RTTY at %2 MHz</source>
@@ -563,15 +665,17 @@ decoder is written for.</source>
 questo decodificatore e&apos; scritto.</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Data on the lower sideband. The tones come out
 reversed — REV puts them back.</source>
-        <translation type="vanished">Dati sulla banda laterale inferiore. I toni escono
+        <translation>Dati sulla banda laterale inferiore. I toni escono
 rovesciati: REV li rimette a posto.</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Voice sideband. RTTY is copied just the same,
 but the radio&apos;s filter is wider than it needs.</source>
-        <translation type="vanished">Banda laterale fonia. L&apos;RTTY si copia lo stesso, ma il
+        <translation>Banda laterale fonia. L&apos;RTTY si copia lo stesso, ma il
 filtro della radio e&apos; piu&apos; largo del necessario.</translation>
     </message>
 </context>
@@ -593,9 +697,10 @@ filtro della radio e&apos; piu&apos; largo del necessario.</translation>
 <context>
     <name>BandScale</name>
     <message>
+        <location filename="../qml/decodium/rtty/BandScale.qml" line="+230"/>
         <source>Drag to move the radio; the wheel tunes by 1 kHz —
 100 Hz with Shift, 10 kHz with Ctrl.</source>
-        <translation type="vanished">Trascina per spostare la radio; la rotellina sintonizza di 1 kHz —
+        <translation>Trascina per spostare la radio; la rotellina sintonizza di 1 kHz —
 100 Hz con Maiusc, 10 kHz con Ctrl.</translation>
     </message>
 </context>
@@ -635,161 +740,198 @@ filtro della radio e&apos; piu&apos; largo del necessario.</translation>
 <context>
     <name>BigReadout</name>
     <message>
+        <location filename="../qml/decodium/rotor/BigReadout.qml" line="+61"/>
         <source>towards %1°</source>
-        <translation type="vanished">verso %1°</translation>
+        <translation>verso %1°</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>stable position</source>
-        <translation type="vanished">posizione stabile</translation>
+        <translation>posizione stabile</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>no reading</source>
-        <translation type="vanished">nessuna lettura</translation>
+        <translation>nessuna lettura</translation>
     </message>
 </context>
 <context>
     <name>BootLoader</name>
     <message>
+        <location filename="../qml/decodium/BootLoader.qml" line="+21"/>
         <source>Decodium 4.0 — Loading...</source>
-        <translation type="vanished">Decodium 4.0 — Caricamento...</translation>
+        <translation>Decodium 4.0 — Caricamento...</translation>
     </message>
     <message>
+        <location line="+133"/>
         <source>DECODIUM 4.0</source>
-        <translation type="vanished">DECODIUM 4.0</translation>
+        <translation>DECODIUM 4.0</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Core Gallager</source>
-        <translation type="vanished">Core Gallager</translation>
+        <translation>Core Gallager</translation>
     </message>
 </context>
 <context>
     <name>BugReportDialog</name>
     <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="+8"/>
         <source>Report a problem</source>
-        <translation type="vanished">Segnala un problema</translation>
+        <translation>Segnala un problema</translation>
     </message>
     <message>
+        <location line="+29"/>
         <source>CAT / HRD</source>
-        <translation type="vanished">CAT / HRD</translation>
+        <translation>CAT / HRD</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Reception / decoding</source>
-        <translation type="vanished">Ricezione / decodifica</translation>
+        <translation>Ricezione / decodifica</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Transmission</source>
-        <translation type="vanished">Trasmissione</translation>
+        <translation>Trasmissione</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Interface</source>
-        <translation type="vanished">Interfaccia</translation>
+        <translation>Interfaccia</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Audio &amp; peripherals</source>
-        <translation type="vanished">Audio e periferiche</translation>
+        <translation>Audio e periferiche</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Installation &amp; updates</source>
-        <translation type="vanished">Installazione e aggiornamenti</translation>
+        <translation>Installazione e aggiornamenti</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Translations</source>
-        <translation type="vanished">Traduzioni</translation>
+        <translation>Traduzioni</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>General / Other</source>
-        <translation type="vanished">Generale / Altro</translation>
+        <translation>Generale / Altro</translation>
     </message>
     <message>
+        <location line="+26"/>
         <source>Problem in %1</source>
-        <translation type="vanished">Problema in %1</translation>
+        <translation>Problema in %1</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Automatic self-check:</source>
-        <translation type="vanished">Autodiagnosi automatica:</translation>
+        <translation>Autodiagnosi automatica:</translation>
     </message>
     <message>
+        <location line="+39"/>
         <source>Your report is posted on the community forum, in your language, so others can help.</source>
-        <translation type="vanished">La tua segnalazione viene pubblicata sul forum della community, nella tua lingua, così altri possono aiutarti.</translation>
+        <translation>La tua segnalazione viene pubblicata sul forum della community, nella tua lingua, così altri possono aiutarti.</translation>
     </message>
     <message numerus="yes">
+        <location line="+29"/>
         <source>Found %n likely cause(s) — please check these before reporting:</source>
-        <translation type="vanished">
+        <translation>
             <numerusform>Trovata %n causa probabile — controllala prima di segnalare:</numerusform>
             <numerusform>Trovate %n cause probabili — controllale prima di segnalare:</numerusform>
         </translation>
     </message>
     <message>
+        <location line="+47"/>
         <source>Self-check found no known cause — please describe the problem below.</source>
-        <translation type="vanished">L&apos;autodiagnosi non ha trovato cause note — descrivi il problema qui sotto.</translation>
+        <translation>L&apos;autodiagnosi non ha trovato cause note — descrivi il problema qui sotto.</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>Category:</source>
-        <translation type="vanished">Categoria:</translation>
+        <translation>Categoria:</translation>
     </message>
     <message>
+        <location line="+16"/>
         <source>Describe the problem:</source>
-        <translation type="vanished">Descrivi il problema:</translation>
+        <translation>Descrivi il problema:</translation>
     </message>
     <message>
+        <location line="+27"/>
         <source>What happens, since when, and what you already tried. Paste any error messages too.</source>
-        <translation type="vanished">Cosa succede, da quando, e cosa hai già provato. Incolla anche eventuali messaggi di errore.</translation>
+        <translation>Cosa succede, da quando, e cosa hai già provato. Incolla anche eventuali messaggi di errore.</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Diagnostic info (auto-collected):</source>
-        <translation type="vanished">Informazioni diagnostiche (raccolte automaticamente):</translation>
+        <translation>Informazioni diagnostiche (raccolte automaticamente):</translation>
     </message>
     <message>
+        <location line="+15"/>
         <source>Diagnostics not available</source>
-        <translation type="vanished">Diagnostica non disponibile</translation>
+        <translation>Diagnostica non disponibile</translation>
     </message>
     <message>
+        <location line="+16"/>
         <source>Copy Report</source>
-        <translation type="vanished">Copia segnalazione</translation>
+        <translation>Copia segnalazione</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>Copied!</source>
-        <translation type="vanished">Copiato!</translation>
+        <translation>Copiato!</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Sending...</source>
-        <translation type="vanished">Invio in corso...</translation>
+        <translation>Invio in corso...</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Upload last diagnostic log</source>
-        <translation type="vanished">Carica l&apos;ultimo log diagnostico</translation>
+        <translation>Carica l&apos;ultimo log diagnostico</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Diagnostic log — %1 — %2</source>
-        <translation type="vanished">Log diagnostico — %1 — %2</translation>
+        <translation>Log diagnostico — %1 — %2</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>The diagnostic log could not be read.</source>
-        <translation type="vanished">Impossibile leggere il log diagnostico.</translation>
+        <translation>Impossibile leggere il log diagnostico.</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Diagnostic log uploaded from Decodium.</source>
-        <translation type="vanished">Log diagnostico caricato da Decodium.</translation>
+        <translation>Log diagnostico caricato da Decodium.</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>Posting...</source>
-        <translation type="vanished">Pubblicazione in corso...</translation>
+        <translation>Pubblicazione in corso...</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Post to community</source>
-        <translation type="vanished">Pubblica sulla community</translation>
+        <translation>Pubblica sulla community</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>You already reported this recently. Check the community for replies: %1</source>
-        <translation type="vanished">Hai già segnalato questo di recente. Controlla le risposte nella community: %1</translation>
+        <translation>Hai già segnalato questo di recente. Controlla le risposte nella community: %1</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Close</source>
-        <translation type="vanished">Chiudi</translation>
+        <translation>Chiudi</translation>
     </message>
     <message>
+        <location line="+23"/>
         <source>Posted! Open the groups: %1</source>
-        <translation type="vanished">Pubblicato! Apri i gruppi: %1</translation>
+        <translation>Pubblicato! Apri i gruppi: %1</translation>
     </message>
 </context>
 <context>
@@ -869,191 +1011,247 @@ filtro della radio e&apos; piu&apos; largo del necessario.</translation>
 <context>
     <name>CallDialog</name>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="+28"/>
         <source>Chiamate (CALL)</source>
-        <translation type="vanished">Chiamate (CALL)</translation>
+        <translation>Chiamate (CALL)</translation>
     </message>
     <message>
+        <location line="+146"/>
         <source>Direct call</source>
-        <translation type="vanished">Chiamata diretta</translation>
+        <translation>Chiamata diretta</translation>
     </message>
     <message>
+        <location line="+32"/>
         <source>Target callsign</source>
-        <translation type="vanished">Nominativo target</translation>
+        <translation>Nominativo target</translation>
     </message>
     <message>
+        <location line="-14"/>
         <source>⏳ ARMED</source>
-        <translation type="vanished">⏳ ARMATO</translation>
+        <translation>⏳ ARMATO</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>ACTIVE</source>
-        <translation type="vanished">ATTIVO</translation>
+        <translation>ATTIVO</translation>
     </message>
     <message>
+        <location line="+44"/>
         <source>Max unanswered calls</source>
-        <translation type="vanished">Max chiamate senza risposta</translation>
+        <translation>Max chiamate senza risposta</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Total timeout (s)</source>
-        <translation type="vanished">Timeout totale (s)</translation>
+        <translation>Timeout totale (s)</translation>
     </message>
     <message>
+        <location line="+15"/>
+        <location line="+217"/>
+        <location line="+157"/>
         <source>∞</source>
-        <translation type="vanished">∞</translation>
+        <translation>∞</translation>
     </message>
     <message>
+        <location line="-326"/>
         <source>Periodo FT8/FT4</source>
-        <translation type="vanished">Periodo FT8/FT4</translation>
+        <translation>Periodo FT8/FT4</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>1st (:00/:30)</source>
-        <translation type="vanished">1° (:00/:30)</translation>
+        <translation>1° (:00/:30)</translation>
     </message>
     <message>
+        <location line="+30"/>
         <source>2nd (:15/:45)</source>
-        <translation type="vanished">2° (:15/:45)</translation>
+        <translation>2° (:15/:45)</translation>
     </message>
     <message>
+        <location line="+30"/>
         <source>Alterna</source>
-        <translation type="vanished">Alterna</translation>
+        <translation>Alterna</translation>
     </message>
     <message>
+        <location line="+36"/>
         <source>Pausa fra cicli (s)</source>
-        <translation type="vanished">Pausa fra cicli (s)</translation>
+        <translation>Pausa fra cicli (s)</translation>
     </message>
     <message>
+        <location line="+23"/>
         <source>DX-watch armed — doesn&apos;t call immediately: waits for the target to be decoded</source>
-        <translation type="vanished">DX-watch armato — non chiama subito: attende che il target sia decodificato</translation>
+        <translation>DX-watch armato — non chiama subito: attende che il target sia decodificato</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Re-arm: if the target disappears, go back to listening (max 3 times, then manual Halt)</source>
-        <translation type="vanished">Ri-arma: se il target scompare, torna in ascolto (max 3 volte, poi Halt manuale)</translation>
+        <translation>Ri-arma: se il target scompare, torna in ascolto (max 3 volte, poi Halt manuale)</translation>
     </message>
     <message>
+        <location line="+26"/>
         <source>⏳ Listening: waiting for %1 to be decoded…</source>
-        <translation type="vanished">⏳ In ascolto: attendo la decodifica di %1…</translation>
+        <translation>⏳ In ascolto: attendo la decodifica di %1…</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Status: calling %1</source>
-        <translation type="vanished">Stato: sto chiamando %1</translation>
+        <translation>Stato: sto chiamando %1</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Unanswered %1 / %2</source>
-        <translation type="vanished">Senza risposta %1 / %2</translation>
+        <translation>Senza risposta %1 / %2</translation>
     </message>
     <message>
+        <location line="+196"/>
         <source>Generic AutoCQ (ACQ button)</source>
-        <translation type="vanished">AutoCQ generico (pulsante ACQ)</translation>
+        <translation>AutoCQ generico (pulsante ACQ)</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Max CQ calls (0=∞)</source>
-        <translation type="vanished">Max chiamate CQ (0=∞)</translation>
+        <translation>Max chiamate CQ (0=∞)</translation>
     </message>
     <message>
+        <location line="+16"/>
+        <source>Pause after each CQ (s)</source>
+        <translation>Pausa dopo ogni CQ (s)</translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>Completed CQs only (including custom calls); QSO replies do not count. Pauses start after playback and TX resumes at the next permitted slot. Generic and burst pauses overlap. The safety watchdog remains active during listening: its period count is NOT a CQ count.</source>
+        <translation>Solo CQ completati (comprese le chiamate personalizzate); le risposte QSO non contano. Le pause iniziano dopo la riproduzione e la TX riprende nel prossimo slot consentito. Le pause generiche e quelle a raffica si sovrappongono. Il watchdog di sicurezza resta attivo durante l&apos;ascolto: il suo conteggio dei periodi NON è un conteggio di CQ.</translation>
+    </message>
+    <message>
+        <location line="+7"/>
         <source>CQ burst / listening cadence</source>
-        <translation type="vanished">Raffiche CQ / cadenza di ascolto</translation>
+        <translation>Raffiche CQ / cadenza di ascolto</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>CQs per burst (0 = continuous)</source>
-        <translation type="vanished">CQ per raffica (0 = continuo)</translation>
+        <translation>CQ per raffica (0 = continuo)</translation>
     </message>
     <message>
+        <location line="+16"/>
         <source>Listening cycles between bursts</source>
-        <translation type="vanished">Cicli di ascolto tra le raffiche</translation>
+        <translation>Cicli di ascolto tra le raffiche</translation>
     </message>
     <message>
+        <location line="+14"/>
         <source>Set both values above zero to enable this cadence. Valid callers are still answered while listening.</source>
-        <translation type="vanished">Imposta entrambi i valori sopra lo zero per attivare la cadenza. Durante l&apos;ascolto Decodium risponde comunque ai chiamanti validi.</translation>
+        <translation>Imposta entrambi i valori sopra lo zero per attivare la cadenza. Durante l&apos;ascolto Decodium risponde comunque ai chiamanti validi.</translation>
     </message>
     <message>
+        <location line="+17"/>
         <source>Close</source>
-        <translation type="vanished">Chiudi</translation>
+        <translation>Chiudi</translation>
     </message>
     <message>
         <source>Pausa fra cicli CQ (s)</source>
         <translation type="vanished">Pausa fra cicli CQ (s)</translation>
     </message>
     <message>
+        <location line="+23"/>
         <source>Stop</source>
-        <translation type="vanished">Stop</translation>
+        <translation>Stop</translation>
     </message>
     <message>
         <source>▶ Start</source>
         <translation type="vanished">▶ Avvia</translation>
     </message>
     <message>
+        <location line="-305"/>
         <source>Auto Call</source>
-        <translation type="vanished">Chiamata automatica</translation>
+        <translation>Chiamata automatica</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Automatically call eligible CQ stations without selecting a target</source>
-        <translation type="vanished">Chiama automaticamente le stazioni in CQ idonee, senza selezionare un obiettivo</translation>
+        <translation>Chiama automaticamente le stazioni in CQ idonee, senza selezionare un obiettivo</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>■ Stop Auto Call</source>
-        <translation type="vanished">■ Ferma chiamata automatica</translation>
+        <translation>■ Ferma chiamata automatica</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>▶ Start Auto Call</source>
-        <translation type="vanished">▶ Avvia chiamata automatica</translation>
+        <translation>▶ Avvia chiamata automatica</translation>
     </message>
     <message>
+        <location line="+26"/>
         <source>Answers eligible CQ stations, skips calls already worked on this band, and stops at the session limit.</source>
-        <translation type="vanished">Risponde alle stazioni in CQ idonee, salta i nominativi già lavorati su questa banda e si ferma al limite della sessione.</translation>
+        <translation>Risponde alle stazioni in CQ idonee, salta i nominativi già lavorati su questa banda e si ferma al limite della sessione.</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Armed: waits for a valid CQ decode; TX starts on the next legal slot.</source>
-        <translation type="vanished">Armato: attende una decodifica CQ valida; la trasmissione parte al primo slot consentito.</translation>
+        <translation>Armato: attende una decodifica CQ valida; la trasmissione parte al primo slot consentito.</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Idle: press Start Auto Call to arm automatic CQ replies.</source>
-        <translation type="vanished">Inattivo: premi Avvia chiamata automatica per armare le risposte automatiche alle CQ.</translation>
+        <translation>Inattivo: premi Avvia chiamata automatica per armare le risposte automatiche alle CQ.</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Max QSOs this session (0=∞)</source>
-        <translation type="vanished">QSO massimi in questa sessione (0=∞)</translation>
+        <translation>QSO massimi in questa sessione (0=∞)</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Candidate priority</source>
-        <translation type="vanished">Priorità dei candidati</translation>
+        <translation>Priorità dei candidati</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Last decoded</source>
-        <translation type="vanished">Ultima decodificata</translation>
+        <translation>Ultima decodificata</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Strongest signal</source>
-        <translation type="vanished">Segnale più forte</translation>
+        <translation>Segnale più forte</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Furthest grid</source>
-        <translation type="vanished">Locatore più lontano</translation>
+        <translation>Locatore più lontano</translation>
     </message>
     <message>
+        <location line="+66"/>
         <source>QSOs completed: %1 / %2</source>
-        <translation type="vanished">QSO completati: %1 / %2</translation>
+        <translation>QSO completati: %1 / %2</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Reset count</source>
-        <translation type="vanished">Azzera il conteggio</translation>
+        <translation>Azzera il conteggio</translation>
     </message>
     <message>
+        <location line="+189"/>
         <source>▶ Direct Call</source>
-        <translation type="vanished">▶ Chiamata diretta</translation>
+        <translation>▶ Chiamata diretta</translation>
     </message>
     <message>
+        <location line="-610"/>
         <source>es. F4CQS</source>
-        <translation type="vanished">es. F4CQS</translation>
+        <translation>es. F4CQS</translation>
     </message>
 </context>
 <context>
     <name>CallerQueuePanel</name>
     <message>
+        <location filename="../qml/panels/CallerQueuePanel.qml" line="+30"/>
         <source>FOX CALLER QUEUE</source>
-        <translation type="vanished">CODA CHIAMANTI FOX</translation>
+        <translation>CODA CHIAMANTI FOX</translation>
     </message>
     <message>
+        <location line="+93"/>
         <source>No callers in queue</source>
-        <translation type="vanished">Nessun chiamante in coda</translation>
+        <translation>Nessun chiamante in coda</translation>
     </message>
 </context>
 <context>
@@ -1624,84 +1822,105 @@ filtro della radio e&apos; piu&apos; largo del necessario.</translation>
 <context>
     <name>CallsignLookupWindow</name>
     <message>
+        <location filename="../qml/decodium/components/CallsignLookupWindow.qml" line="+182"/>
         <source>Close</source>
-        <translation type="vanished">Chiudi</translation>
+        <translation>Chiudi</translation>
     </message>
     <message>
+        <location line="-54"/>
         <source>no indication</source>
-        <translation type="vanished">nessuna indicazione</translation>
+        <translation>nessuna indicazione</translation>
     </message>
     <message>
+        <location line="-10"/>
+        <location line="+2"/>
+        <location line="+2"/>
+        <location line="+2"/>
         <source>not available</source>
-        <translation type="vanished">non disponibile</translation>
+        <translation>non disponibile</translation>
     </message>
     <message>
+        <location line="-28"/>
         <source>Service unavailable</source>
-        <translation type="vanished">Service non disponibile</translation>
+        <translation>Service non disponibile</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>CACHE</source>
-        <translation type="vanished">CACHE</translation>
+        <translation>CACHE</translation>
     </message>
     <message>
+        <location line="-89"/>
         <source>Callsign intelligence</source>
-        <translation type="vanished">Intelligenza nominativi</translation>
+        <translation>Intelligenza nominativi</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Callsign intelligence — %1</source>
-        <translation type="vanished">Intelligenza nominativi — %1</translation>
+        <translation>Intelligenza nominativi — %1</translation>
     </message>
     <message>
+        <location line="+112"/>
         <source>CQ / ITU zone</source>
-        <translation type="vanished">Zona CQ / ITU</translation>
+        <translation>Zona CQ / ITU</translation>
     </message>
     <message>
         <source>Chiudi</source>
         <translation type="vanished">Chiudi</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Conferme</source>
-        <translation type="vanished">Conferme</translation>
+        <translation>Conferme</translation>
     </message>
     <message>
+        <location line="-4"/>
         <source>DXCC / continente</source>
-        <translation type="vanished">DXCC / continente</translation>
+        <translation>DXCC / continente</translation>
     </message>
     <message>
+        <location line="-59"/>
         <source>Lookup</source>
-        <translation type="vanished">Ricerca</translation>
+        <translation>Ricerca</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Lookup…</source>
-        <translation type="vanished">Ricerca…</translation>
+        <translation>Ricerca…</translation>
     </message>
     <message>
+        <location line="+73"/>
         <source>Lookup esterni</source>
-        <translation type="vanished">Lookup esterni</translation>
+        <translation>Lookup esterni</translation>
     </message>
     <message>
+        <location line="-20"/>
         <source>Nome</source>
-        <translation type="vanished">Nome</translation>
+        <translation>Nome</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>QTH</source>
-        <translation type="vanished">QTH</translation>
+        <translation>QTH</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Provider</source>
-        <translation type="vanished">Provider</translation>
+        <translation>Provider</translation>
     </message>
     <message>
         <source>Service non disponibile</source>
         <translation type="vanished">Service non disponibile</translation>
     </message>
     <message>
+        <location line="+48"/>
         <source>Ultimo risultato: %1</source>
-        <translation type="vanished">Ultimo risultato: %1</translation>
+        <translation>Ultimo risultato: %1</translation>
     </message>
     <message>
+        <location line="-47"/>
         <source>fallback DXCC</source>
-        <translation type="vanished">fallback DXCC</translation>
+        <translation>fallback DXCC</translation>
     </message>
     <message>
         <source>nessuna indicazione</source>
@@ -1712,67 +1931,84 @@ filtro della radio e&apos; piu&apos; largo del necessario.</translation>
         <translation type="vanished">non disponibile</translation>
     </message>
     <message>
+        <location line="-73"/>
+        <location line="+58"/>
         <source>Callsign</source>
-        <translation type="vanished">Nominativo</translation>
+        <translation>Nominativo</translation>
     </message>
     <message>
+        <location line="-41"/>
         <source>Refresh</source>
-        <translation type="vanished">Aggiorna</translation>
+        <translation>Aggiorna</translation>
     </message>
     <message>
+        <location line="+47"/>
         <source>Grid</source>
-        <translation type="vanished">Griglia</translation>
+        <translation>Griglia</translation>
     </message>
     <message>
+        <location line="+43"/>
         <source>Club Log</source>
-        <translation type="vanished">Club Log</translation>
+        <translation>Club Log</translation>
     </message>
 </context>
 <context>
     <name>CatSettingsDialog</name>
     <message>
+        <location filename="../qml/decodium/CatSettingsDialog.qml" line="+8"/>
         <source>CAT - Radio Settings</source>
-        <translation type="vanished">CAT - Impostazioni radio</translation>
+        <translation>CAT - Impostazioni radio</translation>
     </message>
     <message>
+        <location line="+27"/>
         <source>⚙ CAT — Radio Settings</source>
-        <translation type="vanished">⚙ CAT — Impostazioni radio</translation>
+        <translation>⚙ CAT — Impostazioni radio</translation>
     </message>
     <message>
+        <location line="+79"/>
         <source>Search radio...</source>
-        <translation type="vanished">Cerca radio...</translation>
+        <translation>Cerca radio...</translation>
     </message>
     <message>
+        <location line="+55"/>
         <source>Serial port:</source>
-        <translation type="vanished">Porta seriale:</translation>
+        <translation>Porta seriale:</translation>
     </message>
     <message>
+        <location line="+46"/>
         <source>Refresh ports</source>
-        <translation type="vanished">Aggiorna porte</translation>
+        <translation>Aggiorna porte</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>Speed (baud):</source>
-        <translation type="vanished">Velocità (baud):</translation>
+        <translation>Velocità (baud):</translation>
     </message>
     <message>
+        <location line="+64"/>
         <source>Auto-connect CAT on startup</source>
-        <translation type="vanished">Connetti CAT automaticamente all&apos;avvio</translation>
+        <translation>Connetti CAT automaticamente all&apos;avvio</translation>
     </message>
     <message>
+        <location line="+26"/>
         <source>Start audio on connect</source>
-        <translation type="vanished">Avvia audio alla connessione</translation>
+        <translation>Avvia audio alla connessione</translation>
     </message>
     <message>
+        <location line="+36"/>
         <source>Not connected</source>
-        <translation type="vanished">Non connesso</translation>
+        <translation>Non connesso</translation>
     </message>
     <message>
+        <location line="+12"/>
+        <location line="+20"/>
         <source>Disconnect</source>
-        <translation type="vanished">Disconnetti</translation>
+        <translation>Disconnetti</translation>
     </message>
     <message>
+        <location line="-20"/>
         <source>Connect</source>
-        <translation type="vanished">Connetti</translation>
+        <translation>Connetti</translation>
     </message>
 </context>
 <context>
@@ -1900,43 +2136,52 @@ Please check your log.</source>
 <context>
     <name>ColorHighlightingDialog</name>
     <message>
+        <location filename="../qml/dialogs/ColorHighlightingDialog.qml" line="+9"/>
         <source>Color Highlighting</source>
-        <translation type="vanished">Evidenziazione a colori</translation>
+        <translation>Evidenziazione a colori</translation>
     </message>
     <message>
+        <location line="+103"/>
         <source>B4 Strikethrough:</source>
-        <translation type="vanished">B4 Barrato:</translation>
+        <translation>B4 Barrato:</translation>
     </message>
     <message>
+        <location line="+19"/>
         <source>Alert Sounds:</source>
-        <translation type="vanished">Suoni di avviso:</translation>
+        <translation>Suoni di avviso:</translation>
     </message>
     <message>
+        <location line="+18"/>
         <source>Choose Color</source>
-        <translation type="vanished">Scegli il colore</translation>
+        <translation>Scegli il colore</translation>
     </message>
     <message>
+        <location line="+21"/>
         <source>Hex color (#RRGGBB):</source>
-        <translation type="vanished">Colore esadecimale (#RRGGBB):</translation>
+        <translation>Colore esadecimale (#RRGGBB):</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>#RRGGBB</source>
-        <translation type="vanished">#RRGGBB</translation>
+        <translation>#RRGGBB</translation>
     </message>
 </context>
 <context>
     <name>CommandBar</name>
     <message>
+        <location filename="../qml/decodium/rotor/CommandBar.qml" line="+38"/>
         <source>STOP</source>
-        <translation type="vanished">STOP</translation>
+        <translation>STOP</translation>
     </message>
     <message>
+        <location line="+28"/>
         <source>PARK %1°</source>
-        <translation type="vanished">PARCHEGGIA %1°</translation>
+        <translation>PARCHEGGIA %1°</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>MEMORIES…</source>
-        <translation type="vanished">MEMORIE…</translation>
+        <translation>MEMORIE…</translation>
     </message>
 </context>
 <context>
@@ -2563,299 +2808,428 @@ Hamlib ripristinato verrà utilizzato dopo il riavvio</translation>
 <context>
     <name>ControlPage</name>
     <message>
+        <location filename="../qml/decodium/rotor/ControlPage.qml" line="+104"/>
         <source>azimuthal map from the QTH</source>
-        <translation type="vanished">mappa azimutale dal QTH</translation>
+        <translation>mappa azimutale dal QTH</translation>
     </message>
 </context>
 <context>
     <name>CwWindow</name>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="+757"/>
         <source>Center CW</source>
-        <translation type="vanished">Centra CW</translation>
+        <translation>Centra CW</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Center tone</source>
-        <translation type="vanished">Tono centro</translation>
+        <translation>Tono centro</translation>
     </message>
     <message>
+        <location line="-26"/>
         <source>Frequency in MHz. Press Enter to tune.</source>
-        <translation type="vanished">Frequenza in MHz. Premi Invio per sintonizzare.</translation>
+        <translation>Frequenza in MHz. Premi Invio per sintonizzare.</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>VFO step in Hz</source>
-        <translation type="vanished">Passo VFO in Hz</translation>
+        <translation>Passo VFO in Hz</translation>
     </message>
     <message>
+        <location line="+23"/>
         <source>Match the radio&apos;s CW pitch / sidetone.</source>
-        <translation type="vanished">Imposta lo stesso tono CW della radio.</translation>
+        <translation>Imposta lo stesso tono CW della radio.</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Match the radio&apos;s receive sideband: upper or lower (also in CW-R).</source>
-        <translation type="vanished">Scegli il lato CW della radio: superiore o inferiore (anche in CW-R).</translation>
+        <translation>Scegli il lato CW della radio: superiore o inferiore (anche in CW-R).</translation>
     </message>
     <message>
+        <location line="-741"/>
         <source>CW</source>
-        <translation type="vanished">CW</translation>
+        <translation>CW</translation>
     </message>
     <message>
+        <location line="+39"/>
+        <source>The radio CAT keyer is not currently available. Check the CAT connection and the radio&apos;s CW keyer support. The decoder works anyway.</source>
+        <translation>Il keyer CAT della radio non è al momento disponibile. Controlla la connessione CAT e il supporto del keyer CW della radio. Il decoder funziona comunque.</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>The serial keyer is not open: choose its port in Setup. The decoder works anyway.</source>
+        <translation>Il keyer seriale non è aperto: scegli la sua porta nelle impostazioni. Il decoder funziona comunque.</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>The WinKeyer is not open: choose its port in Setup. The decoder works anyway.</source>
+        <translation>Il WinKeyer non è aperto: scegli la sua porta nelle impostazioni. Il decoder funziona comunque.</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>CW transmit is unavailable: choose a working serial keyer or WinKeyer in Setup, or use a radio with a supported CAT CW keyer.</source>
+        <translation>La trasmissione CW non è disponibile: scegli nelle impostazioni un keyer seriale o un WinKeyer funzionante, oppure usa una radio con keyer CW CAT supportato.</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>CW transmit is not ready. Check the selected keyer and its connection. The decoder works anyway.</source>
+        <translation>La trasmissione CW non è pronta. Controlla il keyer selezionato e la sua connessione. Il decoder funziona comunque.</translation>
+    </message>
+    <message>
+        <location line="+122"/>
         <source>MACROS</source>
-        <translation type="vanished">MACRO</translation>
+        <translation>MACRO</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>Holes filled when sent: {MYCALL} {CALL} {RST} {NR} {EXCH} {NAME}. Anything left empty is dropped.</source>
-        <translation type="vanished">I buchi si riempiono all&apos;invio: {MYCALL} {CALL} {RST} {NR} {EXCH} {NAME}. Quel che resta vuoto viene scartato.</translation>
+        <translation>I buchi si riempiono all&apos;invio: {MYCALL} {CALL} {RST} {NR} {EXCH} {NAME}. Quel che resta vuoto viene scartato.</translation>
     </message>
     <message>
+        <location line="+34"/>
         <source>Add a key</source>
-        <translation type="vanished">Aggiungi un tasto</translation>
+        <translation>Aggiungi un tasto</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Restore the defaults</source>
-        <translation type="vanished">Ripristina i predefiniti</translation>
+        <translation>Ripristina i predefiniti</translation>
     </message>
     <message>
+        <location line="+2"/>
+        <location line="+203"/>
         <source>Close</source>
-        <translation type="vanished">Chiudi</translation>
+        <translation>Chiudi</translation>
     </message>
     <message>
+        <location line="-173"/>
         <source>CW TRANSMIT</source>
-        <translation type="vanished">TRASMISSIONE CW</translation>
+        <translation>TRASMISSIONE CW</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>Send CW as</source>
-        <translation type="vanished">Manda il CW come</translation>
+        <translation>Manda il CW come</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>Audio tone (works with a remote radio)</source>
-        <translation type="vanished">Tono audio (funziona con una radio remota)</translation>
+        <translation>Tono audio (funziona con una radio remota)</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Serial keyer (DTR / RTS)</source>
-        <translation type="vanished">Manipolatore seriale (DTR / RTS)</translation>
+        <translation>Manipolatore seriale (DTR / RTS)</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>K1EL WinKeyer</source>
-        <translation type="vanished">K1EL WinKeyer</translation>
+        <translation>K1EL WinKeyer</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Port</source>
-        <translation type="vanished">Porta</translation>
+        <translation>Porta</translation>
     </message>
     <message>
+        <location line="+25"/>
         <source>Refresh</source>
-        <translation type="vanished">Aggiorna</translation>
+        <translation>Aggiorna</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>Key line</source>
-        <translation type="vanished">Linea di manipolazione</translation>
+        <translation>Linea di manipolazione</translation>
     </message>
     <message>
+        <location line="+46"/>
+        <source>TX tone test plays a local V on the selected output; it does not key the radio. Use Test (V) below to test the configured CW transmitter.</source>
+        <translation>Il test tono TX riproduce una V locale sull&apos;uscita selezionata; non manipola la radio. Usa Test (V) qui sotto per provare il trasmettitore CW configurato.</translation>
+    </message>
+    <message>
+        <location line="+9"/>
         <source>Send the key, not audio (Decolink)</source>
-        <translation type="vanished">Manda il tasto, non l&apos;audio (Decolink)</translation>
+        <translation>Manda il tasto, non l&apos;audio (Decolink)</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Tone</source>
-        <translation type="vanished">Tono</translation>
+        <translation>Tono</translation>
     </message>
     <message>
+        <location line="+15"/>
         <source>%1 Hz</source>
-        <translation type="vanished">%1 Hz</translation>
+        <translation>%1 Hz</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>A remote radio is in use: only the key timing goes over the link, and the gateway next to the radio makes the tone.</source>
-        <translation type="vanished">È in uso una radio remota: sul collegamento passano solo i tempi del tasto, e il tono lo fa il gateway accanto alla radio.</translation>
+        <translation>È in uso una radio remota: sul collegamento passano solo i tempi del tasto, e il tono lo fa il gateway accanto alla radio.</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>A remote radio is in use: the CW goes out as an audio tone through the link, whatever is chosen above.</source>
-        <translation type="vanished">È in uso una radio remota: il CW esce come tono audio sul collegamento, qualunque cosa sia scelta sopra.</translation>
+        <translation>È in uso una radio remota: il CW esce come tono audio sul collegamento, qualunque cosa sia scelta sopra.</translation>
     </message>
     <message>
+        <location line="+2"/>
+        <source>The radio&apos;s built-in CAT keyer sends CW while the rig stays in CW mode.</source>
+        <translation>Il keyer CAT integrato nella radio invia la CW mentre l&apos;apparato resta in modo CW.</translation>
+    </message>
+    <message>
+        <location line="+1"/>
         <source>The audio tone needs the radio in USB or DATA-U. A serial keyer or a WinKeyer keys the radio&apos;s own key input and needs the radio in CW.</source>
-        <translation type="vanished">Il tono audio richiede la radio in USB o DATA-U. Un manipolatore seriale o un WinKeyer agisce sull&apos;ingresso tasto della radio e richiede la radio in CW.</translation>
+        <translation>Il tono audio richiede la radio in USB o DATA-U. Un manipolatore seriale o un WinKeyer agisce sull&apos;ingresso tasto della radio e richiede la radio in CW.</translation>
     </message>
     <message>
+        <location line="+9"/>
+        <source>CW via the current CAT connection is unavailable: the radio or rigctld server does not expose Hamlib send_morse. A rigctld host:port belongs in CAT settings, not in Serial keyer or WinKeyer.</source>
+        <translation>La CW tramite la connessione CAT corrente non è disponibile: la radio o il server rigctld non espone send_morse di Hamlib. Un host:porta rigctld va nelle impostazioni CAT, non in Keyer seriale o WinKeyer.</translation>
+    </message>
+    <message>
+        <location line="+4"/>
         <source>Test (V)</source>
-        <translation type="vanished">Prova (V)</translation>
+        <translation>Prova (V)</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>WinKeyer version %1</source>
-        <translation type="vanished">Versione WinKeyer %1</translation>
+        <translation>Versione WinKeyer %1</translation>
     </message>
     <message>
+        <location line="+31"/>
         <source>no CAT</source>
-        <translation type="vanished">senza CAT</translation>
+        <translation>senza CAT</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>audio tone</source>
-        <translation type="vanished">tono audio</translation>
+        <translation>tono audio</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>remote key</source>
-        <translation type="vanished">tasto remoto</translation>
+        <translation>tasto remoto</translation>
     </message>
     <message>
+        <location line="+1"/>
+        <source>radio CAT keyer</source>
+        <translation>keyer CAT della radio</translation>
+    </message>
+    <message>
+        <location line="+1"/>
         <source>serial keyer</source>
-        <translation type="vanished">manipolatore seriale</translation>
+        <translation>manipolatore seriale</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>remote radio</source>
-        <translation type="vanished">radio remota</translation>
+        <translation>radio remota</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Stop</source>
-        <translation type="vanished">Ferma</translation>
+        <translation>Ferma</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Macros…</source>
-        <translation type="vanished">Macro…</translation>
+        <translation>Macro…</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Setup…</source>
-        <translation type="vanished">Impostazioni…</translation>
+        <translation>Impostazioni…</translation>
     </message>
     <message>
+        <location line="-411"/>
         <source>CW transmit is not ready: it needs the radio connected and a transmit audio output. The decoder works anyway, it only needs the radio audio.</source>
-        <translation type="vanished">La trasmissione CW non è pronta: servono la radio collegata e un&apos;uscita audio di trasmissione. Il decodificatore funziona comunque, gli serve solo l&apos;audio della radio.</translation>
+        <translation>La trasmissione CW non è pronta: servono la radio collegata e un&apos;uscita audio di trasmissione. Il decodificatore funziona comunque, gli serve solo l&apos;audio della radio.</translation>
     </message>
     <message>
         <source>The keyer is not open: choose its port in Setup. The decoder works anyway.</source>
         <translation type="vanished">Il manipolatore non è aperto: scegli la sua porta nelle impostazioni. Il decodificatore funziona comunque.</translation>
     </message>
     <message>
+        <location line="+462"/>
         <source>Call</source>
-        <translation type="vanished">Nominativo</translation>
+        <translation>Nominativo</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>RST</source>
-        <translation type="vanished">RST</translation>
+        <translation>RST</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Rcvd</source>
-        <translation type="vanished">Ricev.</translation>
+        <translation>Ricev.</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Nr</source>
-        <translation type="vanished">N.</translation>
+        <translation>N.</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Exch</source>
-        <translation type="vanished">Scambio</translation>
+        <translation>Scambio</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Name</source>
-        <translation type="vanished">Nome</translation>
+        <translation>Nome</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Log QSO</source>
-        <translation type="vanished">Registra QSO</translation>
+        <translation>Registra QSO</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>QSO logged</source>
-        <translation type="vanished">QSO registrato</translation>
+        <translation>QSO registrato</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Nothing to log: enter the call</source>
-        <translation type="vanished">Niente da registrare: inserisci il nominativo</translation>
+        <translation>Niente da registrare: inserisci il nominativo</translation>
     </message>
     <message>
+        <location line="+59"/>
         <source>Right click: change it</source>
-        <translation type="vanished">Tasto destro: modificala</translation>
+        <translation>Tasto destro: modificala</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Speed</source>
-        <translation type="vanished">Velocità</translation>
+        <translation>Velocità</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>%1 wpm</source>
-        <translation type="vanished">%1 wpm</translation>
+        <translation>%1 wpm</translation>
     </message>
     <message>
+        <location line="+14"/>
+        <source>TX while typing</source>
+        <translation>TX mentre si digita</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Transmit each new character as soon as the keyer is ready.</source>
+        <translation>Trasmetti ogni nuovo carattere appena il keyer è pronto.</translation>
+    </message>
+    <message>
+        <location line="+12"/>
         <source>write here and press Enter: it goes out in CW</source>
-        <translation type="vanished">scrivi qui e premi Invio: esce in CW</translation>
+        <translation>scrivi qui e premi Invio: esce in CW</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Send</source>
-        <translation type="vanished">Invia</translation>
+        <translation>Invia</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>Decoder</source>
-        <translation type="vanished">Decodificatore</translation>
+        <translation>Decodificatore</translation>
     </message>
     <message>
+        <location line="+89"/>
         <source>Decoder tone</source>
-        <translation type="vanished">Tono del decodificatore</translation>
+        <translation>Tono del decodificatore</translation>
     </message>
     <message>
+        <location line="+6"/>
+        <location line="+13"/>
         <source>Auto</source>
-        <translation type="vanished">Auto</translation>
+        <translation>Auto</translation>
     </message>
     <message>
+        <location line="-6"/>
         <source>Decoder speed</source>
-        <translation type="vanished">Velocità del decodificatore</translation>
+        <translation>Velocità del decodificatore</translation>
     </message>
     <message>
+        <location line="+19"/>
         <source>fixed %1 WPM</source>
-        <translation type="vanished">fissa %1 WPM</translation>
+        <translation>fissa %1 WPM</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>%1 WPM</source>
-        <translation type="vanished">%1 WPM</translation>
+        <translation>%1 WPM</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>fixed %1 Hz · %2</source>
-        <translation type="vanished">fissa %1 Hz · %2</translation>
+        <translation>fissa %1 Hz · %2</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>fixed %1 Hz · noise</source>
-        <translation type="vanished">fissa %1 Hz · rumore</translation>
+        <translation>fissa %1 Hz · rumore</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>auto · %1 · %2 Hz</source>
-        <translation type="vanished">auto · %1 · %2 Hz</translation>
+        <translation>auto · %1 · %2 Hz</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>listening…</source>
-        <translation type="vanished">in ascolto…</translation>
+        <translation>in ascolto…</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>Clear</source>
-        <translation type="vanished">Cancella</translation>
+        <translation>Cancella</translation>
     </message>
     <message>
+        <location line="+82"/>
         <source>waiting for audio…</source>
-        <translation type="vanished">in attesa dell&apos;audio…</translation>
+        <translation>in attesa dell&apos;audio…</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>F: %1 Hz · S: %2 WPM · C: %3</source>
-        <translation type="vanished">F: %1 Hz · S: %2 WPM · C: %3</translation>
+        <translation>F: %1 Hz · S: %2 WPM · C: %3</translation>
     </message>
     <message>
+        <location line="+14"/>
         <source>reading</source>
-        <translation type="vanished">legge</translation>
+        <translation>legge</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>noise</source>
-        <translation type="vanished">rumore</translation>
+        <translation>rumore</translation>
     </message>
     <message>
+        <location line="-421"/>
         <source>Radio RX audio</source>
-        <translation type="vanished">Audio radio RX</translation>
+        <translation>Audio radio RX</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>RX volume</source>
-        <translation type="vanished">Volume RX</translation>
+        <translation>Volume RX</translation>
     </message>
     <message>
+        <location line="-147"/>
         <source>TX sidetone on this computer</source>
-        <translation type="vanished">Nota TX su questo computer</translation>
+        <translation>Nota TX su questo computer</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>TX sidetone volume</source>
-        <translation type="vanished">Volume nota TX</translation>
+        <translation>Volume nota TX</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>TX tone test</source>
-        <translation type="vanished">Prova nota TX</translation>
+        <translation>Prova nota TX</translation>
     </message>
 </context>
 <context>
@@ -3086,8 +3460,9 @@ o contattare l&apos;assistenza DXLab all&apos;indirizzo DXLab@groups.io.</transl
 <context>
     <name>DecoComboBox</name>
     <message>
+        <location filename="../qml/decodium/components/DecoComboBox.qml" line="+114"/>
         <source>▾</source>
-        <translation type="vanished">▾</translation>
+        <translation>▾</translation>
     </message>
 </context>
 <context>
@@ -3153,46 +3528,374 @@ o contattare l&apos;assistenza DXLab all&apos;indirizzo DXLab@groups.io.</transl
     </message>
 </context>
 <context>
+    <name>DecoPortWindow</name>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="+51"/>
+        <source>DecoPort - radio on the network</source>
+        <translation>DecoPort - radio in rete</translation>
+    </message>
+    <message>
+        <location line="+130"/>
+        <source>SECURITY</source>
+        <translation>SICUREZZA</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>PASSWORD SET</source>
+        <translation>PASSWORD IMPOSTATA</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>NO PASSWORD</source>
+        <translation>NESSUNA PASSWORD</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Every packet is signed. The same password is needed on the other computer.</source>
+        <translation>Ogni pacchetto è firmato. Sull&apos;altro computer serve la stessa password.</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Without a password the radio is not published: the gateway refuses to start.</source>
+        <translation>Senza password la radio non viene pubblicata: il gateway si rifiuta di avviarsi.</translation>
+    </message>
+    <message>
+        <location line="+16"/>
+        <source>new password (at least 8 characters)</source>
+        <translation>nuova password (almeno 8 caratteri)</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>password (at least 8 characters)</source>
+        <translation>password (almeno 8 caratteri)</translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>CHANGE</source>
+        <translation>CAMBIA</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>SET</source>
+        <translation>IMPOSTA</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Password saved. Use the same one on the other computer; anyone connected with the old one is now shut out.</source>
+        <translation>Password salvata. Usa la stessa sull&apos;altro computer; chi era connesso con la vecchia ora è escluso.</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Password not accepted.</source>
+        <translation>Password non accettata.</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>REMOVE</source>
+        <translation>RIMUOVI</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Password removed and gateway stopped: the radio is no longer published.</source>
+        <translation>Password rimossa e gateway fermato: la radio non è più pubblicata.</translation>
+    </message>
+    <message>
+        <location line="+15"/>
+        <source>The password is not stored as you type it: it becomes a key, and the password is discarded. It cannot be read back from here.</source>
+        <translation>La password non viene memorizzata come la digiti: diventa una chiave e la password viene scartata. Da qui non si può rileggere.</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>THIS RADIO - PUBLISHED ON THE NETWORK</source>
+        <translation>QUESTA RADIO - PUBBLICATA IN RETE</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>unavailable</source>
+        <translation>non disponibile</translation>
+    </message>
+    <message>
+        <location line="+15"/>
+        <source>CAT %1</source>
+        <translation>CAT %1</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>in: %1</source>
+        <translation>in: %1</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>out: %1</source>
+        <translation>out: %1</translation>
+    </message>
+    <message>
+        <location line="+26"/>
+        <source>STOP</source>
+        <translation>STOP</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>PUBLISH</source>
+        <translation>PUBBLICA</translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>RESCAN</source>
+        <translation>RICERCA</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>ON AIR ON THE LAN</source>
+        <translation>IN ARIA SULLA LAN</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>NOT PUBLISHED</source>
+        <translation>NON PUBBLICATA</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>%1 client</source>
+        <translation>%1 client</translation>
+    </message>
+    <message>
+        <location line="+35"/>
+        <source>No packet has arrived: the client is not reaching this machine. Check network, firewall and port %1.</source>
+        <translation>Nessun pacchetto è arrivato: il client non raggiunge questa macchina. Controlla rete, firewall e porta %1.</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>%1 s ago</source>
+        <translation>%1 s fa</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>%1 min ago</source>
+        <translation>%1 min fa</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>%1 wrong password</source>
+        <translation>%1 password errata</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>%1 clock out of step</source>
+        <translation>%1 orologio fuori passo</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>%1 not DecoPort traffic</source>
+        <translation>%1 non traffico DecoPort</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>%1 from a blocked sender</source>
+        <translation>%1 da un mittente bloccato</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>%1 packets from %2 (%3), all rejected: %4</source>
+        <translation>%1 pacchetti da %2 (%3), tutti rifiutati: %4</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>%1 packets received, %2 accepted - last from %3 (%4)</source>
+        <translation>%1 pacchetti ricevuti, %2 accettati - l&apos;ultimo da %3 (%4)</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>RADIOS FOUND ON THE NETWORK</source>
+        <translation>RADIO TROVATE IN RETE</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Listening. A gateway announces itself every two seconds; nothing to type.</source>
+        <translation>In ascolto. Un gateway si annuncia ogni due secondi; non c&apos;è nulla da digitare.</translation>
+    </message>
+    <message>
+        <location line="+42"/>
+        <source>CAT</source>
+        <translation>CAT</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>NO CAT</source>
+        <translation>NESSUN CAT</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>CONNECT</source>
+        <translation>CONNETTI</translation>
+    </message>
+    <message>
+        <location line="+17"/>
+        <source>CONNECTED RADIO</source>
+        <translation>RADIO CONNESSA</translation>
+    </message>
+    <message>
+        <location line="+16"/>
+        <source>Radio</source>
+        <translation>Radio</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Frequency</source>
+        <translation>Frequenza</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Hz</source>
+        <translation>Hz</translation>
+    </message>
+    <message>
+        <location line="+15"/>
+        <source>TUNE</source>
+        <translation>SINTONIZZA</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Mode</source>
+        <translation>Modo</translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <source>Transmitter</source>
+        <translation>Trasmettitore</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>KEYED</source>
+        <translation>MANIPOLATO</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>RECEIVING</source>
+        <translation>IN RICEZIONE</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>keying and transmit audio are not carried yet</source>
+        <translation>la manipolazione e l&apos;audio di trasmissione non sono ancora trasportati</translation>
+    </message>
+    <message>
+        <location line="+34"/>
+        <source>IN USE</source>
+        <translation>IN USO</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>NOT IN USE</source>
+        <translation>NON IN USO</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Decoding the remote radio — the local sound card is released</source>
+        <translation>Decodifica della radio remota — la scheda audio locale è rilasciata</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Decoding the local sound card</source>
+        <translation>Decodifica della scheda audio locale</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>STOP USING</source>
+        <translation>SMETTI DI USARE</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>USE THIS RADIO</source>
+        <translation>USA QUESTA RADIO</translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>LISTENING</source>
+        <translation>IN ASCOLTO</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>SILENT</source>
+        <translation>SILENZIO</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Hear the remote radio on the speaker as well as decoding it</source>
+        <translation>Ascolta la radio remota sull&apos;altoparlante oltre a decodificarla</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>MUTE</source>
+        <translation>MUTO</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>LISTEN</source>
+        <translation>ASCOLTA</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Its audio goes into the decoder and its frequency becomes the one shown in the application, in both directions. Transmission stays local.</source>
+        <translation>Il suo audio entra nel decoder e la sua frequenza diventa quella mostrata nell&apos;applicazione, in entrambe le direzioni. La trasmissione resta locale.</translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>DISCONNECT</source>
+        <translation>DISCONNETTI</translation>
+    </message>
+</context>
+<context>
     <name>DecoSyncPanel</name>
     <message>
+        <location filename="../qml/decodium/components/DecoSyncPanel.qml" line="+54"/>
         <source>DecoSyncTime not available</source>
-        <translation type="vanished">DecoSyncTime non disponibile</translation>
+        <translation>DecoSyncTime non disponibile</translation>
     </message>
     <message>
+        <location line="+15"/>
         <source>DecoSyncTime Monitor</source>
-        <translation type="vanished">Monitor DecoSyncTime</translation>
+        <translation>Monitor DecoSyncTime</translation>
     </message>
     <message>
+        <location line="+91"/>
         <source>Source</source>
-        <translation type="vanished">Fonte</translation>
+        <translation>Fonte</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Stato</source>
-        <translation type="vanished">Stato</translation>
+        <translation>Stato</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Offset</source>
-        <translation type="vanished">Offset</translation>
+        <translation>Offset</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Servers</source>
-        <translation type="vanished">Server</translation>
+        <translation>Server</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>NTP UDP</source>
-        <translation type="vanished">NTP UDP</translation>
+        <translation>NTP UDP</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>8 pool</source>
-        <translation type="vanished">8 pool</translation>
+        <translation>8 pool</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>HTTPS Date</source>
-        <translation type="vanished">HTTPS Date</translation>
+        <translation>HTTPS Date</translation>
     </message>
     <message>
+        <location line="+18"/>
         <source>SelfCal FT</source>
-        <translation type="vanished">SelfCal FT</translation>
+        <translation>SelfCal FT</translation>
     </message>
 </context>
 <context>
@@ -3335,163 +4038,243 @@ o contattare l&apos;assistenza DXLab all&apos;indirizzo DXLab@groups.io.</transl
 <context>
     <name>DecodeHistoryDialog</name>
     <message>
+        <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="+18"/>
         <source>Decode History (DB)</source>
-        <translation type="vanished">Cronologia decode (DB)</translation>
+        <translation>Cronologia decode (DB)</translation>
     </message>
     <message>
+        <location line="+65"/>
         <source>Export ADIF</source>
-        <translation type="vanished">Esporta ADIF</translation>
+        <translation>Esporta ADIF</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>ADIF (*.adi)</source>
-        <translation type="vanished">ADIF (*.adi)</translation>
+        <translation>ADIF (*.adi)</translation>
     </message>
     <message>
+        <location line="+32"/>
         <source>Decode History</source>
-        <translation type="vanished">Cronologia decode</translation>
+        <translation>Cronologia decode</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>%1 total decodes  •  %2 sessions</source>
-        <translation type="vanished">%1 decode totali  •  %2 sessioni</translation>
+        <translation>%1 decode totali  •  %2 sessioni</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Empty DB</source>
-        <translation type="vanished">DB vuoto</translation>
+        <translation>DB vuoto</translation>
     </message>
     <message>
+        <location line="+15"/>
         <source>Callsign</source>
-        <translation type="vanished">Nominativo</translation>
+        <translation>Nominativo</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Band</source>
-        <translation type="vanished">Banda</translation>
+        <translation>Banda</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Mode</source>
-        <translation type="vanished">Modo</translation>
+        <translation>Modo</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>From (UTC)</source>
-        <translation type="vanished">Da (UTC)</translation>
+        <translation>Da (UTC)</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>To (UTC)</source>
-        <translation type="vanished">A (UTC)</translation>
+        <translation>A (UTC)</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Limit</source>
-        <translation type="vanished">Limite</translation>
+        <translation>Limite</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>e.g. F4CQS</source>
-        <translation type="vanished">es. F4CQS</translation>
+        <translation>es. F4CQS</translation>
     </message>
     <message>
+        <location line="+212"/>
         <source>Search</source>
-        <translation type="vanished">Cerca</translation>
+        <translation>Cerca</translation>
     </message>
     <message>
+        <location line="+19"/>
         <source>Clear filters</source>
-        <translation type="vanished">Azzera filtri</translation>
+        <translation>Azzera filtri</translation>
     </message>
     <message>
+        <location line="+28"/>
         <source>%1 results</source>
-        <translation type="vanished">%1 risultati</translation>
+        <translation>%1 risultati</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>No results</source>
-        <translation type="vanished">Nessun risultato</translation>
+        <translation>Nessun risultato</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Export ADIF…</source>
-        <translation type="vanished">Esporta ADIF…</translation>
+        <translation>Esporta ADIF…</translation>
     </message>
     <message>
+        <location line="+153"/>
         <source>Close</source>
-        <translation type="vanished">Chiudi</translation>
+        <translation>Chiudi</translation>
     </message>
     <message>
+        <location line="-110"/>
         <source>Grid</source>
-        <translation type="vanished">Griglia</translation>
+        <translation>Griglia</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Freq</source>
-        <translation type="vanished">Freq</translation>
+        <translation>Freq</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Message</source>
-        <translation type="vanished">Messaggio</translation>
+        <translation>Messaggio</translation>
     </message>
 </context>
 <context>
     <name>DecodeWindow</name>
     <message>
+        <location filename="../qml/decodium/components/DecodeWindow.qml" line="+1333"/>
+        <location line="+552"/>
         <source>── PERIOD ──</source>
-        <translation type="vanished">── PERIODO ──</translation>
+        <translation>── PERIODO ──</translation>
     </message>
     <message>
+        <location line="-915"/>
         <source>Full Spectrum</source>
-        <translation type="vanished">Spettro completo</translation>
+        <translation>Spettro completo</translation>
     </message>
     <message>
+        <location line="+79"/>
         <source>Freq</source>
-        <translation type="vanished">Freq</translation>
+        <translation>Freq</translation>
     </message>
     <message>
+        <location line="+14"/>
         <source>Drift</source>
-        <translation type="vanished">Deriva</translation>
+        <translation>Deriva</translation>
     </message>
     <message>
+        <location line="+39"/>
         <source>Az</source>
-        <translation type="vanished">Az</translation>
+        <translation>Az</translation>
     </message>
     <message>
+        <location line="+445"/>
         <source>No decoded messages
 Click Monitor to start</source>
-        <translation type="vanished">Nessun messaggio decodificato
+        <translation>Nessun messaggio decodificato
 Premi Monitor per iniziare</translation>
     </message>
     <message>
+        <location line="+34"/>
         <source>Signal RX</source>
-        <translation type="vanished">Segnale RX</translation>
+        <translation>Segnale RX</translation>
     </message>
     <message>
+        <location line="-602"/>
         <source>decodes</source>
-        <translation type="vanished">decodifiche</translation>
+        <translation>decodifiche</translation>
     </message>
 </context>
 <context>
     <name>DecoderPanel</name>
     <message>
+        <location filename="../qml/decodium/rtty/DecoderPanel.qml" line="+76"/>
+        <source>Baud set: %1</source>
+        <translation>Baud impostato: %1</translation>
+    </message>
+    <message>
+        <location line="+47"/>
         <source>Correction</source>
-        <translation type="vanished">Correzione</translation>
+        <translation>Correzione</translation>
     </message>
     <message>
+        <location line="+22"/>
         <source>Off</source>
-        <translation type="vanished">Spenta</translation>
+        <translation>Spenta</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Normal</source>
-        <translation type="vanished">Normale</translation>
+        <translation>Normale</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Deep</source>
-        <translation type="vanished">Profonda</translation>
+        <translation>Profonda</translation>
     </message>
     <message>
+        <location line="+28"/>
+        <source>Swaps the two tones. When the other station is on the
+opposite sideband everything arrives as gibberish, and
+this is the one button that fixes it.</source>
+        <translation>Scambia i due toni. Quando l&apos;altra stazione è sulla
+banda laterale opposta tutto arriva come un guazzabuglio, e
+questo è l&apos;unico pulsante che lo risolve.</translation>
+    </message>
+    <message>
+        <location line="+15"/>
+        <source>Follows the drift of the signal already locked,
+within a few tens of hertz.</source>
+        <translation>Segue la deriva del segnale già agganciato,
+entro alcune decine di hertz.</translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>Searches by itself whenever nothing is being
+copied, and tries the polarity too. While the
+decoder is locked it touches nothing.</source>
+        <translation>Cerca da solo quando non si sta
+copiando nulla, e prova anche la polarità. Finché il
+decoder è agganciato non tocca nulla.</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>CENTRE</source>
+        <translation>CENTRA</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Finds the tone pair in the band and moves the
+tuning onto it. Once, now.</source>
+        <translation>Trova la coppia di toni nella banda e porta
+la sintonia su di essa. Una volta, adesso.</translation>
+    </message>
+    <message>
+        <location line="+19"/>
         <source>Unshift on space — recovers a lost FIGS/LTRS, but
 breaks long figure groups such as serial numbers.</source>
-        <translation type="vanished">Ritorno alle lettere con lo spazio: recupera un FIGS/LTRS perso,
+        <translation>Ritorno alle lettere con lo spazio: recupera un FIGS/LTRS perso,
 ma spezza i gruppi lunghi di cifre come i numeri progressivi.</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Set radio</source>
-        <translation type="vanished">Prepara radio</translation>
+        <translation>Prepara radio</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Puts the radio into DIGU and narrows its filter
 around the tones.</source>
-        <translation type="vanished">Mette la radio in DIGU e le stringe il filtro
+        <translation>Mette la radio in DIGU e le stringe il filtro
 attorno ai toni.</translation>
     </message>
 </context>
@@ -3508,7 +4291,7 @@ attorno ai toni.</translation>
         <translation>%1 %2 collegato</translation>
     </message>
     <message>
-        <location line="+30240"/>
+        <location line="+30289"/>
         <source>Direct call received, but the callsign is not resolved</source>
         <translation>Chiamata diretta ricevuta, ma il nominativo non e&apos; risolto</translation>
     </message>
@@ -3528,7 +4311,7 @@ attorno ai toni.</translation>
         <translation>TX non avviata</translation>
     </message>
     <message>
-        <location line="+21277"/>
+        <location line="+21278"/>
         <source>No WAV file found in: %1</source>
         <translation>Nessun file WAV trovato in: %1</translation>
     </message>
@@ -3548,7 +4331,7 @@ attorno ai toni.</translation>
         <translation>Cattura audio avviata: %1</translation>
     </message>
     <message>
-        <location line="-2215"/>
+        <location line="-2216"/>
         <source>Transmit watchdog: timed out, transmission stopped</source>
         <translation>Watchdog di trasmissione: tempo scaduto, TX fermata</translation>
     </message>
@@ -3610,7 +4393,7 @@ attorno ai toni.</translation>
         <translation>RX avviato via backend legacy - %1</translation>
     </message>
     <message>
-        <location line="+33808"/>
+        <location line="+33809"/>
         <source>Update available: v%1</source>
         <translation>Aggiornamento disponibile: v%1</translation>
     </message>
@@ -3665,7 +4448,7 @@ attorno ai toni.</translation>
         <translation>Ricerca di FT2 Log Bridge...</translation>
     </message>
     <message>
-        <location line="-42439"/>
+        <location line="-42440"/>
         <source>Invalid CAT frequency after EME/transverter correction</source>
         <translation>Frequenza CAT non valida dopo la correzione EME/transverter</translation>
     </message>
@@ -3715,12 +4498,11 @@ attorno ai toni.</translation>
         <translation>Test del tono CW saltato mentre la radio sta trasmettendo o sintonizzando.</translation>
     </message>
     <message>
-        <location line="+10"/>
         <source>CW tone test sent to the selected local audio output (V).</source>
-        <translation>Test del tono CW inviato all'uscita audio locale selezionata (V).</translation>
+        <translation type="vanished">Test del tono CW inviato all&apos;uscita audio locale selezionata (V).</translation>
     </message>
     <message>
-        <location line="+103"/>
+        <location line="+113"/>
         <source>the Hamlib CAT port %1</source>
         <translation>la porta CAT Hamlib %1</translation>
     </message>
@@ -3730,7 +4512,7 @@ attorno ai toni.</translation>
         <translation>la porta PTT Hamlib %1</translation>
     </message>
     <message>
-        <location line="+16388"/>
+        <location line="+16389"/>
         <source>Choose a different file: the active logbook cannot be overwritten.</source>
         <translation>Scegli un file diverso: il logbook attivo non può essere sovrascritto.</translation>
     </message>
@@ -3792,7 +4574,12 @@ attorno ai toni.</translation>
         <translation>Aggiornamento in corso...</translation>
     </message>
     <message>
-        <location line="-30"/>
+        <location line="-13535"/>
+        <source>CW tone test queued for the selected local audio output (V).</source>
+        <translation>Test tono CW messo in coda per l&apos;uscita audio locale selezionata (V).</translation>
+    </message>
+    <message>
+        <location line="+13505"/>
         <location line="+32"/>
         <source>Error</source>
         <translation>Errore</translation>
@@ -3832,7 +4619,7 @@ attorno ai toni.</translation>
         <translation type="vanished">Chiamata diretta ricevuta, ma il nominativo non e&apos; risolto</translation>
     </message>
     <message>
-        <location line="-9053"/>
+        <location line="-9054"/>
         <source>Map selection: %1 %2</source>
         <translation>Selezione mappa: %1 %2</translation>
     </message>
@@ -3842,12 +4629,12 @@ attorno ai toni.</translation>
         <translation>Selezione mappa: %1</translation>
     </message>
     <message>
-        <location line="+10126"/>
+        <location line="+10127"/>
         <source>Update checks are disabled in this build.</source>
         <translation>I controlli aggiornamenti sono disabilitati in questa build.</translation>
     </message>
     <message>
-        <location line="-10095"/>
+        <location line="-10096"/>
         <source>Map CALL could not select TX1 for %1</source>
         <translation>Il CALL della mappa non ha potuto selezionare TX1 per %1</translation>
     </message>
@@ -4789,34 +5576,41 @@ attorno ai toni.</translation>
 <context>
     <name>DecodiumCommunityReport</name>
     <message>
+        <location filename="../src/services/DecodiumCommunityReport.cpp" line="+99"/>
         <source>Please describe the problem before sending.</source>
-        <translation type="vanished">Descrivi il problema prima di inviare.</translation>
+        <translation>Descrivi il problema prima di inviare.</translation>
     </message>
     <message>
+        <location line="+24"/>
         <source>Cannot reach the community: %1</source>
-        <translation type="vanished">Impossibile raggiungere la community: %1</translation>
+        <translation>Impossibile raggiungere la community: %1</translation>
     </message>
     <message>
+        <location line="+22"/>
         <source>The community form could not be prepared. Please try again later or post manually at %1</source>
-        <translation type="vanished">Impossibile preparare il modulo della community. Riprova più tardi o pubblica manualmente su %1</translation>
+        <translation>Impossibile preparare il modulo della community. Riprova più tardi o pubblica manualmente su %1</translation>
     </message>
     <message>
+        <location line="+27"/>
         <source>
 [...truncated, %1 characters total...]</source>
-        <translation type="vanished">
+        <translation>
 [...troncato, %1 caratteri in totale...]</translation>
     </message>
     <message>
+        <location line="+43"/>
         <source>The community rejected the report (likely too long). Please shorten it and try again.</source>
-        <translation type="vanished">La community ha rifiutato la segnalazione (probabilmente troppo lunga). Accorciala e riprova.</translation>
+        <translation>La community ha rifiutato la segnalazione (probabilmente troppo lunga). Accorciala e riprova.</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Could not send the report: %1</source>
-        <translation type="vanished">Impossibile inviare la segnalazione: %1</translation>
+        <translation>Impossibile inviare la segnalazione: %1</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>unexpected server response (%1)</source>
-        <translation type="vanished">risposta del server imprevista (%1)</translation>
+        <translation>risposta del server imprevista (%1)</translation>
     </message>
 </context>
 <context>
@@ -5099,6 +5893,31 @@ attorno ai toni.</translation>
     </message>
 </context>
 <context>
+    <name>DecodiumLink</name>
+    <message>
+        <location filename="../src/rtty/link/DecodiumLink.cpp" line="+26"/>
+        <location line="+161"/>
+        <source>RTTY TX unavailable: check audio output and active mode</source>
+        <translation>TX RTTY non disponibile: controlla l&apos;uscita audio e il modo attivo</translation>
+    </message>
+    <message>
+        <location line="-142"/>
+        <location line="+2"/>
+        <source>radio di Decodium</source>
+        <translation>radio di Decodium</translation>
+    </message>
+    <message>
+        <location line="+138"/>
+        <source>collegato: %1</source>
+        <translation>collegato: %1</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Audio/AFSK — use VOX or manual PTT</source>
+        <translation>Audio/AFSK — usa VOX o PTT manuale</translation>
+    </message>
+</context>
+<context>
     <name>DecodiumPropagationManager</name>
     <message>
         <location filename="../src/services/DecodiumPropagationManager.cpp" line="+87"/>
@@ -5225,104 +6044,187 @@ attorno ai toni.</translation>
 <context>
     <name>DecodiumTransceiverManager</name>
     <message>
-        <location filename="../src/radio/DecodiumTransceiverManager.cpp" line="+2296"/>
+        <location filename="../src/radio/DecodiumTransceiverManager.cpp" line="+1744"/>
+        <source>The selected transceiver is not available in Hamlib</source>
+        <translation>Il ricetrasmettitore selezionato non è disponibile in Hamlib</translation>
+    </message>
+    <message>
+        <location line="+24"/>
+        <source>Waiting for configured CAT port %1 after radio power restore (%2/5)…</source>
+        <translation>In attesa della porta CAT configurata %1 dopo il ripristino dell&apos;alimentazione della radio (%2/5)…</translation>
+    </message>
+    <message>
+        <location line="+69"/>
+        <source>Could not prepare the CAT power-on request: %1</source>
+        <translation>Impossibile preparare la richiesta di accensione CAT: %1</translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <source>Could not prepare the CAT power-on request</source>
+        <translation>Impossibile preparare la richiesta di accensione CAT</translation>
+    </message>
+    <message>
+        <location line="+249"/>
+        <source>CAT wake-up sent; waiting for %1 to return (%2/5)…</source>
+        <translation>Sveglia CAT inviata; in attesa che %1 ritorni (%2/5)…</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>No reply arrived from the selected CAT port while sending the explicit power-on wake-up. Check the selected CAT port and its serial settings. If the radio&apos;s USB/serial interface disappears while it is off, it cannot be switched on through that interface.</source>
+        <translation>Nessuna risposta dalla porta CAT selezionata durante l&apos;invio della sveglia esplicita di accensione. Controlla la porta CAT selezionata e le sue impostazioni seriali. Se l&apos;interfaccia USB/seriale della radio scompare quando è spenta, non può essere accesa tramite quell&apos;interfaccia.</translation>
+    </message>
+    <message>
+        <location line="+165"/>
+        <source>The configured CAT port did not return after the radio power was restored. Check that the radio supply is on and select its actual CAT port.</source>
+        <translation>La porta CAT configurata non è tornata dopo il ripristino dell&apos;alimentazione della radio. Verifica che l&apos;alimentazione della radio sia attiva e seleziona la sua porta CAT effettiva.</translation>
+    </message>
+    <message>
+        <location line="+18"/>
         <source>CAT interrotto, riconnessione automatica (%1/%2)...</source>
         <translation>CAT interrotto, riconnessione automatica (%1/%2)...</translation>
     </message>
     <message>
         <location line="+399"/>
-        <location line="+21"/>
-        <location line="+21"/>
+        <location line="+30"/>
+        <location line="+151"/>
         <location line="+167"/>
         <source>CAT disconnected</source>
         <translation>CAT disconnesso</translation>
+    </message>
+    <message>
+        <location line="-251"/>
+        <source>Power On while disconnected requires a direct serial or USB Hamlib CAT connection.</source>
+        <translation>L&apos;accensione da disconnessi richiede una connessione CAT Hamlib diretta, seriale o USB.</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>A CAT connection attempt is already in progress</source>
+        <translation>Un tentativo di connessione CAT è già in corso</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Select the radio&apos;s CAT port before using Power On.</source>
+        <translation>Seleziona la porta CAT della radio prima di usare Accendi.</translation>
+    </message>
+    <message>
+        <location line="+16"/>
+        <source>Waiting for configured CAT port %1 after radio power restore…</source>
+        <translation>In attesa della porta CAT configurata %1 dopo il ripristino dell&apos;alimentazione della radio…</translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <source>Sending CAT power-on wake-up to %1…</source>
+        <translation>Invio della sveglia CAT di accensione a %1…</translation>
     </message>
 </context>
 <context>
     <name>DecodiumUpdater</name>
     <message>
+        <location filename="../src/app/DecodiumUpdater.cpp" line="+193"/>
         <source>Checking for updates...</source>
-        <translation type="vanished">Ricerca di aggiornamenti...</translation>
+        <translation>Ricerca di aggiornamenti...</translation>
     </message>
     <message>
+        <location line="+112"/>
         <source>Could not check for updates: %1</source>
-        <translation type="vanished">Impossibile verificare gli aggiornamenti: %1</translation>
+        <translation>Impossibile verificare gli aggiornamenti: %1</translation>
     </message>
     <message>
+        <location line="-32"/>
         <source>Could not read the release information.</source>
-        <translation type="vanished">Impossibile leggere le informazioni sulla versione.</translation>
+        <translation>Impossibile leggere le informazioni sulla versione.</translation>
     </message>
     <message>
+        <location line="-32"/>
         <source>Decodium is up to date (%1).</source>
-        <translation type="vanished">Decodium è aggiornato (%1).</translation>
+        <translation>Decodium è aggiornato (%1).</translation>
     </message>
     <message>
+        <location line="+106"/>
         <source>Version %1 is available.</source>
-        <translation type="vanished">È disponibile la versione %1.</translation>
+        <translation>È disponibile la versione %1.</translation>
     </message>
     <message>
+        <location line="+17"/>
         <source>Version %1 will be skipped.</source>
-        <translation type="vanished">La versione %1 verrà ignorata.</translation>
+        <translation>La versione %1 verrà ignorata.</translation>
     </message>
     <message>
+        <location line="+82"/>
         <source>Cannot write to the temporary folder.</source>
-        <translation type="vanished">Impossibile scrivere nella cartella temporanea.</translation>
+        <translation>Impossibile scrivere nella cartella temporanea.</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Downloading %1...</source>
-        <translation type="vanished">Download di %1 in corso...</translation>
+        <translation>Download di %1 in corso...</translation>
     </message>
     <message>
+        <location line="+38"/>
         <source>Download failed: %1</source>
-        <translation type="vanished">Download non riuscito: %1</translation>
+        <translation>Download non riuscito: %1</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>The downloaded file is incomplete. Please try again.</source>
-        <translation type="vanished">Il file scaricato è incompleto. Riprova.</translation>
+        <translation>Il file scaricato è incompleto. Riprova.</translation>
     </message>
     <message>
+        <location line="+57"/>
         <source>Starting the installer...</source>
-        <translation type="vanished">Avvio del programma di installazione...</translation>
+        <translation>Avvio del programma di installazione...</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Could not start the installer.</source>
-        <translation type="vanished">Impossibile avviare il programma di installazione.</translation>
+        <translation>Impossibile avviare il programma di installazione.</translation>
     </message>
     <message>
+        <location line="-193"/>
         <source>Offline: downloads disabled</source>
-        <translation type="vanished">Offline: download disabilitati</translation>
+        <translation>Offline: download disabilitati</translation>
     </message>
     <message>
+        <location line="-218"/>
+        <location line="+34"/>
+        <location line="+66"/>
         <source>Offline: update checks disabled</source>
-        <translation type="vanished">Offline: controllo aggiornamenti disabilitato</translation>
+        <translation>Offline: controllo aggiornamenti disabilitato</translation>
     </message>
     <message>
+        <location line="-98"/>
         <source>Online: update checks enabled</source>
-        <translation type="vanished">Online: controllo aggiornamenti abilitato</translation>
+        <translation>Online: controllo aggiornamenti abilitato</translation>
     </message>
     <message>
+        <location line="+265"/>
         <source>Cannot create the Downloads folder.</source>
-        <translation type="vanished">Impossibile creare la cartella Download.</translation>
+        <translation>Impossibile creare la cartella Download.</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Cannot write to the Downloads folder.</source>
-        <translation type="vanished">Impossibile scrivere nella cartella Download.</translation>
+        <translation>Impossibile scrivere nella cartella Download.</translation>
     </message>
     <message>
+        <location line="+84"/>
         <source>The AppImage could not be installed safely: %1</source>
-        <translation type="vanished">Impossibile installare l’AppImage in modo sicuro: %1</translation>
+        <translation>Impossibile installare l’AppImage in modo sicuro: %1</translation>
     </message>
     <message>
+        <location line="+15"/>
         <source>The AppImage was updated successfully. Restarting Decodium...</source>
-        <translation type="vanished">AppImage aggiornata correttamente. Riavvio di Decodium...</translation>
+        <translation>AppImage aggiornata correttamente. Riavvio di Decodium...</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>The AppImage was updated at %1. Please restart Decodium manually.</source>
-        <translation type="vanished">AppImage aggiornata in %1. Riavvia Decodium manualmente.</translation>
+        <translation>AppImage aggiornata in %1. Riavvia Decodium manualmente.</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>The AppImage was saved to %1. Launch it manually to complete the update.</source>
-        <translation type="vanished">AppImage salvata in %1. Avviala manualmente per completare l’aggiornamento.</translation>
+        <translation>AppImage salvata in %1. Avviala manualmente per completare l’aggiornamento.</translation>
     </message>
 </context>
 <context>
@@ -5510,160 +6412,201 @@ attorno ai toni.</translation>
 <context>
     <name>DecolinkWindow</name>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="+32"/>
         <source>Decolink - remote radio through the server</source>
-        <translation type="vanished">Decolink - radio remota tramite il server</translation>
+        <translation>Decolink - radio remota tramite il server</translation>
     </message>
     <message>
+        <location line="+123"/>
         <source>ACCOUNT</source>
-        <translation type="vanished">ACCOUNT</translation>
+        <translation>ACCOUNT</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>Server</source>
-        <translation type="vanished">Server</translation>
+        <translation>Server</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>E-mail</source>
-        <translation type="vanished">E-mail</translation>
+        <translation>E-mail</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Password</source>
-        <translation type="vanished">Password</translation>
+        <translation>Password</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>(saved)</source>
-        <translation type="vanished">(salvata)</translation>
+        <translation>(salvata)</translation>
     </message>
     <message>
+        <location line="+3"/>
+        <location line="+104"/>
         <source>Station</source>
-        <translation type="vanished">Stazione</translation>
+        <translation>Stazione</translation>
     </message>
     <message>
+        <location line="-101"/>
         <source>empty = choose from the list</source>
-        <translation type="vanished">vuoto = scegli dall&apos;elenco</translation>
+        <translation>vuoto = scegli dall&apos;elenco</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Relay</source>
-        <translation type="vanished">Relay</translation>
+        <translation>Relay</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>same as server</source>
-        <translation type="vanished">come il server</translation>
+        <translation>come il server</translation>
     </message>
     <message>
+        <location line="+19"/>
         <source>Remember the password (system secure store)</source>
-        <translation type="vanished">Ricorda la password (deposito sicuro del sistema)</translation>
+        <translation>Ricorda la password (deposito sicuro del sistema)</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Reconnect</source>
-        <translation type="vanished">Riconnetti</translation>
+        <translation>Riconnetti</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Connect</source>
-        <translation type="vanished">Connetti</translation>
+        <translation>Connetti</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Disconnect</source>
-        <translation type="vanished">Disconnetti</translation>
+        <translation>Disconnetti</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Forget password</source>
-        <translation type="vanished">Dimentica la password</translation>
+        <translation>Dimentica la password</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>STATIONS</source>
-        <translation type="vanished">STAZIONI</translation>
+        <translation>STAZIONI</translation>
     </message>
     <message>
+        <location line="+29"/>
         <source>LINK</source>
-        <translation type="vanished">COLLEGAMENTO</translation>
+        <translation>COLLEGAMENTO</translation>
     </message>
     <message>
+        <location line="+16"/>
         <source>Role</source>
-        <translation type="vanished">Ruolo</translation>
+        <translation>Ruolo</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Frequency</source>
-        <translation type="vanished">Frequenza</translation>
+        <translation>Frequenza</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>S-meter</source>
-        <translation type="vanished">S-meter</translation>
+        <translation>S-meter</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Round trip</source>
-        <translation type="vanished">Andata e ritorno</translation>
+        <translation>Andata e ritorno</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Transmit</source>
-        <translation type="vanished">Trasmissione</translation>
+        <translation>Trasmissione</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>allowed</source>
-        <translation type="vanished">consentita</translation>
+        <translation>consentita</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>listen only</source>
-        <translation type="vanished">solo ascolto</translation>
+        <translation>solo ascolto</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>USE AS MY RADIO</source>
-        <translation type="vanished">USA COME MIA RADIO</translation>
+        <translation>USA COME MIA RADIO</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>Decodium decodes the audio of the remote radio and drives its frequency, mode and PTT instead of the local sound card and CAT. Turning it off brings the local ones back.</source>
-        <translation type="vanished">Decodium decodifica l&apos;audio della radio remota e ne comanda frequenza, modo e PTT al posto della scheda audio e del CAT locali. Disattivando, tornano quelli locali.</translation>
+        <translation>Decodium decodifica l&apos;audio della radio remota e ne comanda frequenza, modo e PTT al posto della scheda audio e del CAT locali. Disattivando, tornano quelli locali.</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Stop using the remote radio</source>
-        <translation type="vanished">Smetti di usare la radio remota</translation>
+        <translation>Smetti di usare la radio remota</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Use the remote radio</source>
-        <translation type="vanished">Usa la radio remota</translation>
+        <translation>Usa la radio remota</translation>
     </message>
     <message>
+        <location line="-257"/>
         <source>owner</source>
-        <translation type="vanished">titolare</translation>
+        <translation>titolare</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>operator</source>
-        <translation type="vanished">operatore</translation>
+        <translation>operatore</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>listener</source>
-        <translation type="vanished">ascoltatore</translation>
+        <translation>ascoltatore</translation>
     </message>
     <message>
+        <location line="+122"/>
+        <location line="+101"/>
         <source>Audio</source>
-        <translation type="vanished">Audio</translation>
+        <translation>Audio</translation>
     </message>
     <message>
+        <location line="-97"/>
         <source>Follow the station</source>
-        <translation type="vanished">Segui la stazione</translation>
+        <translation>Segui la stazione</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>PCM 48 kHz (compatible)</source>
-        <translation type="vanished">PCM 48 kHz (compatibile)</translation>
+        <translation>PCM 48 kHz (compatibile)</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Digital, lossless (12 kHz)</source>
-        <translation type="vanished">Digitale, senza perdite (12 kHz)</translation>
+        <translation>Digitale, senza perdite (12 kHz)</translation>
     </message>
     <message>
+        <location line="+102"/>
         <source>recovered</source>
-        <translation type="vanished">recuperati</translation>
+        <translation>recuperati</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>lost</source>
-        <translation type="vanished">persi</translation>
+        <translation>persi</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>busy: %1 is transmitting</source>
-        <translation type="vanished">occupato: %1 sta trasmettendo</translation>
+        <translation>occupato: %1 sta trasmettendo</translation>
     </message>
     <message>
+        <location line="+22"/>
         <source>Listen to the remote radio (RX audio)</source>
-        <translation type="vanished">Ascolta la radio remota (audio RX)</translation>
+        <translation>Ascolta la radio remota (audio RX)</translation>
     </message>
 </context>
 <context>
@@ -5673,84 +6616,129 @@ attorno ai toni.</translation>
         <translation type="vanished">Misuratore RF</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecometerWindow.qml" line="+692"/>
         <source>RANGE</source>
-        <translation type="vanished">PORTATA</translation>
+        <translation>PORTATA</translation>
     </message>
     <message>
+        <location line="+313"/>
         <source>SCREEN</source>
-        <translation type="vanished">SCHERMATA</translation>
+        <translation>SCHERMATA</translation>
     </message>
     <message>
+        <location line="+54"/>
         <source>AUTO</source>
-        <translation type="vanished">AUTO</translation>
+        <translation>AUTO</translation>
     </message>
     <message>
+        <location line="-169"/>
         <source>IMPEDANCE</source>
-        <translation type="vanished">IMPEDENZA</translation>
+        <translation>IMPEDENZA</translation>
     </message>
     <message>
+        <location line="-1"/>
         <source>TX TIME</source>
-        <translation type="vanished">TEMPO TX</translation>
+        <translation>TEMPO TX</translation>
     </message>
     <message>
+        <location line="+42"/>
         <source>X: needs vector sensor</source>
-        <translation type="vanished">X: serve un sensore vettoriale</translation>
+        <translation>X: serve un sensore vettoriale</translation>
     </message>
     <message>
         <source>NO CAT TELEMETRY</source>
         <translation type="vanished">NESSUNA TELEMETRIA CAT</translation>
     </message>
     <message>
+        <location line="-750"/>
         <source>connected</source>
-        <translation type="vanished">connesso</translation>
+        <translation>connesso</translation>
     </message>
     <message>
+        <location line="+709"/>
+        <source>BAND</source>
+        <translation>BANDA</translation>
+    </message>
+    <message>
+        <location line="+17"/>
+        <source>RX SIGNAL</source>
+        <translation>SEGNALE RX</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>TRANSMITTING</source>
+        <translation>IN ARIA</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>NO S-METER</source>
+        <translation>NESSUN S-METER</translation>
+    </message>
+    <message>
+        <location line="+51"/>
         <source>SWR ALARM</source>
-        <translation type="vanished">ALLARME ROS</translation>
+        <translation>ALLARME ROS</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>ALC CLIP</source>
-        <translation type="vanished">TAGLIO ALC</translation>
+        <translation>TAGLIO ALC</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>PWR SENSE</source>
-        <translation type="vanished">SENSORE POT.</translation>
+        <translation>SENSORE POT.</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>CAT LINK</source>
-        <translation type="vanished">COLLEGAMENTO CAT</translation>
+        <translation>COLLEGAMENTO CAT</translation>
     </message>
     <message>
+        <location line="+121"/>
+        <source>HOLD</source>
+        <translation>HOLD</translation>
+    </message>
+    <message>
+        <location line="+79"/>
         <source>RF VECTOR METER</source>
-        <translation type="vanished">MISURATORE VETTORIALE RF</translation>
+        <translation>MISURATORE VETTORIALE RF</translation>
     </message>
     <message>
+        <location line="-991"/>
         <source>NO CAT LINK</source>
-        <translation type="vanished">NESSUN COLLEGAMENTO CAT</translation>
+        <translation>NESSUN COLLEGAMENTO CAT</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>TELEMETRY OFF — ENABLE PWR/SWR</source>
-        <translation type="vanished">TELEMETRIA SPENTA — ATTIVA PWR/ROS</translation>
+        <translation>TELEMETRIA SPENTA — ATTIVA PWR/ROS</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>RIG REPORTS NO METER</source>
-        <translation type="vanished">LA RADIO NON FORNISCE MISURA</translation>
+        <translation>LA RADIO NON FORNISCE MISURA</translation>
     </message>
     <message>
+        <location line="+4"/>
+        <location line="+936"/>
         <source>AMP</source>
-        <translation type="vanished">AMP</translation>
+        <translation>AMP</translation>
     </message>
     <message>
+        <location line="-1"/>
         <source>EXC</source>
-        <translation type="vanished">ECC</translation>
+        <translation>ECC</translation>
     </message>
     <message>
+        <location line="-935"/>
         <source>amplifier</source>
-        <translation type="vanished">amplificatore</translation>
+        <translation>amplificatore</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>AMP SILENT - SHOWING EXCITER</source>
-        <translation type="vanished">AMP MUTO — MOSTRA L&apos;ECCITATRICE</translation>
+        <translation>AMP MUTO — MOSTRA L&apos;ECCITATRICE</translation>
     </message>
 </context>
 <context>
@@ -5790,40 +6778,49 @@ attorno ai toni.</translation>
 <context>
     <name>DevOverlay</name>
     <message>
+        <location filename="../qml/decodium/components/DevOverlay.qml" line="+140"/>
         <source>Decodium DevOverlay</source>
-        <translation type="vanished">Decodium DevOverlay</translation>
+        <translation>Decodium DevOverlay</translation>
     </message>
     <message>
+        <location line="+57"/>
         <source>Frame (ms):</source>
-        <translation type="vanished">Fotogramma (ms):</translation>
+        <translation>Fotogramma (ms):</translation>
     </message>
     <message>
+        <location line="+18"/>
         <source>Decode Hz:</source>
-        <translation type="vanished">Decodifiche al secondo:</translation>
+        <translation>Decodifiche al secondo:</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>Delegates:</source>
-        <translation type="vanished">Delegati:</translation>
+        <translation>Delegati:</translation>
     </message>
     <message>
+        <location line="+18"/>
         <source>Uptime:</source>
-        <translation type="vanished">Tempo di attività:</translation>
+        <translation>Tempo di attività:</translation>
     </message>
     <message>
+        <location line="+20"/>
         <source>Frame time 5s</source>
-        <translation type="vanished">Tempo di fotogramma 5 s</translation>
+        <translation>Tempo di fotogramma 5 s</translation>
     </message>
     <message>
+        <location line="+66"/>
         <source>Copy diagnostics</source>
-        <translation type="vanished">Copia la diagnostica</translation>
+        <translation>Copia la diagnostica</translation>
     </message>
     <message>
+        <location line="+17"/>
         <source>Close</source>
-        <translation type="vanished">Chiudi</translation>
+        <translation>Chiudi</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Copied to clipboard</source>
-        <translation type="vanished">Copiato negli appunti</translation>
+        <translation>Copiato negli appunti</translation>
     </message>
 </context>
 <context>
@@ -5939,32 +6936,39 @@ Errore: %2 - %3</translation>
 <context>
     <name>DisplayPanel</name>
     <message>
+        <location filename="../qml/decodium/rotor/DisplayPanel.qml" line="+27"/>
         <source>control box missing</source>
-        <translation type="vanished">control box assente</translation>
+        <translation>control box assente</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>rotating towards %1°</source>
-        <translation type="vanished">in rotazione verso %1°</translation>
+        <translation>in rotazione verso %1°</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>rotating</source>
-        <translation type="vanished">in rotazione</translation>
+        <translation>in rotazione</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>stopped</source>
-        <translation type="vanished">fermo</translation>
+        <translation>fermo</translation>
     </message>
     <message>
+        <location line="+27"/>
         <source>FREE DIRECTION</source>
-        <translation type="vanished">DIREZIONE LIBERA</translation>
+        <translation>DIREZIONE LIBERA</translation>
     </message>
     <message>
+        <location line="+25"/>
         <source>AZIMUTH</source>
-        <translation type="vanished">AZIMUT</translation>
+        <translation>AZIMUT</translation>
     </message>
     <message>
+        <location line="+23"/>
         <source>ELEVATION</source>
-        <translation type="vanished">ELEVAZIONE</translation>
+        <translation>ELEVAZIONE</translation>
     </message>
 </context>
 <context>
@@ -5978,205 +6982,293 @@ Errore: %2 - %3</translation>
 <context>
     <name>DxClusterPanel</name>
     <message>
+        <location filename="../qml/decodium/components/DxClusterPanel.qml" line="+85"/>
         <source>DX Cluster</source>
-        <translation type="vanished">Cluster DX</translation>
+        <translation>Cluster DX</translation>
     </message>
     <message>
+        <location line="+64"/>
         <source>Time</source>
-        <translation type="vanished">Tempo</translation>
+        <translation>Tempo</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>DX Call</source>
-        <translation type="vanished">Nominativo DX</translation>
+        <translation>Nominativo DX</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Freq</source>
-        <translation type="vanished">Freq</translation>
+        <translation>Freq</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Band</source>
-        <translation type="vanished">Banda</translation>
+        <translation>Banda</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Mode</source>
-        <translation type="vanished">Modo</translation>
+        <translation>Modo</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Spotter</source>
-        <translation type="vanished">Osservatore</translation>
+        <translation>Osservatore</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Info</source>
-        <translation type="vanished">Info</translation>
+        <translation>Info</translation>
     </message>
     <message>
+        <location line="+171"/>
         <source>Filter:</source>
-        <translation type="vanished">Filtro:</translation>
+        <translation>Filtro:</translation>
     </message>
     <message>
+        <location line="+31"/>
         <source>Clear</source>
-        <translation type="vanished">Cancella</translation>
+        <translation>Cancella</translation>
     </message>
 </context>
 <context>
     <name>DxPedFloatWindow</name>
     <message>
+        <location filename="../qml/decodium/components/DxPedFloatWindow.qml" line="+111"/>
         <source>⇲ DOCK</source>
-        <translation type="vanished">⇲ AGGANCIA</translation>
+        <translation>⇲ AGGANCIA</translation>
     </message>
     <message>
+        <location line="-59"/>
         <source>DX-Pedition panel</source>
-        <translation type="vanished">Pannello DX-Pedition</translation>
+        <translation>Pannello DX-Pedition</translation>
     </message>
 </context>
 <context>
     <name>DxPedTxPanel</name>
     <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml" line="+228"/>
         <source>CQ MULTI</source>
-        <translation type="vanished">CQ MULTI</translation>
+        <translation>CQ MULTI</translation>
     </message>
     <message>
+        <location line="+89"/>
         <source>CQ</source>
-        <translation type="vanished">CQ</translation>
+        <translation>CQ</translation>
     </message>
     <message>
+        <location line="-204"/>
         <source>On air - %1 QSO + %2 parallel CQ on %3 slots, %4 queued</source>
-        <translation type="vanished">In aria - %1 QSO + %2 CQ paralleli su %3 slot, %4 in coda</translation>
+        <translation>In aria - %1 QSO + %2 CQ paralleli su %3 slot, %4 in coda</translation>
     </message>
     <message>
+        <location line="+55"/>
         <source>MULTI-SLOT</source>
-        <translation type="vanished">MULTI-SLOT</translation>
+        <translation>MULTI-SLOT</translation>
     </message>
     <message>
+        <location line="+41"/>
         <source>SLOT</source>
-        <translation type="vanished">SLOT</translation>
+        <translation>SLOT</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>MAM</source>
-        <translation type="vanished">MAM</translation>
+        <translation>MAM</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>AUTO CQ</source>
-        <translation type="vanished">AUTO CQ</translation>
+        <translation>AUTO CQ</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>ARM</source>
-        <translation type="vanished">ARMA</translation>
+        <translation>ARMA</translation>
     </message>
     <message>
+        <location line="+21"/>
         <source>FT2: multi-slot never validated on air - if QSOs do not close, go back to 1 slot</source>
-        <translation type="vanished">FT2: multi-slot mai validato in aria - se i QSO non chiudono, torna a 1 slot</translation>
+        <translation>FT2: multi-slot mai validato in aria - se i QSO non chiudono, torna a 1 slot</translation>
     </message>
     <message>
+        <location line="-149"/>
         <source>Multi-slot OFF - serial MAM, one caller at a time</source>
-        <translation type="vanished">Multi-slot OFF - MAM seriale, un chiamante per volta</translation>
+        <translation>Multi-slot OFF - MAM seriale, un chiamante per volta</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Mode %1: multi-slot not available (needs FT8, FT4 or FT2)</source>
-        <translation type="vanished">Modo %1: multi-slot non disponibile (servono FT8, FT4 o FT2)</translation>
+        <translation>Modo %1: multi-slot non disponibile (servono FT8, FT4 o FT2)</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>TX disabled - press ARM or ENABLE TX</source>
-        <translation type="vanished">TX disabilitato - premi ARMA o ENABLE TX</translation>
+        <translation>TX disabilitato - premi ARMA o ENABLE TX</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>MAM or AUTO CQ is required to answer callers</source>
-        <translation type="vanished">Serve MAM o AUTO CQ per rispondere ai chiamanti</translation>
+        <translation>Serve MAM o AUTO CQ per rispondere ai chiamanti</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>On air - %1 of %2 slots busy, %3 queued</source>
-        <translation type="vanished">In aria - %1 slot su %2 occupati, %3 in coda</translation>
+        <translation>In aria - %1 slot su %2 occupati, %3 in coda</translation>
     </message>
     <message>
+        <location line="+202"/>
         <source>free</source>
-        <translation type="vanished">libero</translation>
+        <translation>libero</translation>
     </message>
     <message>
+        <location line="+67"/>
         <source>LOG</source>
-        <translation type="vanished">LOG</translation>
+        <translation>LOG</translation>
     </message>
     <message>
+        <location line="+24"/>
         <source>QUEUE %1</source>
-        <translation type="vanished">CODA %1</translation>
+        <translation>CODA %1</translation>
     </message>
     <message>
+        <location line="+38"/>
         <source>CLEAR QUEUE</source>
-        <translation type="vanished">SVUOTA CODA</translation>
+        <translation>SVUOTA CODA</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>CLEAR SLOTS</source>
-        <translation type="vanished">CHIUDI SLOT</translation>
+        <translation>CHIUDI SLOT</translation>
     </message>
     <message>
+        <location line="+6"/>
+        <source>HALT</source>
+        <translation>HALT</translation>
+    </message>
+    <message>
+        <location line="+12"/>
         <source>TX MACROS ▴</source>
-        <translation type="vanished">MACRO TX ▴</translation>
+        <translation>MACRO TX ▴</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>TX MACROS ▾</source>
-        <translation type="vanished">MACRO TX ▾</translation>
+        <translation>MACRO TX ▾</translation>
     </message>
 </context>
 <context>
     <name>DxPeditionWorkspace</name>
     <message>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="+1132"/>
         <source>PANELS</source>
-        <translation type="vanished">PANNELLI</translation>
+        <translation>PANNELLI</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Click a panel to close or reopen it. A closed panel frees its slot instead of leaving a gap.</source>
-        <translation type="vanished">Clicca un pannello per chiuderlo o riaprirlo. Un pannello chiuso libera il suo posto invece di lasciare un buco.</translation>
+        <translation>Clicca un pannello per chiuderlo o riaprirlo. Un pannello chiuso libera il suo posto invece di lasciare un buco.</translation>
     </message>
     <message>
+        <location line="+42"/>
         <source>closed</source>
-        <translation type="vanished">chiuso</translation>
+        <translation>chiuso</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>window</source>
-        <translation type="vanished">finestra</translation>
+        <translation>finestra</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>docked</source>
-        <translation type="vanished">agganciato</translation>
+        <translation>agganciato</translation>
     </message>
     <message>
+        <location line="+34"/>
         <source>RESTORE DEFAULT LAYOUT</source>
-        <translation type="vanished">RIPRISTINA DISPOSIZIONE</translation>
+        <translation>RIPRISTINA DISPOSIZIONE</translation>
     </message>
     <message>
+        <location line="-1040"/>
         <source>DX-Ped TX · Slot</source>
-        <translation type="vanished">DX-Ped TX · Slot</translation>
+        <translation>DX-Ped TX · Slot</translation>
     </message>
     <message>
+        <location line="+544"/>
         <source>UTC · OPER IU8LMC</source>
-        <translation type="vanished">UTC · OPER IU8LMC</translation>
+        <translation>UTC · OPER IU8LMC</translation>
     </message>
     <message>
+        <location line="-546"/>
         <source>Full Spectrum · Decode</source>
-        <translation type="vanished">Full Spectrum · Decodifica</translation>
+        <translation>Full Spectrum · Decodifica</translation>
     </message>
     <message>
+        <location line="-3"/>
+        <source>Cluster</source>
+        <translation>Cluster</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>MAM</source>
+        <translation>MAM</translation>
+    </message>
+    <message>
+        <location line="+4"/>
         <source>Signal RX · QSO Lock</source>
-        <translation type="vanished">Signal RX · Aggancio QSO</translation>
+        <translation>Signal RX · Aggancio QSO</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Log · QSO Entry</source>
-        <translation type="vanished">Log · Inserimento QSO</translation>
+        <translation>Log · Inserimento QSO</translation>
     </message>
     <message>
+        <location line="+306"/>
+        <source>Drag onto another panel to swap the two</source>
+        <translation>Trascina su un altro pannello per scambiare i due</translation>
+    </message>
+    <message>
+        <location line="+63"/>
+        <source>Open this panel in a window of its own</source>
+        <translation>Apri questo pannello in una finestra propria</translation>
+    </message>
+    <message>
+        <location line="+22"/>
+        <source>Close this panel - reopen it from PANELS in the top bar</source>
+        <translation>Chiudi questo pannello - riaprilo da PANNELLI nella barra superiore</translation>
+    </message>
+    <message>
+        <location line="+63"/>
         <source>DECODIUM 4</source>
-        <translation type="vanished">DECODIUM 4</translation>
+        <translation>DECODIUM 4</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>DX-PEDITION MODE</source>
-        <translation type="vanished">MODO DX-PEDITION</translation>
+        <translation>MODO DX-PEDITION</translation>
     </message>
     <message>
+        <location line="+131"/>
+        <source>%1 closed panel(s). Open this to bring them back.</source>
+        <translation>%1 pannello/i chiuso/i. Apri questo per riportarli.</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Shows where every panel is, and reopens the closed ones.</source>
+        <translation>Mostra dove si trova ogni pannello e riapre quelli chiusi.</translation>
+    </message>
+    <message>
+        <location line="-597"/>
         <source>PSK Reporter</source>
-        <translation type="vanished">PSK Reporter</translation>
+        <translation>PSK Reporter</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Waterfall</source>
-        <translation type="vanished">Display a cascata</translation>
+        <translation>Display a cascata</translation>
     </message>
     <message>
         <source>TX Macros</source>
@@ -6490,291 +7582,395 @@ Errore: %2 - %3</translation>
 <context>
     <name>FT2LinkPanel</name>
     <message numerus="yes">
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="+1538"/>
         <source>%n item</source>
-        <translation type="vanished">
+        <translation>
             <numerusform>%n elemento</numerusform>
             <numerusform>%n elementi</numerusform>
         </translation>
     </message>
     <message numerus="yes">
+        <location line="+2"/>
         <source> / %n unread</source>
-        <translation type="vanished">
+        <translation>
             <numerusform> / %n non letto</numerusform>
             <numerusform> / %n non letti</numerusform>
         </translation>
     </message>
     <message numerus="yes">
+        <location line="+5"/>
         <source>%n save pending</source>
-        <translation type="vanished">
+        <translation>
             <numerusform>%n salvataggio in attesa</numerusform>
             <numerusform>%n salvataggi in attesa</numerusform>
         </translation>
     </message>
     <message>
+        <location line="+14"/>
+        <location line="+30"/>
+        <location line="+5119"/>
+        <location line="+4377"/>
         <source>received file</source>
-        <translation type="vanished">file ricevuto</translation>
+        <translation>file ricevuto</translation>
     </message>
     <message>
+        <location line="-9524"/>
         <source>Marked read %1</source>
-        <translation type="vanished">Contrassegnato come letto: %1</translation>
+        <translation>Contrassegnato come letto: %1</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Marked unread %1</source>
-        <translation type="vanished">Contrassegnato come non letto: %1</translation>
+        <translation>Contrassegnato come non letto: %1</translation>
     </message>
     <message numerus="yes">
+        <location line="+20"/>
         <source>Marked read %n received file</source>
-        <translation type="vanished">
+        <translation>
             <numerusform>Contrassegnato come letto %n file ricevuto</numerusform>
             <numerusform>Contrassegnati come letti %n file ricevuti</numerusform>
         </translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>No unread received files</source>
-        <translation type="vanished">Nessun file ricevuto non letto</translation>
+        <translation>Nessun file ricevuto non letto</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Deleted %1</source>
-        <translation type="vanished">Eliminato %1</translation>
+        <translation>Eliminato %1</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Delete failed: %1</source>
-        <translation type="vanished">Eliminazione non riuscita: %1</translation>
+        <translation>Eliminazione non riuscita: %1</translation>
     </message>
     <message numerus="yes">
+        <location line="+12"/>
         <source>Deleted %n read received file</source>
-        <translation type="vanished">
+        <translation>
             <numerusform>Eliminato %n file ricevuto già letto</numerusform>
             <numerusform>Eliminati %n file ricevuti già letti</numerusform>
         </translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>No read received files</source>
-        <translation type="vanished">Nessun file ricevuto già letto</translation>
+        <translation>Nessun file ricevuto già letto</translation>
     </message>
     <message>
+        <location line="+49"/>
+        <location line="+57"/>
         <source>Received file has no content</source>
-        <translation type="vanished">Il file ricevuto non contiene dati</translation>
+        <translation>Il file ricevuto non contiene dati</translation>
     </message>
     <message>
+        <location line="-52"/>
         <source>Asynchronous file saving is unavailable</source>
-        <translation type="vanished">Il salvataggio asincrono dei file non è disponibile</translation>
+        <translation>Il salvataggio asincrono dei file non è disponibile</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Save already in progress</source>
-        <translation type="vanished">Salvataggio già in corso</translation>
+        <translation>Salvataggio già in corso</translation>
     </message>
     <message>
+        <location line="+15"/>
         <source>Unable to queue received file save</source>
-        <translation type="vanished">Impossibile accodare il salvataggio del file ricevuto</translation>
+        <translation>Impossibile accodare il salvataggio del file ricevuto</translation>
     </message>
     <message>
+        <location line="+16"/>
         <source>Auto-saving %1...</source>
-        <translation type="vanished">Salvataggio automatico di %1...</translation>
+        <translation>Salvataggio automatico di %1...</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Saving %1...</source>
-        <translation type="vanished">Salvataggio di %1...</translation>
+        <translation>Salvataggio di %1...</translation>
     </message>
     <message>
+        <location line="+17"/>
         <source>Save As is unavailable</source>
-        <translation type="vanished">Salva con nome non è disponibile</translation>
+        <translation>Salva con nome non è disponibile</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Save FT2-Link received file as</source>
-        <translation type="vanished">Salva il file FT2-Link ricevuto con nome</translation>
+        <translation>Salva il file FT2-Link ricevuto con nome</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>All files (*)</source>
-        <translation type="vanished">Tutti i file (*)</translation>
+        <translation>Tutti i file (*)</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Text files (*.txt *.md *.log *.csv *.json)</source>
-        <translation type="vanished">File di testo (*.txt *.md *.log *.csv *.json)</translation>
+        <translation>File di testo (*.txt *.md *.log *.csv *.json)</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Images (*.png *.jpg *.jpeg *.gif *.bmp)</source>
-        <translation type="vanished">Immagini (*.png *.jpg *.jpeg *.gif *.bmp)</translation>
+        <translation>Immagini (*.png *.jpg *.jpeg *.gif *.bmp)</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Save As cancelled</source>
-        <translation type="vanished">Salva con nome annullato</translation>
+        <translation>Salva con nome annullato</translation>
     </message>
     <message>
+        <location line="+19"/>
         <source>Folder selection is unavailable</source>
-        <translation type="vanished">La selezione della cartella non è disponibile</translation>
+        <translation>La selezione della cartella non è disponibile</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Select FT2-Link received files folder</source>
-        <translation type="vanished">Seleziona la cartella dei file FT2-Link ricevuti</translation>
+        <translation>Seleziona la cartella dei file FT2-Link ricevuti</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Receive folder: %1</source>
-        <translation type="vanished">Cartella di ricezione: %1</translation>
+        <translation>Cartella di ricezione: %1</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>Open folder is unavailable</source>
-        <translation type="vanished">L&apos;apertura della cartella non è disponibile</translation>
+        <translation>L&apos;apertura della cartella non è disponibile</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Opening received files folder...</source>
-        <translation type="vanished">Apertura della cartella dei file ricevuti...</translation>
+        <translation>Apertura della cartella dei file ricevuti...</translation>
     </message>
     <message>
+        <location line="+41"/>
+        <location line="+30"/>
         <source>unknown error</source>
-        <translation type="vanished">errore sconosciuto</translation>
+        <translation>errore sconosciuto</translation>
     </message>
     <message>
+        <location line="-28"/>
         <source>Auto-save failed: %1</source>
-        <translation type="vanished">Salvataggio automatico non riuscito: %1</translation>
+        <translation>Salvataggio automatico non riuscito: %1</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Save failed: %1</source>
-        <translation type="vanished">Salvataggio non riuscito: %1</translation>
+        <translation>Salvataggio non riuscito: %1</translation>
     </message>
     <message>
+        <location line="+14"/>
         <source>Auto-saved %1</source>
-        <translation type="vanished">Salvato automaticamente %1</translation>
+        <translation>Salvato automaticamente %1</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Saved %1</source>
-        <translation type="vanished">Salvato %1</translation>
+        <translation>Salvato %1</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>Opened %1</source>
-        <translation type="vanished">Aperta %1</translation>
+        <translation>Aperta %1</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>receive folder</source>
-        <translation type="vanished">cartella di ricezione</translation>
+        <translation>cartella di ricezione</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Open folder failed: %1</source>
-        <translation type="vanished">Apertura della cartella non riuscita: %1</translation>
+        <translation>Apertura della cartella non riuscita: %1</translation>
     </message>
     <message>
+        <location line="+4659"/>
+        <location line="+4377"/>
         <source>RECEIVED FILES</source>
-        <translation type="vanished">FILE RICEVUTI</translation>
+        <translation>FILE RICEVUTI</translation>
     </message>
     <message>
+        <location line="-4349"/>
+        <location line="+4377"/>
         <source>AUTO ON</source>
-        <translation type="vanished">AUTO ATT</translation>
+        <translation>AUTO ATT</translation>
     </message>
     <message>
+        <location line="-4377"/>
+        <location line="+4377"/>
         <source>AUTO OFF</source>
-        <translation type="vanished">AUTO DIS</translation>
+        <translation>AUTO DIS</translation>
     </message>
     <message>
+        <location line="-4374"/>
+        <location line="+4377"/>
         <source>Automatically save new files in the receive folder</source>
-        <translation type="vanished">Salva automaticamente i nuovi file nella cartella di ricezione</translation>
+        <translation>Salva automaticamente i nuovi file nella cartella di ricezione</translation>
     </message>
     <message>
+        <location line="-4372"/>
+        <location line="+4377"/>
         <source>FOLDER</source>
-        <translation type="vanished">CARTELLA</translation>
+        <translation>CARTELLA</translation>
     </message>
     <message>
+        <location line="-4374"/>
+        <location line="+4377"/>
         <source>Choose the received files folder</source>
-        <translation type="vanished">Scegli la cartella dei file ricevuti</translation>
+        <translation>Scegli la cartella dei file ricevuti</translation>
     </message>
     <message>
+        <location line="-4372"/>
+        <location line="+4377"/>
         <source>OPEN</source>
-        <translation type="vanished">APRI</translation>
+        <translation>APRI</translation>
     </message>
     <message>
+        <location line="-4374"/>
+        <location line="+4377"/>
         <source>Open the received files folder</source>
-        <translation type="vanished">Apri la cartella dei file ricevuti</translation>
+        <translation>Apri la cartella dei file ricevuti</translation>
     </message>
     <message>
+        <location line="-4372"/>
+        <location line="+4377"/>
         <source>READ ALL</source>
-        <translation type="vanished">LEGGI TUTTI</translation>
+        <translation>LEGGI TUTTI</translation>
     </message>
     <message>
+        <location line="-4373"/>
+        <location line="+4377"/>
         <source>Clear unread marker for all received files</source>
-        <translation type="vanished">Rimuovi il contrassegno non letto da tutti i file ricevuti</translation>
+        <translation>Rimuovi il contrassegno non letto da tutti i file ricevuti</translation>
     </message>
     <message>
+        <location line="-4372"/>
+        <location line="+4377"/>
         <source>CLEAR</source>
-        <translation type="vanished">PULISCI</translation>
+        <translation>PULISCI</translation>
     </message>
     <message>
+        <location line="-4373"/>
+        <location line="+4377"/>
         <source>Delete received files already marked read</source>
-        <translation type="vanished">Elimina i file ricevuti già contrassegnati come letti</translation>
+        <translation>Elimina i file ricevuti già contrassegnati come letti</translation>
     </message>
     <message>
+        <location line="-4338"/>
+        <location line="+4377"/>
         <source>NEW</source>
-        <translation type="vanished">NUOVO</translation>
+        <translation>NUOVO</translation>
     </message>
     <message>
+        <location line="-4375"/>
+        <location line="+4377"/>
         <source>IMG</source>
-        <translation type="vanished">IMG</translation>
+        <translation>IMG</translation>
     </message>
     <message>
+        <location line="-4377"/>
+        <location line="+4377"/>
         <source>FILE</source>
-        <translation type="vanished">FILE</translation>
+        <translation>FILE</translation>
     </message>
     <message>
+        <location line="-4320"/>
+        <location line="+4377"/>
         <source>SAVE</source>
-        <translation type="vanished">SALVA</translation>
+        <translation>SALVA</translation>
     </message>
     <message>
+        <location line="-4371"/>
+        <location line="+4377"/>
         <source>Save to the configured receive folder</source>
-        <translation type="vanished">Salva nella cartella di ricezione configurata</translation>
+        <translation>Salva nella cartella di ricezione configurata</translation>
     </message>
     <message>
+        <location line="-4372"/>
+        <location line="+4377"/>
         <source>SAVE AS</source>
-        <translation type="vanished">SALVA COME</translation>
+        <translation>SALVA COME</translation>
     </message>
     <message>
+        <location line="-4371"/>
+        <location line="+4377"/>
         <source>Save with another name or in another folder</source>
-        <translation type="vanished">Salva con un altro nome o in un&apos;altra cartella</translation>
+        <translation>Salva con un altro nome o in un&apos;altra cartella</translation>
     </message>
     <message>
+        <location line="-4371"/>
+        <location line="+4377"/>
         <source>READ</source>
-        <translation type="vanished">LEGGI</translation>
+        <translation>LEGGI</translation>
     </message>
     <message>
+        <location line="-4377"/>
+        <location line="+4377"/>
         <source>UNREAD</source>
-        <translation type="vanished">NON LETTO</translation>
+        <translation>NON LETTO</translation>
     </message>
     <message>
+        <location line="-4372"/>
+        <location line="+4377"/>
         <source>Mark received file as read</source>
-        <translation type="vanished">Contrassegna il file ricevuto come letto</translation>
+        <translation>Contrassegna il file ricevuto come letto</translation>
     </message>
     <message>
+        <location line="-4376"/>
+        <location line="+4377"/>
         <source>Mark received file as unread</source>
-        <translation type="vanished">Contrassegna il file ricevuto come non letto</translation>
+        <translation>Contrassegna il file ricevuto come non letto</translation>
     </message>
     <message>
+        <location line="-4370"/>
+        <location line="+4377"/>
         <source>COPY</source>
-        <translation type="vanished">COPIA</translation>
+        <translation>COPIA</translation>
     </message>
     <message>
+        <location line="-4373"/>
+        <location line="+4377"/>
         <source>Copy received file content</source>
-        <translation type="vanished">Copia il contenuto del file ricevuto</translation>
+        <translation>Copia il contenuto del file ricevuto</translation>
     </message>
     <message>
+        <location line="-4372"/>
+        <location line="+4377"/>
         <source>Copied %1</source>
-        <translation type="vanished">Copiato %1</translation>
+        <translation>Copiato %1</translation>
     </message>
     <message>
+        <location line="-4370"/>
+        <location line="+4377"/>
         <source>DEL</source>
-        <translation type="vanished">ELIM</translation>
+        <translation>ELIM</translation>
     </message>
     <message>
+        <location line="-4373"/>
+        <location line="+4377"/>
         <source>Delete this received file entry</source>
-        <translation type="vanished">Elimina questa voce dei file ricevuti</translation>
+        <translation>Elimina questa voce dei file ricevuti</translation>
     </message>
     <message>
+        <location line="-4368"/>
+        <location line="+4377"/>
         <source>No received files</source>
-        <translation type="vanished">Nessun file ricevuto</translation>
+        <translation>Nessun file ricevuto</translation>
     </message>
     <message>
+        <location line="-4364"/>
+        <location line="+4377"/>
         <source>Folder: %1</source>
-        <translation type="vanished">Cartella: %1</translation>
+        <translation>Cartella: %1</translation>
     </message>
     <message>
+        <location line="-4375"/>
+        <location line="+4377"/>
         <source>Waiting for files in %1</source>
-        <translation type="vanished">In attesa di file in %1</translation>
+        <translation>In attesa di file in %1</translation>
     </message>
     <message>
         <source>Cannot create receive directory: %1</source>
@@ -6793,364 +7989,454 @@ Errore: %2 - %3</translation>
         <translation type="vanished">Il gestore file di sistema non ha potuto aprire la cartella di ricezione</translation>
     </message>
     <message>
+        <location line="-5697"/>
         <source>FT2-LINK</source>
-        <translation type="vanished">FT2-LINK</translation>
+        <translation>FT2-LINK</translation>
     </message>
     <message>
+        <location line="+191"/>
         <source>CQ only</source>
-        <translation type="vanished">Solo CQ</translation>
+        <translation>Solo CQ</translation>
     </message>
     <message>
+        <location line="+39"/>
         <source>AUTO CQ</source>
-        <translation type="vanished">AUTO CQ</translation>
+        <translation>AUTO CQ</translation>
     </message>
     <message>
+        <location line="+354"/>
         <source>LOOP ACK</source>
-        <translation type="vanished">LOOP ACK</translation>
+        <translation>LOOP ACK</translation>
     </message>
     <message>
+        <location line="+89"/>
         <source>No sessions</source>
-        <translation type="vanished">Nessuna sessione</translation>
+        <translation>Nessuna sessione</translation>
     </message>
     <message>
+        <location line="+100"/>
         <source>DROP DATA</source>
-        <translation type="vanished">DROP DATA</translation>
+        <translation>DROP DATA</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>DROP ACK</source>
-        <translation type="vanished">DROP ACK</translation>
+        <translation>DROP ACK</translation>
     </message>
     <message>
+        <location line="+594"/>
         <source>No tags</source>
-        <translation type="vanished">Nessuna etichetta</translation>
+        <translation>Nessuna etichetta</translation>
     </message>
     <message>
+        <location line="+50"/>
         <source>SET CF</source>
-        <translation type="vanished">SET CF</translation>
+        <translation>SET CF</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>CF TAG</source>
-        <translation type="vanished">CF TAG</translation>
+        <translation>CF TAG</translation>
     </message>
     <message>
+        <location line="+38"/>
         <source>Message</source>
-        <translation type="vanished">Messaggio</translation>
+        <translation>Messaggio</translation>
     </message>
     <message>
+        <location line="+121"/>
         <source>key=value; key=value</source>
-        <translation type="vanished">key=value; key=value</translation>
+        <translation>key=value; key=value</translation>
     </message>
     <message>
+        <location line="+217"/>
         <source>BBS group. Empty means ALL.</source>
-        <translation type="vanished">Gruppo BBS. Vuoto significa TUTTI.</translation>
+        <translation>Gruppo BBS. Vuoto significa TUTTI.</translation>
     </message>
     <message>
+        <location line="+37"/>
         <source>Bulletin title</source>
-        <translation type="vanished">Titolo del bollettino</translation>
+        <translation>Titolo del bollettino</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Short BBS subject/title.</source>
-        <translation type="vanished">Oggetto o titolo breve per la BBS.</translation>
+        <translation>Oggetto o titolo breve per la BBS.</translation>
     </message>
     <message>
+        <location line="+35"/>
         <source>BBS message body</source>
-        <translation type="vanished">Corpo del messaggio BBS</translation>
+        <translation>Corpo del messaggio BBS</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Text to store and send as the BBS bulletin body.</source>
-        <translation type="vanished">Testo da salvare e inviare come corpo del bollettino BBS.</translation>
+        <translation>Testo da salvare e inviare come corpo del bollettino BBS.</translation>
     </message>
     <message>
+        <location line="+49"/>
         <source>server-file.txt</source>
-        <translation type="vanished">server-file.txt</translation>
+        <translation>server-file.txt</translation>
     </message>
     <message>
+        <location line="+19"/>
         <source>BBS server file body</source>
-        <translation type="vanished">Contenuto del file sul server BBS</translation>
+        <translation>Contenuto del file sul server BBS</translation>
     </message>
     <message>
+        <location line="+69"/>
         <source>remote-file.txt</source>
-        <translation type="vanished">remote-file.txt</translation>
+        <translation>remote-file.txt</translation>
     </message>
     <message>
+        <location line="+139"/>
         <source>No BBS server files</source>
-        <translation type="vanished">Nessun file sul server BBS</translation>
+        <translation>Nessun file sul server BBS</translation>
     </message>
     <message>
+        <location line="+45"/>
         <source>SAVE GROUP</source>
-        <translation type="vanished">SALVA GRUPPO</translation>
+        <translation>SALVA GRUPPO</translation>
     </message>
     <message>
+        <location line="+28"/>
         <source>BBS BULLETINS</source>
-        <translation type="vanished">BOLLETTINI BBS</translation>
+        <translation>BOLLETTINI BBS</translation>
     </message>
     <message>
+        <location line="+37"/>
         <source>MARK ALL READ</source>
-        <translation type="vanished">SEGNA TUTTI COME LETTI</translation>
+        <translation>SEGNA TUTTI COME LETTI</translation>
     </message>
     <message>
+        <location line="+181"/>
         <source>Broadcast message</source>
-        <translation type="vanished">Messaggio di diffusione</translation>
+        <translation>Messaggio di diffusione</translation>
     </message>
     <message>
+        <location line="+42"/>
         <source>Alert tags: WX, POTA, NET</source>
-        <translation type="vanished">Etichette di avviso: WX, POTA, NET</translation>
+        <translation>Etichette di avviso: WX, POTA, NET</translation>
     </message>
     <message>
+        <location line="+52"/>
         <source>PATH CALL</source>
-        <translation type="vanished">PATH CALL</translation>
+        <translation>PATH CALL</translation>
     </message>
     <message>
+        <location line="+128"/>
         <source>Digipeater payload</source>
-        <translation type="vanished">Contenuto del digipeater</translation>
+        <translation>Contenuto del digipeater</translation>
     </message>
     <message>
+        <location line="+41"/>
         <source>DIGIPEATER</source>
-        <translation type="vanished">DIGIPEATER</translation>
+        <translation>DIGIPEATER</translation>
     </message>
     <message>
+        <location line="+28"/>
         <source>ALERT CENTER</source>
-        <translation type="vanished">CENTRO AVVISI</translation>
+        <translation>CENTRO AVVISI</translation>
     </message>
     <message>
+        <location line="+29"/>
         <source>CLEAR ARCH</source>
-        <translation type="vanished">SVUOTA ARCHIVIO</translation>
+        <translation>SVUOTA ARCHIVIO</translation>
     </message>
     <message>
+        <location line="+164"/>
         <source>Subject</source>
-        <translation type="vanished">Oggetto</translation>
+        <translation>Oggetto</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>Mail body</source>
-        <translation type="vanished">Corpo del messaggio</translation>
+        <translation>Corpo del messaggio</translation>
     </message>
     <message>
+        <location line="+166"/>
         <source>USE PATH</source>
-        <translation type="vanished">USE PATH</translation>
+        <translation>USE PATH</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>CALL RLY</source>
-        <translation type="vanished">CALL RLY</translation>
+        <translation>CALL RLY</translation>
     </message>
     <message>
+        <location line="+37"/>
         <source>smtp.host</source>
-        <translation type="vanished">smtp.host</translation>
+        <translation>smtp.host</translation>
     </message>
     <message>
+        <location line="+43"/>
         <source>SMTP user</source>
-        <translation type="vanished">Utente SMTP</translation>
+        <translation>Utente SMTP</translation>
     </message>
     <message>
+        <location line="+18"/>
         <source>From email</source>
-        <translation type="vanished">Indirizzo mittente</translation>
+        <translation>Indirizzo mittente</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>SMTP password</source>
-        <translation type="vanished">Password SMTP</translation>
+        <translation>Password SMTP</translation>
     </message>
     <message>
+        <location line="+237"/>
         <source>No mail</source>
-        <translation type="vanished">Nessun messaggio</translation>
+        <translation>Nessun messaggio</translation>
     </message>
     <message>
+        <location line="+168"/>
         <source>Away message</source>
-        <translation type="vanished">Messaggio di assenza</translation>
+        <translation>Messaggio di assenza</translation>
     </message>
     <message>
+        <location line="+21"/>
         <source>Welcome message</source>
-        <translation type="vanished">Messaggio di benvenuto</translation>
+        <translation>Messaggio di benvenuto</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>AUTO REPLY</source>
-        <translation type="vanished">AUTO REPLY</translation>
+        <translation>AUTO REPLY</translation>
     </message>
     <message>
+        <location line="+23"/>
         <source>AUTO AWAY</source>
-        <translation type="vanished">AUTO AWAY</translation>
+        <translation>AUTO AWAY</translation>
     </message>
     <message>
+        <location line="+43"/>
         <source>CALL ID</source>
-        <translation type="vanished">CALL ID</translation>
+        <translation>CALL ID</translation>
     </message>
     <message>
+        <location line="+25"/>
         <source>AUTO DISC</source>
-        <translation type="vanished">AUTO DISC</translation>
+        <translation>AUTO DISC</translation>
     </message>
     <message>
+        <location line="+26"/>
         <source>PING RX</source>
-        <translation type="vanished">PING RX</translation>
+        <translation>PING RX</translation>
     </message>
     <message>
+        <location line="+78"/>
         <source>LH PEEK</source>
-        <translation type="vanished">LH PEEK</translation>
+        <translation>LH PEEK</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>SNR TX</source>
-        <translation type="vanished">SNR TX</translation>
+        <translation>SNR TX</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>VSNR OK</source>
-        <translation type="vanished">VSNR OK</translation>
+        <translation>VSNR OK</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>LC PEEK</source>
-        <translation type="vanished">LC PEEK</translation>
+        <translation>LC PEEK</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>VM PEEK</source>
-        <translation type="vanished">VM PEEK</translation>
+        <translation>VM PEEK</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>VM PARK</source>
-        <translation type="vanished">VM PARK</translation>
+        <translation>VM PARK</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>INFO REQ</source>
-        <translation type="vanished">INFO REQ</translation>
+        <translation>INFO REQ</translation>
     </message>
     <message>
+        <location line="+232"/>
         <source>Comment</source>
-        <translation type="vanished">Commento</translation>
+        <translation>Commento</translation>
     </message>
     <message>
+        <location line="+132"/>
         <source>No contacts</source>
-        <translation type="vanished">Nessun contatto</translation>
+        <translation>Nessun contatto</translation>
     </message>
     <message>
+        <location line="+160"/>
         <source>Shared cluster JSON path</source>
-        <translation type="vanished">Percorso del JSON condiviso del cluster</translation>
+        <translation>Percorso del JSON condiviso del cluster</translation>
     </message>
     <message>
+        <location line="+142"/>
         <source>Paste cluster JSON here, or press EXPORT</source>
-        <translation type="vanished">Incolla qui il JSON del cluster, oppure premi EXPORT</translation>
+        <translation>Incolla qui il JSON del cluster, oppure premi EXPORT</translation>
     </message>
     <message>
+        <location line="+126"/>
         <source>No cluster last-heard records</source>
-        <translation type="vanished">Nessun ascolto registrato dal cluster</translation>
+        <translation>Nessun ascolto registrato dal cluster</translation>
     </message>
     <message>
+        <location line="+144"/>
         <source>not tracked</source>
-        <translation type="vanished">non tracciato</translation>
+        <translation>non tracciato</translation>
     </message>
     <message>
+        <location line="+117"/>
         <source>No path reports</source>
-        <translation type="vanished">Nessun rapporto di percorso</translation>
+        <translation>Nessun rapporto di percorso</translation>
     </message>
     <message>
+        <location line="+166"/>
         <source>Select an export</source>
-        <translation type="vanished">Scegli un&apos;esportazione</translation>
+        <translation>Scegli un&apos;esportazione</translation>
     </message>
     <message>
+        <location line="+140"/>
         <source>Run audit</source>
-        <translation type="vanished">Esegui la verifica</translation>
+        <translation>Esegui la verifica</translation>
     </message>
     <message>
+        <location line="+445"/>
         <source>description</source>
-        <translation type="vanished">descrizione</translation>
+        <translation>descrizione</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>template text with &lt;MYCALL&gt;, &lt;CALL&gt;, &lt;QTH&gt;...</source>
-        <translation type="vanished">template text with &lt;MYCALL&gt;, &lt;CALL&gt;, &lt;QTH&gt;...</translation>
+        <translation>template text with &lt;MYCALL&gt;, &lt;CALL&gt;, &lt;QTH&gt;...</translation>
     </message>
     <message>
+        <location line="+107"/>
         <source>No custom presets</source>
-        <translation type="vanished">Nessun preimpostato personale</translation>
+        <translation>Nessun preimpostato personale</translation>
     </message>
     <message>
+        <location line="+32"/>
         <source>county/state</source>
-        <translation type="vanished">provincia/regione</translation>
+        <translation>provincia/regione</translation>
     </message>
     <message>
+        <location line="+27"/>
         <source>weather line optional</source>
-        <translation type="vanished">riga meteo facoltativa</translation>
+        <translation>riga meteo facoltativa</translation>
     </message>
     <message>
+        <location line="+28"/>
         <source>Wednesday check-in: MAIL sets address, subject and body; CHAT inserts only the body.</source>
-        <translation type="vanished">Check-in del mercoledì: MAIL imposta indirizzo, oggetto e corpo; CHAT inserisce solo il corpo.</translation>
+        <translation>Check-in del mercoledì: MAIL imposta indirizzo, oggetto e corpo; CHAT inserisce solo il corpo.</translation>
     </message>
     <message>
+        <location line="+32"/>
         <source>14105000|20m|Main, 7105000|40m|Main</source>
-        <translation type="vanished">14105000|20m|Main, 7105000|40m|Main</translation>
+        <translation>14105000|20m|Main, 7105000|40m|Main</translation>
     </message>
     <message>
+        <location line="+38"/>
         <source>0000-2359|CALLING|14105000|20m main|CQ</source>
-        <translation type="vanished">0000-2359|CALLING|14105000|20m main|CQ</translation>
+        <translation>0000-2359|CALLING|14105000|20m main|CQ</translation>
     </message>
     <message>
+        <location line="+88"/>
         <source>14101250-14108750|20m, 7101250-7108750|40m</source>
-        <translation type="vanished">14101250-14108750|20m, 7101250-7108750|40m</translation>
+        <translation>14101250-14108750|20m, 7101250-7108750|40m</translation>
     </message>
     <message>
+        <location line="+29"/>
         <source>FREQ stores calling-frequency presets, UTC schedule windows and allowed QSY ranges. Schedule actions CALLING/CQ/BEACON/EMCOMM/QUIET protect the active frequency; DATA marks a data window. CAT auto-QSY is not performed.</source>
-        <translation type="vanished">FREQ conserva le frequenze di chiamata preimpostate, le finestre orarie in UTC e gli intervalli di QSY consentiti. Le azioni CALLING/CQ/BEACON/EMCOMM/QUIET proteggono la frequenza attiva; DATA segna una finestra dati. Il QSY automatico via CAT non viene eseguito.</translation>
+        <translation>FREQ conserva le frequenze di chiamata preimpostate, le finestre orarie in UTC e gli intervalli di QSY consentiti. Le azioni CALLING/CQ/BEACON/EMCOMM/QUIET proteggono la frequenza attiva; DATA segna una finestra dati. Il QSY automatico via CAT non viene eseguito.</translation>
     </message>
     <message>
+        <location line="+144"/>
         <source>CALL1, CALL2, Z6/TEST</source>
-        <translation type="vanished">CALL1, CALL2, Z6/TEST</translation>
+        <translation>CALL1, CALL2, Z6/TEST</translation>
     </message>
     <message>
+        <location line="+35"/>
         <source>Add callsign</source>
-        <translation type="vanished">Aggiungi nominativo</translation>
+        <translation>Aggiungi nominativo</translation>
     </message>
     <message>
+        <location line="+21"/>
         <source>Blocked calls cannot start a session, are hidden from last-heard, and their beacon, CQ, ping and broadcast traffic is ignored locally.</source>
-        <translation type="vanished">I nominativi bloccati non possono aprire una sessione, non compaiono fra gli ultimi ascoltati, e il loro traffico di faro, CQ, ping e diffusione viene ignorato in locale.</translation>
+        <translation>I nominativi bloccati non possono aprire una sessione, non compaiono fra gli ultimi ascoltati, e il loro traffico di faro, CQ, ping e diffusione viene ignorato in locale.</translation>
     </message>
     <message>
+        <location line="+69"/>
         <source>No blocked calls</source>
-        <translation type="vanished">Nessun nominativo bloccato</translation>
+        <translation>Nessun nominativo bloccato</translation>
     </message>
     <message>
+        <location line="+21"/>
         <source>SATELLITE HALF-DUPLEX</source>
-        <translation type="vanished">SATELLITE HALF-DUPLEX</translation>
+        <translation>SATELLITE HALF-DUPLEX</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Enable independent RX/TX VFOs</source>
-        <translation type="vanished">Attiva VFO indipendenti per RX e TX</translation>
+        <translation>Attiva VFO indipendenti per RX e TX</translation>
     </message>
     <message>
+        <location line="+15"/>
         <source>RX MHz</source>
-        <translation type="vanished">RX MHz</translation>
+        <translation>RX MHz</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>downlink dial MHz</source>
-        <translation type="vanished">frequenza di discesa in MHz</translation>
+        <translation>frequenza di discesa in MHz</translation>
     </message>
     <message>
+        <location line="+28"/>
         <source>TX MHz</source>
-        <translation type="vanished">TX MHz</translation>
+        <translation>TX MHz</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>uplink dial MHz</source>
-        <translation type="vanished">frequenza di salita in MHz</translation>
+        <translation>frequenza di salita in MHz</translation>
     </message>
     <message>
+        <location line="+14"/>
         <source>SETTLE ms</source>
-        <translation type="vanished">SETTLE ms</translation>
+        <translation>SETTLE ms</translation>
     </message>
     <message>
+        <location line="+28"/>
         <source>READ RX/TX FROM RIG</source>
-        <translation type="vanished">LEGGI RX/TX DALLA RADIO</translation>
+        <translation>LEGGI RX/TX DALLA RADIO</translation>
     </message>
     <message>
+        <location line="+63"/>
         <source>Use the normal FT2-Link ARM control for every RF transmission. This mode is half-duplex: receive audio pauses on TX, PTT is released before the RX VFO is restored, and a manual stop follows the same safe return path.</source>
-        <translation type="vanished">Usa il normale comando ARM di FT2-Link per ogni trasmissione. Questo modo è half-duplex: l&apos;audio di ricezione si ferma in trasmissione, il PTT viene rilasciato prima di ripristinare il VFO di ricezione, e anche l&apos;arresto manuale segue lo stesso percorso di rientro sicuro.</translation>
+        <translation>Usa il normale comando ARM di FT2-Link per ogni trasmissione. Questo modo è half-duplex: l&apos;audio di ricezione si ferma in trasmissione, il PTT viene rilasciato prima di ripristinare il VFO di ricezione, e anche l&apos;arresto manuale segue lo stesso percorso di rientro sicuro.</translation>
     </message>
     <message>
+        <location line="+21"/>
         <source>QO-100 / cross-band setup</source>
-        <translation type="vanished">QO-100 / cross-band setup</translation>
+        <translation>QO-100 / cross-band setup</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Enter the actual CAT dial frequencies used by your station or transverter. No fixed QO-100 defaults are applied: radio IF plans and transverter offsets differ.</source>
-        <translation type="vanished">Inserisci le frequenze CAT reali usate dalla tua stazione o dal transverter. Non viene applicato alcun valore fisso per QO-100: i piani di media frequenza e gli scostamenti dei transverter cambiano da caso a caso.</translation>
+        <translation>Inserisci le frequenze CAT reali usate dalla tua stazione o dal transverter. Non viene applicato alcun valore fisso per QO-100: i piani di media frequenza e gli scostamenti dei transverter cambiano da caso a caso.</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>The normal FT audio-offset split is deliberately bypassed for this mode, so a cross-band TX cannot reuse or move the FT2-Link chat/session view.</source>
-        <translation type="vanished">In questo modo lo split per scostamento audio dell&apos;FT viene deliberatamente saltato, così una trasmissione cross-band non può riusare né spostare la vista chat/sessione di FT2-Link.</translation>
+        <translation>In questo modo lo split per scostamento audio dell&apos;FT viene deliberatamente saltato, così una trasmissione cross-band non può riusare né spostare la vista chat/sessione di FT2-Link.</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>CAT diagnostics are recorded with the [FT2SAT] tag. Start with low power and verify the rig VFOs before on-air use.</source>
-        <translation type="vanished">La diagnostica CAT viene registrata con l&apos;etichetta [FT2SAT]. Parti con potenza bassa e verifica i VFO della radio prima di andare in aria.</translation>
+        <translation>La diagnostica CAT viene registrata con l&apos;etichetta [FT2SAT]. Parti con potenza bassa e verifica i VFO della radio prima di andare in aria.</translation>
     </message>
 </context>
 <context>
@@ -7250,96 +8536,115 @@ Errore: %2</translation>
 <context>
     <name>FilterPanel</name>
     <message>
+        <location filename="../qml/decodium/rtty/FilterPanel.qml" line="+48"/>
         <source>FILTERS</source>
-        <translation type="vanished">FILTRI</translation>
+        <translation>FILTRI</translation>
     </message>
     <message>
+        <location line="+16"/>
         <source>Bandpass around the two tones: throws away
 everything outside before the detector.</source>
-        <translation type="vanished">Passabanda attorno ai due toni: butta via tutto
+        <translation>Passabanda attorno ai due toni: butta via tutto
 cio&apos; che sta fuori prima del rivelatore.</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Removes one frequency. Ctrl+click the waterfall
 to drop it on the carrier that is in the way.</source>
-        <translation type="vanished">Toglie una frequenza. Ctrl+clic sul waterfall per
+        <translation>Toglie una frequenza. Ctrl+clic sul waterfall per
 posarla sulla portante che da&apos; fastidio.</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Adaptive canceller: removes steady carriers by
 itself. On weak signals it can eat the RTTY as
 well — try it and listen.</source>
-        <translation type="vanished">Cancellatore adattivo: toglie da solo le portanti
+        <translation>Cancellatore adattivo: toglie da solo le portanti
 stabili. Sui segnali deboli puo&apos; mangiarsi anche
 l&apos;RTTY: provalo e ascolta.</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>BPF width</source>
-        <translation type="vanished">Largh. BPF</translation>
+        <translation>Largh. BPF</translation>
     </message>
     <message>
+        <location line="+20"/>
         <source>FRAMING</source>
-        <translation type="vanished">TRAMA</translation>
+        <translation>TRAMA</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Stop</source>
-        <translation type="vanished">Stop</translation>
+        <translation>Stop</translation>
     </message>
     <message>
+        <location line="+27"/>
         <source>Bits</source>
-        <translation type="vanished">Bit</translation>
+        <translation>Bit</translation>
     </message>
     <message>
+        <location line="+29"/>
         <source>Par.</source>
-        <translation type="vanished">Par.</translation>
+        <translation>Par.</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>none</source>
-        <translation type="vanished">nessuna</translation>
+        <translation>nessuna</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>even</source>
-        <translation type="vanished">pari</translation>
+        <translation>pari</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>odd</source>
-        <translation type="vanished">dispari</translation>
+        <translation>dispari</translation>
     </message>
     <message>
+        <location line="+27"/>
         <source>Figures set: US has BELL and apostrophe where
 ITA2 swaps the two.</source>
-        <translation type="vanished">Tabella delle cifre: la US ha BELL e apostrofo dove
+        <translation>Tabella delle cifre: la US ha BELL e apostrofo dove
 la ITA2 li scambia.</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Prints characters whose stop bit read wrong too:
 a few more characters on distorted signals, some
 lines of rubbish in exchange.</source>
-        <translation type="vanished">Stampa anche i caratteri col bit di stop letto male:
+        <translation>Stampa anche i caratteri col bit di stop letto male:
 qualche carattere in piu&apos; sui segnali distorti, in
 cambio di qualche riga di spazzatura.</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>TRANSMIT</source>
-        <translation type="vanished">TRASMISSIONE</translation>
+        <translation>TRASMISSIONE</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Fill</source>
-        <translation type="vanished">Riempi</translation>
+        <translation>Riempi</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>off</source>
-        <translation type="vanished">spento</translation>
+        <translation>spento</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>What to send between characters while you
 type live.</source>
-        <translation type="vanished">Cosa mandare fra un carattere e l&apos;altro mentre
+        <translation>Cosa mandare fra un carattere e l&apos;altro mentre
 scrivi dal vivo.</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Character wait</source>
-        <translation type="vanished">Attesa car.</translation>
+        <translation>Attesa car.</translation>
     </message>
 </context>
 <context>
@@ -7618,32 +8923,39 @@ scrivi dal vivo.</translation>
 <context>
     <name>FullSpectrumPanel</name>
     <message>
+        <location filename="../qml/decodium/components/FullSpectrumPanel.qml" line="+468"/>
         <source>No decodes</source>
-        <translation type="vanished">Nessuna decodifica</translation>
+        <translation>Nessuna decodifica</translation>
     </message>
     <message>
+        <location line="-184"/>
         <source>UTC</source>
-        <translation type="vanished">UTC</translation>
+        <translation>UTC</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>dB</source>
-        <translation type="vanished">dB</translation>
+        <translation>dB</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>DT</source>
-        <translation type="vanished">DT</translation>
+        <translation>DT</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>FREQ</source>
-        <translation type="vanished">FREQ</translation>
+        <translation>FREQ</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>MESSAGE</source>
-        <translation type="vanished">MESSAGGIO</translation>
+        <translation>MESSAGGIO</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>DXCC</source>
-        <translation type="vanished">DXCC</translation>
+        <translation>DXCC</translation>
     </message>
 </context>
 <context>
@@ -7765,7 +9077,7 @@ scrivi dal vivo.</translation>
         <translation>Errore di inizializzazione di Hamlib</translation>
     </message>
     <message>
-        <location line="+181"/>
+        <location line="+194"/>
         <source>Hamlib settings file error: %1 at character offset %2</source>
         <translation>Errore del file delle impostazioni di Hamlib:%1 all&apos;offset del carattere %2</translation>
     </message>
@@ -7780,7 +9092,7 @@ scrivi dal vivo.</translation>
         <translation>Errore del file delle impostazioni di Hamlib: config deve essere un oggetto JSON</translation>
     </message>
     <message>
-        <location line="-89"/>
+        <location line="-102"/>
         <source>Unsupported CAT type</source>
         <translation>Tipo CAT non supportato</translation>
     </message>
@@ -7790,7 +9102,7 @@ scrivi dal vivo.</translation>
         <translation>Errore Hamlib: %1 mentre %2</translation>
     </message>
     <message>
-        <location line="+422"/>
+        <location line="+435"/>
         <source>opening connection to rig</source>
         <translation>apertura connessione al rig</translation>
     </message>
@@ -7800,7 +9112,7 @@ scrivi dal vivo.</translation>
         <translation>Rig non pronto — caps nullo dopo l&apos;apertura (nessuna risposta dalla radio?)</translation>
     </message>
     <message>
-        <location line="+162"/>
+        <location line="+224"/>
         <source>getting current frequency</source>
         <translation>ottenere la frequenza corrente</translation>
     </message>
@@ -7817,17 +9129,17 @@ scrivi dal vivo.</translation>
     </message>
     <message>
         <location line="-12"/>
-        <location line="+794"/>
+        <location line="+826"/>
         <source>getting other VFO frequency</source>
         <translation>ottenere altra frequenza VFO</translation>
     </message>
     <message>
-        <location line="-790"/>
+        <location line="-822"/>
         <source>getting other VFO mode</source>
         <translation>ottenere altra modalità VFO</translation>
     </message>
     <message>
-        <location line="+285"/>
+        <location line="+295"/>
         <source>setting TX VFO mode</source>
         <translation>impostazione modo VFO in TX</translation>
     </message>
@@ -7837,8 +9149,8 @@ scrivi dal vivo.</translation>
         <translation>impostazione frequenza TX/split</translation>
     </message>
     <message>
-        <location line="-919"/>
-        <location line="+629"/>
+        <location line="-1004"/>
+        <location line="+704"/>
         <source>setting current VFO</source>
         <translation>impostazione del VFO corrente</translation>
     </message>
@@ -7853,32 +9165,34 @@ scrivi dal vivo.</translation>
         <translation>ottenere il modo</translation>
     </message>
     <message>
-        <location line="-654"/>
-        <location line="+671"/>
-        <location line="+657"/>
+        <location line="-729"/>
+        <location line="+746"/>
+        <location line="+689"/>
         <source>getting current VFO</source>
         <translation>ottenere il VFO corrente</translation>
     </message>
     <message>
-        <location line="-600"/>
+        <location line="-811"/>
+        <location line="+179"/>
         <location line="+8"/>
         <location line="+14"/>
-        <location line="+642"/>
+        <location line="+674"/>
         <source>getting current VFO frequency</source>
         <translation>ottenere la frequenza del VFO corrente</translation>
     </message>
     <message>
-        <location line="-658"/>
+        <location line="-690"/>
         <location line="+15"/>
         <location line="+7"/>
-        <location line="+107"/>
+        <location line="+117"/>
         <location line="+34"/>
         <location line="+84"/>
         <source>setting frequency</source>
         <translation>impostazione della frequenza</translation>
     </message>
     <message>
-        <location line="-94"/>
+        <location line="-434"/>
+        <location line="+340"/>
         <location line="+101"/>
         <location line="+83"/>
         <location line="+13"/>
@@ -7938,7 +9252,7 @@ scrivi dal vivo.</translation>
         <translation> (scrittura tollerata)</translation>
     </message>
     <message>
-        <location line="+127"/>
+        <location line="+149"/>
         <source>getting RX VFO frequency</source>
         <translation>lettura frequenza VFO RX</translation>
     </message>
@@ -7948,7 +9262,7 @@ scrivi dal vivo.</translation>
         <translation>ottenere lo stato PTT</translation>
     </message>
     <message>
-        <location line="+550"/>
+        <location line="+572"/>
         <source>setting PTT on</source>
         <translation>attivare PTT</translation>
     </message>
@@ -7985,12 +9299,14 @@ scrivi dal vivo.</translation>
     <message>
         <location line="+9"/>
         <location line="+19"/>
-        <location line="+13"/>
+        <location line="+18"/>
+        <location line="+18"/>
+        <location line="+17"/>
         <source>Radio disconnected</source>
         <translation>Radio disconnessa</translation>
     </message>
     <message>
-        <location line="-31"/>
+        <location line="-71"/>
         <source>Cannot start ATU tune while transmitting</source>
         <translation>Impossibile avviare la sintonia ATU durante la trasmissione</translation>
     </message>
@@ -8001,16 +9317,31 @@ scrivi dal vivo.</translation>
     </message>
     <message>
         <location line="+17"/>
+        <source>Cannot disable the ATU while transmitting</source>
+        <translation>Impossibile disattivare l&apos;ATU durante la trasmissione</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>This radio does not expose ATU enable/disable through Hamlib</source>
+        <translation>Questa radio non espone l&apos;attivazione/disattivazione dell&apos;ATU tramite Hamlib</translation>
+    </message>
+    <message>
+        <location line="+17"/>
+        <source>This radio does not expose ATU state through Hamlib</source>
+        <translation>Questa radio non espone lo stato dell&apos;ATU tramite Hamlib</translation>
+    </message>
+    <message>
+        <location line="+17"/>
         <source>Cannot power on while transmitting</source>
         <translation>Impossibile accendere durante la trasmissione</translation>
     </message>
     <message>
-        <location line="+13"/>
+        <location line="+17"/>
         <source>Cannot power off while transmitting</source>
         <translation>Impossibile spegnere durante la trasmissione</translation>
     </message>
     <message>
-        <location line="-2178"/>
+        <location line="-2347"/>
         <source>setting a configuration item</source>
         <translation>impostazione di un elemento di configurazione</translation>
     </message>
@@ -8024,27 +9355,32 @@ scrivi dal vivo.</translation>
 <context>
     <name>HeaderBar</name>
     <message>
+        <location filename="../qml/decodium/rtty/HeaderBar.qml" line="+69"/>
         <source>Audio only — no CAT</source>
-        <translation type="vanished">Solo audio — senza CAT</translation>
+        <translation>Solo audio — senza CAT</translation>
     </message>
     <message>
+        <location line="-28"/>
         <source>RTTY</source>
-        <translation type="vanished">RTTY</translation>
+        <translation>RTTY</translation>
     </message>
     <message>
+        <location line="+105"/>
         <source>Setup</source>
-        <translation type="vanished">Impostazioni</translation>
+        <translation>Impostazioni</translation>
     </message>
 </context>
 <context>
     <name>HistoryStrip</name>
     <message>
+        <location filename="../qml/decodium/rotor/HistoryStrip.qml" line="+7"/>
         <source>POSITION TREND</source>
-        <translation type="vanished">ANDAMENTO POSIZIONE</translation>
+        <translation>ANDAMENTO POSIZIONE</translation>
     </message>
     <message>
+        <location line="+74"/>
         <source>waiting for samples…</source>
-        <translation type="vanished">in attesa di campioni…</translation>
+        <translation>in attesa di campioni…</translation>
     </message>
 </context>
 <context>
@@ -8079,118 +9415,146 @@ scrivi dal vivo.</translation>
 <context>
     <name>InfoDialog</name>
     <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="+713"/>
         <source>Open Settings</source>
-        <translation type="vanished">Apri impostazioni</translation>
+        <translation>Apri impostazioni</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Open Log</source>
-        <translation type="vanished">Apri log</translation>
+        <translation>Apri log</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Open Macros</source>
-        <translation type="vanished">Apri macro</translation>
+        <translation>Apri macro</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Reset windows Layout</source>
-        <translation type="vanished">Ripristina layout finestre</translation>
+        <translation>Ripristina layout finestre</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Compact Full Spectrum</source>
-        <translation type="vanished">Full Spectrum compatto</translation>
+        <translation>Full Spectrum compatto</translation>
     </message>
     <message>
+        <location line="-635"/>
         <source>DECODIUM INFO</source>
-        <translation type="vanished">INFORMAZIONI SU DECODIUM</translation>
+        <translation>INFORMAZIONI SU DECODIUM</translation>
     </message>
     <message>
+        <location line="+135"/>
         <source>4.0 Core Gallager</source>
-        <translation type="vanished">4.0 Core Gallager</translation>
+        <translation>4.0 Core Gallager</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Advanced Digital Mode Decoder for Amateur Radio
 FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</source>
-        <translation type="vanished">Decodificatore avanzato per i modi digitali radioamatoriali
+        <translation>Decodificatore avanzato per i modi digitali radioamatoriali
 FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
     </message>
     <message>
+        <location line="+33"/>
         <source>Decodium by IU8LMC</source>
-        <translation type="vanished">Decodium by IU8LMC</translation>
+        <translation>Decodium by IU8LMC</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Qt6 Modern UI Port by IU8LMC</source>
-        <translation type="vanished">Interfaccia moderna in Qt6 di IU8LMC</translation>
+        <translation>Interfaccia moderna in Qt6 di IU8LMC</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Developed by Salvatore Raccampo 9H1SR</source>
-        <translation type="vanished">Sviluppato da Salvatore Raccampo 9H1SR</translation>
+        <translation>Sviluppato da Salvatore Raccampo 9H1SR</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>WSJT-X Algorithms by K1JT (Joe Taylor)</source>
-        <translation type="vanished">Algoritmi WSJT-X di K1JT (Joe Taylor)</translation>
+        <translation>Algoritmi WSJT-X di K1JT (Joe Taylor)</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Copyright 2024-2026 - Open Source GPL</source>
-        <translation type="vanished">Copyright 2024-2026 - Open source GPL</translation>
+        <translation>Copyright 2024-2026 - Open source GPL</translation>
     </message>
     <message>
+        <location line="+24"/>
         <source>DECODIUM HISTORY</source>
-        <translation type="vanished">STORIA DI DECODIUM</translation>
+        <translation>STORIA DI DECODIUM</translation>
     </message>
     <message>
+        <location line="+96"/>
         <source>CONTACTS &amp; FEEDBACK</source>
-        <translation type="vanished">CONTATTI E SEGNALAZIONI</translation>
+        <translation>CONTATTI E SEGNALAZIONI</translation>
     </message>
     <message>
+        <location line="+22"/>
         <source>Developer: IU8LMC</source>
-        <translation type="vanished">Developer: IU8LMC</translation>
+        <translation>Developer: IU8LMC</translation>
     </message>
     <message>
+        <location line="+15"/>
         <source>iu8lmc@gmail.com</source>
-        <translation type="vanished">iu8lmc@gmail.com</translation>
+        <translation>iu8lmc@gmail.com</translation>
     </message>
     <message>
+        <location line="+18"/>
         <source>Developer: 9H1SR</source>
-        <translation type="vanished">Developer: 9H1SR</translation>
+        <translation>Developer: 9H1SR</translation>
     </message>
     <message>
+        <location line="+15"/>
         <source>9h1sr@gmail.com</source>
-        <translation type="vanished">9h1sr@gmail.com</translation>
+        <translation>9h1sr@gmail.com</translation>
     </message>
     <message>
+        <location line="+37"/>
         <source>SEND FEEDBACK</source>
-        <translation type="vanished">INVIA UNA SEGNALAZIONE</translation>
+        <translation>INVIA UNA SEGNALAZIONE</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>Subject</source>
-        <translation type="vanished">Oggetto</translation>
+        <translation>Oggetto</translation>
     </message>
     <message>
+        <location line="+27"/>
         <source>Message, suggestion, or bug report</source>
-        <translation type="vanished">Messaggio, suggerimento o segnalazione di un difetto</translation>
+        <translation>Messaggio, suggerimento o segnalazione di un difetto</translation>
     </message>
     <message>
+        <location line="+26"/>
         <source>Send Feedback</source>
-        <translation type="vanished">Invia</translation>
+        <translation>Invia</translation>
     </message>
     <message>
+        <location line="+47"/>
         <source>QUICK GUIDE</source>
-        <translation type="vanished">GUIDA RAPIDA</translation>
+        <translation>GUIDA RAPIDA</translation>
     </message>
     <message>
+        <location line="+24"/>
         <source>QUICK START</source>
-        <translation type="vanished">AVVIO RAPIDO</translation>
+        <translation>AVVIO RAPIDO</translation>
     </message>
     <message>
+        <location line="+43"/>
         <source>KEYBOARD SHORTCUTS</source>
-        <translation type="vanished">SCORCIATOIE DA TASTIERA</translation>
+        <translation>SCORCIATOIE DA TASTIERA</translation>
     </message>
     <message>
+        <location line="+75"/>
         <source>OPERATING TIPS</source>
-        <translation type="vanished">CONSIGLI OPERATIVI</translation>
+        <translation>CONSIGLI OPERATIVI</translation>
     </message>
     <message>
+        <location line="+41"/>
         <source>USEFUL LINKS</source>
-        <translation type="vanished">COLLEGAMENTI UTILI</translation>
+        <translation>COLLEGAMENTI UTILI</translation>
     </message>
 </context>
 <context>
@@ -8256,801 +9620,1005 @@ FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
 <context>
     <name>JttyWindow</name>
     <message>
+        <location filename="../qml/decodium/components/JttyWindow.qml" line="+38"/>
         <source>JTTY - keyboard mode</source>
-        <translation type="vanished">JTTY - modo da tastiera</translation>
+        <translation>JTTY - modo da tastiera</translation>
     </message>
     <message>
+        <location line="+176"/>
         <source>TX</source>
-        <translation type="vanished">TX</translation>
+        <translation>TX</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>RX</source>
-        <translation type="vanished">RX</translation>
+        <translation>RX</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>JTTY OFF</source>
-        <translation type="vanished">JTTY SPENTO</translation>
+        <translation>JTTY SPENTO</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>RX %1 Hz</source>
-        <translation type="vanished">RX %1 Hz</translation>
+        <translation>RX %1 Hz</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>TX %1 Hz</source>
-        <translation type="vanished">TX %1 Hz</translation>
+        <translation>TX %1 Hz</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>TX=RX</source>
-        <translation type="vanished">TX=RX</translation>
+        <translation>TX=RX</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>FTol</source>
-        <translation type="vanished">FTol</translation>
+        <translation>FTol</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>DX</source>
-        <translation type="vanished">DX</translation>
+        <translation>DX</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>lower case</source>
-        <translation type="vanished">minuscole</translation>
+        <translation>minuscole</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Clear</source>
-        <translation type="vanished">Pulisci</translation>
+        <translation>Pulisci</translation>
     </message>
     <message>
+        <location line="+16"/>
         <source>QSO FREQUENCY  (RX %1 ± %2 Hz)</source>
-        <translation type="vanished">FREQUENZA QSO  (RX %1 ± %2 Hz)</translation>
+        <translation>FREQUENZA QSO  (RX %1 ± %2 Hz)</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>ALL FREQUENCIES  (click a line: RX there and pick the call)</source>
-        <translation type="vanished">TUTTE LE FREQUENZE  (clic su una riga: RX lì e prende il nominativo)</translation>
+        <translation>TUTTE LE FREQUENZE  (clic su una riga: RX lì e prende il nominativo)</translation>
     </message>
     <message>
+        <location line="+76"/>
         <source>Click to send, right click to edit</source>
-        <translation type="vanished">Clic per trasmettere, tasto destro per modificare</translation>
+        <translation>Clic per trasmettere, tasto destro per modificare</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Contest</source>
-        <translation type="vanished">Contest</translation>
+        <translation>Contest</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>None</source>
-        <translation type="vanished">Nessuno</translation>
+        <translation>Nessuno</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Field Day</source>
-        <translation type="vanished">Field Day</translation>
+        <translation>Field Day</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>RTTY Roundup</source>
-        <translation type="vanished">RTTY Roundup</translation>
+        <translation>RTTY Roundup</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Exchange</source>
-        <translation type="vanished">Scambio</translation>
+        <translation>Scambio</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Serial</source>
-        <translation type="vanished">Progressivo</translation>
+        <translation>Progressivo</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>log on &quot;TU&quot;</source>
-        <translation type="vanished">registra al &quot;TU&quot;</translation>
+        <translation>registra al &quot;TU&quot;</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Log QSO</source>
-        <translation type="vanished">Registra QSO</translation>
+        <translation>Registra QSO</translation>
     </message>
     <message>
+        <location line="+40"/>
         <source>Type a message and press Enter (Esc stops the transmission)</source>
-        <translation type="vanished">Scrivi un messaggio e premi Invio (Esc ferma la trasmissione)</translation>
+        <translation>Scrivi un messaggio e premi Invio (Esc ferma la trasmissione)</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Send</source>
-        <translation type="vanished">Trasmetti</translation>
+        <translation>Trasmetti</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Stop TX</source>
-        <translation type="vanished">Ferma TX</translation>
+        <translation>Ferma TX</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>Sending: %1</source>
-        <translation type="vanished">In trasmissione: %1</translation>
+        <translation>In trasmissione: %1</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Select JTTY in the mode selector to receive and transmit.</source>
-        <translation type="vanished">Scegli JTTY nel selettore dei modi per ricevere e trasmettere.</translation>
+        <translation>Scegli JTTY nel selettore dei modi per ricevere e trasmettere.</translation>
     </message>
     <message>
+        <location line="+21"/>
         <source>F%1 template</source>
-        <translation type="vanished">Modello F%1</translation>
+        <translation>Modello F%1</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>%M my call, %H and %Q the DX call, %E exchange, %G grid.
 The default templates are sent as compact native frames.</source>
-        <translation type="vanished">%M il mio nominativo, %H e %Q quello del DX, %E lo scambio, %G il locatore.
+        <translation>%M il mio nominativo, %H e %Q quello del DX, %E lo scambio, %G il locatore.
 I modelli predefiniti partono come frame nativi compatti.</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>Save</source>
-        <translation type="vanished">Salva</translation>
+        <translation>Salva</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Defaults (all)</source>
-        <translation type="vanished">Predefiniti (tutti)</translation>
+        <translation>Predefiniti (tutti)</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Cancel</source>
-        <translation type="vanished">Annulla</translation>
+        <translation>Annulla</translation>
     </message>
 </context>
 <context>
     <name>LiveMapPanel</name>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="+3569"/>
         <source>No feedback available</source>
-        <translation type="vanished">Feedback non disponibile</translation>
+        <translation>Feedback non disponibile</translation>
     </message>
     <message>
+        <location line="-1108"/>
         <source>Stale cache · updating</source>
-        <translation type="vanished">Cache obsoleta · aggiornamento in corso</translation>
+        <translation>Cache obsoleta · aggiornamento in corso</translation>
     </message>
     <message>
+        <location line="-2"/>
         <source>Fallback in use: %1</source>
-        <translation type="vanished">Fallback attivo: %1</translation>
+        <translation>Fallback attivo: %1</translation>
     </message>
     <message>
+        <location line="-39"/>
         <source>Local atlas, OpenStreetMap/OpenTopoMap, GEBCO bathymetry, NASA GIBS and MapTiler. If a provider fails, the configured fallback is tried.</source>
-        <translation type="vanished">Atlas locale, OpenStreetMap/OpenTopoMap, GEBCO bathymetry, NASA GIBS e MapTiler. Se un provider fallisce viene provato il fallback configurato.</translation>
+        <translation>Atlas locale, OpenStreetMap/OpenTopoMap, GEBCO bathymetry, NASA GIBS e MapTiler. Se un provider fallisce viene provato il fallback configurato.</translation>
     </message>
     <message>
+        <location line="-921"/>
         <source>Validity not declared by the provider</source>
-        <translation type="vanished">Validità non dichiarata dal provider</translation>
+        <translation>Validità non dichiarata dal provider</translation>
     </message>
     <message>
+        <location line="-592"/>
         <source>Zoom out</source>
-        <translation type="vanished">Zoom indietro</translation>
+        <translation>Zoom indietro</translation>
     </message>
     <message>
+        <location line="+30"/>
         <source>Zoom in</source>
-        <translation type="vanished">Zoom avanti</translation>
+        <translation>Zoom avanti</translation>
     </message>
     <message>
+        <location line="+33"/>
         <source>Reset view (auto-fit)</source>
-        <translation type="vanished">Ripristina vista (auto-fit)</translation>
+        <translation>Ripristina vista (auto-fit)</translation>
     </message>
     <message>
+        <location line="+42"/>
         <source>Toggle day/night greyline overlay</source>
-        <translation type="vanished">Mostra/nascondi overlay greyline giorno/notte</translation>
+        <translation>Mostra/nascondi overlay greyline giorno/notte</translation>
     </message>
     <message>
+        <location line="+52"/>
         <source>Dock</source>
-        <translation type="vanished">Aggancia</translation>
+        <translation>Aggancia</translation>
     </message>
     <message>
         <source>Detach</source>
         <translation type="vanished">Stacca</translation>
     </message>
     <message>
+        <location line="+15"/>
         <source>Dock Live Map</source>
-        <translation type="vanished">Aggancia Live Map</translation>
+        <translation>Aggancia Live Map</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Detach Live Map</source>
-        <translation type="vanished">Sgancia Live Map</translation>
+        <translation>Sgancia Live Map</translation>
     </message>
     <message>
+        <location line="+679"/>
         <source>  last %1 s ago</source>
-        <translation type="vanished">  %1 s fa</translation>
+        <translation>  %1 s fa</translation>
     </message>
     <message>
+        <location line="+1068"/>
         <source> spots</source>
-        <translation type="vanished"> spot</translation>
+        <translation> spot</translation>
     </message>
     <message>
+        <location line="-589"/>
         <source>%1  %2</source>
-        <translation type="vanished">%1  %2</translation>
+        <translation>%1  %2</translation>
     </message>
     <message>
+        <location line="-307"/>
         <source>%1  %2  %3 dB  %4  |  %5</source>
-        <translation type="vanished">%1  %2  %3 dB  %4  |  %5</translation>
+        <translation>%1  %2  %3 dB  %4  |  %5</translation>
     </message>
     <message>
+        <location line="+3490"/>
         <source>%1  %2 / %3</source>
-        <translation type="vanished">%1  %2 / %3</translation>
+        <translation>%1  %2 / %3</translation>
     </message>
     <message>
+        <location line="-3381"/>
         <source>%1 %2  %3  %4  %5</source>
-        <translation type="vanished">%1 %2  %3  %4  %5</translation>
+        <translation>%1 %2  %3  %4  %5</translation>
     </message>
     <message>
+        <location line="+3348"/>
         <source>%1 / %2 drives the Award and Wanted roster filters</source>
-        <translation type="vanished">%1 / %2 governa i filtri diploma e ricercati dell&apos;elenco</translation>
+        <translation>%1 / %2 governa i filtri diploma e ricercati dell&apos;elenco</translation>
     </message>
     <message>
+        <location line="-3558"/>
         <source>%1 QSO  %2 confirmed  %3 live  %4 PSK</source>
-        <translation type="vanished">%1 QSO  %2 confermati  %3 in diretta  %4 PSK</translation>
+        <translation>%1 QSO  %2 confermati  %3 in diretta  %4 PSK</translation>
     </message>
     <message>
+        <location line="+2938"/>
+        <location line="+31"/>
         <source>%1 QSO · %2 QSL</source>
-        <translation type="vanished">%1 QSO · %2 QSL</translation>
+        <translation>%1 QSO · %2 QSL</translation>
     </message>
     <message>
+        <location line="-3050"/>
         <source>%1 live  %2 PSK  %3</source>
-        <translation type="vanished">%1 in diretta  %2 PSK  %3</translation>
+        <translation>%1 in diretta  %2 PSK  %3</translation>
     </message>
     <message>
+        <location line="+2331"/>
         <source>%1 stations · %2 wanted · %3 new · %4 unconfirmed</source>
-        <translation type="vanished">%1 stazioni · %2 ricercate · %3 nuove · %4 non confermate</translation>
+        <translation>%1 stazioni · %2 ricercate · %3 nuove · %4 non confermate</translation>
     </message>
     <message>
+        <location line="-2338"/>
         <source>%1 worked  %2 confirmed</source>
-        <translation type="vanished">%1 collegati  %2 confermati</translation>
+        <translation>%1 collegati  %2 confermati</translation>
     </message>
     <message>
+        <location line="-571"/>
         <source>%1 worked / %2 confirmed</source>
-        <translation type="vanished">%1 collegati / %2 confermati</translation>
+        <translation>%1 collegati / %2 confermati</translation>
     </message>
     <message>
+        <location line="+2107"/>
         <source>14 MHz</source>
-        <translation type="vanished">14 MHz</translation>
+        <translation>14 MHz</translation>
     </message>
     <message>
+        <location line="+45"/>
         <source>5 MHz</source>
-        <translation type="vanished">5 MHz</translation>
+        <translation>5 MHz</translation>
     </message>
     <message>
+        <location line="-2"/>
         <source>&lt;1 MHz</source>
-        <translation type="vanished">&lt;1 MHz</translation>
+        <translation>&lt;1 MHz</translation>
     </message>
     <message>
+        <location line="-45"/>
         <source>&lt;5 MHz</source>
-        <translation type="vanished">&lt;5 MHz</translation>
+        <translation>&lt;5 MHz</translation>
     </message>
     <message>
+        <location line="+49"/>
         <source>&gt;14 MHz</source>
-        <translation type="vanished">&gt;14 MHz</translation>
+        <translation>&gt;14 MHz</translation>
     </message>
     <message>
+        <location line="-45"/>
         <source>&gt;28 MHz</source>
-        <translation type="vanished">&gt;28 MHz</translation>
+        <translation>&gt;28 MHz</translation>
     </message>
     <message>
+        <location line="-402"/>
         <source>4-char grids</source>
-        <translation type="vanished">griglie a 4 caratteri</translation>
+        <translation>griglie a 4 caratteri</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>6-char grids</source>
-        <translation type="vanished">griglie a 6 caratteri</translation>
+        <translation>griglie a 6 caratteri</translation>
     </message>
     <message>
+        <location line="+1798"/>
         <source>ADIF  %1</source>
-        <translation type="vanished">ADIF  %1</translation>
+        <translation>ADIF  %1</translation>
     </message>
     <message>
+        <location line="+57"/>
         <source>ADIF span  %1 — %2</source>
-        <translation type="vanished">Intervallo ADIF  %1 — %2</translation>
+        <translation>Intervallo ADIF  %1 — %2</translation>
     </message>
     <message>
+        <location line="-2538"/>
         <source>ALERTS</source>
-        <translation type="vanished">AVVISI</translation>
+        <translation>AVVISI</translation>
     </message>
     <message>
+        <location line="-1"/>
         <source>ALERTS %1</source>
-        <translation type="vanished">AVVISI %1</translation>
+        <translation>AVVISI %1</translation>
     </message>
     <message>
+        <location line="+2472"/>
         <source>ALL TIME</source>
-        <translation type="vanished">SEMPRE</translation>
+        <translation>SEMPRE</translation>
     </message>
     <message>
+        <location line="-892"/>
         <source>AWARD</source>
-        <translation type="vanished">DIPLOMA</translation>
+        <translation>DIPLOMA</translation>
     </message>
     <message>
+        <location line="-1587"/>
         <source>AWARDS</source>
-        <translation type="vanished">DIPLOMI</translation>
+        <translation>DIPLOMI</translation>
     </message>
     <message>
+        <location line="+958"/>
         <source>Active  %1</source>
-        <translation type="vanished">Attive  %1</translation>
+        <translation>Attive  %1</translation>
     </message>
     <message>
+        <location line="-745"/>
         <source>BASE MAP</source>
-        <translation type="vanished">MAPPA DI BASE</translation>
+        <translation>MAPPA DI BASE</translation>
     </message>
     <message>
+        <location line="+1922"/>
         <source>Band scope, optional</source>
-        <translation type="vanished">Ambito di banda, facoltativo</translation>
+        <translation>Ambito di banda, facoltativo</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Mode scope, optional</source>
-        <translation type="vanished">Ambito di modo, facoltativo</translation>
+        <translation>Ambito di modo, facoltativo</translation>
     </message>
     <message>
+        <location line="-1777"/>
         <source>Base: %1</source>
-        <translation type="vanished">Base: %1</translation>
+        <translation>Base: %1</translation>
     </message>
     <message>
+        <location line="-3"/>
         <source>Base: &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;</source>
-        <translation type="vanished">Base: &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;</translation>
+        <translation>Base: &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;</translation>
     </message>
     <message>
+        <location line="-1027"/>
+        <location line="+451"/>
+        <location line="+102"/>
+        <location line="+2524"/>
         <source>CALL</source>
-        <translation type="vanished">CALL</translation>
+        <translation>CALL</translation>
     </message>
     <message>
+        <location line="-3337"/>
         <source>COND</source>
-        <translation type="vanished">COND</translation>
+        <translation>COND</translation>
     </message>
     <message>
+        <location line="+200"/>
+        <location line="+605"/>
         <source>CONFIRMED</source>
-        <translation type="vanished">CONFERMATI</translation>
+        <translation>CONFERMATI</translation>
     </message>
     <message>
+        <location line="+2630"/>
         <source>Confirmed</source>
-        <translation type="vanished">Confermati</translation>
+        <translation>Confermati</translation>
     </message>
     <message>
+        <location line="-1557"/>
         <source>Confirmed  %1</source>
-        <translation type="vanished">Confermati  %1</translation>
+        <translation>Confermati  %1</translation>
     </message>
     <message>
+        <location line="+554"/>
         <source>CQ activity</source>
-        <translation type="vanished">Attività CQ</translation>
+        <translation>Attività CQ</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Call pattern, e.g. 9H*</source>
-        <translation type="vanished">Schema di nominativo, es. 9H*</translation>
+        <translation>Schema di nominativo, es. 9H*</translation>
     </message>
     <message>
+        <location line="+26"/>
         <source>Call roster text-filter mode</source>
-        <translation type="vanished">Modo del filtro testo dell&apos;elenco nominativi</translation>
+        <translation>Modo del filtro testo dell&apos;elenco nominativi</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Call, grid, DXCC or message</source>
-        <translation type="vanished">Nominativo, griglia, DXCC o messaggio</translation>
+        <translation>Nominativo, griglia, DXCC o messaggio</translation>
     </message>
     <message>
+        <location line="+965"/>
         <source>Calls</source>
-        <translation type="vanished">Nominativi</translation>
+        <translation>Nominativi</translation>
     </message>
     <message>
+        <location line="-118"/>
         <source>DX</source>
-        <translation type="vanished">DX</translation>
+        <translation>DX</translation>
     </message>
     <message>
+        <location line="-1921"/>
+        <location line="+2040"/>
         <source>DXCC</source>
-        <translation type="vanished">DXCC</translation>
+        <translation>DXCC</translation>
     </message>
     <message>
+        <location line="-1961"/>
         <source>PSK</source>
-        <translation type="vanished">PSK</translation>
+        <translation>PSK</translation>
     </message>
     <message>
+        <location line="+1958"/>
         <source>QSO</source>
-        <translation type="vanished">QSO</translation>
+        <translation>QSO</translation>
     </message>
     <message>
+        <location line="-1571"/>
         <source>QSO  %1</source>
-        <translation type="vanished">QSO  %1</translation>
+        <translation>QSO  %1</translation>
     </message>
     <message>
+        <location line="-1469"/>
         <source>USGS</source>
-        <translation type="vanished">USGS</translation>
+        <translation>USGS</translation>
     </message>
     <message>
+        <location line="+2065"/>
         <source>Regex</source>
-        <translation type="vanished">Regex</translation>
+        <translation>Regex</translation>
     </message>
     <message>
+        <location line="-531"/>
         <source>Center map on the Moon subpoint</source>
-        <translation type="vanished">Centra la mappa sul punto sublunare</translation>
+        <translation>Centra la mappa sul punto sublunare</translation>
     </message>
     <message>
+        <location line="-1336"/>
         <source>Center this grid</source>
-        <translation type="vanished">Centra questa griglia</translation>
+        <translation>Centra questa griglia</translation>
     </message>
     <message>
+        <location line="+2147"/>
         <source>Choose the information shown on each roster row</source>
-        <translation type="vanished">Scegli le informazioni mostrate in ogni riga dell&apos;elenco</translation>
+        <translation>Scegli le informazioni mostrate in ogni riga dell&apos;elenco</translation>
     </message>
     <message>
+        <location line="+397"/>
         <source>Clear all</source>
-        <translation type="vanished">Cancella tutto</translation>
+        <translation>Cancella tutto</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Clear all watched calls and all call or DXCC exclusions</source>
-        <translation type="vanished">Cancella tutti i nominativi sorvegliati e tutte le esclusioni di nominativo o DXCC</translation>
+        <translation>Cancella tutti i nominativi sorvegliati e tutte le esclusioni di nominativo o DXCC</translation>
     </message>
     <message>
+        <location line="-422"/>
         <source>Clear live station history</source>
-        <translation type="vanished">Cancella la cronologia delle stazioni in diretta</translation>
+        <translation>Cancella la cronologia delle stazioni in diretta</translation>
     </message>
     <message>
+        <location line="-2471"/>
         <source>Click CALL to start a QSO or ROTATE to aim the antenna.</source>
-        <translation type="vanished">Fai clic su CALL per iniziare un QSO o su ROTATE per orientare l&apos;antenna.</translation>
+        <translation>Fai clic su CALL per iniziare un QSO o su ROTATE per orientare l&apos;antenna.</translation>
     </message>
     <message>
+        <location line="+195"/>
         <source>Click for event details</source>
-        <translation type="vanished">Fai clic per i dettagli dell&apos;evento</translation>
+        <translation>Fai clic per i dettagli dell&apos;evento</translation>
     </message>
     <message>
+        <location line="+442"/>
         <source>Close details</source>
-        <translation type="vanished">Chiudi i dettagli</translation>
+        <translation>Chiudi i dettagli</translation>
     </message>
     <message>
+        <location line="-287"/>
         <source>Close grid details</source>
-        <translation type="vanished">Chiudi i dettagli della griglia</translation>
+        <translation>Chiudi i dettagli della griglia</translation>
     </message>
     <message>
+        <location line="+2135"/>
         <source>Columns</source>
-        <translation type="vanished">Colonne</translation>
+        <translation>Colonne</translation>
     </message>
     <message>
+        <location line="-2229"/>
         <source>Combined</source>
-        <translation type="vanished">Combinato</translation>
+        <translation>Combinato</translation>
     </message>
     <message>
+        <location line="+2264"/>
         <source>Compare worked and confirmed status globally, by band or by band and mode</source>
-        <translation type="vanished">Confronta lo stato collegati e confermati a livello globale, per banda o per banda e modo</translation>
+        <translation>Confronta lo stato collegati e confermati a livello globale, per banda o per banda e modo</translation>
     </message>
     <message>
+        <location line="-916"/>
         <source>Confirmed = paper QSL, LoTW or eQSL received (ADIF status Y)</source>
-        <translation type="vanished">Confermato = QSL cartacea, LoTW o eQSL ricevuta (stato ADIF Y)</translation>
+        <translation>Confermato = QSL cartacea, LoTW o eQSL ricevuta (stato ADIF Y)</translation>
     </message>
     <message>
+        <location line="-2724"/>
         <source>Confirmed grids contain an imported ADIF QSO with QSL_RCVD=Y, LOTW_QSL_RCVD=Y or EQSL_QSL_RCVD=Y.</source>
-        <translation type="vanished">Le griglie confermate contengono un QSO ADIF importato con QSL_RCVD=Y, LOTW_QSL_RCVD=Y o EQSL_QSL_RCVD=Y.</translation>
+        <translation>Le griglie confermate contengono un QSO ADIF importato con QSL_RCVD=Y, LOTW_QSL_RCVD=Y o EQSL_QSL_RCVD=Y.</translation>
     </message>
     <message>
+        <location line="+2429"/>
         <source>Connect the PSK Reporter MQTT feed</source>
-        <translation type="vanished">Collega il flusso MQTT di PSK Reporter</translation>
+        <translation>Collega il flusso MQTT di PSK Reporter</translation>
     </message>
     <message>
+        <location line="+67"/>
         <source>Coverage grid precision</source>
-        <translation type="vanished">Precisione della griglia di copertura</translation>
+        <translation>Precisione della griglia di copertura</translation>
     </message>
     <message>
+        <location line="+1122"/>
         <source>Create wanted, ignored or watched rules with optional band and mode scopes</source>
-        <translation type="vanished">Crea regole di ricercati, ignorati o sorvegliati con ambiti facoltativi di banda e modo</translation>
+        <translation>Crea regole di ricercati, ignorati o sorvegliati con ambiti facoltativi di banda e modo</translation>
     </message>
     <message>
+        <location line="-2825"/>
         <source>Cycle Live, Logbook and combined map views</source>
-        <translation type="vanished">Alterna le viste Diretta, Registro e combinata della mappa</translation>
+        <translation>Alterna le viste Diretta, Registro e combinata della mappa</translation>
     </message>
     <message>
+        <location line="+88"/>
         <source>DETAILS</source>
-        <translation type="vanished">DETTAGLI</translation>
+        <translation>DETTAGLI</translation>
     </message>
     <message>
+        <location line="-1"/>
         <source>HIDE DETAILS</source>
-        <translation type="vanished">NASCONDI I DETTAGLI</translation>
+        <translation>NASCONDI I DETTAGLI</translation>
     </message>
     <message>
         <source>Decodium Atlas is local. NASA GIBS and MapTiler use the network when Offline mode is disabled.</source>
         <translation type="vanished">Decodium Atlas è locale. NASA GIBS e MapTiler usano la rete quando la modalità offline è disattivata.</translation>
     </message>
     <message>
+        <location line="+1781"/>
         <source>Draw active and wanted grids as compact map pins</source>
-        <translation type="vanished">Disegna le griglie attive e ricercate come segnaposti compatti</translation>
+        <translation>Disegna le griglie attive e ricercate come segnaposti compatti</translation>
     </message>
     <message>
+        <location line="+546"/>
         <source>EXTERNAL DATA</source>
-        <translation type="vanished">DATI ESTERNI</translation>
+        <translation>DATI ESTERNI</translation>
     </message>
     <message>
+        <location line="-1912"/>
         <source>Earthquake</source>
-        <translation type="vanished">Terremoto</translation>
+        <translation>Terremoto</translation>
     </message>
     <message>
+        <location line="+2034"/>
         <source>Exclude</source>
-        <translation type="vanished">Escludi</translation>
+        <translation>Escludi</translation>
     </message>
     <message>
+        <location line="+933"/>
         <source>FILTERED · %1 · %2 of %3 QSO</source>
-        <translation type="vanished">FILTRATO · %1 · %2 di %3 QSO</translation>
+        <translation>FILTRATO · %1 · %2 di %3 QSO</translation>
     </message>
     <message>
+        <location line="-911"/>
         <source>Filtering runs in the map database worker</source>
-        <translation type="vanished">Il filtraggio gira nel processo della banca dati della mappa</translation>
+        <translation>Il filtraggio gira nel processo della banca dati della mappa</translation>
     </message>
     <message>
+        <location line="-1924"/>
         <source>GRID %1</source>
-        <translation type="vanished">GRIGLIA %1</translation>
+        <translation>GRIGLIA %1</translation>
     </message>
     <message>
+        <location line="+2881"/>
         <source>Grids</source>
-        <translation type="vanished">Griglie</translation>
+        <translation>Griglie</translation>
     </message>
     <message>
+        <location line="-3095"/>
         <source>Geographic area</source>
-        <translation type="vanished">Area geografica</translation>
+        <translation>Area geografica</translation>
     </message>
     <message>
+        <location line="-1186"/>
         <source>Global earthquakes of magnitude 2.5 or greater reported by USGS during the last day.</source>
-        <translation type="vanished">Terremoti globali di magnitudo 2,5 o superiore segnalati dall&apos;USGS nell&apos;ultimo giorno.</translation>
+        <translation>Terremoti globali di magnitudo 2,5 o superiore segnalati dall&apos;USGS nell&apos;ultimo giorno.</translation>
     </message>
     <message>
+        <location line="+2945"/>
         <source>Good</source>
-        <translation type="vanished">Buono</translation>
+        <translation>Buono</translation>
     </message>
     <message>
+        <location line="-2"/>
         <source>Poor</source>
-        <translation type="vanished">Scarso</translation>
+        <translation>Scarso</translation>
     </message>
     <message>
+        <location line="-1443"/>
+        <location line="+109"/>
+        <location line="+2487"/>
         <source>Unknown</source>
-        <translation type="vanished">Sconosciuto</translation>
+        <translation>Sconosciuto</translation>
     </message>
     <message>
+        <location line="-2637"/>
         <source>HISTORY</source>
-        <translation type="vanished">CRONOLOGIA</translation>
+        <translation>CRONOLOGIA</translation>
     </message>
     <message>
+        <location line="-1"/>
         <source>HISTORY %1</source>
-        <translation type="vanished">CRONOLOGIA %1</translation>
+        <translation>CRONOLOGIA %1</translation>
     </message>
     <message>
+        <location line="+988"/>
         <source>Heat %1  Timeline %2  Paths %3</source>
-        <translation type="vanished">Mappa di calore %1  Cronologia %2  Tracciati %3</translation>
+        <translation>Mappa di calore %1  Cronologia %2  Tracciati %3</translation>
     </message>
     <message>
+        <location line="-1098"/>
         <source>Hovered half: %1</source>
-        <translation type="vanished">Metà sotto il puntatore: %1</translation>
+        <translation>Metà sotto il puntatore: %1</translation>
     </message>
     <message>
+        <location line="+2036"/>
         <source>Hunt entities not yet worked or not yet confirmed</source>
-        <translation type="vanished">Cerca entità non ancora collegate o non ancora confermate</translation>
+        <translation>Cerca entità non ancora collegate o non ancora confermate</translation>
     </message>
     <message>
+        <location line="+784"/>
         <source>Ignore every station from %1</source>
-        <translation type="vanished">Ignora tutte le stazioni di %1</translation>
+        <translation>Ignora tutte le stazioni di %1</translation>
     </message>
     <message>
+        <location line="-10"/>
         <source>Ignore this station until roster preferences are reset</source>
-        <translation type="vanished">Ignora questa stazione fino al ripristino delle preferenze dell&apos;elenco</translation>
+        <translation>Ignora questa stazione fino al ripristino delle preferenze dell&apos;elenco</translation>
     </message>
     <message>
+        <location line="-522"/>
         <source>Keep each station active in the roster for this many minutes</source>
-        <translation type="vanished">Mantieni ogni stazione attiva nell&apos;elenco per questi minuti</translation>
+        <translation>Mantieni ogni stazione attiva nell&apos;elenco per questi minuti</translation>
     </message>
     <message>
+        <location line="+513"/>
         <source>Keep this station at the top of the roster</source>
-        <translation type="vanished">Mantieni questa stazione in cima all&apos;elenco</translation>
+        <translation>Mantieni questa stazione in cima all&apos;elenco</translation>
     </message>
     <message>
+        <location line="-2350"/>
         <source>LAYERS</source>
-        <translation type="vanished">LIVELLI</translation>
+        <translation>LIVELLI</translation>
     </message>
     <message>
+        <location line="-346"/>
         <source>LIVE</source>
-        <translation type="vanished">IN DIRETTA</translation>
+        <translation>IN DIRETTA</translation>
     </message>
     <message>
+        <location line="-1"/>
         <source>LIVE %1</source>
-        <translation type="vanished">IN DIRETTA %1</translation>
+        <translation>IN DIRETTA %1</translation>
     </message>
     <message>
+        <location line="-689"/>
         <source>Live</source>
-        <translation type="vanished">In diretta</translation>
+        <translation>In diretta</translation>
     </message>
     <message>
+        <location line="+1948"/>
         <source>Live  %1</source>
-        <translation type="vanished">In diretta  %1</translation>
+        <translation>In diretta  %1</translation>
     </message>
     <message>
+        <location line="+55"/>
         <source>LOCATE</source>
-        <translation type="vanished">LOCALIZZA</translation>
+        <translation>LOCALIZZA</translation>
     </message>
     <message>
+        <location line="-1016"/>
         <source>LOGBOOK</source>
-        <translation type="vanished">REGISTRO</translation>
+        <translation>REGISTRO</translation>
     </message>
     <message>
+        <location line="+2484"/>
         <source>LOGBOOK · ALL TIME · %1 QSO</source>
-        <translation type="vanished">REGISTRO · SEMPRE · %1 QSO</translation>
+        <translation>REGISTRO · SEMPRE · %1 QSO</translation>
     </message>
     <message>
+        <location line="-904"/>
         <source>LOOKUP</source>
-        <translation type="vanished">RICERCA</translation>
+        <translation>RICERCA</translation>
     </message>
     <message>
+        <location line="+240"/>
         <source>Lists</source>
-        <translation type="vanished">Elenchi</translation>
+        <translation>Elenchi</translation>
     </message>
     <message>
+        <location line="-2"/>
         <source>Lists %1</source>
-        <translation type="vanished">Elenchi %1</translation>
+        <translation>Elenchi %1</translation>
     </message>
     <message>
+        <location line="-1094"/>
         <source>Live 5 min</source>
-        <translation type="vanished">In diretta 5 min</translation>
+        <translation>In diretta 5 min</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Live 15 min</source>
-        <translation type="vanished">In diretta 15 min</translation>
+        <translation>In diretta 15 min</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Live 30 min</source>
-        <translation type="vanished">In diretta 30 min</translation>
+        <translation>In diretta 30 min</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Live 60 min</source>
-        <translation type="vanished">In diretta 60 min</translation>
+        <translation>In diretta 60 min</translation>
     </message>
     <message>
+        <location line="-109"/>
         <source>Live MQTT</source>
-        <translation type="vanished">MQTT in diretta</translation>
+        <translation>MQTT in diretta</translation>
     </message>
     <message>
+        <location line="+1914"/>
         <source>Live spots</source>
-        <translation type="vanished">Spot in diretta</translation>
+        <translation>Spot in diretta</translation>
     </message>
     <message>
+        <location line="-4304"/>
         <source>Live Parks on the Air activator spots. Disabling this layer immediately removes all POTA markers from the map.</source>
-        <translation type="vanished">Spot in diretta degli attivatori Parks on the Air. Disattivando questo livello tutti i segnaposti POTA sparaiscono subito dalla mappa.</translation>
+        <translation>Spot in diretta degli attivatori Parks on the Air. Disattivando questo livello tutti i segnaposti POTA sparaiscono subito dalla mappa.</translation>
     </message>
     <message>
+        <location line="+2995"/>
         <source>Live and logbook visibility</source>
-        <translation type="vanished">Visibilità di diretta e registro</translation>
+        <translation>Visibilità di diretta e registro</translation>
     </message>
     <message>
+        <location line="-719"/>
         <source>Loading PSK...</source>
-        <translation type="vanished">Caricamento PSK...</translation>
+        <translation>Caricamento PSK...</translation>
     </message>
     <message>
+        <location line="-137"/>
         <source>Loading...</source>
-        <translation type="vanished">Caricamento...</translation>
+        <translation>Caricamento...</translation>
     </message>
     <message>
+        <location line="-379"/>
         <source>MAP</source>
-        <translation type="vanished">MAPPA</translation>
+        <translation>MAPPA</translation>
     </message>
     <message>
+        <location line="+1212"/>
         <source>MAP OPERATIONS</source>
-        <translation type="vanished">OPERAZIONI DELLA MAPPA</translation>
+        <translation>OPERAZIONI DELLA MAPPA</translation>
     </message>
     <message>
+        <location line="-3148"/>
         <source>MOON</source>
-        <translation type="vanished">LUNA</translation>
+        <translation>LUNA</translation>
     </message>
     <message>
+        <location line="+844"/>
         <source>POP</source>
-        <translation type="vanished">POP</translation>
+        <translation>POP</translation>
     </message>
     <message>
+        <location line="+2168"/>
         <source>MUF and foF2 use MHz. Es is a probability index, not a frequency.</source>
-        <translation type="vanished">MUF e foF2 sono in MHz. Es è un indice di probabilità, non una frequenza.</translation>
+        <translation>MUF e foF2 sono in MHz. Es è un indice di probabilità, non una frequenza.</translation>
     </message>
     <message>
+        <location line="-1104"/>
         <source>Map Intelligence</source>
-        <translation type="vanished">Intelligenza della mappa</translation>
+        <translation>Intelligenza della mappa</translation>
     </message>
     <message>
+        <location line="-715"/>
         <source>Map item</source>
-        <translation type="vanished">Elemento della mappa</translation>
+        <translation>Elemento della mappa</translation>
     </message>
     <message>
+        <location line="-187"/>
         <source>Map preset</source>
-        <translation type="vanished">Preimpostazione della mappa</translation>
+        <translation>Preimpostazione della mappa</translation>
     </message>
     <message>
+        <location line="-19"/>
         <source>Map projection</source>
-        <translation type="vanished">Proiezione della mappa</translation>
+        <translation>Proiezione della mappa</translation>
     </message>
     <message>
+        <location line="+2201"/>
         <source>Projection</source>
-        <translation type="vanished">Proiezione</translation>
+        <translation>Proiezione</translation>
     </message>
     <message>
+        <location line="-897"/>
         <source>MapTiler API key</source>
-        <translation type="vanished">Chiave API di MapTiler</translation>
+        <translation>Chiave API di MapTiler</translation>
     </message>
     <message>
+        <location line="+3034"/>
         <source>Mark read</source>
-        <translation type="vanished">Segna come letto</translation>
+        <translation>Segna come letto</translation>
     </message>
     <message>
+        <location line="-2396"/>
         <source>Missing  %1</source>
-        <translation type="vanished">Mancanti  %1</translation>
+        <translation>Mancanti  %1</translation>
     </message>
     <message>
+        <location line="+16"/>
         <source>Moon  Az %1°  El %2°  ·  Subpoint %3 %4</source>
-        <translation type="vanished">Luna  Az %1°  El %2°  ·  Punto sublunare %3 %4</translation>
+        <translation>Luna  Az %1°  El %2°  ·  Punto sublunare %3 %4</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Moon data unavailable</source>
-        <translation type="vanished">Dati della Luna non disponibili</translation>
+        <translation>Dati della Luna non disponibili</translation>
     </message>
     <message>
+        <location line="+28"/>
         <source>Propagation data unavailable</source>
-        <translation type="vanished">Dati di propagazione non disponibili</translation>
+        <translation>Dati di propagazione non disponibili</translation>
     </message>
     <message>
+        <location line="-2796"/>
         <source>Moon visibility hemisphere, sublunar point and path from your station. The marker appears as soon as the ephemeris has been calculated.</source>
-        <translation type="vanished">Emisfero di visibilità della Luna, punto sublunare e tracciato dalla tua stazione. Il segnaposto appare appena calcolate le effemeridi.</translation>
+        <translation>Emisfero di visibilità della Luna, punto sublunare e tracciato dalla tua stazione. Il segnaposto appare appena calcolate le effemeridi.</translation>
     </message>
     <message>
+        <location line="+3271"/>
         <source>New grid</source>
-        <translation type="vanished">Griglia nuova</translation>
+        <translation>Griglia nuova</translation>
     </message>
     <message>
+        <location line="+396"/>
         <source>Reverse sort</source>
-        <translation type="vanished">Ordine inverso</translation>
+        <translation>Ordine inverso</translation>
     </message>
     <message>
+        <location line="-1985"/>
         <source>No QSO history in this grid</source>
-        <translation type="vanished">Nessuna cronologia QSO in questa griglia</translation>
+        <translation>Nessuna cronologia QSO in questa griglia</translation>
     </message>
     <message>
+        <location line="+2588"/>
         <source>No active ADIF logbook</source>
-        <translation type="vanished">Nessun registro ADIF attivo</translation>
+        <translation>Nessun registro ADIF attivo</translation>
     </message>
     <message>
+        <location line="-957"/>
         <source>No filter</source>
-        <translation type="vanished">Nessun filtro</translation>
+        <translation>Nessun filtro</translation>
     </message>
     <message>
+        <location line="-1731"/>
         <source>No recent traffic in this grid</source>
-        <translation type="vanished">Nessun traffico recente in questa griglia</translation>
+        <translation>Nessun traffico recente in questa griglia</translation>
     </message>
     <message>
+        <location line="+2475"/>
         <source>No watched or ignored entries</source>
-        <translation type="vanished">Nessuna voce sorvegliata o ignorata</translation>
+        <translation>Nessuna voce sorvegliata o ignorata</translation>
     </message>
     <message>
+        <location line="-197"/>
         <source>OPERATIONAL RULES</source>
-        <translation type="vanished">REGOLE OPERATIVE</translation>
+        <translation>REGOLE OPERATIVE</translation>
     </message>
     <message>
+        <location line="-3864"/>
         <source>Official IOTA Directory groups. Catalog positions are shown on the map; worked and confirmed status is applied only when the imported ADIF QSO contains an IOTA field.</source>
-        <translation type="vanished">Gruppi ufficiali della IOTA Directory. Le posizioni del catalogo si vedono sulla mappa; lo stato collegato e confermato vale solo se il QSO ADIF importato contiene un campo IOTA.</translation>
+        <translation>Gruppi ufficiali della IOTA Directory. Le posizioni del catalogo si vedono sulla mappa; lo stato collegato e confermato vale solo se il QSO ADIF importato contiene un campo IOTA.</translation>
     </message>
     <message>
+        <location line="+2022"/>
         <source>Offline</source>
-        <translation type="vanished">Offline</translation>
+        <translation>Offline</translation>
     </message>
     <message>
         <source>Offline mode uses the local Decodium Atlas and stops online base maps, PSK MQTT and external map feeds. ADIF, local cache and radio activity remain available.</source>
         <translation type="vanished">La modalità offline usa l&apos;Atlas locale di Decodium e ferma le mappe di base in linea, PSK MQTT e i flussi esterni della mappa. ADIF, cache locale e attività radio restano disponibili.</translation>
     </message>
     <message>
+        <location line="+1295"/>
         <source>Only</source>
-        <translation type="vanished">Solo</translation>
+        <translation>Solo</translation>
     </message>
     <message>
+        <location line="-1750"/>
+        <location line="+2626"/>
         <source>Open callsign lookup</source>
-        <translation type="vanished">Apri la ricerca del nominativo</translation>
+        <translation>Apri la ricerca del nominativo</translation>
     </message>
     <message>
+        <location line="-3342"/>
         <source>Open detailed statistics</source>
-        <translation type="vanished">Apri le statistiche dettagliate</translation>
+        <translation>Apri le statistiche dettagliate</translation>
     </message>
     <message>
+        <location line="-833"/>
         <source>Open global wildfire events published by NASA EONET.</source>
-        <translation type="vanished">Apri gli incendi boschivi globali pubblicati da NASA EONET.</translation>
+        <translation>Apri gli incendi boschivi globali pubblicati da NASA EONET.</translation>
     </message>
     <message>
+        <location line="+843"/>
         <source>Open radio and propagation conditions</source>
-        <translation type="vanished">Apri le condizioni radio e di propagazione</translation>
+        <translation>Apri le condizioni radio e di propagazione</translation>
     </message>
     <message>
+        <location line="-20"/>
         <source>Open the independent call roster</source>
-        <translation type="vanished">Apri l&apos;elenco nominativi indipendente</translation>
+        <translation>Apri l&apos;elenco nominativi indipendente</translation>
     </message>
     <message>
+        <location line="+190"/>
         <source>Operational marker</source>
-        <translation type="vanished">Segnaposto operativo</translation>
+        <translation>Segnaposto operativo</translation>
     </message>
     <message>
+        <location line="+1322"/>
         <source>Overlay PSK receivers with local activity or replace local activity</source>
-        <translation type="vanished">Sovrapponi i ricevitori PSK all&apos;attività locale oppure sostituisci l&apos;attività locale</translation>
+        <translation>Sovrapponi i ricevitori PSK all&apos;attività locale oppure sostituisci l&apos;attività locale</translation>
     </message>
     <message>
+        <location line="+470"/>
         <source>PROPAGATION SCALE</source>
-        <translation type="vanished">SCALA DI PROPAGAZIONE</translation>
+        <translation>SCALA DI PROPAGAZIONE</translation>
     </message>
     <message>
         <source>PSK Reporter: %1 receivers found</source>
@@ -9061,44 +10629,55 @@ I modelli predefiniti partono come frame nativi compatti.</translation>
         <translation type="vanished">PSK Reporter: nessun ricevitore caricato per l&apos;ultima ora</translation>
     </message>
     <message>
+        <location line="-455"/>
         <source>PSK grid opacity</source>
-        <translation type="vanished">Opacità della griglia PSK</translation>
+        <translation>Opacità della griglia PSK</translation>
     </message>
     <message>
+        <location line="+75"/>
         <source>PSK/spot history age</source>
-        <translation type="vanished">Età della cronologia PSK/spot</translation>
+        <translation>Età della cronologia PSK/spot</translation>
     </message>
     <message>
+        <location line="-244"/>
         <source>Period</source>
-        <translation type="vanished">Periodo</translation>
+        <translation>Periodo</translation>
     </message>
     <message>
+        <location line="+1690"/>
         <source>Value</source>
-        <translation type="vanished">Valore</translation>
+        <translation>Valore</translation>
     </message>
     <message>
+        <location line="-1093"/>
         <source>Propagation  SFI %1  K %2  MUF %3</source>
-        <translation type="vanished">Propagazione  SFI %1  K %2  MUF %3</translation>
+        <translation>Propagazione  SFI %1  K %2  MUF %3</translation>
     </message>
     <message>
+        <location line="+14"/>
         <source>Propagation controls MUF, foF2, Es and Aurora</source>
-        <translation type="vanished">I comandi di propagazione gestiscono MUF, foF2, Es e aurora</translation>
+        <translation>I comandi di propagazione gestiscono MUF, foF2, Es e aurora</translation>
     </message>
     <message>
+        <location line="+554"/>
         <source>Provider used by lookup actions in grid popups and the roster</source>
-        <translation type="vanished">Fornitore usato dalle ricerche nei fumetti di griglia e nell&apos;elenco</translation>
+        <translation>Fornitore usato dalle ricerche nei fumetti di griglia e nell&apos;elenco</translation>
     </message>
     <message>
+        <location line="-723"/>
         <source>Push-pin live grids</source>
-        <translation type="vanished">Segnaposti per le griglie in diretta</translation>
+        <translation>Segnaposti per le griglie in diretta</translation>
     </message>
     <message>
+        <location line="-1802"/>
+        <location line="+921"/>
         <source>ROSTER</source>
-        <translation type="vanished">ELENCO</translation>
+        <translation>ELENCO</translation>
     </message>
     <message>
+        <location line="-614"/>
         <source>ROTATE</source>
-        <translation type="vanished">ORIENTA</translation>
+        <translation>ORIENTA</translation>
     </message>
     <message>
         <source>Receivers that reported hearing your callsign to PSK Reporter during the last hour. Decodium PSK upload does not need to be enabled.</source>
@@ -9109,592 +10688,747 @@ I modelli predefiniti partono come frame nativi compatti.</translation>
         <translation type="vanished">Recupera i ricevitori che hanno sentito il tuo nominativo nell&apos;ultima ora. L&apos;invio PSK è indipendente.</translation>
     </message>
     <message>
+        <location line="+1125"/>
         <source>Refresh PSK</source>
-        <translation type="vanished">Aggiorna PSK</translation>
+        <translation>Aggiorna PSK</translation>
     </message>
     <message>
+        <location line="+939"/>
         <source>Refresh enabled external layers</source>
-        <translation type="vanished">Aggiorna i livelli esterni attivi</translation>
+        <translation>Aggiorna i livelli esterni attivi</translation>
     </message>
     <message>
+        <location line="+753"/>
         <source>Remove rule</source>
-        <translation type="vanished">Rimuovi la regola</translation>
+        <translation>Rimuovi la regola</translation>
     </message>
     <message>
+        <location line="+90"/>
         <source>Remove this entry</source>
-        <translation type="vanished">Rimuovi questa voce</translation>
+        <translation>Rimuovi questa voce</translation>
     </message>
     <message>
+        <location line="+214"/>
         <source>Remove the temporary map time filter</source>
-        <translation type="vanished">Rimuovi il filtro temporaneo di tempo della mappa</translation>
+        <translation>Rimuovi il filtro temporaneo di tempo della mappa</translation>
     </message>
     <message>
+        <location line="-676"/>
         <source>Review watched calls and ignored calls or DXCC entities</source>
-        <translation type="vanished">Rivedi i nominativi sorvegliati e i nominativi o entità DXCC ignorati</translation>
+        <translation>Rivedi i nominativi sorvegliati e i nominativi o entità DXCC ignorati</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Rules</source>
-        <translation type="vanished">Regole</translation>
+        <translation>Regole</translation>
     </message>
     <message>
+        <location line="-1"/>
         <source>Rules %1</source>
-        <translation type="vanished">Regole %1</translation>
+        <translation>Regole %1</translation>
     </message>
     <message>
+        <location line="-574"/>
         <source>SCREENSHOT</source>
-        <translation type="vanished">SCHERMATA</translation>
+        <translation>SCHERMATA</translation>
     </message>
     <message>
+        <location line="-2199"/>
         <source>SHOT</source>
-        <translation type="vanished">SCATTO</translation>
+        <translation>SCATTO</translation>
     </message>
     <message>
+        <location line="+20"/>
+        <location line="+923"/>
         <source>STATS</source>
-        <translation type="vanished">STATISTICHE</translation>
+        <translation>STATISTICHE</translation>
     </message>
     <message>
+        <location line="-941"/>
         <source>Save a screenshot of the map</source>
-        <translation type="vanished">Salva una schermata della mappa</translation>
+        <translation>Salva una schermata della mappa</translation>
     </message>
     <message>
+        <location line="+4225"/>
         <source>Select %1 as the active roster award</source>
-        <translation type="vanished">Seleziona %1 come diploma attivo dell&apos;elenco</translation>
+        <translation>Seleziona %1 come diploma attivo dell&apos;elenco</translation>
     </message>
     <message>
+        <location line="-68"/>
         <source>Select an award to make its missing entities operational targets</source>
-        <translation type="vanished">Seleziona un diploma per fare delle entità mancanti degli obiettivi operativi</translation>
+        <translation>Seleziona un diploma per fare delle entità mancanti degli obiettivi operativi</translation>
     </message>
     <message>
+        <location line="-1602"/>
         <source>Select the award whose missing entities become wanted stations</source>
-        <translation type="vanished">Seleziona il diploma le cui entità mancanti diventano stazioni ricercate</translation>
+        <translation>Seleziona il diploma le cui entità mancanti diventano stazioni ricercate</translation>
     </message>
     <message>
+        <location line="+1520"/>
         <source>Use this award to identify wanted stations in the roster</source>
-        <translation type="vanished">Usa questo diploma per individuare le stazioni ricercate nell&apos;elenco</translation>
+        <translation>Usa questo diploma per individuare le stazioni ricercate nell&apos;elenco</translation>
     </message>
     <message>
+        <location line="-2320"/>
         <source>Show QSO/QSL history and current activity in separate halves of the same grid</source>
-        <translation type="vanished">Mostra la cronologia QSO/QSL e l&apos;attività corrente in metà separate della stessa griglia</translation>
+        <translation>Mostra la cronologia QSO/QSL e l&apos;attività corrente in metà separate della stessa griglia</translation>
     </message>
     <message>
+        <location line="-9"/>
         <source>Split historical and live grid status</source>
-        <translation type="vanished">Separa lo stato storico e in diretta della griglia</translation>
+        <translation>Separa lo stato storico e in diretta della griglia</translation>
     </message>
     <message>
+        <location line="+86"/>
         <source>Show UTC-offset meridians on the map</source>
-        <translation type="vanished">Mostra sulla mappa i meridiani di scarto UTC</translation>
+        <translation>Mostra sulla mappa i meridiani di scarto UTC</translation>
     </message>
     <message>
+        <location line="-9"/>
         <source>UTC time zones</source>
-        <translation type="vanished">Fusi orari UTC</translation>
+        <translation>Fusi orari UTC</translation>
     </message>
     <message>
+        <location line="+911"/>
         <source>Show all, new, unconfirmed, wanted or watched stations</source>
-        <translation type="vanished">Mostra tutte le stazioni, oppure solo nuove, non confermate, ricercate o sorvegliate</translation>
+        <translation>Mostra tutte le stazioni, oppure solo nuove, non confermate, ricercate o sorvegliate</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Show only active CQ calls in the roster</source>
-        <translation type="vanished">Mostra nell&apos;elenco solo le chiamate CQ attive</translation>
+        <translation>Mostra nell&apos;elenco solo le chiamate CQ attive</translation>
     </message>
     <message>
+        <location line="-1119"/>
         <source>Source correlation filter</source>
-        <translation type="vanished">Filtro di correlazione delle fonti</translation>
+        <translation>Filtro di correlazione delle fonti</translation>
     </message>
     <message>
+        <location line="+785"/>
         <source>Source: &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;</source>
-        <translation type="vanished">Fonte: &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;</translation>
+        <translation>Fonte: &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;</translation>
     </message>
     <message>
+        <location line="-1663"/>
+        <location line="+2626"/>
         <source>Start QSO with this station</source>
-        <translation type="vanished">Inizia un QSO con questa stazione</translation>
+        <translation>Inizia un QSO con questa stazione</translation>
     </message>
     <message>
+        <location line="-2663"/>
         <source>Station locator</source>
-        <translation type="vanished">Locatore della stazione</translation>
+        <translation>Locatore della stazione</translation>
     </message>
     <message>
+        <location line="+2625"/>
         <source>Stop watching this station</source>
-        <translation type="vanished">Smetti di sorvegliare questa stazione</translation>
+        <translation>Smetti di sorvegliare questa stazione</translation>
     </message>
     <message>
+        <location line="-2605"/>
         <source>Watch this station</source>
-        <translation type="vanished">Sorveglia questa stazione</translation>
+        <translation>Sorveglia questa stazione</translation>
     </message>
     <message>
+        <location line="+844"/>
         <source>Subscribe to the PSK Reporter MQTT stream for this station</source>
-        <translation type="vanished">Iscriviti al flusso MQTT di PSK Reporter per questa stazione</translation>
+        <translation>Iscriviti al flusso MQTT di PSK Reporter per questa stazione</translation>
     </message>
     <message>
+        <location line="-1"/>
         <source>The subscription is retained but paused while Offline mode is enabled</source>
-        <translation type="vanished">L&apos;iscrizione resta ma è in pausa mentre la modalità offline è attiva</translation>
+        <translation>L&apos;iscrizione resta ma è in pausa mentre la modalità offline è attiva</translation>
     </message>
     <message>
+        <location line="+1946"/>
         <source>TOP BANDS</source>
-        <translation type="vanished">BANDE PRINCIPALI</translation>
+        <translation>BANDE PRINCIPALI</translation>
     </message>
     <message>
+        <location line="+31"/>
         <source>TOP MODES</source>
-        <translation type="vanished">MODI PRINCIPALI</translation>
+        <translation>MODI PRINCIPALI</translation>
     </message>
     <message>
+        <location line="-37"/>
         <source>The ADIF logbook is loaded, but no QSO matches the current map filters.</source>
-        <translation type="vanished">Il registro ADIF è caricato, ma nessun QSO corrisponde ai filtri correnti della mappa.</translation>
+        <translation>Il registro ADIF è caricato, ma nessun QSO corrisponde ai filtri correnti della mappa.</translation>
     </message>
     <message>
+        <location line="-1830"/>
         <source>Time before live grid activity fades out</source>
-        <translation type="vanished">Tempo prima che l&apos;attività in diretta della griglia svanisca</translation>
+        <translation>Tempo prima che l&apos;attività in diretta della griglia svanisca</translation>
     </message>
     <message>
+        <location line="-1265"/>
         <source>Tsunami flag reported</source>
-        <translation type="vanished">Segnalato avviso di tsunami</translation>
+        <translation>Segnalato avviso di tsunami</translation>
     </message>
     <message>
+        <location line="+1032"/>
+        <location line="+138"/>
         <source>Unavailable while Offline mode is enabled</source>
-        <translation type="vanished">Non disponibile mentre la modalità offline è attiva</translation>
+        <translation>Non disponibile mentre la modalità offline è attiva</translation>
     </message>
     <message>
+        <location line="-2419"/>
         <source>United States county boundaries from the U.S. Census TIGER service. Zoom in after it loads to inspect individual counties.</source>
-        <translation type="vanished">Confini delle contee degli Stati Uniti dal servizio TIGER del censimento USA. Dopo il caricamento ingrandisci per esaminare le singole contee.</translation>
+        <translation>Confini delle contee degli Stati Uniti dal servizio TIGER del censimento USA. Dopo il caricamento ingrandisci per esaminare le singole contee.</translation>
     </message>
     <message>
+        <location line="-2"/>
         <source>United States state boundaries from the U.S. Census TIGER service. The map focuses on the United States when enabled.</source>
-        <translation type="vanished">Confini degli stati degli Stati Uniti dal servizio TIGER del censimento USA. Quando è attivo la mappa si centra sugli USA.</translation>
+        <translation>Confini degli stati degli Stati Uniti dal servizio TIGER del censimento USA. Quando è attivo la mappa si centra sugli USA.</translation>
     </message>
     <message>
         <source>Use the local atlas and stop online base maps, PSK MQTT and external overlays. Local logbook and radio data remain available.</source>
         <translation type="vanished">Usa l&apos;atlante locale e ferma le mappe di base in linea, PSK MQTT e i livelli esterni. Registro locale e dati radio restano disponibili.</translation>
     </message>
     <message>
+        <location line="+3706"/>
         <source>VISIBLE ROSTER COLUMNS</source>
-        <translation type="vanished">COLONNE VISIBILI DELL&apos;ELENCO</translation>
+        <translation>COLONNE VISIBILI DELL&apos;ELENCO</translation>
     </message>
     <message>
+        <location line="+287"/>
         <source>WATCHED / IGNORED LISTS</source>
-        <translation type="vanished">ELENCHI SORVEGLIATI / IGNORATI</translation>
+        <translation>ELENCHI SORVEGLIATI / IGNORATI</translation>
     </message>
     <message>
+        <location line="-2931"/>
+        <location line="+606"/>
         <source>WORKED</source>
-        <translation type="vanished">COLLEGATI</translation>
+        <translation>COLLEGATI</translation>
     </message>
     <message>
+        <location line="+1068"/>
         <source>Worked  %1</source>
-        <translation type="vanished">Collegati  %1</translation>
+        <translation>Collegati  %1</translation>
     </message>
     <message>
+        <location line="+2304"/>
         <source>Worked %1 · Confirmed %2 · Remaining %3</source>
-        <translation type="vanished">Collegati %1 · Confermati %2 · Rimanenti %3</translation>
+        <translation>Collegati %1 · Confermati %2 · Rimanenti %3</translation>
     </message>
     <message>
+        <location line="-5034"/>
         <source>WPX prefixes derived from your imported ADIF log.</source>
-        <translation type="vanished">Prefissi WPX ricavati dal tuo registro ADIF importato.</translation>
+        <translation>Prefissi WPX ricavati dal tuo registro ADIF importato.</translation>
     </message>
     <message>
+        <location line="+3306"/>
         <source>Wildcard pattern matched against callsigns and messages</source>
-        <translation type="vanished">Schema con caratteri jolly confrontato con nominativi e messaggi</translation>
+        <translation>Schema con caratteri jolly confrontato con nominativi e messaggi</translation>
     </message>
     <message>
+        <location line="-3198"/>
         <source>n/a</source>
-        <translation type="vanished">n/d</translation>
+        <translation>n/d</translation>
     </message>
     <message>
+        <location line="-132"/>
         <source>not updated</source>
-        <translation type="vanished">non aggiornato</translation>
+        <translation>non aggiornato</translation>
     </message>
     <message>
+        <location line="+3250"/>
         <source>unavailable</source>
-        <translation type="vanished">non disponibile</translation>
+        <translation>non disponibile</translation>
     </message>
     <message>
+        <location line="+1334"/>
+        <location line="+282"/>
         <source>%1 / 100</source>
-        <translation type="vanished">%1 / 100</translation>
+        <translation>%1 / 100</translation>
     </message>
     <message>
+        <location line="-273"/>
         <source>%1 bands / %2h</source>
-        <translation type="vanished">%1 bande / %2 h</translation>
+        <translation>%1 bande / %2 h</translation>
     </message>
     <message>
+        <location line="-2793"/>
         <source>ACTIVITY</source>
-        <translation type="vanished">ATTIVITÀ</translation>
+        <translation>ATTIVITÀ</translation>
     </message>
     <message>
+        <location line="+2693"/>
         <source>BAND ACTIVITY</source>
-        <translation type="vanished">ATTIVITÀ PER BANDA</translation>
+        <translation>ATTIVITÀ PER BANDA</translation>
     </message>
     <message>
+        <location line="+325"/>
         <source>BAND RANKING</source>
-        <translation type="vanished">CLASSIFICA DELLE BANDE</translation>
+        <translation>CLASSIFICA DELLE BANDE</translation>
     </message>
     <message>
+        <location line="+41"/>
         <source>BEST</source>
-        <translation type="vanished">MIGLIORE</translation>
+        <translation>MIGLIORE</translation>
     </message>
     <message>
+        <location line="-295"/>
         <source>BEST BAND</source>
-        <translation type="vanished">BANDA MIGLIORE</translation>
+        <translation>BANDA MIGLIORE</translation>
     </message>
     <message>
+        <location line="-22"/>
         <source>Analyse the last %1 hours</source>
-        <translation type="vanished">Analizza le ultime %1 ore</translation>
+        <translation>Analizza le ultime %1 ore</translation>
     </message>
     <message>
+        <location line="+69"/>
         <source>LOCAL RX</source>
-        <translation type="vanished">RX LOCALE</translation>
+        <translation>RX LOCALE</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>LOCAL TX</source>
-        <translation type="vanished">TX LOCALE</translation>
+        <translation>TX LOCALE</translation>
     </message>
     <message>
+        <location line="+178"/>
         <source>Local RX</source>
-        <translation type="vanished">RX locale</translation>
+        <translation>RX locale</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Local TX</source>
-        <translation type="vanished">TX locale</translation>
+        <translation>TX locale</translation>
     </message>
     <message>
+        <location line="-174"/>
+        <location line="+175"/>
         <source>PSK RX</source>
-        <translation type="vanished">PSK RX</translation>
+        <translation>PSK RX</translation>
     </message>
     <message>
+        <location line="-170"/>
+        <location line="+171"/>
         <source>PSK TX</source>
-        <translation type="vanished">PSK TX</translation>
+        <translation>PSK TX</translation>
     </message>
     <message>
+        <location line="+78"/>
         <source>Local %1 RX / %2 TX   PSK %3 RX / %4 TX   %5 calls   %6 dB</source>
-        <translation type="vanished">Locale %1 RX / %2 TX   PSK %3 RX / %4 TX   %5 nominativi   %6 dB</translation>
+        <translation>Locale %1 RX / %2 TX   PSK %3 RX / %4 TX   %5 nominativi   %6 dB</translation>
     </message>
     <message>
+        <location line="-304"/>
         <source>No activity</source>
-        <translation type="vanished">Nessuna attività</translation>
+        <translation>Nessuna attività</translation>
     </message>
     <message>
+        <location line="+212"/>
         <source>No band activity in this window</source>
-        <translation type="vanished">Nessuna attività per banda in questa finestra</translation>
+        <translation>Nessuna attività per banda in questa finestra</translation>
     </message>
     <message>
+        <location line="-24"/>
         <source>now</source>
-        <translation type="vanished">adesso</translation>
+        <translation>adesso</translation>
     </message>
     <message>
+        <location line="-296"/>
         <source>%1 QSO · %2 QSL · %3%</source>
-        <translation type="vanished">%1 QSO · %2 QSL · %3%</translation>
+        <translation>%1 QSO · %2 QSL · %3%</translation>
     </message>
     <message>
+        <location line="-1899"/>
         <source>%1 · %2 / %3 / %4</source>
-        <translation type="vanished">%1 · %2 / %3 / %4</translation>
+        <translation>%1 · %2 / %3 / %4</translation>
     </message>
     <message>
+        <location line="+2551"/>
         <source>%1 · %2 · %3</source>
-        <translation type="vanished">%1 · %2 · %3</translation>
+        <translation>%1 · %2 · %3</translation>
     </message>
     <message>
+        <location line="-1641"/>
         <source>OQRS</source>
-        <translation type="vanished">OQRS</translation>
+        <translation>OQRS</translation>
     </message>
     <message>
+        <location line="+1761"/>
         <source>JSON files (*.json)</source>
-        <translation type="vanished">File JSON (*.json)</translation>
+        <translation>File JSON (*.json)</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Decodium map configuration (*.json)</source>
-        <translation type="vanished">Configurazione della mappa Decodium (*.json)</translation>
+        <translation>Configurazione della mappa Decodium (*.json)</translation>
     </message>
     <message>
+        <location line="-111"/>
         <source>%1 / %2 — open roster and map</source>
-        <translation type="vanished">%1 / %2 — apri elenco e mappa</translation>
+        <translation>%1 / %2 — apri elenco e mappa</translation>
     </message>
     <message>
+        <location line="-681"/>
         <source>%1 classified · %2 unknown</source>
-        <translation type="vanished">%1 classificati · %2 sconosciuti</translation>
+        <translation>%1 classificati · %2 sconosciuti</translation>
     </message>
     <message>
+        <location line="-3774"/>
         <source>Auto-fit active QSO</source>
-        <translation type="vanished">Adatta automaticamente al QSO attivo</translation>
+        <translation>Adatta automaticamente al QSO attivo</translation>
     </message>
     <message>
+        <location line="+4289"/>
         <source>Award endorsement band</source>
-        <translation type="vanished">Banda di convalida del diploma</translation>
+        <translation>Banda di convalida del diploma</translation>
     </message>
     <message>
+        <location line="-3068"/>
         <source>Color</source>
-        <translation type="vanished">Colore</translation>
+        <translation>Colore</translation>
     </message>
     <message>
+        <location line="+23"/>
         <source>Opacity</source>
-        <translation type="vanished">Opacità</translation>
+        <translation>Opacità</translation>
     </message>
     <message>
+        <location line="+29"/>
         <source>Width</source>
-        <translation type="vanished">Larghezza</translation>
+        <translation>Larghezza</translation>
     </message>
     <message>
+        <location line="+29"/>
         <source>Labels</source>
-        <translation type="vanished">Etichette</translation>
+        <translation>Etichette</translation>
     </message>
     <message>
+        <location line="+3001"/>
         <source>Confirmation source used for the confirmed score</source>
-        <translation type="vanished">Fonte di conferma usata per il conteggio dei confermati</translation>
+        <translation>Fonte di conferma usata per il conteggio dei confermati</translation>
     </message>
     <message>
+        <location line="-1530"/>
         <source>Current band/mode use the selected map band and mode; Digital modes includes FT, JT, Q and other digital modes</source>
-        <translation type="vanished">Banda/modo corrente usano la banda e il modo selezionati sulla mappa; Modi digitali comprende FT, JT, Q e altri modi digitali</translation>
+        <translation>Banda/modo corrente usano la banda e il modo selezionati sulla mappa; Modi digitali comprende FT, JT, Q e altri modi digitali</translation>
     </message>
     <message>
+        <location line="+80"/>
         <source>Max DT</source>
-        <translation type="vanished">Max DT</translation>
+        <translation>Max DT</translation>
     </message>
     <message>
+        <location line="-23"/>
         <source>Min SNR</source>
-        <translation type="vanished">Min SNR</translation>
+        <translation>Min SNR</translation>
     </message>
     <message>
+        <location line="+54"/>
         <source>LoTW age</source>
-        <translation type="vanished">Età LoTW</translation>
+        <translation>Età LoTW</translation>
     </message>
     <message>
+        <location line="-959"/>
         <source>Decay lifetime for this source</source>
-        <translation type="vanished">Tempo di decadimento di questa fonte</translation>
+        <translation>Tempo di decadimento di questa fonte</translation>
     </message>
     <message>
+        <location line="+1249"/>
         <source>EXCEPTIONS</source>
-        <translation type="vanished">ECCEZIONI</translation>
+        <translation>ECCEZIONI</translation>
     </message>
     <message>
+        <location line="-1841"/>
         <source>Export map config</source>
-        <translation type="vanished">Esporta la configurazione della mappa</translation>
+        <translation>Esporta la configurazione della mappa</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Import map config</source>
-        <translation type="vanished">Importa la configurazione della mappa</translation>
+        <translation>Importa la configurazione della mappa</translation>
     </message>
     <message>
+        <location line="+3223"/>
         <source>Import Decodium map configuration</source>
-        <translation type="vanished">Importa la configurazione della mappa Decodium</translation>
+        <translation>Importa la configurazione della mappa Decodium</translation>
     </message>
     <message>
+        <location line="-3219"/>
         <source>Import the complete map configuration bundle</source>
-        <translation type="vanished">Importa il pacchetto completo di configurazione della mappa</translation>
+        <translation>Importa il pacchetto completo di configurazione della mappa</translation>
     </message>
     <message>
+        <location line="-8"/>
         <source>Export presets, roster preferences/rules, layer styles, temporal decay and map viewport</source>
-        <translation type="vanished">Esporta preimpostazioni, preferenze e regole dell&apos;elenco, stili dei livelli, decadimento temporale e inquadratura della mappa</translation>
+        <translation>Esporta preimpostazioni, preferenze e regole dell&apos;elenco, stili dei livelli, decadimento temporale e inquadratura della mappa</translation>
     </message>
     <message>
+        <location line="+2982"/>
         <source>From YYYY-MM-DD</source>
-        <translation type="vanished">Da AAAA-MM-GG</translation>
+        <translation>Da AAAA-MM-GG</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>To YYYY-MM-DD</source>
-        <translation type="vanished">A AAAA-MM-GG</translation>
+        <translation>A AAAA-MM-GG</translation>
     </message>
     <message>
+        <location line="-3603"/>
         <source>Historical hover: %1 · Live hover: %2</source>
-        <translation type="vanished">Storico sotto il puntatore: %1 · Diretta sotto il puntatore: %2</translation>
+        <translation>Storico sotto il puntatore: %1 · Diretta sotto il puntatore: %2</translation>
     </message>
     <message>
+        <location line="+2072"/>
         <source>Keep stations with a LoTW confirmation within the configured age</source>
-        <translation type="vanished">Mantieni le stazioni con conferma LoTW entro l&apos;età impostata</translation>
+        <translation>Mantieni le stazioni con conferma LoTW entro l&apos;età impostata</translation>
     </message>
     <message>
+        <location line="-1594"/>
         <source>LAYER STYLE</source>
-        <translation type="vanished">STILE DEL LIVELLO</translation>
+        <translation>STILE DEL LIVELLO</translation>
     </message>
     <message>
+        <location line="+1582"/>
         <source>Limit the roster to your DXCC or to other DXCCs</source>
-        <translation type="vanished">Limita l&apos;elenco al tuo DXCC o ad altri DXCC</translation>
+        <translation>Limita l&apos;elenco al tuo DXCC o ad altri DXCC</translation>
     </message>
     <message>
+        <location line="+1632"/>
         <source>MISSING LIVE ENTITIES (%1)</source>
-        <translation type="vanished">ENTITÀ IN DIRETTA MANCANTI (%1)</translation>
+        <translation>ENTITÀ IN DIRETTA MANCANTI (%1)</translation>
     </message>
     <message>
+        <location line="-1453"/>
         <source>Matrix</source>
-        <translation type="vanished">Matrice</translation>
+        <translation>Matrice</translation>
     </message>
     <message>
+        <location line="+143"/>
         <source>NEW / WANTED MATRIX</source>
-        <translation type="vanished">MATRICE NUOVI / RICERCATI</translation>
+        <translation>MATRICE NUOVI / RICERCATI</translation>
     </message>
     <message>
+        <location line="+1205"/>
         <source>Operator callsign</source>
-        <translation type="vanished">Nominativo dell&apos;operatore</translation>
+        <translation>Nominativo dell&apos;operatore</translation>
     </message>
     <message>
+        <location line="-545"/>
         <source>PROPAGATION TYPES</source>
-        <translation type="vanished">TIPI DI PROPAGAZIONE</translation>
+        <translation>TIPI DI PROPAGAZIONE</translation>
     </message>
     <message>
+        <location line="-2185"/>
         <source>Propagation</source>
-        <translation type="vanished">Propagazione</translation>
+        <translation>Propagazione</translation>
     </message>
     <message>
+        <location line="-855"/>
+        <location line="+2"/>
         <source>—</source>
-        <translation type="vanished">—</translation>
+        <translation>—</translation>
     </message>
     <message>
+        <location line="+2091"/>
         <source>RR73=CQ</source>
-        <translation type="vanished">RR73=CQ</translation>
+        <translation>RR73=CQ</translation>
     </message>
     <message>
+        <location line="-60"/>
         <source>SCOPE</source>
-        <translation type="vanished">AMBITO</translation>
+        <translation>AMBITO</translation>
     </message>
     <message>
+        <location line="+390"/>
         <source>WANTED</source>
-        <translation type="vanished">RICERCATI</translation>
+        <translation>RICERCATI</translation>
     </message>
     <message>
+        <location line="-338"/>
         <source>Spotted me</source>
-        <translation type="vanished">Mi hanno spottato</translation>
+        <translation>Mi hanno spottato</translation>
     </message>
     <message>
+        <location line="-2890"/>
         <source>Restore previous view</source>
-        <translation type="vanished">Ripristina la vista precedente</translation>
+        <translation>Ripristina la vista precedente</translation>
     </message>
     <message>
+        <location line="+78"/>
         <source>Restore previous map view</source>
-        <translation type="vanished">Ripristina la vista precedente della mappa</translation>
+        <translation>Ripristina la vista precedente della mappa</translation>
     </message>
     <message>
+        <location line="+2968"/>
         <source>Select NEW categories and inspect wanted or exception matrices</source>
-        <translation type="vanished">Scegli le categorie NUOVI ed esamina le matrici di ricercati o eccezioni</translation>
+        <translation>Scegli le categorie NUOVI ed esamina le matrici di ricercati o eccezioni</translation>
     </message>
     <message>
+        <location line="-1752"/>
         <source>Select the layer whose appearance is being edited</source>
-        <translation type="vanished">Scegli il livello di cui stai modificando l&apos;aspetto</translation>
+        <translation>Scegli il livello di cui stai modificando l&apos;aspetto</translation>
     </message>
     <message>
+        <location line="+655"/>
         <source>TEMPORAL LEGEND / SOURCE DECAY</source>
-        <translation type="vanished">LEGENDA TEMPORALE / DECADIMENTO DELLE FONTI</translation>
+        <translation>LEGENDA TEMPORALE / DECADIMENTO DELLE FONTI</translation>
     </message>
     <message>
+        <location line="+954"/>
         <source>Treat messages containing RR73 as CQ when CQ-only is enabled</source>
-        <translation type="vanished">Tratta i messaggi che contengono RR73 come CQ quando è attivo solo-CQ</translation>
+        <translation>Tratta i messaggi che contengono RR73 come CQ quando è attivo solo-CQ</translation>
     </message>
     <message>
+        <location line="-8"/>
         <source>Use only PSK Reporter spots heard by your callsign</source>
-        <translation type="vanished">Usa solo gli spot di PSK Reporter sentiti dal tuo nominativo</translation>
+        <translation>Usa solo gli spot di PSK Reporter sentiti dal tuo nominativo</translation>
     </message>
     <message>
+        <location line="+323"/>
         <source>Use this entity in NEW and UNCONFIRMED calculations</source>
-        <translation type="vanished">Usa questa entità nei calcoli di NUOVI e NON CONFERMATI</translation>
+        <translation>Usa questa entità nei calcoli di NUOVI e NON CONFERMATI</translation>
     </message>
     <message>
+        <location line="-265"/>
         <source>provider filters are OR</source>
-        <translation type="vanished">i filtri provider sono in OR</translation>
+        <translation>i filtri provider sono in OR</translation>
     </message>
     <message>
+        <location line="-2148"/>
+        <location line="+2"/>
         <source>ready</source>
-        <translation type="vanished">pronto</translation>
+        <translation>pronto</translation>
     </message>
     <message>
+        <location line="+2384"/>
         <source>wanted %1 · exceptions %2</source>
-        <translation type="vanished">ricercati %1 · eccezioni %2</translation>
+        <translation>ricercati %1 · eccezioni %2</translation>
     </message>
     <message>
+        <location line="-2681"/>
         <source>%1 km</source>
-        <translation type="vanished">%1 km</translation>
+        <translation>%1 km</translation>
     </message>
     <message>
+        <location line="+1513"/>
         <source>AZ</source>
-        <translation type="vanished">AZ</translation>
+        <translation>AZ</translation>
     </message>
     <message>
+        <location line="-1515"/>
         <source>AZ %1°</source>
-        <translation type="vanished">AZ %1°</translation>
+        <translation>AZ %1°</translation>
     </message>
     <message>
+        <location line="-2"/>
         <source>EL %1°</source>
-        <translation type="vanished">EL %1°</translation>
+        <translation>EL %1°</translation>
     </message>
     <message>
+        <location line="+2090"/>
         <source>FB AZ %1° / EL %2°</source>
-        <translation type="vanished">FB AZ %1° / EL %2°</translation>
+        <translation>FB AZ %1° / EL %2°</translation>
     </message>
     <message>
+        <location line="-32"/>
         <source>max EL</source>
-        <translation type="vanished">max EL</translation>
+        <translation>max EL</translation>
     </message>
     <message>
+        <location line="-14"/>
         <source>min EL</source>
-        <translation type="vanished">min EL</translation>
+        <translation>min EL</translation>
     </message>
     <message>
+        <location line="-484"/>
         <source>ms</source>
-        <translation type="vanished">ms</translation>
+        <translation>ms</translation>
     </message>
     <message>
+        <location line="-510"/>
         <source>[%1] </source>
-        <translation type="vanished">[%1] </translation>
+        <translation>[%1] </translation>
     </message>
     <message>
+        <location line="-1066"/>
         <source>NEW</source>
-        <translation type="vanished">NUOVO</translation>
+        <translation>NUOVO</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>UNCONFIRMED</source>
-        <translation type="vanished">NON CONFERMATO</translation>
+        <translation>NON CONFERMATO</translation>
     </message>
     <message>
+        <location line="-2"/>
         <source>VALID</source>
-        <translation type="vanished">VALIDO</translation>
+        <translation>VALIDO</translation>
     </message>
     <message>
+        <location line="-1"/>
         <source>EXPIRED</source>
-        <translation type="vanished">SCADUTO</translation>
+        <translation>SCADUTO</translation>
     </message>
     <message>
+        <location line="+23"/>
         <source>VISIBLE</source>
-        <translation type="vanished">VISIBILE</translation>
+        <translation>VISIBILE</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>BELOW HORIZON</source>
-        <translation type="vanished">SOTTO L&apos;ORIZZONTE</translation>
+        <translation>SOTTO L&apos;ORIZZONTE</translation>
     </message>
     <message>
+        <location line="+80"/>
         <source>TRACK</source>
-        <translation type="vanished">INSEGUI</translation>
+        <translation>INSEGUI</translation>
     </message>
     <message>
+        <location line="+1989"/>
         <source>STOP</source>
-        <translation type="vanished">STOP</translation>
+        <translation>STOP</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>PARK</source>
-        <translation type="vanished">PARCHEGGIA</translation>
+        <translation>PARCHEGGIA</translation>
     </message>
     <message>
+        <location line="-103"/>
         <source>Rotator</source>
-        <translation type="vanished">Rotore</translation>
+        <translation>Rotore</translation>
     </message>
     <message>
+        <location line="+83"/>
         <source>Park on stop</source>
-        <translation type="vanished">Parcheggia allo stop</translation>
+        <translation>Parcheggia allo stop</translation>
     </message>
     <message>
+        <location line="-38"/>
         <source>Safety</source>
-        <translation type="vanished">Sicurezza</translation>
+        <translation>Sicurezza</translation>
     </message>
     <message>
+        <location line="-478"/>
         <source>range</source>
-        <translation type="vanished">distanza</translation>
+        <translation>distanza</translation>
     </message>
     <message>
+        <location line="+551"/>
         <source> · tracking</source>
-        <translation type="vanished"> · inseguimento</translation>
+        <translation> · inseguimento</translation>
     </message>
     <message>
+        <location line="-550"/>
         <source>refresh</source>
-        <translation type="vanished">aggiorna</translation>
+        <translation>aggiorna</translation>
     </message>
     <message>
+        <location line="-553"/>
         <source>Clear cache</source>
-        <translation type="vanished">Svuota la cache</translation>
+        <translation>Svuota la cache</translation>
     </message>
     <message>
+        <location line="-28"/>
         <source>STYLE</source>
-        <translation type="vanished">STILE</translation>
+        <translation>STILE</translation>
     </message>
     <message>
         <source>Cache obsoleta · aggiornamento in corso</source>
@@ -9709,68 +11443,82 @@ I modelli predefiniti partono come frame nativi compatti.</translation>
         <translation type="vanished">Feedback non disponibile</translation>
     </message>
     <message>
+        <location line="-944"/>
         <source>Spot scaduto</source>
-        <translation type="vanished">Spot scaduto</translation>
+        <translation>Spot scaduto</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Spot valido ancora %1 s</source>
-        <translation type="vanished">Spot valido ancora %1 s</translation>
+        <translation>Spot valido ancora %1 s</translation>
     </message>
     <message>
         <source>Validità non dichiarata dal provider</source>
         <translation type="vanished">Validità non dichiarata dal provider</translation>
     </message>
     <message>
+        <location line="+4127"/>
         <source>Image files (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</source>
-        <translation type="vanished">File immagine (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</translation>
+        <translation>File immagine (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</translation>
     </message>
     <message>
+        <location line="-1"/>
         <source>World raster (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</source>
-        <translation type="vanished">Raster del mondo (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</translation>
+        <translation>Raster del mondo (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</translation>
     </message>
     <message>
+        <location line="-3145"/>
         <source>Import offline raster</source>
-        <translation type="vanished">Importa un raster offline</translation>
+        <translation>Importa un raster offline</translation>
     </message>
     <message>
+        <location line="+3142"/>
         <source>Import offline world raster</source>
-        <translation type="vanished">Importa un raster del mondo offline</translation>
+        <translation>Importa un raster del mondo offline</translation>
     </message>
     <message>
+        <location line="-3138"/>
         <source>Import a legally obtained equirectangular world raster, such as a Natural Earth export. Decodium stores a private local copy and does not download tiles.</source>
-        <translation type="vanished">Importa un raster del mondo equirettangolare ottenuto legalmente, per esempio un&apos;esportazione di Natural Earth. Decodium ne conserva una copia locale privata e non scarica tasselli.</translation>
+        <translation>Importa un raster del mondo equirettangolare ottenuto legalmente, per esempio un&apos;esportazione di Natural Earth. Decodium ne conserva una copia locale privata e non scarica tasselli.</translation>
     </message>
     <message>
         <source>Atlas locale, OpenStreetMap/OpenTopoMap, GEBCO bathymetry, NASA GIBS e MapTiler. Se un provider fallisce viene provato il fallback configurato.</source>
         <translation type="vanished">Atlas locale, OpenStreetMap/OpenTopoMap, GEBCO bathymetry, NASA GIBS e MapTiler. Se un provider fallisce viene provato il fallback configurato.</translation>
     </message>
     <message>
+        <location line="-2067"/>
         <source>Auroral propagation forecast. The temporal legend shows source age and validity.</source>
-        <translation type="vanished">Previsione di propagazione aurorale. La legenda temporale mostra età e validità della fonte.</translation>
+        <translation>Previsione di propagazione aurorale. La legenda temporale mostra età e validità della fonte.</translation>
     </message>
     <message>
+        <location line="-6"/>
         <source>F2 critical-frequency forecast used to estimate ionospheric support for HF paths.</source>
-        <translation type="vanished">Previsione della frequenza critica F2, usata per stimare il supporto ionosferico dei percorsi HF.</translation>
+        <translation>Previsione della frequenza critica F2, usata per stimare il supporto ionosferico dei percorsi HF.</translation>
     </message>
     <message>
+        <location line="-2"/>
         <source>Maximum Usable Frequency forecast. The temporal legend reports acquisition time, validity and visual decay.</source>
-        <translation type="vanished">Previsione della massima frequenza utilizzabile. La legenda temporale riporta ora di acquisizione, validità e dissolvenza visiva.</translation>
+        <translation>Previsione della massima frequenza utilizzabile. La legenda temporale riporta ora di acquisizione, validità e dissolvenza visiva.</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>NVIS forecast derived from the current foF2 map; it is kept as a separate operational layer.</source>
-        <translation type="vanished">Previsione NVIS ricavata dalla mappa foF2 corrente; resta un livello operativo separato.</translation>
+        <translation>Previsione NVIS ricavata dalla mappa foF2 corrente; resta un livello operativo separato.</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Sporadic-E probability forecast. Cached data fades after its validity window and remains labelled stale.</source>
-        <translation type="vanished">Previsione di probabilità di E sporadico. I dati in cache sfumano dopo la finestra di validità e restano marcati come obsoleti.</translation>
+        <translation>Previsione di probabilità di E sporadico. I dati in cache sfumano dopo la finestra di validità e restano marcati come obsoleti.</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Offline mode pauses cloud/network services, keeps ADIF, logbook, cache and radio activity available, and can use an imported user-provided world raster.</source>
-        <translation type="vanished">La modalità offline mette in pausa i servizi di rete, tiene disponibili ADIF, registro, cache e attività radio, e può usare un raster del mondo importato dall&apos;utente.</translation>
+        <translation>La modalità offline mette in pausa i servizi di rete, tiene disponibili ADIF, registro, cache e attività radio, e può usare un raster del mondo importato dall&apos;utente.</translation>
     </message>
     <message>
+        <location line="+2011"/>
         <source>Pause cloud/network services, keep local ADIF, logbook, cache and radio activity available, and use the local atlas or imported raster pack.</source>
-        <translation type="vanished">Metti in pausa i servizi di rete, tieni disponibili ADIF, registro, cache e attività radio locali, e usa l&apos;atlante locale o il pacchetto raster importato.</translation>
+        <translation>Metti in pausa i servizi di rete, tieni disponibili ADIF, registro, cache e attività radio locali, e usa l&apos;atlante locale o il pacchetto raster importato.</translation>
     </message>
     <message>
         <source>PSK Reporter: no receivers loaded for the last %1 minutes</source>
@@ -9785,253 +11533,318 @@ I modelli predefiniti partono come frame nativi compatti.</translation>
         <translation type="vanished">Recupera i ricevitori che hanno sentito il tuo nominativo negli ultimi %1 minuti. L&apos;invio PSK è indipendente.</translation>
     </message>
     <message>
+        <location line="+267"/>
         <source>5 min</source>
-        <translation type="vanished">5 min</translation>
+        <translation>5 min</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>10 min</source>
-        <translation type="vanished">10 min</translation>
+        <translation>10 min</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>15 min</source>
-        <translation type="vanished">15 min</translation>
+        <translation>15 min</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>20 min</source>
-        <translation type="vanished">20 min</translation>
+        <translation>20 min</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>25 min</source>
-        <translation type="vanished">25 min</translation>
+        <translation>25 min</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>30 min</source>
-        <translation type="vanished">30 min</translation>
+        <translation>30 min</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>35 min</source>
-        <translation type="vanished">35 min</translation>
+        <translation>35 min</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>40 min</source>
-        <translation type="vanished">40 min</translation>
+        <translation>40 min</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>45 min</source>
-        <translation type="vanished">45 min</translation>
+        <translation>45 min</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>50 min</source>
-        <translation type="vanished">50 min</translation>
+        <translation>50 min</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>55 min</source>
-        <translation type="vanished">55 min</translation>
+        <translation>55 min</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>60 min</source>
-        <translation type="vanished">60 min</translation>
+        <translation>60 min</translation>
     </message>
     <message>
+        <location line="-18"/>
         <source>PSK spots</source>
-        <translation type="vanished">Spot PSK</translation>
+        <translation>Spot PSK</translation>
     </message>
     <message>
+        <location line="-10"/>
         <source>Enable the PSK layer to retrieve PSK Reporter spots</source>
-        <translation type="vanished">Attiva il livello PSK per recuperare gli spot di PSK Reporter</translation>
+        <translation>Attiva il livello PSK per recuperare gli spot di PSK Reporter</translation>
     </message>
     <message>
+        <location line="+46"/>
         <source>Look-back and expiry period for PSK Reporter spots displayed on the Live Map</source>
-        <translation type="vanished">Periodo di consultazione all&apos;indietro e di scadenza degli spot di PSK Reporter mostrati sulla Live Map</translation>
+        <translation>Periodo di consultazione all&apos;indietro e di scadenza degli spot di PSK Reporter mostrati sulla Live Map</translation>
     </message>
     <message>
+        <location line="+377"/>
         <source>PSK Reporter Live Map window: %1 minutes</source>
-        <translation type="vanished">Finestra Live Map di PSK Reporter: %1 minuti</translation>
+        <translation>Finestra Live Map di PSK Reporter: %1 minuti</translation>
     </message>
     <message>
+        <location line="-1"/>
         <source>PSK Reporter: refreshing Live Map spots…</source>
-        <translation type="vanished">PSK Reporter: aggiornamento degli spot della Live Map…</translation>
+        <translation>PSK Reporter: aggiornamento degli spot della Live Map…</translation>
     </message>
     <message>
+        <location line="-421"/>
         <source>Refresh PSK Reporter spots for the Live Map. PSK upload is independent.</source>
-        <translation type="vanished">Aggiorna gli spot di PSK Reporter per la Live Map. L&apos;invio PSK è indipendente.</translation>
+        <translation>Aggiorna gli spot di PSK Reporter per la Live Map. L&apos;invio PSK è indipendente.</translation>
     </message>
     <message>
+        <location line="-2291"/>
         <source>PSK Reporter reception reports for your callsign during the last %1 minutes. Decodium PSK upload does not need to be enabled.</source>
-        <translation type="vanished">Rapporti di ricezione di PSK Reporter per il tuo nominativo negli ultimi %1 minuti. Non serve che l&apos;invio PSK di Decodium sia attivo.</translation>
+        <translation>Rapporti di ricezione di PSK Reporter per il tuo nominativo negli ultimi %1 minuti. Non serve che l&apos;invio PSK di Decodium sia attivo.</translation>
     </message>
     <message>
+        <location line="+180"/>
         <source>Unspecified</source>
-        <translation type="vanished">Non specificato</translation>
+        <translation>Non specificato</translation>
     </message>
     <message>
+        <location line="+956"/>
+        <location line="+14"/>
         <source>This map marker has no callsign.</source>
-        <translation type="vanished">Questo segnaposto non ha un nominativo.</translation>
+        <translation>Questo segnaposto non ha un nominativo.</translation>
     </message>
     <message>
+        <location line="+14"/>
         <source>Enable a rotator to aim the antenna.</source>
-        <translation type="vanished">Abilita un rotore per puntare l&apos;antenna.</translation>
+        <translation>Abilita un rotore per puntare l&apos;antenna.</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>Enable a rotator to track this satellite.</source>
-        <translation type="vanished">Abilita un rotore per inseguire questo satellite.</translation>
+        <translation>Abilita un rotore per inseguire questo satellite.</translation>
     </message>
     <message>
+        <location line="+916"/>
+        <location line="+1492"/>
+        <location line="+1575"/>
         <source>Clear</source>
-        <translation type="vanished">Cancella</translation>
+        <translation>Cancella</translation>
     </message>
     <message>
+        <location line="-3018"/>
+        <location line="+1071"/>
         <source>Refresh</source>
-        <translation type="vanished">Aggiorna</translation>
+        <translation>Aggiorna</translation>
     </message>
     <message>
+        <location line="-1033"/>
         <source>Band</source>
-        <translation type="vanished">Banda</translation>
+        <translation>Banda</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Mode</source>
-        <translation type="vanished">Modo</translation>
+        <translation>Modo</translation>
     </message>
     <message>
+        <location line="+28"/>
         <source>Source</source>
-        <translation type="vanished">Fonte</translation>
+        <translation>Fonte</translation>
     </message>
     <message>
+        <location line="+33"/>
         <source>Continent</source>
-        <translation type="vanished">Continente</translation>
+        <translation>Continente</translation>
     </message>
     <message>
+        <location line="+18"/>
         <source>CQ only</source>
-        <translation type="vanished">Solo CQ</translation>
+        <translation>Solo CQ</translation>
     </message>
     <message>
+        <location line="+146"/>
         <source>Connected</source>
-        <translation type="vanished">Connesso</translation>
+        <translation>Connesso</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Connect</source>
-        <translation type="vanished">Connetti</translation>
+        <translation>Connetti</translation>
     </message>
     <message>
+        <location line="+834"/>
         <source>Source: %1</source>
-        <translation type="vanished">Sorgente: %1</translation>
+        <translation>Sorgente: %1</translation>
     </message>
     <message>
+        <location line="+41"/>
         <source>New DXCC</source>
-        <translation type="vanished">Nuovo DXCC</translation>
+        <translation>Nuovo DXCC</translation>
     </message>
     <message>
+        <location line="+155"/>
         <source>LoTW</source>
-        <translation type="vanished">LoTW</translation>
+        <translation>LoTW</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>eQSL</source>
-        <translation type="vanished">eQSL</translation>
+        <translation>eQSL</translation>
     </message>
     <message>
+        <location line="+122"/>
         <source>CQ</source>
-        <translation type="vanished">CQ</translation>
+        <translation>CQ</translation>
     </message>
     <message>
+        <location line="+302"/>
         <source>Hide</source>
-        <translation type="vanished">Nascondi</translation>
+        <translation>Nascondi</translation>
     </message>
     <message>
+        <location line="+30"/>
         <source>Add</source>
-        <translation type="vanished">Aggoingere</translation>
+        <translation>Aggoingere</translation>
     </message>
     <message>
+        <location line="-3435"/>
         <source>Live Map</source>
-        <translation type="vanished">Mappa live</translation>
+        <translation>Mappa live</translation>
     </message>
     <message>
+        <location line="+1413"/>
         <source>#RRGGBB</source>
-        <translation type="vanished">#RRGGBB</translation>
+        <translation>#RRGGBB</translation>
     </message>
     <message>
+        <location line="+1012"/>
         <source>foF2</source>
-        <translation type="vanished">foF2</translation>
+        <translation>foF2</translation>
     </message>
     <message>
+        <location line="+45"/>
         <source>Es</source>
-        <translation type="vanished">Es</translation>
+        <translation>Es</translation>
     </message>
     <message>
+        <location line="-2740"/>
+        <location line="+1339"/>
         <source>Corroborated</source>
-        <translation type="vanished">Confermato</translation>
+        <translation>Confermato</translation>
     </message>
     <message>
+        <location line="+120"/>
         <source>Matched VUCC grid: %1 · Primary: %2</source>
-        <translation type="vanished">Locatore VUCC corrispondente: %1 · Principale: %2</translation>
+        <translation>Locatore VUCC corrispondente: %1 · Principale: %2</translation>
     </message>
     <message>
+        <location line="-2"/>
         <source>VUCC grids: %1</source>
-        <translation type="vanished">Locatori VUCC: %1</translation>
+        <translation>Locatori VUCC: %1</translation>
     </message>
 </context>
 <context>
     <name>LocatorBar</name>
     <message>
+        <location filename="../qml/decodium/rotor/LocatorBar.qml" line="+26"/>
         <source>Locator, e.g. FN31pr</source>
-        <translation type="vanished">Locatore, es. FN31pr</translation>
+        <translation>Locatore, es. FN31pr</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>SHORT</source>
-        <translation type="vanished">CORTO</translation>
+        <translation>CORTO</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>LONG</source>
-        <translation type="vanished">LUNGO</translation>
+        <translation>LUNGO</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>short %1° · long %2° · %3 km</source>
-        <translation type="vanished">corto %1° · lungo %2° · %3 km</translation>
+        <translation>corto %1° · lungo %2° · %3 km</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Reference QTH: %1</source>
-        <translation type="vanished">QTH di riferimento: %1</translation>
+        <translation>QTH di riferimento: %1</translation>
     </message>
 </context>
 <context>
     <name>LogDialog</name>
     <message>
+        <location filename="../qml/decodium/rtty/LogDialog.qml" line="+54"/>
         <source>LOG</source>
-        <translation type="vanished">LOG</translation>
+        <translation>LOG</translation>
     </message>
     <message numerus="yes">
+        <location line="+4"/>
         <source>%n contact(s)</source>
-        <translation type="vanished">
+        <translation>
             <numerusform>%n collegamento</numerusform>
             <numerusform>%n collegamenti</numerusform>
         </translation>
     </message>
     <message>
+        <location line="+38"/>
         <source>RST SENT</source>
-        <translation type="vanished">RST INVIATO</translation>
+        <translation>RST INVIATO</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>RST RCVD</source>
-        <translation type="vanished">RST RICEVUTO</translation>
+        <translation>RST RICEVUTO</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>NAME</source>
-        <translation type="vanished">NOME</translation>
+        <translation>NOME</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Log it</source>
-        <translation type="vanished">Registra</translation>
+        <translation>Registra</translation>
     </message>
     <message>
+        <location line="+46"/>
         <source>Worked before: %1 — last on %2</source>
-        <translation type="vanished">Gia&apos; lavorato: %1 — l&apos;ultima volta il %2</translation>
+        <translation>Gia&apos; lavorato: %1 — l&apos;ultima volta il %2</translation>
     </message>
     <message>
+        <location line="+81"/>
         <source>Export ADIF</source>
-        <translation type="vanished">Esporta ADIF</translation>
+        <translation>Esporta ADIF</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>Close</source>
-        <translation type="vanished">Chiudi</translation>
+        <translation>Chiudi</translation>
     </message>
 </context>
 <context>
@@ -10405,658 +12218,881 @@ I modelli predefiniti partono come frame nativi compatti.</translation>
 <context>
     <name>LogQsoPanel</name>
     <message>
+        <location filename="../qml/decodium/components/LogQsoPanel.qml" line="+133"/>
         <source>NEXT TX</source>
-        <translation type="vanished">PROSSIMA TX</translation>
+        <translation>PROSSIMA TX</translation>
     </message>
 </context>
 <context>
     <name>LogWindow</name>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="+256"/>
         <source>Importa file ADIF</source>
-        <translation type="vanished">Importa file ADIF</translation>
+        <translation>Importa file ADIF</translation>
     </message>
     <message>
+        <location line="+2"/>
+        <location line="+13"/>
+        <location line="+42"/>
         <source>ADIF files (*.adi *.adif)</source>
-        <translation type="vanished">File ADIF (*.adi *.adif)</translation>
+        <translation>File ADIF (*.adi *.adif)</translation>
     </message>
     <message>
+        <location line="-55"/>
+        <location line="+13"/>
+        <location line="+42"/>
         <source>All files (*)</source>
-        <translation type="vanished">Tutti i file (*)</translation>
+        <translation>Tutti i file (*)</translation>
     </message>
     <message>
+        <location line="-44"/>
         <source>Carica logbook ADIF</source>
-        <translation type="vanished">Carica logbook ADIF</translation>
+        <translation>Carica logbook ADIF</translation>
     </message>
     <message>
+        <location line="+42"/>
         <source>Esporta file ADIF</source>
-        <translation type="vanished">Esporta file ADIF</translation>
+        <translation>Esporta file ADIF</translation>
     </message>
     <message>
+        <location line="+100"/>
         <source>e.g. 9H1SR or AMICO</source>
-        <translation type="vanished">es. 9H1SR o AMICO</translation>
+        <translation>es. 9H1SR o AMICO</translation>
     </message>
     <message>
+        <location line="+28"/>
         <source>Delete logbook</source>
-        <translation type="vanished">Elimina logbook</translation>
+        <translation>Elimina logbook</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>You are about to delete the selected logbook.</source>
-        <translation type="vanished">Stai per eliminare il logbook selezionato.</translation>
+        <translation>Stai per eliminare il logbook selezionato.</translation>
     </message>
     <message>
+        <location line="+18"/>
         <source>Also delete the ADIF file from disk</source>
-        <translation type="vanished">Elimina anche il file ADIF dal disco</translation>
+        <translation>Elimina anche il file ADIF dal disco</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Destructive operation: the .adi file will be deleted. If this is the last logbook, Decodium will create a new empty logbook.</source>
-        <translation type="vanished">Operazione distruttiva: il file .adi sarà eliminato. Se questo è l&apos;ultimo logbook, Decodium ne creerà uno nuovo vuoto.</translation>
+        <translation>Operazione distruttiva: il file .adi sarà eliminato. Se questo è l&apos;ultimo logbook, Decodium ne creerà uno nuovo vuoto.</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>The .adi file will remain on disk; only the association with Decodium will be removed.</source>
-        <translation type="vanished">Il file .adi rimarrà sul disco; sarà rimossa solo l&apos;associazione con Decodium.</translation>
+        <translation>Il file .adi rimarrà sul disco; sarà rimossa solo l&apos;associazione con Decodium.</translation>
     </message>
     <message>
+        <location line="+21"/>
         <source>Confirm deletion</source>
-        <translation type="vanished">Conferma eliminazione</translation>
+        <translation>Conferma eliminazione</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Delete the QSO with %1?</source>
-        <translation type="vanished">Eliminare il QSO con %1?</translation>
+        <translation>Eliminare il QSO con %1?</translation>
     </message>
     <message>
+        <location line="+307"/>
         <source>Search callsign, locator...</source>
-        <translation type="vanished">Cerca nominativo, locatore...</translation>
+        <translation>Cerca nominativo, locatore...</translation>
     </message>
     <message>
+        <location line="+214"/>
+        <source>Select/deselect for export</source>
+        <translation>Seleziona/deseleziona per l&apos;esportazione</translation>
+    </message>
+    <message>
+        <location line="+55"/>
+        <source>Select QSO for ADIF export</source>
+        <translation>Seleziona QSO per l&apos;esportazione ADIF</translation>
+    </message>
+    <message>
+        <location line="+198"/>
         <source>✓ Save</source>
-        <translation type="vanished">✓ Salva</translation>
+        <translation>✓ Salva</translation>
     </message>
     <message>
+        <location line="+29"/>
         <source>✕ Delete</source>
-        <translation type="vanished">✕ Elimina</translation>
+        <translation>✕ Elimina</translation>
     </message>
     <message>
+        <location line="+20"/>
         <source>Cancel</source>
-        <translation type="vanished">Annulla</translation>
+        <translation>Annulla</translation>
     </message>
     <message>
+        <location line="-293"/>
         <source>Copy Callsign</source>
-        <translation type="vanished">Copia il nominativo</translation>
+        <translation>Copia il nominativo</translation>
     </message>
     <message>
+        <location line="-933"/>
+        <location line="+928"/>
+        <source>Export selected QSOs (%1)</source>
+        <translation>Esporta i QSO selezionati (%1)</translation>
+    </message>
+    <message>
+        <location line="-923"/>
+        <source>Export entire logbook</source>
+        <translation>Esporta l&apos;intero log</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Clear export selection</source>
+        <translation>Cancella la selezione di esportazione</translation>
+    </message>
+    <message>
+        <location line="+286"/>
         <source>Nuovo logbook</source>
-        <translation type="vanished">Nuovo logbook</translation>
+        <translation>Nuovo logbook</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Nome operatore / callsign</source>
-        <translation type="vanished">Nome operatore / callsign</translation>
+        <translation>Nome operatore / callsign</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>Backup log attuale</source>
-        <translation type="vanished">Backup log attuale</translation>
+        <translation>Backup log attuale</translation>
     </message>
     <message>
+        <location line="+178"/>
         <source>QSO Log</source>
-        <translation type="vanished">Registro QSO</translation>
+        <translation>Registro QSO</translation>
     </message>
     <message>
+        <location line="+36"/>
         <source>−</source>
-        <translation type="vanished">−</translation>
+        <translation>−</translation>
     </message>
     <message>
+        <location line="+17"/>
         <source>Minimize</source>
-        <translation type="vanished">Riduci a icona</translation>
+        <translation>Riduci a icona</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>✕</source>
-        <translation type="vanished">✕</translation>
+        <translation>✕</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Close</source>
-        <translation type="vanished">Chiudi</translation>
+        <translation>Chiudi</translation>
     </message>
     <message>
+        <location line="+87"/>
         <source>New</source>
-        <translation type="vanished">Nuovo</translation>
+        <translation>Nuovo</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Create a separate logbook</source>
-        <translation type="vanished">Crea un logbook separato</translation>
+        <translation>Crea un logbook separato</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Load</source>
-        <translation type="vanished">Carica</translation>
+        <translation>Carica</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Load/use an existing ADIF as a logbook</source>
-        <translation type="vanished">Carica e usa un ADIF esistente come logbook</translation>
+        <translation>Carica e usa un ADIF esistente come logbook</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Bkp</source>
-        <translation type="vanished">Bkp</translation>
+        <translation>Bkp</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Back up the active logbook</source>
-        <translation type="vanished">Fai una copia del logbook attivo</translation>
+        <translation>Fai una copia del logbook attivo</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Del</source>
-        <translation type="vanished">Elim</translation>
+        <translation>Elim</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Delete selected logbook</source>
-        <translation type="vanished">Elimina il logbook selezionato</translation>
+        <translation>Elimina il logbook selezionato</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>🔍</source>
-        <translation type="vanished">🔍</translation>
+        <translation>🔍</translation>
     </message>
     <message>
+        <location line="+47"/>
         <source>Clear</source>
-        <translation type="vanished">Cancella</translation>
+        <translation>Cancella</translation>
     </message>
     <message>
+        <location line="+15"/>
         <source>Remove search, band, and mode filters</source>
-        <translation type="vanished">Togli i filtri di ricerca, banda e modo</translation>
+        <translation>Togli i filtri di ricerca, banda e modo</translation>
     </message>
     <message>
         <source>Importa ADIF</source>
         <translation type="vanished">Importa ADIF</translation>
     </message>
     <message>
+        <location line="+21"/>
         <source>Import ADIF file</source>
-        <translation type="vanished">Importa un file ADIF</translation>
+        <translation>Importa un file ADIF</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Esporta ADIF</source>
-        <translation type="vanished">Esporta ADIF</translation>
+        <translation>Esporta ADIF</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Export ADIF</source>
-        <translation type="vanished">Esporta ADIF</translation>
+        <translation>Esporta ADIF</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>↻</source>
-        <translation type="vanished">↻</translation>
+        <translation>↻</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Refresh</source>
-        <translation type="vanished">Aggiorna</translation>
+        <translation>Aggiorna</translation>
     </message>
     <message>
+        <location line="+19"/>
         <source>Date/Time</source>
-        <translation type="vanished">Data/ora</translation>
+        <translation>Data/ora</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Dist</source>
-        <translation type="vanished">Dist</translation>
+        <translation>Dist</translation>
     </message>
     <message>
+        <location line="+153"/>
         <source>No QSOs found</source>
-        <translation type="vanished">Nessun QSO trovato</translation>
+        <translation>Nessun QSO trovato</translation>
     </message>
     <message>
+        <location line="+279"/>
         <source>MAX DIST</source>
-        <translation type="vanished">DIST MAX</translation>
+        <translation>DIST MAX</translation>
     </message>
     <message>
+        <location line="-494"/>
         <source>Import ADIF</source>
-        <translation type="vanished">Importa ADIF</translation>
+        <translation>Importa ADIF</translation>
     </message>
     <message>
+        <location line="-692"/>
         <source>ADIF import completed</source>
-        <translation type="vanished">Importazione ADIF completata</translation>
+        <translation>Importazione ADIF completata</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>ADIF import failed</source>
-        <translation type="vanished">Importazione ADIF non riuscita</translation>
+        <translation>Importazione ADIF non riuscita</translation>
     </message>
     <message>
+        <location line="+505"/>
         <source>Importing ADIF...</source>
-        <translation type="vanished">Importazione ADIF in corso…</translation>
+        <translation>Importazione ADIF in corso…</translation>
     </message>
 </context>
 <context>
     <name>LogWindowContent</name>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="+172"/>
         <source>Importa file ADIF</source>
-        <translation type="vanished">Importa file ADIF</translation>
+        <translation>Importa file ADIF</translation>
     </message>
     <message>
+        <location line="+2"/>
+        <location line="+19"/>
+        <location line="+12"/>
         <source>ADIF files (*.adi *.adif)</source>
-        <translation type="vanished">File ADIF (*.adi *.adif)</translation>
+        <translation>File ADIF (*.adi *.adif)</translation>
     </message>
     <message>
+        <location line="-31"/>
+        <location line="+19"/>
+        <location line="+12"/>
         <source>All files (*)</source>
-        <translation type="vanished">Tutti i file (*)</translation>
+        <translation>Tutti i file (*)</translation>
     </message>
     <message>
+        <location line="-14"/>
         <source>Esporta file ADIF</source>
-        <translation type="vanished">Esporta file ADIF</translation>
+        <translation>Esporta file ADIF</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Carica logbook ADIF</source>
-        <translation type="vanished">Carica logbook ADIF</translation>
+        <translation>Carica logbook ADIF</translation>
     </message>
     <message>
+        <location line="+94"/>
         <source>e.g. 9H1SR or AMICO</source>
-        <translation type="vanished">es. 9H1SR o AMICO</translation>
+        <translation>es. 9H1SR o AMICO</translation>
     </message>
     <message>
+        <location line="+28"/>
         <source>Delete logbook</source>
-        <translation type="vanished">Elimina logbook</translation>
+        <translation>Elimina logbook</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>You are about to delete the selected logbook.</source>
-        <translation type="vanished">Stai per eliminare il logbook selezionato.</translation>
+        <translation>Stai per eliminare il logbook selezionato.</translation>
     </message>
     <message>
+        <location line="+18"/>
         <source>Also delete the ADIF file from disk</source>
-        <translation type="vanished">Elimina anche il file ADIF dal disco</translation>
+        <translation>Elimina anche il file ADIF dal disco</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Destructive operation: the .adi file will be deleted. If this is the last logbook, Decodium will create a new empty logbook.</source>
-        <translation type="vanished">Operazione distruttiva: il file .adi sarà eliminato. Se questo è l&apos;ultimo logbook, Decodium ne creerà uno nuovo vuoto.</translation>
+        <translation>Operazione distruttiva: il file .adi sarà eliminato. Se questo è l&apos;ultimo logbook, Decodium ne creerà uno nuovo vuoto.</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>The .adi file will remain on disk; only the association with Decodium will be removed.</source>
-        <translation type="vanished">Il file .adi rimarrà sul disco; sarà rimossa solo l&apos;associazione con Decodium.</translation>
+        <translation>Il file .adi rimarrà sul disco; sarà rimossa solo l&apos;associazione con Decodium.</translation>
     </message>
     <message>
+        <location line="+21"/>
         <source>Confirm deletion</source>
-        <translation type="vanished">Conferma eliminazione</translation>
+        <translation>Conferma eliminazione</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Delete the QSO with %1?</source>
-        <translation type="vanished">Eliminare il QSO con %1?</translation>
+        <translation>Eliminare il QSO con %1?</translation>
     </message>
     <message>
+        <location line="+154"/>
         <source>Search...</source>
-        <translation type="vanished">Cerca...</translation>
+        <translation>Cerca...</translation>
     </message>
     <message>
+        <location line="+405"/>
         <source>✓ Save</source>
-        <translation type="vanished">✓ Salva</translation>
+        <translation>✓ Salva</translation>
     </message>
     <message>
+        <location line="+25"/>
         <source>✕ Delete</source>
-        <translation type="vanished">✕ Elimina</translation>
+        <translation>✕ Elimina</translation>
     </message>
     <message>
+        <location line="+19"/>
         <source>Cancel</source>
-        <translation type="vanished">Annulla</translation>
+        <translation>Annulla</translation>
     </message>
     <message>
+        <location line="-711"/>
         <source>Nuovo logbook</source>
-        <translation type="vanished">Nuovo logbook</translation>
+        <translation>Nuovo logbook</translation>
     </message>
     <message>
+        <location line="-238"/>
+        <location line="+682"/>
+        <source>Export selected QSOs (%1)</source>
+        <translation>Esporta i QSO selezionati (%1)</translation>
+    </message>
+    <message>
+        <location line="-677"/>
+        <source>Export entire logbook</source>
+        <translation>Esporta l&apos;intero log</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Clear export selection</source>
+        <translation>Cancella la selezione di esportazione</translation>
+    </message>
+    <message>
+        <location line="+238"/>
         <source>Nome operatore / callsign</source>
-        <translation type="vanished">Nome operatore / callsign</translation>
+        <translation>Nome operatore / callsign</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>Backup log attuale</source>
-        <translation type="vanished">Backup log attuale</translation>
+        <translation>Backup log attuale</translation>
     </message>
     <message>
+        <location line="+188"/>
         <source>New</source>
-        <translation type="vanished">Nuovo</translation>
+        <translation>Nuovo</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Create a separate logbook</source>
-        <translation type="vanished">Crea un logbook separato</translation>
+        <translation>Crea un logbook separato</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Load</source>
-        <translation type="vanished">Carica</translation>
+        <translation>Carica</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Load/use an existing ADIF</source>
-        <translation type="vanished">Carica e usa un ADIF esistente</translation>
+        <translation>Carica e usa un ADIF esistente</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Bkp</source>
-        <translation type="vanished">Bkp</translation>
+        <translation>Bkp</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Back up the active logbook</source>
-        <translation type="vanished">Fai una copia del logbook attivo</translation>
+        <translation>Fai una copia del logbook attivo</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Del</source>
-        <translation type="vanished">Elim</translation>
+        <translation>Elim</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Delete selected logbook</source>
-        <translation type="vanished">Elimina il logbook selezionato</translation>
+        <translation>Elimina il logbook selezionato</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>🔍</source>
-        <translation type="vanished">🔍</translation>
+        <translation>🔍</translation>
     </message>
     <message>
+        <location line="+42"/>
         <source>×</source>
-        <translation type="vanished">×</translation>
+        <translation>×</translation>
     </message>
     <message>
+        <location line="+15"/>
         <source>Remove filters</source>
-        <translation type="vanished">Togli i filtri</translation>
+        <translation>Togli i filtri</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>⬇</source>
-        <translation type="vanished">⬇</translation>
+        <translation>⬇</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Import ADIF</source>
-        <translation type="vanished">Importa ADIF</translation>
+        <translation>Importa ADIF</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>⬆</source>
-        <translation type="vanished">⬆</translation>
+        <translation>⬆</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Export ADIF</source>
-        <translation type="vanished">Esporta ADIF</translation>
+        <translation>Esporta ADIF</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>↻</source>
-        <translation type="vanished">↻</translation>
+        <translation>↻</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Refresh</source>
-        <translation type="vanished">Aggiorna</translation>
+        <translation>Aggiorna</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>Date/Time</source>
-        <translation type="vanished">Data/ora</translation>
+        <translation>Data/ora</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Rpt</source>
-        <translation type="vanished">Rap</translation>
+        <translation>Rap</translation>
     </message>
     <message>
+        <location line="+65"/>
+        <source>Select/deselect for export</source>
+        <translation>Seleziona/deseleziona per l&apos;esportazione</translation>
+    </message>
+    <message>
+        <location line="+9"/>
         <source>Copy Callsign</source>
-        <translation type="vanished">Copia il nominativo</translation>
+        <translation>Copia il nominativo</translation>
     </message>
     <message>
+        <location line="+43"/>
+        <source>Select QSO for ADIF export</source>
+        <translation>Seleziona QSO per l&apos;esportazione ADIF</translation>
+    </message>
+    <message>
+        <location line="+108"/>
         <source>Sent</source>
-        <translation type="vanished">Inviato</translation>
+        <translation>Inviato</translation>
     </message>
     <message>
+        <location line="+17"/>
         <source>Rcvd</source>
-        <translation type="vanished">Ricevuto</translation>
+        <translation>Ricevuto</translation>
     </message>
     <message>
+        <location line="-792"/>
         <source>ADIF import completed</source>
-        <translation type="vanished">Importazione ADIF completata</translation>
+        <translation>Importazione ADIF completata</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>ADIF import failed</source>
-        <translation type="vanished">Importazione ADIF non riuscita</translation>
+        <translation>Importazione ADIF non riuscita</translation>
     </message>
     <message>
+        <location line="+320"/>
         <source>Importing ADIF...</source>
-        <translation type="vanished">Importazione ADIF in corso…</translation>
+        <translation>Importazione ADIF in corso…</translation>
     </message>
 </context>
 <context>
     <name>MacroDialog</name>
     <message>
+        <location filename="../qml/decodium/components/MacroDialog.qml" line="+151"/>
         <source>⌨️ TX Macro Configuration</source>
-        <translation type="vanished">⌨️ Configurazione macro TX</translation>
+        <translation>⌨️ Configurazione macro TX</translation>
     </message>
     <message>
+        <location line="-138"/>
         <source>Macro Settings</source>
-        <translation type="vanished">Impostazioni delle macro</translation>
+        <translation>Impostazioni delle macro</translation>
     </message>
     <message>
+        <location line="+178"/>
         <source>Minimize</source>
-        <translation type="vanished">Riduci a icona</translation>
+        <translation>Riduci a icona</translation>
     </message>
     <message>
+        <location line="+53"/>
         <source>Contest Mode</source>
-        <translation type="vanished">Modalità Contest</translation>
+        <translation>Modalità Contest</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Contest:</source>
-        <translation type="vanished">Concorso:</translation>
+        <translation>Concorso:</translation>
     </message>
     <message>
+        <location line="+40"/>
         <source>Serial #:</source>
-        <translation type="vanished">Progressivo:</translation>
+        <translation>Progressivo:</translation>
     </message>
     <message>
+        <location line="+40"/>
         <source>Exchange:</source>
-        <translation type="vanished">Rapporto:</translation>
+        <translation>Rapporto:</translation>
     </message>
     <message>
+        <location line="+44"/>
         <source>TX Macro Templates</source>
-        <translation type="vanished">Modelli di macro TX</translation>
+        <translation>Modelli di macro TX</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Reset to Default</source>
-        <translation type="vanished">Ripristina i valori iniziali</translation>
+        <translation>Ripristina i valori iniziali</translation>
     </message>
     <message>
+        <location line="+24"/>
         <source>Codes: %M=MyCall  %T=TheirCall  %R=Report  %N=Serial#  %G4=Grid4  %G6=Grid6  %E=Exchange</source>
-        <translation type="vanished">Codes: %M=MyCall  %T=TheirCall  %R=Report  %N=Serial#  %G4=Grid4  %G6=Grid6  %E=Exchange</translation>
+        <translation>Codes: %M=MyCall  %T=TheirCall  %R=Report  %N=Serial#  %G4=Grid4  %G6=Grid6  %E=Exchange</translation>
     </message>
     <message>
+        <location line="+70"/>
         <source>Preview</source>
-        <translation type="vanished">Anteprima</translation>
+        <translation>Anteprima</translation>
     </message>
     <message>
+        <location line="+45"/>
         <source>Click &apos;Preview&apos; to see expanded macro</source>
-        <translation type="vanished">Premi «Anteprima» per vedere la macro espansa</translation>
+        <translation>Premi «Anteprima» per vedere la macro espansa</translation>
     </message>
 </context>
 <context>
     <name>MacroDialogContent</name>
     <message>
+        <location filename="../qml/decodium/components/MacroDialogContent.qml" line="+35"/>
         <source>Contest Mode</source>
-        <translation type="vanished">Modalità Contest</translation>
+        <translation>Modalità Contest</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>Enable Contest Mode</source>
-        <translation type="vanished">Attiva il modo contest</translation>
+        <translation>Attiva il modo contest</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Exchange:</source>
-        <translation type="vanished">Rapporto:</translation>
+        <translation>Rapporto:</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>e.g., 599 001</source>
-        <translation type="vanished">es. 599 001</translation>
+        <translation>es. 599 001</translation>
     </message>
     <message>
+        <location line="+25"/>
         <source>TX Macros</source>
-        <translation type="vanished">Macro TX</translation>
+        <translation>Macro TX</translation>
     </message>
     <message>
+        <location line="+48"/>
         <source>Available Variables:</source>
-        <translation type="vanished">Variabili disponibili:</translation>
+        <translation>Variabili disponibili:</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>%CALL - Their callsign | %MYCALL - Your callsign | %GRID - Their grid</source>
-        <translation type="vanished">%CALL - Their callsign | %MYCALL - Your callsign | %GRID - Their grid</translation>
+        <translation>%CALL - Their callsign | %MYCALL - Your callsign | %GRID - Their grid</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>%RST - Signal report | %EXCH - Contest exchange | %73 - 73 message</source>
-        <translation type="vanished">%RST - Signal report | %EXCH - Contest exchange | %73 - 73 message</translation>
+        <translation>%RST - Signal report | %EXCH - Contest exchange | %73 - 73 message</translation>
     </message>
 </context>
 <context>
     <name>Main</name>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="+13054"/>
         <source>Decodium RX - terminal receiver...</source>
-        <translation type="vanished">Decodium RX - ricevitore da terminale...</translation>
+        <translation>Decodium RX - ricevitore da terminale...</translation>
     </message>
     <message>
+        <location line="-6916"/>
         <source>DX-Ped</source>
-        <translation type="vanished">DX-Ped</translation>
+        <translation>DX-Ped</translation>
     </message>
     <message>
+        <location line="-18"/>
         <source>Switch to the DX-Pedition workspace (3-column tactical layout)</source>
-        <translation type="vanished">Passa al workspace DX-Pedition (layout tattico a 3 colonne)</translation>
+        <translation>Passa al workspace DX-Pedition (layout tattico a 3 colonne)</translation>
     </message>
     <message>
+        <location line="+5371"/>
         <source>Slow-PC mode</source>
-        <translation type="vanished">Modalità PC lento</translation>
+        <translation>Modalità PC lento</translation>
     </message>
     <message>
+        <location line="+16"/>
         <source>If Decodium feels slow or the graphics freeze on this computer, you can turn on Slow-PC mode: it switches to OpenGL graphics (stable on older video cards), lightens CPU usage, and hides the heavy Live Map.
 
 Turn it on now? You can change this anytime in Settings.</source>
-        <translation type="vanished">Se Decodium risulta lento o la grafica si blocca su questo computer, puoi attivare la Modalità PC lento: passa alla grafica OpenGL (stabile su schede video meno recenti), alleggerisce l&apos;uso della CPU e nasconde la pesante Mappa live.
+        <translation>Se Decodium risulta lento o la grafica si blocca su questo computer, puoi attivare la Modalità PC lento: passa alla grafica OpenGL (stabile su schede video meno recenti), alleggerisce l&apos;uso della CPU e nasconde la pesante Mappa live.
 
 Attivarla ora? Puoi cambiare questa impostazione in qualsiasi momento nelle Impostazioni.</translation>
     </message>
     <message>
+        <location line="-2073"/>
         <source>Clear Full Spectrum</source>
-        <translation type="vanished">Cancella il Full Spectrum</translation>
+        <translation>Cancella il Full Spectrum</translation>
     </message>
     <message>
+        <location line="+3637"/>
         <source>About Decodium</source>
-        <translation type="vanished">Informazioni su Decodium</translation>
+        <translation>Informazioni su Decodium</translation>
     </message>
     <message>
+        <location line="+17"/>
         <source>Useful Links...</source>
-        <translation type="vanished">Link utili...</translation>
+        <translation>Link utili...</translation>
     </message>
     <message>
+        <location line="+24"/>
+        <location line="+924"/>
         <source>Keyboard Shortcuts</source>
-        <translation type="vanished">Scorciatoie da tastiera</translation>
+        <translation>Scorciatoie da tastiera</translation>
     </message>
     <message>
+        <location line="-908"/>
         <source>SWL Mode (RX Only)</source>
-        <translation type="vanished">Modalità SWL (solo RX)</translation>
+        <translation>Modalità SWL (solo RX)</translation>
     </message>
     <message>
+        <location line="+16"/>
         <source>Multi-Answer Mode</source>
-        <translation type="vanished">Modalità Multi-Risposta</translation>
+        <translation>Modalità Multi-Risposta</translation>
     </message>
     <message>
+        <location line="+32"/>
         <source>MAM Window...</source>
-        <translation type="vanished">Finestra MAM...</translation>
+        <translation>Finestra MAM...</translation>
     </message>
     <message>
+        <location line="+40"/>
+        <location line="+665"/>
         <source>TX Watchdog</source>
-        <translation type="vanished">Watchdog TX</translation>
+        <translation>Watchdog TX</translation>
     </message>
     <message>
+        <location line="-649"/>
+        <location line="+726"/>
         <source>Contest Mode</source>
-        <translation type="vanished">Modalità Contest</translation>
+        <translation>Modalità Contest</translation>
     </message>
     <message>
+        <location line="-411"/>
         <source>Show clock</source>
-        <translation type="vanished">Mostra orologio</translation>
+        <translation>Mostra orologio</translation>
     </message>
     <message>
+        <location line="+445"/>
         <source>Rule: 1 point per worked station</source>
-        <translation type="vanished">Regola: 1 punto a stazione</translation>
+        <translation>Regola: 1 punto a stazione</translation>
     </message>
     <message>
+        <location line="-720"/>
         <source>CQ Only</source>
-        <translation type="vanished">Solo CQ</translation>
+        <translation>Solo CQ</translation>
     </message>
     <message>
+        <location line="-2466"/>
         <source>Detach</source>
-        <translation type="vanished">Stacca</translation>
+        <translation>Stacca</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Detach the DX Cluster to a window</source>
-        <translation type="vanished">Stacca il DX Cluster in una finestra</translation>
+        <translation>Stacca il DX Cluster in una finestra</translation>
     </message>
     <message>
+        <location line="+639"/>
         <source>Bring all floating windows back into the main window
 and re-center Decodium on the primary monitor?
 
 The saved coordinates will be cleared.</source>
-        <translation type="vanished">Riportare tutte le finestre mobili nella finestra principale
+        <translation>Riportare tutte le finestre mobili nella finestra principale
 e ricentrare Decodium sul monitor primario?
 
 Le coordinate salvate saranno azzerate.</translation>
     </message>
     <message>
+        <location line="+125"/>
         <source>The legacy radio backend reported a problem.</source>
-        <translation type="vanished">Il backend radio legacy ha segnalato un problema.</translation>
+        <translation>Il backend radio legacy ha segnalato un problema.</translation>
     </message>
     <message>
+        <location line="+20"/>
+        <location line="+833"/>
         <source>Hide details</source>
-        <translation type="vanished">Nascondi dettagli</translation>
+        <translation>Nascondi dettagli</translation>
     </message>
     <message>
+        <location line="-833"/>
+        <location line="+833"/>
         <source>Show details</source>
-        <translation type="vanished">Mostra dettagli</translation>
+        <translation>Mostra dettagli</translation>
     </message>
     <message>
+        <location line="+757"/>
         <source>Open ALL.TXT folder</source>
-        <translation type="vanished">Apri cartella ALL.TXT</translation>
+        <translation>Apri cartella ALL.TXT</translation>
     </message>
     <message>
+        <location line="+96"/>
         <source>My Call Only</source>
-        <translation type="vanished">Solo mio nominativo</translation>
+        <translation>Solo mio nominativo</translation>
     </message>
     <message>
+        <location line="+24"/>
         <source>Deep Search</source>
-        <translation type="vanished">Ricerca profonda</translation>
+        <translation>Ricerca profonda</translation>
     </message>
     <message>
+        <location line="+32"/>
         <source>Avg Decode</source>
-        <translation type="vanished">Decodifica media</translation>
+        <translation>Decodifica media</translation>
     </message>
     <message>
+        <location line="+34"/>
         <source>VHF/UHF Features</source>
-        <translation type="vanished">Funzioni VHF/UHF</translation>
+        <translation>Funzioni VHF/UHF</translation>
     </message>
     <message>
+        <location line="+24"/>
         <source>Record RX</source>
-        <translation type="vanished">Registra RX</translation>
+        <translation>Registra RX</translation>
     </message>
     <message>
+        <location line="+16"/>
         <source>Record TX</source>
-        <translation type="vanished">Registra TX</translation>
+        <translation>Registra TX</translation>
     </message>
     <message>
+        <location line="-4019"/>
+        <location line="+6062"/>
         <source>decodes</source>
-        <translation type="vanished">decodifiche</translation>
+        <translation>decodifiche</translation>
     </message>
     <message>
+        <location line="+773"/>
         <source>msgs</source>
-        <translation type="vanished">msg</translation>
+        <translation>msg</translation>
     </message>
     <message>
+        <location line="-6816"/>
+        <location line="+6057"/>
+        <location line="+774"/>
         <source>Clear</source>
-        <translation type="vanished">Cancella</translation>
+        <translation>Cancella</translation>
     </message>
     <message>
+        <location line="-14514"/>
         <source>Full screen</source>
-        <translation type="vanished">Schermo intero</translation>
+        <translation>Schermo intero</translation>
     </message>
     <message>
+        <location line="+1399"/>
         <source>Decodium is up to date (%1).</source>
-        <translation type="vanished">Decodium è aggiornato (%1).</translation>
+        <translation>Decodium è aggiornato (%1).</translation>
     </message>
     <message>
+        <location line="+1599"/>
         <source>Valid range: 100-5000 Hz</source>
-        <translation type="vanished">Intervallo valido: 100-5000 Hz</translation>
+        <translation>Intervallo valido: 100-5000 Hz</translation>
     </message>
     <message>
+        <location line="+83"/>
         <source>Dock the Waterfall here</source>
-        <translation type="vanished">Aggancia qui la cascata</translation>
+        <translation>Aggancia qui la cascata</translation>
     </message>
     <message>
+        <location line="+521"/>
         <source>Click: sync NTP now to align DT (FT8/FT4)</source>
-        <translation type="vanished">Clic: sync NTP ora per allineare il DT (FT8/FT4)</translation>
+        <translation>Clic: sync NTP ora per allineare il DT (FT8/FT4)</translation>
     </message>
     <message>
+        <location line="+249"/>
         <source>Gallager — deep dig for weak signals.
 Enables a second decoding pass (LDPC subpass
 parallelized across cores, named after R. Gallager, father of LDPC)
 that recovers near-noise stations missed by the normal decode.
 Requires a multi-core CPU: on old PCs it may burden the audio
 → in that case leave it off.</source>
-        <translation type="vanished">Gallager — scavo profondo per segnali deboli.
+        <translation>Gallager — scavo profondo per segnali deboli.
 Abilita una seconda passata di decodifica (sotto-passata LDPC
 parallelizzata sui core, dal nome di R. Gallager, padre dell&apos;LDPC)
 che recupera stazioni vicine al rumore perse dalla decodifica normale.
@@ -11064,712 +13100,990 @@ Richiede una CPU multi-core: su PC vecchi può gravare sull&apos;audio
 → in tal caso lascialo disattivato.</translation>
     </message>
     <message>
+        <location line="+401"/>
         <source>Click: open a WAV file
 Right-click: decode a folder</source>
-        <translation type="vanished">Clic: apri un file WAV
+        <translation>Clic: apri un file WAV
 Clic destro: decodifica una cartella</translation>
     </message>
     <message>
+        <location line="+100"/>
         <source>Reset layout (Ctrl+Shift+L)</source>
-        <translation type="vanished">Reimposta layout (Ctrl+Shift+L)</translation>
+        <translation>Reimposta layout (Ctrl+Shift+L)</translation>
     </message>
     <message>
+        <location line="+68"/>
         <source>Decode history (Ctrl+Shift+H)</source>
-        <translation type="vanished">Cronologia decodifiche (Ctrl+Shift+H)</translation>
+        <translation>Cronologia decodifiche (Ctrl+Shift+H)</translation>
     </message>
     <message>
+        <location line="+94"/>
         <source>Weak-signal / DX</source>
-        <translation type="vanished">Segnali deboli / DX</translation>
+        <translation>Segnali deboli / DX</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Contest</source>
-        <translation type="vanished">Contest</translation>
+        <translation>Contest</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>CPU-limited</source>
-        <translation type="vanished">CPU limitata</translation>
+        <translation>CPU limitata</translation>
     </message>
     <message>
+        <location line="+247"/>
         <source>Drag to reposition the clock</source>
-        <translation type="vanished">Trascina per riposizionare l&apos;orologio</translation>
+        <translation>Trascina per riposizionare l&apos;orologio</translation>
     </message>
     <message>
+        <location line="+501"/>
         <source>Restore astronomical data</source>
-        <translation type="vanished">Ripristina i dati astronomici</translation>
+        <translation>Ripristina i dati astronomici</translation>
     </message>
     <message>
+        <location line="+276"/>
         <source>Bypass CQ/My Call and setup filters</source>
-        <translation type="vanished">Bypassa i filtri CQ/My Call e di setup</translation>
+        <translation>Bypassa i filtri CQ/My Call e di setup</translation>
     </message>
     <message>
+        <location line="+47"/>
         <source>Restore Macro configuration</source>
-        <translation type="vanished">Ripristina la configurazione delle Macro</translation>
+        <translation>Ripristina la configurazione delle Macro</translation>
     </message>
     <message>
+        <location line="+260"/>
         <source>Restore TX panel</source>
-        <translation type="vanished">Ripristina il pannello TX</translation>
+        <translation>Ripristina il pannello TX</translation>
     </message>
     <message>
+        <location line="+303"/>
         <source>Clock</source>
-        <translation type="vanished">Orologio</translation>
+        <translation>Orologio</translation>
     </message>
     <message>
+        <location line="+225"/>
         <source>Dock Waterfall</source>
-        <translation type="vanished">Aggancia cascata</translation>
+        <translation>Aggancia cascata</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Waterfall detached</source>
-        <translation type="vanished">Cascata staccata</translation>
+        <translation>Cascata staccata</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Use Dock to re-attach it</source>
-        <translation type="vanished">Usa Aggancia per riattaccarla</translation>
+        <translation>Usa Aggancia per riattaccarla</translation>
     </message>
     <message>
+        <location line="+1147"/>
+        <location line="+897"/>
+        <location line="+1023"/>
         <source>Drag the window here</source>
-        <translation type="vanished">Trascina qui la finestra</translation>
+        <translation>Trascina qui la finestra</translation>
     </message>
     <message>
+        <location line="-1712"/>
+        <location line="+839"/>
+        <location line="+5209"/>
+        <location line="+774"/>
         <source>Return to normal row height</source>
-        <translation type="vanished">Torna all&apos;altezza riga normale</translation>
+        <translation>Torna all&apos;altezza riga normale</translation>
     </message>
     <message>
+        <location line="-6821"/>
+        <location line="+839"/>
+        <location line="+5209"/>
+        <location line="+774"/>
         <source>Compact rows (2x visible decodes)</source>
-        <translation type="vanished">Righe compatte (2x decodifiche visibili)</translation>
+        <translation>Righe compatte (2x decodifiche visibili)</translation>
     </message>
     <message>
+        <location line="-6774"/>
+        <location line="+6061"/>
         <source>◀  Move left</source>
-        <translation type="vanished">◀  Sposta a sinistra</translation>
+        <translation>◀  Sposta a sinistra</translation>
     </message>
     <message>
+        <location line="-6060"/>
+        <location line="+6061"/>
         <source>Move right  ▶</source>
-        <translation type="vanished">Sposta a destra  ▶</translation>
+        <translation>Sposta a destra  ▶</translation>
     </message>
     <message>
+        <location line="-6060"/>
+        <location line="+6061"/>
         <source>Hide this column</source>
-        <translation type="vanished">Nascondi questa colonna</translation>
+        <translation>Nascondi questa colonna</translation>
     </message>
     <message>
+        <location line="-6055"/>
+        <location line="+6061"/>
         <source>✓  Message</source>
-        <translation type="vanished">✓  Messaggio</translation>
+        <translation>✓  Messaggio</translation>
     </message>
     <message>
+        <location line="-6056"/>
+        <location line="+6061"/>
         <source>Newest on top</source>
-        <translation type="vanished">Più recenti in alto</translation>
+        <translation>Più recenti in alto</translation>
     </message>
     <message>
+        <location line="-6059"/>
+        <location line="+6061"/>
         <source>Reset columns</source>
-        <translation type="vanished">Ripristina colonne</translation>
+        <translation>Ripristina colonne</translation>
     </message>
     <message>
+        <location line="-5506"/>
         <source>Go to the latest decode</source>
-        <translation type="vanished">Vai all&apos;ultima decodifica</translation>
+        <translation>Vai all&apos;ultima decodifica</translation>
     </message>
     <message>
+        <location line="+7340"/>
         <source>Insert into layout:</source>
-        <translation type="vanished">Inserisci nel layout:</translation>
+        <translation>Inserisci nel layout:</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>◧ next to Full Spectrum</source>
-        <translation type="vanished">◧ accanto a Full Spectrum</translation>
+        <translation>◧ accanto a Full Spectrum</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>◧ next to Signal RX</source>
-        <translation type="vanished">◧ accanto a Signal RX</translation>
+        <translation>◧ accanto a Signal RX</translation>
     </message>
     <message>
+        <location line="-6358"/>
         <source>Drag to swap the column</source>
-        <translation type="vanished">Trascina per scambiare la colonna</translation>
+        <translation>Trascina per scambiare la colonna</translation>
     </message>
     <message>
+        <location line="+214"/>
         <source>Detach TX panel</source>
-        <translation type="vanished">Stacca il pannello TX</translation>
+        <translation>Stacca il pannello TX</translation>
     </message>
     <message>
+        <location line="+2194"/>
         <source>Report a problem...</source>
-        <translation type="vanished">Segnala un problema...</translation>
+        <translation>Segnala un problema...</translation>
     </message>
     <message>
+        <location line="+16"/>
         <source>Checking...</source>
-        <translation type="vanished">Verifica in corso...</translation>
+        <translation>Verifica in corso...</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Check for updates...</source>
-        <translation type="vanished">Verifica aggiornamenti...</translation>
+        <translation>Verifica aggiornamenti...</translation>
     </message>
     <message>
+        <location line="+15"/>
         <source>Esporta Cabrillo...</source>
-        <translation type="vanished">Esporta Cabrillo...</translation>
+        <translation>Esporta Cabrillo...</translation>
     </message>
     <message>
+        <location line="+224"/>
         <source>Waterfall / Panadapter</source>
-        <translation type="vanished">Waterfall / Panadapter</translation>
+        <translation>Waterfall / Panadapter</translation>
     </message>
     <message>
+        <location line="+317"/>
         <source>F9: toggle RX-only 1st/2nd</source>
-        <translation type="vanished">F9: attiva/disattiva RX-only 1°/2°</translation>
+        <translation>F9: attiva/disattiva RX-only 1°/2°</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Escape: Halt (immediate TX stop)</source>
-        <translation type="vanished">Escape: Halt (stop TX immediato)</translation>
+        <translation>Escape: Halt (stop TX immediato)</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Ctrl+A: toggle Auto Sequence</source>
-        <translation type="vanished">Ctrl+A: attiva/disattiva sequenza automatica</translation>
+        <translation>Ctrl+A: attiva/disattiva sequenza automatica</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Ctrl+Z: toggle ZAP mode</source>
-        <translation type="vanished">Ctrl+Z: attiva/disattiva modo ZAP</translation>
+        <translation>Ctrl+Z: attiva/disattiva modo ZAP</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Alt+L: log the current QSO</source>
-        <translation type="vanished">Alt+L: registra il QSO corrente</translation>
+        <translation>Alt+L: registra il QSO corrente</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Alt+M: clear the decode list (Monitor)</source>
-        <translation type="vanished">Alt+M: pulisci la lista dei decodificati (Monitor)</translation>
+        <translation>Alt+M: pulisci la lista dei decodificati (Monitor)</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Alt+S: stop TX</source>
-        <translation type="vanished">Alt+S: ferma il TX</translation>
+        <translation>Alt+S: ferma il TX</translation>
     </message>
     <message>
+        <location line="+281"/>
+        <location line="+1179"/>
+        <location line="+762"/>
+        <location line="+13"/>
+        <location line="+574"/>
         <source>Dock</source>
-        <translation type="vanished">Aggancia</translation>
+        <translation>Aggancia</translation>
     </message>
     <message>
+        <location line="-1855"/>
         <source>⌨️ TX Macro Configuration</source>
-        <translation type="vanished">⌨️ Configurazione macro TX</translation>
+        <translation>⌨️ Configurazione macro TX</translation>
     </message>
     <message>
+        <location line="+1864"/>
         <source>Dock TX panel</source>
-        <translation type="vanished">Aggancia il pannello TX</translation>
+        <translation>Aggancia il pannello TX</translation>
     </message>
     <message>
+        <location line="-3542"/>
         <source>Hide ASYNC icon</source>
-        <translation type="vanished">Nascondi icona ASYNC</translation>
+        <translation>Nascondi icona ASYNC</translation>
     </message>
     <message>
+        <location line="-10079"/>
         <source>Open WAV file for decoding</source>
-        <translation type="vanished">Apri file WAV per la decodifica</translation>
+        <translation>Apri file WAV per la decodifica</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>File WAV (*.wav)</source>
-        <translation type="vanished">File WAV (*.wav)</translation>
+        <translation>File WAV (*.wav)</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>All files (*)</source>
-        <translation type="vanished">Tutti i file (*)</translation>
+        <translation>Tutti i file (*)</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Select folder with WAV files</source>
-        <translation type="vanished">Seleziona cartella con file WAV</translation>
+        <translation>Seleziona cartella con file WAV</translation>
     </message>
     <message>
+        <location line="+2139"/>
         <source>Auto RX level active</source>
-        <translation type="vanished">Livello RX automatico attivo</translation>
+        <translation>Livello RX automatico attivo</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Auto RX level disabled</source>
-        <translation type="vanished">Livello RX automatico disattivato</translation>
+        <translation>Livello RX automatico disattivato</translation>
     </message>
     <message>
+        <location line="+1255"/>
         <source>Search city...</source>
-        <translation type="vanished">Cerca città...</translation>
+        <translation>Cerca città...</translation>
     </message>
     <message>
+        <location line="+108"/>
         <source>Type a city name</source>
-        <translation type="vanished">Digita il nome di una città</translation>
+        <translation>Digita il nome di una città</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>No matching city</source>
-        <translation type="vanished">Nessuna città corrispondente</translation>
+        <translation>Nessuna città corrispondente</translation>
     </message>
     <message>
+        <location line="+35"/>
         <source>Analog clock</source>
-        <translation type="vanished">Orologio analogico</translation>
+        <translation>Orologio analogico</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Digital clock</source>
-        <translation type="vanished">Orologio digitale</translation>
+        <translation>Orologio digitale</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>City labels</source>
-        <translation type="vanished">Etichette città</translation>
+        <translation>Etichette città</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Hide clock</source>
-        <translation type="vanished">Nascondi orologio</translation>
+        <translation>Nascondi orologio</translation>
     </message>
     <message>
+        <location line="+48"/>
         <source>Restore Waterfall</source>
-        <translation type="vanished">Ripristina Waterfall</translation>
+        <translation>Ripristina Waterfall</translation>
     </message>
     <message>
+        <location line="+52"/>
         <source>Restore QSO Log</source>
-        <translation type="vanished">Ripristina QSO Log</translation>
+        <translation>Ripristina QSO Log</translation>
     </message>
     <message>
+        <location line="+109"/>
         <source>Restore Live Map</source>
-        <translation type="vanished">Ripristina Live Map</translation>
+        <translation>Ripristina Live Map</translation>
     </message>
     <message>
+        <location line="+141"/>
         <source>DX Cluster
 Left-click: open and connect
 Right-click: disconnect</source>
-        <translation type="vanished">DX Cluster
+        <translation>DX Cluster
 Clic sinistro: apri e connetti
 Clic destro: disconnetti</translation>
     </message>
     <message>
+        <location line="+77"/>
         <source>Disable filter bypass</source>
-        <translation type="vanished">Disabilita bypass filtri</translation>
+        <translation>Disabilita bypass filtri</translation>
     </message>
     <message>
+        <location line="+100"/>
         <source>Restore Rig Control</source>
-        <translation type="vanished">Ripristina Controllo Rig</translation>
+        <translation>Ripristina Controllo Rig</translation>
     </message>
     <message>
+        <location line="+53"/>
         <source>Restore Full Spectrum</source>
-        <translation type="vanished">Ripristina Full Spectrum</translation>
+        <translation>Ripristina Full Spectrum</translation>
     </message>
     <message>
+        <location line="+52"/>
         <source>Restore Period 2</source>
-        <translation type="vanished">Ripristina Periodo 2</translation>
+        <translation>Ripristina Periodo 2</translation>
     </message>
     <message>
+        <location line="+51"/>
         <source>Restore Signal RX</source>
-        <translation type="vanished">Ripristina Signal RX</translation>
+        <translation>Ripristina Signal RX</translation>
     </message>
     <message>
+        <location line="+1974"/>
         <source>Detach Full Spectrum</source>
-        <translation type="vanished">Sgancia Full Spectrum</translation>
+        <translation>Sgancia Full Spectrum</translation>
     </message>
     <message>
+        <location line="+774"/>
         <source>Clear Signal RX</source>
-        <translation type="vanished">Pulisci Signal RX</translation>
+        <translation>Pulisci Signal RX</translation>
     </message>
     <message>
+        <location line="+65"/>
         <source>Detach Signal RX</source>
-        <translation type="vanished">Sgancia Signal RX</translation>
+        <translation>Sgancia Signal RX</translation>
     </message>
     <message>
+        <location line="+1100"/>
         <source>Reset Layout</source>
-        <translation type="vanished">Reset Layout</translation>
+        <translation>Reset Layout</translation>
     </message>
     <message>
+        <location line="+372"/>
         <source>Notifica</source>
-        <translation type="vanished">Notifica</translation>
+        <translation>Notifica</translation>
     </message>
     <message>
+        <location line="+1443"/>
         <source>Bypass Filters</source>
-        <translation type="vanished">Bypassa filtri</translation>
+        <translation>Bypassa filtri</translation>
     </message>
     <message>
+        <location line="+106"/>
         <source>Show ASYNC icon</source>
-        <translation type="vanished">Mostra icona ASYNC</translation>
+        <translation>Mostra icona ASYNC</translation>
     </message>
     <message>
+        <location line="+80"/>
         <source>Alert on CQ</source>
-        <translation type="vanished">Alert su CQ</translation>
+        <translation>Alert su CQ</translation>
     </message>
     <message>
+        <location line="+21"/>
         <source>Color Highlighting...</source>
-        <translation type="vanished">Evidenziazione colori...</translation>
+        <translation>Evidenziazione colori...</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>QSY...</source>
-        <translation type="vanished">QSY...</translation>
+        <translation>QSY...</translation>
     </message>
     <message>
+        <location line="+56"/>
         <source>cty.dat downloading...</source>
-        <translation type="vanished">Download cty.dat...</translation>
+        <translation>Download cty.dat...</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Update cty.dat</source>
-        <translation type="vanished">Aggiorna cty.dat</translation>
+        <translation>Aggiorna cty.dat</translation>
     </message>
     <message>
+        <location line="+31"/>
         <source>Show DX Cluster</source>
-        <translation type="vanished">Mostra DX Cluster</translation>
+        <translation>Mostra DX Cluster</translation>
     </message>
     <message>
+        <location line="+15"/>
         <source>Show PSK Reporter</source>
-        <translation type="vanished">Mostra PSK Reporter</translation>
+        <translation>Mostra PSK Reporter</translation>
     </message>
     <message>
+        <location line="+138"/>
         <source>Time Sync Panel</source>
-        <translation type="vanished">Pannello Time Sync</translation>
+        <translation>Pannello Time Sync</translation>
     </message>
     <message>
+        <location line="+14"/>
         <source>Active Stations</source>
-        <translation type="vanished">Stazioni attive</translation>
+        <translation>Stazioni attive</translation>
     </message>
     <message>
+        <location line="+29"/>
         <source>Live Map</source>
-        <translation type="vanished">Mappa live</translation>
+        <translation>Mappa live</translation>
     </message>
     <message>
+        <location line="+15"/>
         <source>Astro / EME</source>
-        <translation type="vanished">Astro / EME</translation>
+        <translation>Astro / EME</translation>
     </message>
     <message>
+        <location line="+15"/>
         <source>DecoSyncTime Monitor</source>
-        <translation type="vanished">Monitor DecoSyncTime</translation>
+        <translation>Monitor DecoSyncTime</translation>
     </message>
     <message>
+        <location line="+14"/>
         <source>DX Cluster Panel</source>
-        <translation type="vanished">Pannello DX Cluster</translation>
+        <translation>Pannello DX Cluster</translation>
     </message>
     <message>
+        <location line="+14"/>
         <source>Alert on My Call</source>
-        <translation type="vanished">Alert su My Call</translation>
+        <translation>Alert su My Call</translation>
     </message>
     <message>
+        <location line="-7567"/>
         <source>Balanced</source>
-        <translation type="vanished">Bilanciato</translation>
+        <translation>Bilanciato</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Profiles...</source>
-        <translation type="vanished">Profili...</translation>
+        <translation>Profili...</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Ready profiles - apply FT2/decode toggles as a group. Details in Setup -&gt; TX.</source>
-        <translation type="vanished">Profili pronti: applicano in blocco i toggle FT2/decode. Dettagli in Setup -&gt; TX.</translation>
+        <translation>Profili pronti: applicano in blocco i toggle FT2/decode. Dettagli in Setup -&gt; TX.</translation>
     </message>
     <message>
+        <location line="-1648"/>
         <source>Active on bands during the last %1 minutes:</source>
-        <translation type="vanished">Attivo sulle bande negli ultimi %1 minuti:</translation>
+        <translation>Attivo sulle bande negli ultimi %1 minuti:</translation>
     </message>
     <message>
+        <location line="+10124"/>
         <source>Astronomical Data - Decodium</source>
-        <translation type="vanished">Dati astronomici - Decodium</translation>
+        <translation>Dati astronomici - Decodium</translation>
     </message>
     <message>
+        <location line="+94"/>
         <source>Satellite tracking - Decodium</source>
-        <translation type="vanished">Inseguimento satelliti - Decodium</translation>
+        <translation>Inseguimento satelliti - Decodium</translation>
     </message>
     <message>
+        <location line="-7038"/>
         <source>Switch to the dark theme</source>
-        <translation type="vanished">Passa al tema scuro</translation>
+        <translation>Passa al tema scuro</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Switch to the light theme</source>
-        <translation type="vanished">Passa al tema chiaro</translation>
+        <translation>Passa al tema chiaro</translation>
     </message>
     <message>
+        <location line="+9796"/>
         <source>Decodium found a radio connected to this computer. Applying the proposal sets the CAT port, the model and the audio devices, so you can start without hunting for the right COM port.</source>
-        <translation type="vanished">Decodium ha trovato una radio collegata a questo computer. Applicando la proposta imposta la porta CAT, il modello e le schede audio, così puoi iniziare senza cercare la porta COM giusta.</translation>
+        <translation>Decodium ha trovato una radio collegata a questo computer. Applicando la proposta imposta la porta CAT, il modello e le schede audio, così puoi iniziare senza cercare la porta COM giusta.</translation>
     </message>
     <message>
+        <location line="-15848"/>
         <source>F11 / Esc</source>
-        <translation type="vanished">F11 / Esc</translation>
+        <translation>F11 / Esc</translation>
     </message>
     <message>
+        <location line="-1691"/>
+        <source>Power off radio?</source>
+        <translation>Spegnere la radio?</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Switch off the radio connected through Hamlib CAT?</source>
+        <translation>Spegnere la radio collegata tramite CAT Hamlib?</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>%1 command sent</source>
+        <translation>Comando %1 inviato</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Radio command failed</source>
+        <translation>Comando radio non riuscito</translation>
+    </message>
+    <message>
+        <location line="+41"/>
+        <source>Start the radio ATU</source>
+        <translation>Avvia l&apos;ATU della radio</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Disable the radio ATU</source>
+        <translation>Disattiva l&apos;ATU della radio</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Power on a supported radio through direct CAT. Its CAT port must be available after mains power is restored.</source>
+        <translation>Accende una radio supportata tramite CAT diretto. La sua porta CAT deve essere disponibile dopo il ripristino dell&apos;alimentazione di rete.</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Power off the radio</source>
+        <translation>Spegni la radio</translation>
+    </message>
+    <message>
+        <location line="+4201"/>
         <source>FT2-Link access</source>
-        <translation type="vanished">Accesso FT2-Link</translation>
+        <translation>Accesso FT2-Link</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Enter password to unlock this mode.</source>
-        <translation type="vanished">Inserisci la password per sbloccare questo modo.</translation>
+        <translation>Inserisci la password per sbloccare questo modo.</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Password</source>
-        <translation type="vanished">Password</translation>
+        <translation>Password</translation>
     </message>
     <message>
+        <location line="+36"/>
         <source>Unlock</source>
-        <translation type="vanished">Sblocca</translation>
+        <translation>Sblocca</translation>
     </message>
     <message>
+        <location line="+106"/>
         <source>Based on WSJT-X by K1JT et al.</source>
-        <translation type="vanished">Basato su WSJT-X di K1JT e altri.</translation>
+        <translation>Basato su WSJT-X di K1JT e altri.</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>QML Interface by IU8LMC</source>
-        <translation type="vanished">Interfaccia QML di IU8LMC</translation>
+        <translation>Interfaccia QML di IU8LMC</translation>
     </message>
     <message>
+        <location line="+192"/>
         <source>No recent activity found
 (last 15 minutes)</source>
-        <translation type="vanished">Nessuna attività recente
+        <translation>Nessuna attività recente
 (ultimi 15 minuti)</translation>
     </message>
     <message>
+        <location line="+237"/>
         <source>Menu</source>
-        <translation type="vanished">Menu</translation>
+        <translation>Menu</translation>
     </message>
     <message>
+        <location line="+723"/>
+        <source>Fast LDPC — vectorized FT2 decoder (NEON on Apple Silicon/ARM64, AVX2 on x86).
+Decodes the same words far quicker than the original decoder,
+freeing CPU for the rest of the cycle. Falls back to the original
+decoder automatically when the required SIMD backend is unavailable.
+Turn it off if you see decodes that look wrong.</source>
+        <translation>Fast LDPC — decoder FT2 vettorizzato (NEON su Apple Silicon/ARM64, AVX2 su x86).
+Decodifica le stesse parole molto più velocemente del decoder originale,
+lasciando CPU libera per il resto del ciclo. Torna automaticamente al
+decoder originale quando il backend SIMD richiesto non è disponibile.
+Disattivalo se vedi decodifiche che sembrano sbagliate.</translation>
+    </message>
+    <message>
+        <location line="+316"/>
         <source>Setup</source>
-        <translation type="vanished">Impostazioni</translation>
+        <translation>Impostazioni</translation>
     </message>
     <message>
+        <location line="+161"/>
         <source>Layout</source>
-        <translation type="vanished">Disposizione</translation>
+        <translation>Disposizione</translation>
     </message>
     <message>
+        <location line="+70"/>
         <source>History</source>
-        <translation type="vanished">Cronologia</translation>
+        <translation>Cronologia</translation>
     </message>
     <message>
+        <location line="+999"/>
         <source>Auto Spot</source>
-        <translation type="vanished">Spot automatico</translation>
+        <translation>Spot automatico</translation>
     </message>
     <message>
+        <location line="+77"/>
         <source>Bypass</source>
-        <translation type="vanished">Escludi</translation>
+        <translation>Escludi</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Filters</source>
-        <translation type="vanished">Filtri</translation>
+        <translation>Filtri</translation>
     </message>
     <message>
+        <location line="+352"/>
         <source>PSK Reporter</source>
-        <translation type="vanished">PSK Reporter</translation>
+        <translation>PSK Reporter</translation>
     </message>
     <message>
+        <location line="+211"/>
         <source>Reset</source>
-        <translation type="vanished">Ripristina</translation>
+        <translation>Ripristina</translation>
     </message>
     <message>
+        <location line="+466"/>
         <source>Detach Waterfall</source>
-        <translation type="vanished">Stacca la cascata</translation>
+        <translation>Stacca la cascata</translation>
     </message>
     <message>
+        <location line="+827"/>
         <source>FT2-Link popped out</source>
-        <translation type="vanished">FT2-Link staccato</translation>
+        <translation>FT2-Link staccato</translation>
     </message>
     <message>
+        <location line="+931"/>
         <source>No decodes</source>
-        <translation type="vanished">Nessuna decodifica</translation>
+        <translation>Nessuna decodifica</translation>
     </message>
     <message>
+        <location line="+1607"/>
         <source>Configure radio</source>
-        <translation type="vanished">Configura la radio</translation>
+        <translation>Configura la radio</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Retry</source>
-        <translation type="vanished">Riprova</translation>
+        <translation>Riprova</translation>
     </message>
     <message>
+        <location line="+754"/>
         <source>Decodium reported a non-blocking problem.</source>
-        <translation type="vanished">Decodium ha segnalato un problema non bloccante.</translation>
+        <translation>Decodium ha segnalato un problema non bloccante.</translation>
     </message>
     <message>
+        <location line="+561"/>
+        <source>DecoPort - radio on the network...</source>
+        <translation>DecoPort - radio in rete...</translation>
+    </message>
+    <message>
+        <location line="+355"/>
+        <source>FT8 AP</source>
+        <translation>FT8 AP</translation>
+    </message>
+    <message>
+        <location line="+507"/>
         <source>Export Cabrillo</source>
-        <translation type="vanished">Esporta Cabrillo</translation>
+        <translation>Esporta Cabrillo</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Output file path:</source>
-        <translation type="vanished">Percorso del file:</translation>
+        <translation>Percorso del file:</translation>
     </message>
     <message>
+        <location line="+17"/>
         <source>Export</source>
-        <translation type="vanished">Esporta</translation>
+        <translation>Esporta</translation>
     </message>
     <message>
+        <location line="+35"/>
         <source>Watchdog Mode</source>
-        <translation type="vanished">Modo watchdog</translation>
+        <translation>Modo watchdog</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Off</source>
-        <translation type="vanished">Spento</translation>
+        <translation>Spento</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>Time</source>
-        <translation type="vanished">Tempo</translation>
+        <translation>Tempo</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>Count</source>
-        <translation type="vanished">Conteggio</translation>
+        <translation>Conteggio</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Time (min):</source>
-        <translation type="vanished">Tempo (min):</translation>
+        <translation>Tempo (min):</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>Max TX:</source>
-        <translation type="vanished">TX massime:</translation>
+        <translation>TX massime:</translation>
     </message>
     <message>
+        <location line="+35"/>
         <source>Contest Type</source>
-        <translation type="vanished">Tipo di contest</translation>
+        <translation>Tipo di contest</translation>
     </message>
     <message>
+        <location line="+25"/>
         <source>Exchange</source>
-        <translation type="vanished">Rapporto</translation>
+        <translation>Rapporto</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>Example: 599 001</source>
-        <translation type="vanished">Esempio: 599 001</translation>
+        <translation>Esempio: 599 001</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Serial Number:</source>
-        <translation type="vanished">Numero progressivo:</translation>
+        <translation>Numero progressivo:</translation>
     </message>
     <message>
+        <location line="+35"/>
         <source>TRANSMISSION</source>
-        <translation type="vanished">TRASMISSIONE</translation>
+        <translation>TRASMISSIONE</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>F1 - F7: Select TX1 - TX7</source>
-        <translation type="vanished">F1 - F7: seleziona TX1 - TX7</translation>
+        <translation>F1 - F7: seleziona TX1 - TX7</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>CONTROLS (Ctrl+)</source>
-        <translation type="vanished">COMANDI (Ctrl+)</translation>
+        <translation>COMANDI (Ctrl+)</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>Ctrl+G: Generate all TX messages</source>
-        <translation type="vanished">Ctrl+G: genera tutti i messaggi TX</translation>
+        <translation>Ctrl+G: genera tutti i messaggi TX</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>ACTIONS (Alt+)</source>
-        <translation type="vanished">AZIONI (Alt+)</translation>
+        <translation>AZIONI (Alt+)</translation>
     </message>
     <message>
+        <location line="+30"/>
         <source>Waterfall - Decodium</source>
-        <translation type="vanished">Cascata - Decodium</translation>
+        <translation>Cascata - Decodium</translation>
     </message>
     <message>
+        <location line="+178"/>
         <source>Zoom:</source>
-        <translation type="vanished">Ingrandimento:</translation>
+        <translation>Ingrandimento:</translation>
     </message>
     <message>
+        <location line="+127"/>
         <source>Minimize</source>
-        <translation type="vanished">Riduci a icona</translation>
+        <translation>Riduci a icona</translation>
     </message>
     <message>
+        <location line="+98"/>
         <source>QSO Log - Decodium</source>
-        <translation type="vanished">Registro QSO - Decodium</translation>
+        <translation>Registro QSO - Decodium</translation>
     </message>
     <message>
+        <location line="+128"/>
         <source>📋 QSO Log</source>
-        <translation type="vanished">📋 Registro QSO</translation>
+        <translation>📋 Registro QSO</translation>
     </message>
     <message>
+        <location line="+271"/>
         <source>Macro - Decodium</source>
-        <translation type="vanished">Macro - Decodium</translation>
+        <translation>Macro - Decodium</translation>
     </message>
     <message>
+        <location line="+212"/>
         <source>Rig Control - Decodium</source>
-        <translation type="vanished">Controllo radio - Decodium</translation>
+        <translation>Controllo radio - Decodium</translation>
     </message>
     <message>
+        <location line="+54"/>
         <source>📻 Rig Control (CAT)</source>
-        <translation type="vanished">📻 Controllo radio (CAT)</translation>
+        <translation>📻 Controllo radio (CAT)</translation>
     </message>
     <message>
+        <location line="+51"/>
         <source>Live Map - Decodium</source>
-        <translation type="vanished">Mappa live - Decodium</translation>
+        <translation>Mappa live - Decodium</translation>
     </message>
     <message>
+        <location line="+78"/>
         <source>Full Spectrum - Decodium</source>
-        <translation type="vanished">Spettro completo - Decodium</translation>
+        <translation>Spettro completo - Decodium</translation>
     </message>
     <message>
+        <location line="+768"/>
         <source>Period 2 - Decodium</source>
-        <translation type="vanished">Periodo 2 - Decodium</translation>
+        <translation>Periodo 2 - Decodium</translation>
     </message>
     <message>
+        <location line="+35"/>
         <source>Signal RX - Decodium</source>
-        <translation type="vanished">Segnale RX - Decodium</translation>
+        <translation>Segnale RX - Decodium</translation>
     </message>
     <message>
+        <location line="+521"/>
         <source>TX Panel - Decodium</source>
-        <translation type="vanished">Pannello TX - Decodium</translation>
+        <translation>Pannello TX - Decodium</translation>
     </message>
     <message>
+        <location line="+327"/>
         <source>FT2-Link - Decodium</source>
-        <translation type="vanished">FT2-Link - Decodium</translation>
+        <translation>FT2-Link - Decodium</translation>
     </message>
     <message>
+        <location line="+409"/>
         <source>DX Cluster - Decodium</source>
-        <translation type="vanished">DX Cluster - Decodium</translation>
+        <translation>DX Cluster - Decodium</translation>
     </message>
     <message>
+        <location line="-13376"/>
+        <location line="+5535"/>
+        <location line="+6061"/>
         <source>UTC</source>
-        <translation type="vanished">UTC</translation>
+        <translation>UTC</translation>
     </message>
     <message>
+        <location line="-11595"/>
+        <location line="+5535"/>
+        <location line="+6061"/>
         <source>dB</source>
-        <translation type="vanished">dB</translation>
+        <translation>dB</translation>
     </message>
     <message>
+        <location line="-11595"/>
+        <location line="+5535"/>
+        <location line="+6061"/>
         <source>DT</source>
-        <translation type="vanished">DT</translation>
+        <translation>DT</translation>
     </message>
     <message>
+        <location line="-11595"/>
+        <location line="+5535"/>
+        <location line="+838"/>
+        <location line="+5223"/>
+        <location line="+776"/>
         <source>Freq</source>
-        <translation type="vanished">Freq</translation>
+        <translation>Freq</translation>
     </message>
     <message>
+        <location line="-12371"/>
         <source>Drift</source>
-        <translation type="vanished">Deriva</translation>
+        <translation>Deriva</translation>
     </message>
     <message>
+        <location line="+1"/>
+        <location line="+6373"/>
+        <location line="+5999"/>
         <source>Message</source>
-        <translation type="vanished">Messaggio</translation>
+        <translation>Messaggio</translation>
     </message>
     <message>
+        <location line="-12371"/>
+        <location line="+5534"/>
+        <location line="+839"/>
+        <location line="+5222"/>
+        <location line="+777"/>
         <source>Dist</source>
-        <translation type="vanished">Dist</translation>
+        <translation>Dist</translation>
     </message>
     <message>
+        <location line="-12371"/>
+        <location line="+5534"/>
+        <location line="+6061"/>
         <source>DXCC</source>
-        <translation type="vanished">DXCC</translation>
+        <translation>DXCC</translation>
     </message>
     <message>
+        <location line="-11594"/>
+        <location line="+5534"/>
+        <location line="+838"/>
+        <location line="+5223"/>
+        <location line="+776"/>
         <source>Az</source>
-        <translation type="vanished">Az</translation>
+        <translation>Az</translation>
     </message>
     <message>
+        <location line="-3208"/>
         <source>RF Meter...</source>
-        <translation type="vanished">Misuratore RF...</translation>
+        <translation>Misuratore RF...</translation>
     </message>
     <message>
+        <location line="+4013"/>
         <source>Active Stations - Decodium</source>
-        <translation type="vanished">Stazioni attive - Decodium</translation>
+        <translation>Stazioni attive - Decodium</translation>
     </message>
     <message>
+        <location line="-4629"/>
         <source>Multi-Answer Mode - Decodium</source>
-        <translation type="vanished">Modalità Multi-Risposta - Decodium</translation>
+        <translation>Modalità Multi-Risposta - Decodium</translation>
     </message>
     <message>
+        <location line="-596"/>
         <source>Settings - Decodium</source>
-        <translation type="vanished">Impostazioni - Decodium</translation>
+        <translation>Impostazioni - Decodium</translation>
     </message>
     <message>
+        <location line="+717"/>
         <source>DECØMETER - RF Meter - Decodium</source>
-        <translation type="vanished">DECØMETER - Misuratore RF - Decodium</translation>
+        <translation>DECØMETER - Misuratore RF - Decodium</translation>
     </message>
     <message>
+        <location line="+249"/>
         <source>SSTV - image radio... (BETA)</source>
-        <translation type="vanished">SSTV - image radio... (BETA)</translation>
+        <translation>SSTV - image radio... (BETA)</translation>
     </message>
     <message>
+        <location line="+23"/>
         <source>Open the RTTY window...</source>
-        <translation type="vanished">Apri la finestra RTTY...</translation>
+        <translation>Apri la finestra RTTY...</translation>
     </message>
     <message>
+        <location line="+17"/>
         <source>Open the JTTY window...</source>
-        <translation type="vanished">Apri la finestra JTTY...</translation>
+        <translation>Apri la finestra JTTY...</translation>
     </message>
     <message>
+        <location line="+37"/>
         <source>Decolink - remote radio through the server...</source>
-        <translation type="vanished">Decolink - radio remota tramite il server...</translation>
+        <translation>Decolink - radio remota tramite il server...</translation>
     </message>
     <message>
+        <location line="+22"/>
         <source>CW - decoder, keyer and macros...</source>
-        <translation type="vanished">CW - decodificatore, manipolatore e macro...</translation>
+        <translation>CW - decodificatore, manipolatore e macro...</translation>
     </message>
     <message>
+        <location line="+18"/>
         <source>Rotator - antenna control...</source>
-        <translation type="vanished">Rotore - controllo antenna...</translation>
+        <translation>Rotore - controllo antenna...</translation>
     </message>
     <message>
+        <location line="-23"/>
         <source>SSB - PC microphone and radio controls...</source>
-        <translation type="vanished">SSB - Microfono PC e controlli radio...</translation>
+        <translation>SSB - Microfono PC e controlli radio...</translation>
     </message>
 </context>
 <context>
@@ -16769,39 +19083,47 @@ Server UDP%2:%3</translation>
 <context>
     <name>MamPanel</name>
     <message>
+        <location filename="../qml/decodium/components/MamPanel.qml" line="+416"/>
         <source>QSO attivi (multi-stream): </source>
-        <translation type="vanished">QSO attivi (multi-stream):</translation>
+        <translation>QSO attivi (multi-stream):</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Double-click a station to add it to the list.</source>
-        <translation type="vanished">Fai doppio clic su una stazione per aggiungerla alla lista.</translation>
+        <translation>Fai doppio clic su una stazione per aggiungerla alla lista.</translation>
     </message>
     <message>
+        <location line="+60"/>
         <source>No active stream</source>
-        <translation type="vanished">Nessuno stream attivo</translation>
+        <translation>Nessuno stream attivo</translation>
     </message>
     <message>
+        <location line="-93"/>
         <source>No active caller</source>
-        <translation type="vanished">Nessun chiamante attivo</translation>
+        <translation>Nessun chiamante attivo</translation>
     </message>
 </context>
 <context>
     <name>MamWindow</name>
     <message>
+        <location filename="../qml/decodium/components/MamWindow.qml" line="+556"/>
         <source>QSO attivi (multi-stream): </source>
-        <translation type="vanished">QSO attivi (multi-stream):</translation>
+        <translation>QSO attivi (multi-stream):</translation>
     </message>
     <message>
+        <location line="+59"/>
         <source>No active stream</source>
-        <translation type="vanished">Nessuno stream attivo</translation>
+        <translation>Nessuno stream attivo</translation>
     </message>
     <message>
+        <location line="-604"/>
         <source>Multi-Answer Mode</source>
-        <translation type="vanished">Modalità Multi-Risposta</translation>
+        <translation>Modalità Multi-Risposta</translation>
     </message>
     <message>
+        <location line="+524"/>
         <source>No active caller</source>
-        <translation type="vanished">Nessun chiamante attivo</translation>
+        <translation>Nessun chiamante attivo</translation>
     </message>
 </context>
 <context>
@@ -16830,69 +19152,126 @@ Server UDP%2:%3</translation>
 <context>
     <name>MapLogbookPanel</name>
     <message>
+        <location filename="../qml/decodium/components/MapLogbookPanel.qml" line="+120"/>
         <source>%1 matching QSO</source>
-        <translation type="vanished">%1 QSO corrispondenti</translation>
+        <translation>%1 QSO corrispondenti</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>ADIF</source>
-        <translation type="vanished">ADIF</translation>
+        <translation>ADIF</translation>
     </message>
     <message>
+        <location line="-8"/>
         <source>CSV</source>
-        <translation type="vanished">CSV</translation>
+        <translation>CSV</translation>
     </message>
     <message>
+        <location line="-75"/>
+        <source>Refresh</source>
+        <translation>Aggiorna</translation>
+    </message>
+    <message>
+        <location line="+21"/>
         <source>Band filter</source>
-        <translation type="vanished">Filtro di banda</translation>
+        <translation>Filtro di banda</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Mode filter</source>
-        <translation type="vanished">Filtro di modo</translation>
+        <translation>Filtro di modo</translation>
     </message>
     <message>
+        <location line="-37"/>
         <source>Call, grid, DXCC, state, POTA, IOTA or WPX</source>
-        <translation type="vanished">Nominativo, griglia, DXCC, stato, POTA, IOTA o WPX</translation>
+        <translation>Nominativo, griglia, DXCC, stato, POTA, IOTA o WPX</translation>
     </message>
     <message>
+        <location line="+47"/>
+        <source>Period</source>
+        <translation>Periodo</translation>
+    </message>
+    <message>
+        <location line="+59"/>
+        <source>QSO</source>
+        <translation>QSO</translation>
+    </message>
+    <message>
+        <location line="+1"/>
         <source>QSL</source>
-        <translation type="vanished">QSL</translation>
+        <translation>QSL</translation>
     </message>
     <message>
+        <location line="+1"/>
+        <source>DXCC</source>
+        <translation>DXCC</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Grids</source>
+        <translation>Griglie</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Calls</source>
+        <translation>Nominativi</translation>
+    </message>
+    <message>
+        <location line="+43"/>
         <source>DATE</source>
-        <translation type="vanished">DATA</translation>
+        <translation>DATA</translation>
     </message>
     <message>
+        <location line="-67"/>
+        <location line="+8"/>
         <source>Export the current filtered logbook to Documents/Decodium</source>
-        <translation type="vanished">Esporta il registro filtrato corrente in Documenti/Decodium</translation>
+        <translation>Esporta il registro filtrato corrente in Documenti/Decodium</translation>
     </message>
     <message>
+        <location line="+60"/>
+        <source>CALL</source>
+        <translation>CALL</translation>
+    </message>
+    <message>
+        <location line="+1"/>
         <source>GRID</source>
-        <translation type="vanished">GRIGLIA</translation>
+        <translation>GRIGLIA</translation>
     </message>
     <message>
+        <location line="+1"/>
+        <source>BAND</source>
+        <translation>BANDA</translation>
+    </message>
+    <message>
+        <location line="+1"/>
         <source>MODE</source>
-        <translation type="vanished">MODO</translation>
+        <translation>MODO</translation>
     </message>
     <message>
+        <location line="-90"/>
         <source>Newest first</source>
-        <translation type="vanished">I più recenti per primi</translation>
+        <translation>I più recenti per primi</translation>
     </message>
     <message>
+        <location line="+180"/>
         <source>No QSO matches the current filters</source>
-        <translation type="vanished">Nessun QSO corrisponde ai filtri correnti</translation>
+        <translation>Nessun QSO corrisponde ai filtri correnti</translation>
     </message>
     <message>
+        <location line="-89"/>
         <source>REFERENCE / DXCC</source>
-        <translation type="vanished">RIFERIMENTO / DXCC</translation>
+        <translation>RIFERIMENTO / DXCC</translation>
     </message>
     <message>
+        <location line="-100"/>
         <source>Sort field</source>
-        <translation type="vanished">Campo di ordinamento</translation>
+        <translation>Campo di ordinamento</translation>
     </message>
     <message>
+        <location line="+153"/>
         <source>Primary: %1
 VUCC: %2</source>
-        <translation type="vanished">Principale: %1
+        <translation>Principale: %1
 VUCC: %2</translation>
     </message>
 </context>
@@ -16903,84 +19282,110 @@ VUCC: %2</translation>
         <translation type="vanished">%1  %2  %3 dB  %4</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapOperationsWindows.qml" line="+333"/>
         <source>%1 items  ·  %2</source>
-        <translation type="vanished">%1 voci  ·  %2</translation>
+        <translation>%1 voci  ·  %2</translation>
     </message>
     <message>
+        <location line="-145"/>
         <source>EXTERNAL MAP CONDITIONS</source>
-        <translation type="vanished">CONDIZIONI ESTERNE DELLA MAPPA</translation>
+        <translation>CONDIZIONI ESTERNE DELLA MAPPA</translation>
     </message>
     <message>
+        <location line="-117"/>
         <source>Filter call, grid or DXCC</source>
-        <translation type="vanished">Filtra nominativo, griglia o DXCC</translation>
+        <translation>Filtra nominativo, griglia o DXCC</translation>
     </message>
     <message>
+        <location line="-7"/>
         <source>LIVE CALL ROSTER</source>
-        <translation type="vanished">ELENCO NOMINATIVI IN DIRETTA</translation>
+        <translation>ELENCO NOMINATIVI IN DIRETTA</translation>
     </message>
     <message>
+        <location line="-7"/>
         <source>Map Roster - Decodium</source>
-        <translation type="vanished">Elenco della mappa - Decodium</translation>
+        <translation>Elenco della mappa - Decodium</translation>
     </message>
     <message>
+        <location line="+65"/>
+        <source>%1  %2  %3 dB  %4  %5</source>
+        <translation>%1  %2  %3 dB  %4  %5</translation>
+    </message>
+    <message>
+        <location line="+33"/>
         <source>Map Statistics - Decodium</source>
-        <translation type="vanished">Statistiche della mappa - Decodium</translation>
+        <translation>Statistiche della mappa - Decodium</translation>
     </message>
     <message>
+        <location line="+23"/>
         <source>Radio Conditions - Decodium</source>
-        <translation type="vanished">Condizioni radio - Decodium</translation>
+        <translation>Condizioni radio - Decodium</translation>
     </message>
     <message>
+        <location line="+37"/>
         <source>Moon: Az %1°  El %2°  Distance %3 km</source>
-        <translation type="vanished">Luna: Az %1°  El %2°  Distanza %3 km</translation>
+        <translation>Luna: Az %1°  El %2°  Distanza %3 km</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>Sublunar point %1°, %2°  Illumination %3%</source>
-        <translation type="vanished">Punto sublunare %1°, %2°  Illuminazione %3%</translation>
+        <translation>Punto sublunare %1°, %2°  Illuminazione %3%</translation>
     </message>
     <message>
+        <location line="+120"/>
         <source>  · valid to %1</source>
-        <translation type="vanished">  · valido fino a %1</translation>
+        <translation>  · valido fino a %1</translation>
     </message>
     <message>
+        <location line="-58"/>
         <source>valid to %1</source>
-        <translation type="vanished">valido fino a %1</translation>
+        <translation>valido fino a %1</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>validity unavailable</source>
-        <translation type="vanished">validità non disponibile</translation>
+        <translation>validità non disponibile</translation>
     </message>
     <message>
+        <location line="-253"/>
         <source>%1h old</source>
-        <translation type="vanished">%1 h fa</translation>
+        <translation>%1 h fa</translation>
     </message>
     <message>
+        <location line="-1"/>
         <source>%1m old</source>
-        <translation type="vanished">%1 min fa</translation>
+        <translation>%1 min fa</translation>
     </message>
     <message>
+        <location line="-2"/>
         <source>%1s old</source>
-        <translation type="vanished">%1 s fa</translation>
+        <translation>%1 s fa</translation>
     </message>
     <message>
+        <location line="-2"/>
         <source>no sample</source>
-        <translation type="vanished">nessun campione</translation>
+        <translation>nessun campione</translation>
     </message>
     <message>
+        <location line="+218"/>
         <source>PROPAGATION FORECAST · age / validity / decay</source>
-        <translation type="vanished">PREVISIONE DI PROPAGAZIONE · età / validità / dissolvenza</translation>
+        <translation>PREVISIONE DI PROPAGAZIONE · età / validità / dissolvenza</translation>
     </message>
     <message>
+        <location line="-113"/>
         <source>CALL</source>
-        <translation type="vanished">CALL</translation>
+        <translation>CALL</translation>
     </message>
     <message>
+        <location line="+58"/>
+        <location line="+166"/>
         <source>Refresh</source>
-        <translation type="vanished">Aggiorna</translation>
+        <translation>Aggiorna</translation>
     </message>
     <message>
+        <location line="-141"/>
         <source>Moon data unavailable</source>
-        <translation type="vanished">Dati della Luna non disponibili</translation>
+        <translation>Dati della Luna non disponibili</translation>
     </message>
 </context>
 <context>
@@ -17010,84 +19415,138 @@ VUCC: %2</translation>
         <translation type="vanished">Nessuna statistica per i filtri correnti del registro</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapStatisticsPanel.qml" line="+94"/>
         <source>%1 QSO</source>
-        <translation type="vanished">%1 QSO</translation>
+        <translation>%1 QSO</translation>
     </message>
     <message>
+        <location line="+252"/>
         <source>%1 QSO · %2 QSL · %3 DXCC</source>
-        <translation type="vanished">%1 QSO · %2 QSL · %3 DXCC</translation>
+        <translation>%1 QSO · %2 QSL · %3 DXCC</translation>
     </message>
     <message>
+        <location line="-126"/>
         <source>QSL %1 (%2)</source>
-        <translation type="vanished">QSL %1 (%2)</translation>
+        <translation>QSL %1 (%2)</translation>
     </message>
     <message>
+        <location line="-160"/>
         <source>JSON</source>
-        <translation type="vanished">JSON</translation>
+        <translation>JSON</translation>
     </message>
     <message>
+        <location line="+6"/>
+        <source>CSV</source>
+        <translation>CSV</translation>
+    </message>
+    <message>
+        <location line="+70"/>
+        <source>QSO</source>
+        <translation>QSO</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Confirmed</source>
+        <translation>Confermati</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Calls</source>
+        <translation>Nominativi</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>DXCC</source>
+        <translation>DXCC</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Grids</source>
+        <translation>Griglie</translation>
+    </message>
+    <message>
+        <location line="+125"/>
         <source>%1 QSO · %2 QSL
 Calls %3/%4 · DXCC %5/%6</source>
-        <translation type="vanished">%1 QSO · %2 QSL
+        <translation>%1 QSO · %2 QSL
 Nominativi %3/%4 · DXCC %5/%6</translation>
     </message>
     <message>
+        <location line="-153"/>
         <source>%1 · worked %2 · confirmed %3</source>
-        <translation type="vanished">%1 · collegati %2 · confermati %3</translation>
+        <translation>%1 · collegati %2 · confermati %3</translation>
     </message>
     <message>
+        <location line="+119"/>
         <source>AWARD PROGRESSION · CUMULATIVE</source>
-        <translation type="vanished">AVANZAMENTO DIPLOMA · CUMULATIVO</translation>
+        <translation>AVANZAMENTO DIPLOMA · CUMULATIVO</translation>
     </message>
     <message>
+        <location line="-155"/>
         <source>Award focus</source>
-        <translation type="vanished">Diploma in evidenza</translation>
+        <translation>Diploma in evidenza</translation>
     </message>
     <message>
+        <location line="+201"/>
         <source>Grid %1/%2 · WPX %3/%4</source>
-        <translation type="vanished">Grid %1/%2 · WPX %3/%4</translation>
+        <translation>Grid %1/%2 · WPX %3/%4</translation>
     </message>
     <message>
+        <location line="+41"/>
+        <source>%1 QSO · %2 QSL</source>
+        <translation>%1 QSO · %2 QSL</translation>
+    </message>
+    <message>
+        <location line="+57"/>
         <source>DRILL-DOWN · %1</source>
-        <translation type="vanished">DETTAGLIO · %1</translation>
+        <translation>DETTAGLIO · %1</translation>
     </message>
     <message>
+        <location line="-63"/>
         <source>Open QSO drill-down</source>
-        <translation type="vanished">Apri il dettaglio dei QSO</translation>
+        <translation>Apri il dettaglio dei QSO</translation>
     </message>
     <message>
+        <location line="-258"/>
         <source>LOGBOOK STATISTICS</source>
-        <translation type="vanished">STATISTICHE DEL REGISTRO</translation>
+        <translation>STATISTICHE DEL REGISTRO</translation>
     </message>
     <message>
+        <location line="+185"/>
         <source>No dated QSO available for historical progression</source>
-        <translation type="vanished">Nessun QSO con data per l&apos;andamento storico</translation>
+        <translation>Nessun QSO con data per l&apos;andamento storico</translation>
     </message>
     <message>
+        <location line="-57"/>
         <source>PERIOD COMPARISON</source>
-        <translation type="vanished">CONFRONTO TRA PERIODI</translation>
+        <translation>CONFRONTO TRA PERIODI</translation>
     </message>
     <message>
+        <location line="+146"/>
         <source>PROFILES / CALLSIGNS</source>
-        <translation type="vanished">PROFILI / NOMINATIVI</translation>
+        <translation>PROFILI / NOMINATIVI</translation>
     </message>
     <message>
+        <location line="-206"/>
         <source>target %1</source>
-        <translation type="vanished">obiettivo %1</translation>
+        <translation>obiettivo %1</translation>
     </message>
     <message>
+        <location line="+232"/>
         <source>QSOs</source>
-        <translation type="vanished">QSO</translation>
+        <translation>QSO</translation>
     </message>
     <message>
+        <location line="-145"/>
         <source>QSO %1 → %2 (%3)
 DXCC %4 · Grid %5 · WPX %6</source>
-        <translation type="vanished">QSO %1 → %2 (%3)
+        <translation>QSO %1 → %2 (%3)
 DXCC %4 · Grid %5 · WPX %6</translation>
     </message>
     <message>
+        <location line="+81"/>
         <source>TOP BANDS · MODES · DXCC · WPX · GRIDS</source>
-        <translation type="vanished">BANDE · MODI · DXCC · WPX · GRIGLIE PRINCIPALI</translation>
+        <translation>BANDE · MODI · DXCC · WPX · GRIGLIE PRINCIPALI</translation>
     </message>
 </context>
 <context>
@@ -17107,28 +19566,34 @@ DXCC %4 · Grid %5 · WPX %6</translation>
 <context>
     <name>MessageAvgPanel</name>
     <message>
+        <location filename="../qml/panels/MessageAvgPanel.qml" line="+43"/>
         <source>MESSAGE AVERAGING</source>
-        <translation type="vanished">MEDIA DEI MESSAGGI</translation>
+        <translation>MEDIA DEI MESSAGGI</translation>
     </message>
     <message>
+        <location line="+21"/>
         <source>Clear</source>
-        <translation type="vanished">Cancella</translation>
+        <translation>Cancella</translation>
     </message>
     <message>
+        <location line="+21"/>
         <source>Freq</source>
-        <translation type="vanished">Freq</translation>
+        <translation>Freq</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Avg</source>
-        <translation type="vanished">Avg</translation>
+        <translation>Avg</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Message</source>
-        <translation type="vanished">Messaggio</translation>
+        <translation>Messaggio</translation>
     </message>
     <message>
+        <location line="+76"/>
         <source>No averaged results yet</source>
-        <translation type="vanished">Ancora nessun risultato mediato</translation>
+        <translation>Ancora nessun risultato mediato</translation>
     </message>
 </context>
 <context>
@@ -17259,74 +19724,113 @@ DXCC %4 · Grid %5 · WPX %6</translation>
 <context>
     <name>NetworkPanel</name>
     <message>
+        <location filename="../qml/decodium/rotor/NetworkPanel.qml" line="+7"/>
         <source>NETWORK LINKS</source>
-        <translation type="vanished">COLLEGAMENTI DI RETE</translation>
+        <translation>COLLEGAMENTI DI RETE</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Addresses to use on the phone and station software:</source>
-        <translation type="vanished">Indirizzi da usare su telefono e software di stazione:</translation>
+        <translation>Indirizzi da usare su telefono e software di stazione:</translation>
     </message>
     <message>
+        <location line="+40"/>
         <source>Token-protected access: clients must present it.</source>
-        <translation type="vanished">Accesso protetto da token: i client devono presentarlo.</translation>
+        <translation>Accesso protetto da token: i client devono presentarlo.</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Open access on the local network. For use away from home go through a VPN; do not open ports on the router.</source>
-        <translation type="vanished">Accesso aperto sulla rete locale. Per l&apos;uso fuori casa passa da una VPN; non aprire porte sul router.</translation>
+        <translation>Accesso aperto sulla rete locale. Per l&apos;uso fuori casa passa da una VPN; non aprire porte sul router.</translation>
+    </message>
+</context>
+<context>
+    <name>OmniRigTransceiver</name>
+    <message>
+        <location filename="../Transceiver/OmniRigTransceiver.cpp" line="+55"/>
+        <source>OmniRig: unrecognized mode</source>
+        <translation>OmniRig: modo non riconosciuto</translation>
+    </message>
+    <message>
+        <location line="+113"/>
+        <source>Failed to start OmniRig COM server</source>
+        <translation>Impossibile avviare il server COM di OmniRig</translation>
+    </message>
+    <message>
+        <location line="+219"/>
+        <source>OmniRig COM/OLE error: %1 at %2: %3 (%4)</source>
+        <translation>Errore COM/OLE di OmniRig: %1 a %2: %3 (%4)</translation>
+    </message>
+    <message>
+        <location line="+380"/>
+        <source>OmniRig: don&apos;t know how to set rig frequency</source>
+        <translation>OmniRig: non so come impostare la frequenza della radio</translation>
     </message>
 </context>
 <context>
     <name>PSKReporterPanel</name>
     <message>
+        <location filename="../qml/decodium/components/PSKReporterPanel.qml" line="+134"/>
         <source>updating…</source>
-        <translation type="vanished">aggiornamento…</translation>
+        <translation>aggiornamento…</translation>
     </message>
 </context>
 <context>
     <name>PointingPanel</name>
     <message>
+        <location filename="../qml/decodium/rotor/PointingPanel.qml" line="+19"/>
         <source>Azimuth °</source>
-        <translation type="vanished">Azimut °</translation>
+        <translation>Azimut °</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Elevation °</source>
-        <translation type="vanished">Elevazione °</translation>
+        <translation>Elevazione °</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>AIM</source>
-        <translation type="vanished">PUNTA</translation>
+        <translation>PUNTA</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>N</source>
-        <translation type="vanished">N</translation>
+        <translation>N</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>NE</source>
-        <translation type="vanished">NE</translation>
+        <translation>NE</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>E</source>
-        <translation type="vanished">E</translation>
+        <translation>E</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>SE</source>
-        <translation type="vanished">SE</translation>
+        <translation>SE</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>S</source>
-        <translation type="vanished">S</translation>
+        <translation>S</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>SW</source>
-        <translation type="vanished">SO</translation>
+        <translation>SO</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>W</source>
-        <translation type="vanished">O</translation>
+        <translation>O</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>NW</source>
-        <translation type="vanished">NO</translation>
+        <translation>NO</translation>
     </message>
 </context>
 <context>
@@ -17340,67 +19844,82 @@ DXCC %4 · Grid %5 · WPX %6</translation>
 <context>
     <name>PresetPanel</name>
     <message>
+        <location filename="../qml/decodium/rotor/PresetPanel.qml" line="+8"/>
         <source>MEMORIES</source>
-        <translation type="vanished">MEMORIE</translation>
+        <translation>MEMORIE</translation>
     </message>
     <message>
+        <location line="+55"/>
         <source>%1° / %2°</source>
-        <translation type="vanished">%1° / %2°</translation>
+        <translation>%1° / %2°</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>GO</source>
-        <translation type="vanished">VAI</translation>
+        <translation>VAI</translation>
     </message>
     <message>
+        <location line="+19"/>
         <source>No memories: name the current heading and save it.</source>
-        <translation type="vanished">Nessuna memoria: dai un nome alla direzione attuale e salvala.</translation>
+        <translation>Nessuna memoria: dai un nome alla direzione attuale e salvala.</translation>
     </message>
     <message>
+        <location line="+14"/>
         <source>Memory name</source>
-        <translation type="vanished">Nome della memoria</translation>
+        <translation>Nome della memoria</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>SAVE HERE</source>
-        <translation type="vanished">SALVA QUI</translation>
+        <translation>SALVA QUI</translation>
     </message>
 </context>
 <context>
     <name>Q65DopplerPanel</name>
     <message>
+        <location filename="../qml/decodium/components/Q65DopplerPanel.qml" line="+27"/>
         <source>Q65 — EME Doppler tracking</source>
-        <translation type="vanished">Q65 — Inseguimento Doppler EME</translation>
+        <translation>Q65 — Inseguimento Doppler EME</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Constant frequency on Moon (CFOM)</source>
-        <translation type="vanished">Frequenza costante sulla Luna (CFOM)</translation>
+        <translation>Frequenza costante sulla Luna (CFOM)</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Full Doppler to DX Grid</source>
-        <translation type="vanished">Doppler completo verso il locator DX</translation>
+        <translation>Doppler completo verso il locator DX</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Own Echo (RX only)</source>
-        <translation type="vanished">Eco proprio (solo RX)</translation>
+        <translation>Eco proprio (solo RX)</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>My grid: %1</source>
-        <translation type="vanished">Mio locator: %1</translation>
+        <translation>Mio locator: %1</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>DX locator (6 characters)</source>
-        <translation type="vanished">Locator DX (6 caratteri)</translation>
+        <translation>Locator DX (6 caratteri)</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Enable Doppler tracking</source>
-        <translation type="vanished">Abilita inseguimento Doppler</translation>
+        <translation>Abilita inseguimento Doppler</translation>
     </message>
     <message>
+        <location line="+15"/>
         <source>RX correction: %1 Hz   TX correction: %2 Hz</source>
-        <translation type="vanished">Correzione RX: %1 Hz   Correzione TX: %2 Hz</translation>
+        <translation>Correzione RX: %1 Hz   Correzione TX: %2 Hz</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Hamlib + Rig/Fake It split required. TX correction is held during transmission. Tracking starts OFF each session; coordinate the method with the other station.</source>
-        <translation type="vanished">Sono richiesti Hamlib e split Rig/Fake It. La correzione TX resta fissa durante la trasmissione. Il tracking parte SPENTO a ogni avvio; concordare il metodo con il corrispondente.</translation>
+        <translation>Sono richiesti Hamlib e split Rig/Fake It. La correzione TX resta fissa durante la trasmissione. Il tracking parte SPENTO a ogni avvio; concordare il metodo con il corrispondente.</translation>
     </message>
 </context>
 <context>
@@ -17484,7 +20003,7 @@ DXCC %4 · Grid %5 · WPX %6</translation>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../src/radio/DecodiumTransceiverManager.cpp" line="-2660"/>
+        <location filename="../src/radio/DecodiumTransceiverManager.cpp" line="-2595"/>
         <source>CAT disabled for receive/recording tests: the serial port stays available for JTDX.</source>
         <translation>CAT disabilitato per test RX/recording: la seriale resta disponibile per JTDX.</translation>
     </message>
@@ -17579,26 +20098,26 @@ DXCC %4 · Grid %5 · WPX %6</translation>
         <translation>il cluster non ha restituito dati</translation>
     </message>
     <message>
-        <location line="+45"/>
-        <location filename="../widgets/IonosphericForecastWindow.cpp" line="-252"/>
-        <location filename="../src/services/DecodiumPropagationManager.cpp" line="+143"/>
         <location filename="../Network/Cloudlog.cpp" line="-231"/>
+        <location filename="../src/services/DecodiumPropagationManager.cpp" line="+143"/>
+        <location filename="../widgets/DXClusterWindow.cpp" line="+45"/>
+        <location filename="../widgets/IonosphericForecastWindow.cpp" line="-252"/>
         <source>empty reply</source>
         <translation>risposta vuota</translation>
     </message>
     <message>
         <location line="+7"/>
-        <location filename="../widgets/IonosphericForecastWindow.cpp" line="+7"/>
         <location filename="../src/services/DecodiumPropagationManager.cpp" line="+6"/>
-        <location filename="../Network/Cloudlog.cpp" line="+7"/>
+        <location filename="../widgets/DXClusterWindow.cpp" line="+7"/>
+        <location filename="../widgets/IonosphericForecastWindow.cpp" line="+7"/>
         <source>reply too large</source>
         <translation>risposta troppo grande</translation>
     </message>
     <message>
         <location line="+7"/>
-        <location filename="../widgets/IonosphericForecastWindow.cpp" line="+7"/>
         <location filename="../src/services/DecodiumPropagationManager.cpp" line="+6"/>
-        <location filename="../Network/Cloudlog.cpp" line="+7"/>
+        <location filename="../widgets/DXClusterWindow.cpp" line="+7"/>
+        <location filename="../widgets/IonosphericForecastWindow.cpp" line="+7"/>
         <source>reply exceeds limit</source>
         <translation>la risposta supera il limite</translation>
     </message>
@@ -17726,8 +20245,8 @@ DXCC %4 · Grid %5 · WPX %6</translation>
         <translation>L&apos;URL di Cloudlog è vuoto</translation>
     </message>
     <message>
+        <location line="+12"/>
         <location filename="../Network/DecodiumCloudlogLite.cpp" line="-565"/>
-        <location filename="../Network/Cloudlog.cpp" line="+12"/>
         <source>Cloudlog URL is invalid: %1</source>
         <translation>L&apos;URL di Cloudlog non è valido: %1</translation>
     </message>
@@ -18096,16 +20615,23 @@ Il file scaricato supera il limite di %1 MiB:
         <source>None</source>
         <translation>Nessuna</translation>
     </message>
+    <message>
+        <location filename="../UDPExamples/MessageAggregator.cpp" line="+100"/>
+        <source>Unexpected error</source>
+        <translation>Errore imprevisto</translation>
+    </message>
 </context>
 <context>
     <name>QSYDialog</name>
     <message>
+        <location filename="../qml/dialogs/QSYDialog.qml" line="+78"/>
         <source>SUGGESTED FREQUENCIES</source>
-        <translation type="vanished">FREQUENZE SUGGERITE</translation>
+        <translation>FREQUENZE SUGGERITE</translation>
     </message>
     <message>
+        <location line="+90"/>
         <source>Close</source>
-        <translation type="vanished">Chiudi</translation>
+        <translation>Chiudi</translation>
     </message>
 </context>
 <context>
@@ -18542,77 +21068,106 @@ non verranno mostrate!</translation>
     </message>
 </context>
 <context>
+    <name>QsoLog</name>
+    <message>
+        <location filename="../src/rtty/app/QsoLog.cpp" line="+76"/>
+        <source>A callsign is the least a contact needs to be logged</source>
+        <translation>Un nominativo è il minimo che serve a un contatto per essere registrato</translation>
+    </message>
+    <message>
+        <location line="+197"/>
+        <source>Cannot write the log in %1</source>
+        <translation>Impossibile scrivere il log in %1</translation>
+    </message>
+</context>
+<context>
     <name>QsyQuickPickerDialog</name>
     <message>
+        <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="+18"/>
         <source>QSY Quick Picker</source>
-        <translation type="vanished">QSY Quick Picker</translation>
+        <translation>QSY Quick Picker</translation>
     </message>
     <message>
+        <location line="+64"/>
         <source>QSY to Working Frequencies preset</source>
-        <translation type="vanished">QSY al preset Frequenze di lavoro</translation>
+        <translation>QSY al preset Frequenze di lavoro</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>%1 presets · %2 visible</source>
-        <translation type="vanished">%1 preset · %2 visibili</translation>
+        <translation>%1 preset · %2 visibili</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>Preferred only</source>
-        <translation type="vanished">Solo Preferred</translation>
+        <translation>Solo Preferred</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>Modo:</source>
-        <translation type="vanished">Modo:</translation>
+        <translation>Modo:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Band:</source>
-        <translation type="vanished">Banda:</translation>
+        <translation>Banda:</translation>
     </message>
     <message>
+        <location line="+97"/>
         <source>Click a preset to QSY · F2 to reopen</source>
-        <translation type="vanished">Clicca un preset per il QSY · F2 per riaprire</translation>
+        <translation>Clicca un preset per il QSY · F2 per riaprire</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Close</source>
-        <translation type="vanished">Chiudi</translation>
+        <translation>Chiudi</translation>
     </message>
 </context>
 <context>
     <name>QueuePanel</name>
     <message>
+        <location filename="../qml/decodium/components/QueuePanel.qml" line="+182"/>
         <source>Grid</source>
-        <translation type="vanished">Griglia</translation>
+        <translation>Griglia</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Freq</source>
-        <translation type="vanished">Freq</translation>
+        <translation>Freq</translation>
     </message>
     <message>
+        <location line="+92"/>
         <source>Queue empty
 Double-click decode to add</source>
-        <translation type="vanished">Coda vuota
+        <translation>Coda vuota
 Doppio clic su una decodifica per aggiungerla</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Clear Queue</source>
-        <translation type="vanished">Svuota la coda</translation>
+        <translation>Svuota la coda</translation>
     </message>
     <message>
+        <location line="+40"/>
         <source>Status</source>
-        <translation type="vanished">Stato</translation>
+        <translation>Stato</translation>
     </message>
     <message>
+        <location line="+91"/>
         <source>No active QSOs
 Add from queue</source>
-        <translation type="vanished">Nessun QSO attivo
+        <translation>Nessun QSO attivo
 Aggiungi dalla coda</translation>
     </message>
     <message>
+        <location line="+14"/>
         <source>Max:</source>
-        <translation type="vanished">Max:</translation>
+        <translation>Max:</translation>
     </message>
     <message>
+        <location line="+20"/>
         <source>Clear</source>
-        <translation type="vanished">Cancella</translation>
+        <translation>Cancella</translation>
     </message>
 </context>
 <context>
@@ -18659,36 +21214,56 @@ Aggiungi dalla coda</translation>
     </message>
 </context>
 <context>
+    <name>RadioHub</name>
+    <message>
+        <location filename="../src/rtty/link/RadioHub.cpp" line="+13"/>
+        <source>Disconnected</source>
+        <translation>Disconnesso</translation>
+    </message>
+    <message>
+        <location line="+150"/>
+        <source>Transmit is unavailable on this connection</source>
+        <translation>La trasmissione non è disponibile su questa connessione</translation>
+    </message>
+</context>
+<context>
     <name>ReceivePanel</name>
     <message>
+        <location filename="../qml/decodium/rtty/ReceivePanel.qml" line="+61"/>
         <source>RECEIVE</source>
-        <translation type="vanished">RICEZIONE</translation>
+        <translation>RICEZIONE</translation>
     </message>
     <message>
+        <location line="+29"/>
         <source>Call</source>
-        <translation type="vanished">Call</translation>
+        <translation>Call</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Highlights callsigns. Click one to put it
 in the HIS CALL field.</source>
-        <translation type="vanished">Evidenzia i nominativi. Cliccane uno per metterlo
+        <translation>Evidenzia i nominativi. Cliccane uno per metterlo
 nel campo HIS CALL.</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Follow</source>
-        <translation type="vanished">Segui</translation>
+        <translation>Segui</translation>
     </message>
     <message>
+        <location line="+14"/>
         <source>Copy</source>
-        <translation type="vanished">Copia</translation>
+        <translation>Copia</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Clear</source>
-        <translation type="vanished">Pulisci</translation>
+        <translation>Pulisci</translation>
     </message>
     <message>
+        <location line="+161"/>
         <source>jump to end ↓</source>
-        <translation type="vanished">vai in fondo ↓</translation>
+        <translation>vai in fondo ↓</translation>
     </message>
 </context>
 <context>
@@ -18786,273 +21361,389 @@ Errore (%2):%3</translation>
 <context>
     <name>RigControlDialog</name>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="+388"/>
         <source>Management:</source>
-        <translation type="vanished">Gestione:</translation>
+        <translation>Gestione:</translation>
     </message>
     <message>
+        <location line="+14"/>
         <source>Control:</source>
-        <translation type="vanished">Controllo:</translation>
+        <translation>Controllo:</translation>
     </message>
     <message>
+        <location line="+14"/>
         <source>Ownership:</source>
-        <translation type="vanished">Controllo esclusivo:</translation>
+        <translation>Controllo esclusivo:</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Request control automatically</source>
-        <translation type="vanished">Richiedi automaticamente il controllo</translation>
+        <translation>Richiedi automaticamente il controllo</translation>
     </message>
     <message>
+        <location line="-409"/>
         <source>CAT — Transceiver Settings</source>
-        <translation type="vanished">CAT — Impostazioni transceiver</translation>
+        <translation>CAT — Impostazioni transceiver</translation>
     </message>
     <message>
+        <location line="+81"/>
         <source>CAT — Transceiver Control</source>
-        <translation type="vanished">CAT — Controllo transceiver</translation>
+        <translation>CAT — Controllo transceiver</translation>
     </message>
     <message>
+        <location line="+28"/>
         <source>Not connected</source>
-        <translation type="vanished">Non connesso</translation>
+        <translation>Non connesso</translation>
     </message>
     <message>
+        <location line="+39"/>
         <source>CAT active</source>
-        <translation type="vanished">CAT attivo</translation>
+        <translation>CAT attivo</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>CAT not connected</source>
-        <translation type="vanished">CAT non connesso</translation>
+        <translation>CAT non connesso</translation>
     </message>
     <message>
+        <location line="+64"/>
         <source>The backend can only be changed when the radio is disconnected.</source>
-        <translation type="vanished">Il backend può essere cambiato solo quando la radio è disconnessa.</translation>
+        <translation>Il backend può essere cambiato solo quando la radio è disconnessa.</translation>
     </message>
     <message>
+        <location line="+22"/>
         <source>
 Tip: close OmniRig from the Windows tray icon, then press Connect again.</source>
-        <translation type="vanished">
+        <translation>
 Suggerimento: chiudi OmniRig dall&apos;icona nella tray di Windows, poi premi di nuovo Connetti.</translation>
     </message>
     <message>
+        <location line="+62"/>
         <source>Rig name…</source>
-        <translation type="vanished">Nome radio…</translation>
+        <translation>Nome radio…</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Choose…</source>
-        <translation type="vanished">Scegli…</translation>
+        <translation>Scegli…</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Select Transceiver</source>
-        <translation type="vanished">Seleziona transceiver</translation>
+        <translation>Seleziona transceiver</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>⚙  Choose Transceiver (%1 available)</source>
-        <translation type="vanished">⚙  Scegli transceiver (%1 disponibili)</translation>
+        <translation>⚙  Scegli transceiver (%1 disponibili)</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Filter by name (e.g. Icom, Yaesu, FT-991…)</source>
-        <translation type="vanished">Filtra per nome (es. Icom, Yaesu, FT-991…)</translation>
+        <translation>Filtra per nome (es. Icom, Yaesu, FT-991…)</translation>
     </message>
     <message>
+        <location line="+35"/>
         <source>Cancel</source>
-        <translation type="vanished">Annulla</translation>
+        <translation>Annulla</translation>
     </message>
     <message>
+        <location line="+204"/>
         <source>Connect on startup</source>
-        <translation type="vanished">Connetti all&apos;avvio</translation>
+        <translation>Connetti all&apos;avvio</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>Start monitor</source>
-        <translation type="vanished">Avvia monitor</translation>
+        <translation>Avvia monitor</translation>
     </message>
     <message>
+        <location line="+165"/>
         <source>▶  Connect</source>
-        <translation type="vanished">▶  Connetti</translation>
+        <translation>▶  Connetti</translation>
     </message>
     <message>
+        <location line="+33"/>
         <source>■  Disconnect</source>
-        <translation type="vanished">■  Disconnetti</translation>
+        <translation>■  Disconnetti</translation>
     </message>
     <message>
+        <location line="+18"/>
         <source>Close</source>
-        <translation type="vanished">Chiudi</translation>
+        <translation>Chiudi</translation>
     </message>
     <message>
+        <location line="-69"/>
         <source>…(%1 more lines)</source>
-        <translation type="vanished">…(altre %1 righe)</translation>
+        <translation>…(altre %1 righe)</translation>
     </message>
     <message>
+        <location line="-469"/>
         <source>Advanced</source>
-        <translation type="vanished">Avanzate</translation>
+        <translation>Avanzate</translation>
     </message>
 </context>
 <context>
     <name>RigControlDialogContent</name>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="+172"/>
         <source>Search radio...</source>
-        <translation type="vanished">Cerca radio...</translation>
+        <translation>Cerca radio...</translation>
     </message>
     <message>
+        <location line="-98"/>
         <source>Auto-detect</source>
-        <translation type="vanished">Rilevamento automatico</translation>
+        <translation>Rilevamento automatico</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Detect my radio</source>
-        <translation type="vanished">Rileva la mia radio</translation>
+        <translation>Rileva la mia radio</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Reads what the system already knows: it opens no port and sends no command</source>
-        <translation type="vanished">Legge solo ciò che il sistema già sa: non apre porte e non invia comandi</translation>
+        <translation>Legge solo ciò che il sistema già sa: non apre porte e non invia comandi</translation>
     </message>
     <message>
+        <location line="+19"/>
         <source>Radio</source>
-        <translation type="vanished">Radio</translation>
+        <translation>Radio</translation>
     </message>
     <message>
+        <location line="+123"/>
         <source>Network host</source>
-        <translation type="vanished">Host di rete</translation>
+        <translation>Host di rete</translation>
     </message>
     <message>
+        <location line="+23"/>
         <source>Serial port</source>
-        <translation type="vanished">Porta seriale</translation>
+        <translation>Porta seriale</translation>
     </message>
     <message>
+        <location line="+26"/>
         <source>Refresh ports</source>
-        <translation type="vanished">Aggiorna porte</translation>
+        <translation>Aggiorna porte</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Baud rate</source>
-        <translation type="vanished">Velocità</translation>
+        <translation>Velocità</translation>
     </message>
     <message>
+        <location line="+24"/>
         <source>PTT method</source>
-        <translation type="vanished">Metodo PTT</translation>
+        <translation>Metodo PTT</translation>
     </message>
     <message>
+        <location line="+23"/>
         <source>Auto-connect on startup</source>
-        <translation type="vanished">Collega all&apos;avvio</translation>
+        <translation>Collega all&apos;avvio</translation>
     </message>
     <message>
+        <location line="+15"/>
         <source>Auto-start audio</source>
-        <translation type="vanished">Avvia l&apos;audio da solo</translation>
+        <translation>Avvia l&apos;audio da solo</translation>
     </message>
     <message>
+        <location line="+24"/>
         <source>TS-590S USB: Menu 60 COM = USB, Menu 62 BAUD = 115200 (default)</source>
-        <translation type="vanished">TS-590S USB: Menu 60 COM = USB, Menu 62 BAUD = 115200 (default)</translation>
+        <translation>TS-590S USB: Menu 60 COM = USB, Menu 62 BAUD = 115200 (default)</translation>
     </message>
     <message>
+        <location line="+16"/>
         <source>Save</source>
-        <translation type="vanished">Salva</translation>
+        <translation>Salva</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Connect</source>
-        <translation type="vanished">Connetti</translation>
+        <translation>Connetti</translation>
     </message>
     <message>
+        <location line="+16"/>
         <source>Disconnect</source>
-        <translation type="vanished">Disconnetti</translation>
+        <translation>Disconnetti</translation>
     </message>
 </context>
 <context>
     <name>RigDetectResults</name>
     <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="+96"/>
         <source>Detected radios</source>
-        <translation type="vanished">Radio rilevate</translation>
+        <translation>Radio rilevate</translation>
     </message>
     <message>
+        <location line="+21"/>
         <source>Nothing has been changed yet. Check the proposal, then apply it.</source>
-        <translation type="vanished">Non è stato ancora cambiato nulla. Controlla la proposta, poi applicala.</translation>
+        <translation>Non è stato ancora cambiato nulla. Controlla la proposta, poi applicala.</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>No serial device found. Is the radio on and the USB cable connected?</source>
-        <translation type="vanished">Nessun dispositivo seriale trovato. La radio è accesa e il cavo USB collegato?</translation>
+        <translation>Nessun dispositivo seriale trovato. La radio è accesa e il cavo USB collegato?</translation>
     </message>
     <message>
+        <location line="+41"/>
         <source>confidence %1%</source>
-        <translation type="vanished">attendibilità %1%</translation>
+        <translation>attendibilità %1%</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>CAT port: %1</source>
-        <translation type="vanished">Porta CAT: %1</translation>
+        <translation>Porta CAT: %1</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source> — %1 baud</source>
-        <translation type="vanished"> — %1 baud</translation>
+        <translation> — %1 baud</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source> (other ports of the same device: %1)</source>
-        <translation type="vanished"> (altre porte dello stesso apparato: %1)</translation>
+        <translation> (altre porte dello stesso apparato: %1)</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>Audio: in %1 / out %2</source>
-        <translation type="vanished">Audio: ingresso %1 / uscita %2</translation>
+        <translation>Audio: ingresso %1 / uscita %2</translation>
     </message>
     <message>
+        <location line="+1"/>
+        <location line="+1"/>
         <source>not found</source>
-        <translation type="vanished">non trovata</translation>
+        <translation>non trovata</translation>
     </message>
     <message>
+        <location line="+15"/>
         <source>Apply</source>
-        <translation type="vanished">Applica</translation>
+        <translation>Applica</translation>
     </message>
     <message>
+        <location line="+30"/>
         <source>Also set the radio&apos;s audio devices</source>
-        <translation type="vanished">Imposta anche le schede audio della radio</translation>
+        <translation>Imposta anche le schede audio della radio</translation>
     </message>
     <message>
+        <location line="+27"/>
         <source>Close</source>
-        <translation type="vanished">Chiudi</translation>
+        <translation>Chiudi</translation>
     </message>
 </context>
 <context>
     <name>RotorSwitch</name>
     <message>
+        <location filename="../qml/decodium/rotor/RotorSwitch.qml" line="+7"/>
         <source>on</source>
-        <translation type="vanished">acceso</translation>
+        <translation>acceso</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>off</source>
-        <translation type="vanished">spento</translation>
+        <translation>spento</translation>
     </message>
 </context>
 <context>
     <name>RotorWindow</name>
     <message>
+        <location filename="../qml/decodium/components/RotorWindow.qml" line="+23"/>
         <source>Rotator - PRO.SIS.TEL control</source>
-        <translation type="vanished">Rotore - controllo PRO.SIS.TEL</translation>
+        <translation>Rotore - controllo PRO.SIS.TEL</translation>
     </message>
     <message>
+        <location line="+26"/>
         <source>CONTROL</source>
-        <translation type="vanished">CONTROLLO</translation>
+        <translation>CONTROLLO</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>DIAGNOSTICS</source>
-        <translation type="vanished">DIAGNOSTICA</translation>
+        <translation>DIAGNOSTICA</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>SETTINGS</source>
-        <translation type="vanished">IMPOSTAZIONI</translation>
+        <translation>IMPOSTAZIONI</translation>
+    </message>
+</context>
+<context>
+    <name>RttyEngine</name>
+    <message>
+        <location filename="../src/rtty/app/RttyEngine.cpp" line="+59"/>
+        <source>Transmit ran for three minutes — stopped</source>
+        <translation>La trasmissione è durata tre minuti — fermata</translation>
+    </message>
+    <message>
+        <location line="+39"/>
+        <source>Trying the opposite polarity (%1)</source>
+        <translation>Provo la polarità opposta (%1)</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>reversed</source>
+        <translation>invertita</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>direct</source>
+        <translation>diretta</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Signal at %1 Hz: moving there</source>
+        <translation>Segnale a %1 Hz: mi sposto lì</translation>
+    </message>
+    <message>
+        <location line="+165"/>
+        <source>No recognisable RTTY signal in the band</source>
+        <translation>Nessun segnale RTTY riconoscibile nella banda</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Centred on %1 Hz (%2 dB above the floor)</source>
+        <translation>Centrato su %1 Hz (%2 dB sopra il fondo)</translation>
+    </message>
+    <message>
+        <location line="+407"/>
+        <source>The radio is in %1 (native FSK). Decodium transmits RTTY as audio/AFSK. Press &apos;Set radio&apos; in the DECODER panel to select DATA-U/DIGU before transmitting.</source>
+        <translation>La radio è in %1 (FSK nativo). Decodium trasmette l&apos;RTTY come audio/AFSK. Premi «Imposta radio» nel pannello DECODER per selezionare DATA-U/DIGU prima di trasmettere.</translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>The radio is in %1: on voice modes the USB audio does not modulate. Press &apos;Set radio&apos; in the DECODER panel.</source>
+        <translation>La radio è in %1: nei modi fonia l&apos;audio USB non modula. Premi «Imposta radio» nel pannello DECODER.</translation>
+    </message>
+    <message>
+        <location line="+107"/>
+        <source>RTTY audio transmission stopped: output unavailable or transmitter busy.</source>
+        <translation>Trasmissione audio RTTY interrotta: uscita non disponibile o trasmettitore occupato.</translation>
     </message>
 </context>
 <context>
     <name>RttyMain</name>
     <message>
+        <location filename="../qml/decodium/rtty/RttyMain.qml" line="+22"/>
         <source>Audio only — no CAT</source>
-        <translation type="vanished">Solo audio — senza CAT</translation>
+        <translation>Solo audio — senza CAT</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>RTTY</source>
-        <translation type="vanished">RTTY</translation>
+        <translation>RTTY</translation>
     </message>
     <message>
         <source>nessuna radio</source>
         <translation type="vanished">nessuna radio</translation>
     </message>
     <message>
+        <location line="+186"/>
         <source>DECODER</source>
-        <translation type="vanished">DECODIFICA</translation>
+        <translation>DECODIFICA</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>FILTERS</source>
-        <translation type="vanished">FILTRI</translation>
+        <translation>FILTRI</translation>
     </message>
 </context>
 <context>
@@ -19107,234 +21798,319 @@ Suggerimento: chiudi OmniRig dall&apos;icona nella tray di Windows, poi premi di
 <context>
     <name>SatelliteMap</name>
     <message>
+        <location filename="../qml/decodium/rotor/SatelliteMap.qml" line="+323"/>
         <source>DECODIUM %1</source>
-        <translation type="vanished">DECODIUM %1</translation>
+        <translation>DECODIUM %1</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>LISTENING OFF</source>
-        <translation type="vanished">ASCOLTO SPENTO</translation>
+        <translation>ASCOLTO SPENTO</translation>
     </message>
     <message numerus="yes">
+        <location line="+6"/>
         <source>%n station(s)</source>
-        <translation type="vanished">
+        <translation>
             <numerusform>%n stazione</numerusform>
             <numerusform>%n stazioni</numerusform>
         </translation>
     </message>
     <message>
+        <location line="+111"/>
         <source>%1 · %2° · %3 km</source>
-        <translation type="vanished">%1 · %2° · %3 km</translation>
+        <translation>%1 · %2° · %3 km</translation>
     </message>
     <message>
+        <location line="+35"/>
         <source>AIM</source>
-        <translation type="vanished">PUNTA</translation>
+        <translation>PUNTA</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>MEMORY</source>
-        <translation type="vanished">MEMORIA</translation>
+        <translation>MEMORIA</translation>
     </message>
     <message>
+        <location line="+21"/>
         <source>© OpenStreetMap contributors</source>
-        <translation type="vanished">© OpenStreetMap contributors</translation>
+        <translation>© OpenStreetMap contributors</translation>
     </message>
 </context>
 <context>
     <name>SatelliteWindow</name>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="+628"/>
         <source>AZ %1° / EL %2°</source>
-        <translation type="vanished">AZ %1° / EL %2°</translation>
+        <translation>AZ %1° / EL %2°</translation>
     </message>
     <message>
+        <location line="+69"/>
         <source>AZ %1°→%2°</source>
-        <translation type="vanished">AZ %1°→%2°</translation>
+        <translation>AZ %1°→%2°</translation>
     </message>
     <message>
+        <location line="-1"/>
         <source>LOS %1</source>
-        <translation type="vanished">LOS %1</translation>
+        <translation>LOS %1</translation>
     </message>
     <message>
+        <location line="-1"/>
         <source>max %1°</source>
-        <translation type="vanished">max %1°</translation>
+        <translation>max %1°</translation>
     </message>
     <message>
+        <location line="-324"/>
         <source>Track</source>
-        <translation type="vanished">Insegui</translation>
+        <translation>Insegui</translation>
     </message>
     <message>
+        <location line="+274"/>
         <source>Rotor PARK</source>
-        <translation type="vanished">Parcheggia il rotore</translation>
+        <translation>Parcheggia il rotore</translation>
     </message>
     <message>
+        <location line="-5"/>
         <source>Rotor STOP</source>
-        <translation type="vanished">Ferma il rotore</translation>
+        <translation>Ferma il rotore</translation>
     </message>
     <message>
+        <location line="-258"/>
         <source>Rotator enabled</source>
-        <translation type="vanished">Rotore attivo</translation>
+        <translation>Rotore attivo</translation>
     </message>
     <message>
         <source>Rotator host</source>
         <translation type="vanished">Host del rotore</translation>
     </message>
     <message>
+        <location line="+243"/>
         <source>Rotor feedback</source>
-        <translation type="vanished">Feedback del rotore</translation>
+        <translation>Feedback del rotore</translation>
     </message>
     <message>
+        <location line="-249"/>
         <source>Auto rotator</source>
-        <translation type="vanished">Rotore automatico</translation>
+        <translation>Rotore automatico</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Auto Doppler</source>
-        <translation type="vanished">Doppler automatico</translation>
+        <translation>Doppler automatico</translation>
     </message>
     <message>
+        <location line="+229"/>
         <source>Doppler</source>
-        <translation type="vanished">Doppler</translation>
+        <translation>Doppler</translation>
     </message>
     <message>
+        <location line="-8"/>
         <source>Azimuth</source>
-        <translation type="vanished">Azimut</translation>
+        <translation>Azimut</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Elevation</source>
-        <translation type="vanished">Elevazione</translation>
+        <translation>Elevazione</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Range</source>
-        <translation type="vanished">Distanza</translation>
+        <translation>Distanza</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Visibility</source>
-        <translation type="vanished">Visibilità</translation>
+        <translation>Visibilità</translation>
     </message>
     <message>
+        <location line="+1"/>
+        <source>VISIBLE</source>
+        <translation>VISIBILE</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>BELOW HORIZON</source>
+        <translation>SOTTO L&apos;ORIZZONTE</translation>
+    </message>
+    <message>
+        <location line="+5"/>
         <source>Observer</source>
-        <translation type="vanished">Osservatore</translation>
+        <translation>Osservatore</translation>
     </message>
     <message>
+        <location line="-196"/>
         <source>Protocol</source>
-        <translation type="vanished">Protocollo</translation>
+        <translation>Protocollo</translation>
     </message>
     <message>
+        <location line="+194"/>
         <source>Tracked frequency</source>
-        <translation type="vanished">Frequenza inseguita</translation>
+        <translation>Frequenza inseguita</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>TLE age</source>
-        <translation type="vanished">Età del TLE</translation>
+        <translation>Età del TLE</translation>
     </message>
     <message>
+        <location line="-267"/>
         <source>Refresh TLE</source>
-        <translation type="vanished">Aggiorna il TLE</translation>
+        <translation>Aggiorna il TLE</translation>
     </message>
     <message>
+        <location line="+311"/>
         <source>Predict 24 h</source>
-        <translation type="vanished">Previsione 24 h</translation>
+        <translation>Previsione 24 h</translation>
     </message>
     <message>
+        <location line="-6"/>
         <source>Upcoming passes</source>
-        <translation type="vanished">Passaggi imminenti</translation>
+        <translation>Passaggi imminenti</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Calculating passes…</source>
-        <translation type="vanished">Calcolo dei passaggi…</translation>
+        <translation>Calcolo dei passaggi…</translation>
     </message>
     <message>
+        <location line="+42"/>
         <source>Calculation running in background…</source>
-        <translation type="vanished">Calcolo in corso in secondo piano…</translation>
+        <translation>Calcolo in corso in secondo piano…</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>No pass in the selected interval</source>
-        <translation type="vanished">Nessun passaggio nell&apos;intervallo scelto</translation>
+        <translation>Nessun passaggio nell&apos;intervallo scelto</translation>
     </message>
     <message>
+        <location line="-306"/>
         <source>Satellite service unavailable</source>
-        <translation type="vanished">Servizio satelliti non disponibile</translation>
+        <translation>Servizio satelliti non disponibile</translation>
     </message>
     <message>
+        <location line="-113"/>
         <source>🛰 Satellite tracking</source>
-        <translation type="vanished">🛰 Inseguimento satelliti</translation>
+        <translation>🛰 Inseguimento satelliti</translation>
     </message>
     <message>
+        <location line="+72"/>
         <source>Updating…</source>
-        <translation type="vanished">Aggiornamento…</translation>
+        <translation>Aggiornamento…</translation>
     </message>
     <message>
+        <location line="+275"/>
         <source>Unavailable</source>
-        <translation type="vanished">Non disponibile</translation>
+        <translation>Non disponibile</translation>
     </message>
     <message>
+        <location line="-44"/>
         <source>AZ ±10° • EL ±5°</source>
-        <translation type="vanished">AZ ±10° • EL ±5°</translation>
+        <translation>AZ ±10° • EL ±5°</translation>
     </message>
     <message>
+        <location line="-576"/>
+        <source>Satellite tracking</source>
+        <translation>Inseguimento satelliti</translation>
+    </message>
+    <message>
+        <location line="+290"/>
+        <source>Close</source>
+        <translation>Chiudi</translation>
+    </message>
+    <message>
+        <location line="+70"/>
+        <source>Stop</source>
+        <translation>Stop</translation>
+    </message>
+    <message>
+        <location line="+63"/>
         <source>Host</source>
-        <translation type="vanished">Host</translation>
+        <translation>Host</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>IP or hostname</source>
-        <translation type="vanished">IP o nome host</translation>
+        <translation>IP o nome host</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Command port</source>
-        <translation type="vanished">Porta comandi</translation>
+        <translation>Porta comandi</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>%1 command port</source>
-        <translation type="vanished">Porta comandi %1</translation>
+        <translation>Porta comandi %1</translation>
     </message>
     <message>
+        <location line="+45"/>
+        <source>unavailable</source>
+        <translation>non disponibile</translation>
+    </message>
+    <message>
+        <location line="+16"/>
         <source>Manual movement</source>
-        <translation type="vanished">Movimento manuale</translation>
+        <translation>Movimento manuale</translation>
     </message>
     <message>
+        <location line="+29"/>
         <source>Move azimuth +10°</source>
-        <translation type="vanished">Muovi l&apos;azimut +10°</translation>
+        <translation>Muovi l&apos;azimut +10°</translation>
     </message>
     <message>
+        <location line="-18"/>
         <source>Move azimuth −10°</source>
-        <translation type="vanished">Muovi l&apos;azimut −10°</translation>
+        <translation>Muovi l&apos;azimut −10°</translation>
     </message>
     <message>
+        <location line="+36"/>
         <source>Move elevation +5°</source>
-        <translation type="vanished">Muovi l&apos;elevazione +5°</translation>
+        <translation>Muovi l&apos;elevazione +5°</translation>
     </message>
     <message>
+        <location line="+18"/>
         <source>Move elevation −5°</source>
-        <translation type="vanished">Muovi l&apos;elevazione −5°</translation>
+        <translation>Muovi l&apos;elevazione −5°</translation>
     </message>
     <message>
+        <location line="-75"/>
         <source>Rotator service unavailable</source>
-        <translation type="vanished">Servizio del rotore non disponibile</translation>
+        <translation>Servizio del rotore non disponibile</translation>
     </message>
     <message>
+        <location line="+89"/>
         <source>Enable ‘Rotator enabled’ to send commands</source>
-        <translation type="vanished">Attiva «Rotore attivo» per inviare comandi</translation>
+        <translation>Attiva «Rotore attivo» per inviare comandi</translation>
     </message>
     <message>
+        <location line="-181"/>
         <source>Satellite tracking active • enable ‘Rotator enabled’ to send commands</source>
-        <translation type="vanished">Inseguimento satelliti attivo • attiva «Rotore attivo» per inviare comandi</translation>
+        <translation>Inseguimento satelliti attivo • attiva «Rotore attivo» per inviare comandi</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Satellite tracking active • rotator commands are sent asynchronously</source>
-        <translation type="vanished">Inseguimento satelliti attivo • i comandi del rotore sono inviati in modo asincrono</translation>
+        <translation>Inseguimento satelliti attivo • i comandi del rotore sono inviati in modo asincrono</translation>
     </message>
     <message>
+        <location line="-1"/>
         <source>Satellite tracking active • waiting for the satellite above the horizon</source>
-        <translation type="vanished">Inseguimento satelliti attivo • in attesa del satellite sopra l&apos;orizzonte</translation>
+        <translation>Inseguimento satelliti attivo • in attesa del satellite sopra l&apos;orizzonte</translation>
     </message>
     <message>
+        <location line="+88"/>
         <source>TCP rotctld: %1:%2 • commands + feedback on same port</source>
-        <translation type="vanished">TCP rotctld: %1:%2 • comandi e feedback sulla stessa porta</translation>
+        <translation>TCP rotctld: %1:%2 • comandi e feedback sulla stessa porta</translation>
     </message>
     <message>
+        <location line="-6"/>
         <source>UDP command port: %1 • feedback port: %2</source>
-        <translation type="vanished">Porta comandi UDP: %1 • porta feedback: %2</translation>
+        <translation>Porta comandi UDP: %1 • porta feedback: %2</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>UDP command port: %1 • feedback unavailable</source>
-        <translation type="vanished">Porta comandi UDP: %1 • feedback non disponibile</translation>
+        <translation>Porta comandi UDP: %1 • feedback non disponibile</translation>
     </message>
 </context>
 <context>
@@ -19392,40 +22168,49 @@ Suggerimento: chiudi OmniRig dall&apos;icona nella tray di Windows, poi premi di
         <translation type="vanished">DATABASE LOCALI</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="+146"/>
         <source>FCC ULS</source>
-        <translation type="vanished">FCC ULS</translation>
+        <translation>FCC ULS</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>LoTW - User activity</source>
-        <translation type="vanished">LoTW - attività utenti</translation>
+        <translation>LoTW - attività utenti</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>LoTW - Confirmations received</source>
-        <translation type="vanished">LoTW - conferme ricevute</translation>
+        <translation>LoTW - conferme ricevute</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>eQSL AG</source>
-        <translation type="vanished">eQSL AG</translation>
+        <translation>eQSL AG</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>eQSL InBox - Confirmations received</source>
-        <translation type="vanished">eQSL InBox - conferme ricevute</translation>
+        <translation>eQSL InBox - conferme ricevute</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>QRZ.com - Confirmations received</source>
-        <translation type="vanished">QRZ.com - conferme ricevute</translation>
+        <translation>QRZ.com - conferme ricevute</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Club Log OQRS</source>
-        <translation type="vanished">Club Log OQRS</translation>
+        <translation>Club Log OQRS</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>DXCC cty.dat</source>
-        <translation type="vanished">DXCC cty.dat</translation>
+        <translation>DXCC cty.dat</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>CALL3.TXT</source>
-        <translation type="vanished">CALL3.TXT</translation>
+        <translation>CALL3.TXT</translation>
     </message>
     <message>
         <source>No records</source>
@@ -19464,12 +22249,14 @@ Suggerimento: chiudi OmniRig dall&apos;icona nella tray di Windows, poi premi di
         <translation type="vanished">Importa</translation>
     </message>
     <message>
+        <location line="+27"/>
         <source>Clear global lookup cache</source>
-        <translation type="vanished">Svuota cache lookup globale</translation>
+        <translation>Svuota cache lookup globale</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>All locally stored callsign lookup results for every provider will be deleted. The FCC, LoTW, eQSL and Club Log databases will not be deleted. Continue?</source>
-        <translation type="vanished">Verranno eliminati tutti i risultati lookup dei nominativi memorizzati localmente, per tutti i provider. I database FCC, LoTW, eQSL e Club Log non verranno cancellati. Continuare?</translation>
+        <translation>Verranno eliminati tutti i risultati lookup dei nominativi memorizzati localmente, per tutti i provider. I database FCC, LoTW, eQSL e Club Log non verranno cancellati. Continuare?</translation>
     </message>
     <message>
         <source>Management:</source>
@@ -19520,216 +22307,315 @@ When OFF (upstream 1.0.438 behaviour): the TX Watchdog takes priority and ignore
 Quando OFF (comportamento upstream 1.0.438): il watchdog TX ha la priorità e ignora il limite dei tentativi chiamante fino al proprio timeout, quindi una chiamata può ripetersi per tutta la durata del watchdog (predefinito 6 min).</translation>
     </message>
     <message>
+        <location line="-156"/>
+        <location line="+1626"/>
         <source>Settings</source>
-        <translation type="vanished">Impostazioni</translation>
+        <translation>Impostazioni</translation>
     </message>
     <message>
+        <location line="-1113"/>
+        <location line="+24"/>
+        <source>Enter a valid offset, for example -2556 MHz</source>
+        <translation>Inserisci un offset valido, ad esempio -2556 MHz</translation>
+    </message>
+    <message>
+        <location line="-16"/>
+        <location line="+25"/>
+        <source>Offset saved and verified</source>
+        <translation>Offset salvato e verificato</translation>
+    </message>
+    <message>
+        <location line="-24"/>
+        <location line="+25"/>
+        <source>Offset was not saved; check the value and settings-file permissions</source>
+        <translation>L&apos;offset non è stato salvato; controlla il valore e i permessi del file delle impostazioni</translation>
+    </message>
+    <message>
+        <location line="+85"/>
         <source>Select AzEl directory</source>
-        <translation type="vanished">Seleziona cartella AzEl</translation>
+        <translation>Seleziona cartella AzEl</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Select save directory</source>
-        <translation type="vanished">Seleziona cartella di salvataggio</translation>
+        <translation>Seleziona cartella di salvataggio</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Merge Working Frequencies</source>
-        <translation type="vanished">Unisci Working Frequencies</translation>
+        <translation>Unisci Working Frequencies</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Load Working Frequencies</source>
-        <translation type="vanished">Carica Working Frequencies</translation>
+        <translation>Carica Working Frequencies</translation>
     </message>
     <message>
+        <location line="+2"/>
+        <location line="+10"/>
         <source>Frequency files (*.qrg *.qrg.json)</source>
-        <translation type="vanished">File di frequenza (*.qrg *.qrg.json)</translation>
+        <translation>File di frequenza (*.qrg *.qrg.json)</translation>
     </message>
     <message>
+        <location line="-10"/>
+        <location line="+10"/>
         <source>All files (*)</source>
-        <translation type="vanished">Tutti i file (*)</translation>
+        <translation>Tutti i file (*)</translation>
     </message>
     <message>
+        <location line="-2"/>
         <source>Save Working Frequencies</source>
-        <translation type="vanished">Salva Working Frequencies</translation>
+        <translation>Salva Working Frequencies</translation>
     </message>
     <message>
+        <location line="+192"/>
         <source>Auto</source>
-        <translation type="vanished">Auto</translation>
+        <translation>Auto</translation>
     </message>
     <message>
+        <location line="+496"/>
         <source>Transmitted Message</source>
-        <translation type="vanished">Messaggio Trasmesso</translation>
+        <translation>Messaggio Trasmesso</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>My Callsign</source>
-        <translation type="vanished">Mio Nominativo</translation>
+        <translation>Mio Nominativo</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>New DXCC on Band</source>
-        <translation type="vanished">Nuovo DXCC su Banda</translation>
+        <translation>Nuovo DXCC su Banda</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>New DXCC</source>
-        <translation type="vanished">Nuovo DXCC</translation>
+        <translation>Nuovo DXCC</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>New Continent on Band</source>
-        <translation type="vanished">Nuovo Continente su Banda</translation>
+        <translation>Nuovo Continente su Banda</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>New Continent</source>
-        <translation type="vanished">Nuovo Continente</translation>
+        <translation>Nuovo Continente</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>New CQ Zone on Band</source>
-        <translation type="vanished">Nuova Zona CQ su Banda</translation>
+        <translation>Nuova Zona CQ su Banda</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>New CQ Zone</source>
-        <translation type="vanished">Nuova Zona CQ</translation>
+        <translation>Nuova Zona CQ</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>New ITU Zone on Band</source>
-        <translation type="vanished">Nuova Zona ITU su Banda</translation>
+        <translation>Nuova Zona ITU su Banda</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>New ITU Zone</source>
-        <translation type="vanished">Nuova Zona ITU</translation>
+        <translation>Nuova Zona ITU</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>New Grid on Band</source>
-        <translation type="vanished">Nuovo Grid su Banda</translation>
+        <translation>Nuovo Grid su Banda</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>New Grid</source>
-        <translation type="vanished">Nuovo Grid</translation>
+        <translation>Nuovo Grid</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>New Callsign on Band</source>
-        <translation type="vanished">Nuovo Nominativo su Banda</translation>
+        <translation>Nuovo Nominativo su Banda</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>New Callsign</source>
-        <translation type="vanished">Nuovo Nominativo</translation>
+        <translation>Nuovo Nominativo</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>CQ in Message</source>
-        <translation type="vanished">CQ nel Messaggio</translation>
+        <translation>CQ nel Messaggio</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>DX Entity</source>
-        <translation type="vanished">Entità DX</translation>
+        <translation>Entità DX</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>73 / RR73</source>
-        <translation type="vanished">73 / RR73</translation>
+        <translation>73 / RR73</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>B4 (Worked)</source>
-        <translation type="vanished">B4 (Lavorato)</translation>
+        <translation>B4 (Lavorato)</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Normal decodes</source>
-        <translation type="vanished">Decodifiche normali</translation>
+        <translation>Decodifiche normali</translation>
     </message>
     <message>
+        <location line="+284"/>
+        <source>A−</source>
+        <translation>A−</translation>
+    </message>
+    <message>
+        <location line="+18"/>
+        <source>Setup text size: %1%. Decrease. This affects Setup only.</source>
+        <translation>Dimensione del testo delle impostazioni: %1%. Riduci. Riguarda solo le impostazioni.</translation>
+    </message>
+    <message>
+        <location line="+16"/>
+        <source>A+</source>
+        <translation>A+</translation>
+    </message>
+    <message>
+        <location line="+18"/>
+        <source>Setup text size: %1%. Increase. This affects Setup only.</source>
+        <translation>Dimensione del testo delle impostazioni: %1%. Aumenta. Riguarda solo le impostazioni.</translation>
+    </message>
+    <message>
+        <location line="+34"/>
+        <source>Setup text size: %1%. Reset to 100%. This affects Setup only.</source>
+        <translation>Dimensione del testo delle impostazioni: %1%. Riporta al 100%. Riguarda solo le impostazioni.</translation>
+    </message>
+    <message>
+        <location line="+28"/>
         <source>Changes are applied immediately where supported.</source>
-        <translation type="vanished">Le modifiche vengono applicate subito dove previsto.</translation>
+        <translation>Le modifiche vengono applicate subito dove previsto.</translation>
     </message>
     <message>
+        <location line="+16"/>
         <source>Close</source>
-        <translation type="vanished">Chiudi</translation>
+        <translation>Chiudi</translation>
     </message>
     <message>
+        <location line="+88"/>
         <source>Station</source>
-        <translation type="vanished">Stazione</translation>
+        <translation>Stazione</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Radio</source>
-        <translation type="vanished">Radio</translation>
+        <translation>Radio</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Audio</source>
-        <translation type="vanished">Audio</translation>
+        <translation>Audio</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>TX</source>
-        <translation type="vanished">TX</translation>
+        <translation>TX</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Display</source>
-        <translation type="vanished">Display</translation>
+        <translation>Display</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Decode</source>
-        <translation type="vanished">Decodifica</translation>
+        <translation>Decodifica</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Reporting</source>
-        <translation type="vanished">Reporting</translation>
+        <translation>Reporting</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Colors</source>
-        <translation type="vanished">Colori</translation>
+        <translation>Colori</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Advanced</source>
-        <translation type="vanished">Avanzate</translation>
+        <translation>Avanzate</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Alerts</source>
-        <translation type="vanished">Alerts</translation>
+        <translation>Alerts</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Filters</source>
-        <translation type="vanished">Filtri</translation>
+        <translation>Filtri</translation>
     </message>
     <message>
+        <location line="-477"/>
         <source>Choose Decoded Font</source>
-        <translation type="vanished">Scegli Decoded Font</translation>
+        <translation>Scegli Decoded Font</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Choose Font</source>
-        <translation type="vanished">Scegli Font</translation>
+        <translation>Scegli Font</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Search:</source>
-        <translation type="vanished">Cerca:</translation>
+        <translation>Cerca:</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>filter by name</source>
-        <translation type="vanished">filtra per nome</translation>
+        <translation>filtra per nome</translation>
     </message>
     <message>
+        <location line="+16"/>
         <source>Monospaced fonts:</source>
-        <translation type="vanished">Font monospaziati:</translation>
+        <translation>Font monospaziati:</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Fonts:</source>
-        <translation type="vanished">Font:</translation>
+        <translation>Font:</translation>
     </message>
     <message>
+        <location line="+48"/>
         <source>Selected:</source>
-        <translation type="vanished">Selezionato:</translation>
+        <translation>Selezionato:</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Size:</source>
-        <translation type="vanished">Dimensione:</translation>
+        <translation>Dimensione:</translation>
     </message>
     <message>
+        <location line="+65"/>
         <source>Cancel</source>
-        <translation type="vanished">Annulla</translation>
+        <translation>Annulla</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Apply</source>
-        <translation type="vanished">Applica</translation>
+        <translation>Applica</translation>
     </message>
     <message>
+        <location line="+315"/>
         <source>Frequencies</source>
-        <translation type="vanished">Frequenze</translation>
+        <translation>Frequenze</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>UI Buttons</source>
-        <translation type="vanished">Pulsanti UI</translation>
+        <translation>Pulsanti UI</translation>
     </message>
     <message>
         <source>Search radio, model or brand...</source>
@@ -20430,8 +23316,9 @@ Costa CPU extra durante i QSO. Default: OFF.</translation>
         <translation type="vanished">Aggiorna</translation>
     </message>
     <message>
+        <location line="-507"/>
         <source>LoTW marker</source>
-        <translation type="vanished">Marker LoTW</translation>
+        <translation>Marker LoTW</translation>
     </message>
     <message>
         <source>SWR max:</source>
@@ -21376,12 +24263,14 @@ Nel dubbio, usa Alta.</translation>
         <translation type="vanished">Nominativi blu:</translation>
     </message>
     <message>
+        <location line="+146"/>
         <source>Bold</source>
-        <translation type="vanished">Grassetto</translation>
+        <translation>Grassetto</translation>
     </message>
     <message>
+        <location line="-486"/>
         <source>Both</source>
-        <translation type="vanished">Entrambi</translation>
+        <translation>Entrambi</translation>
     </message>
     <message>
         <source>CAT CONTROL</source>
@@ -21540,8 +24429,10 @@ Nel dubbio, usa Alta.</translation>
         <translation type="vanished">Ricerca approfondita:</translation>
     </message>
     <message>
+        <location line="-253"/>
+        <location line="+241"/>
         <source>Default</source>
-        <translation type="vanished">Predefinito</translation>
+        <translation>Predefinito</translation>
     </message>
     <message>
         <source>Degrade S/N:</source>
@@ -21648,8 +24539,9 @@ Nel dubbio, usa Alta.</translation>
         <translation type="vanished">FREQUENZA E TIMING</translation>
     </message>
     <message>
+        <location line="-20"/>
         <source>Fake It</source>
-        <translation type="vanished">Simula</translation>
+        <translation>Simula</translation>
     </message>
     <message>
         <source>Fast</source>
@@ -21688,8 +24580,9 @@ Nel dubbio, usa Alta.</translation>
         <translation type="vanished">Modalità Fox:</translation>
     </message>
     <message>
+        <location line="+36"/>
         <source>Front/Mic</source>
-        <translation type="vanished">Frontale/microfono</translation>
+        <translation>Frontale/microfono</translation>
     </message>
     <message>
         <source>Full</source>
@@ -21728,8 +24621,9 @@ Nel dubbio, usa Alta.</translation>
         <translation type="vanished">Stretta di mano:</translation>
     </message>
     <message>
+        <location line="-251"/>
         <source>Hardware</source>
-        <translation type="vanished">Hardware</translation>
+        <translation>Hardware</translation>
     </message>
     <message>
         <source>High DPI:</source>
@@ -21780,8 +24674,9 @@ Nel dubbio, usa Alta.</translation>
         <translation type="vanished">Interfaccia utilizzata:</translation>
     </message>
     <message>
+        <location line="+740"/>
         <source>Italic</source>
-        <translation type="vanished">Corsivo</translation>
+        <translation>Corsivo</translation>
     </message>
     <message>
         <source>JT65 VHF/UHF</source>
@@ -21808,8 +24703,9 @@ Nel dubbio, usa Alta.</translation>
         <translation type="vanished">Lascia il server vuoto per usare automaticamente pool.ntp.org, Apple, Cloudflare e Google.</translation>
     </message>
     <message>
+        <location line="-497"/>
         <source>Left</source>
-        <translation type="vanished">Sinistro</translation>
+        <translation>Sinistro</translation>
     </message>
     <message>
         <source>Listen Port:</source>
@@ -21864,8 +24760,9 @@ Nel dubbio, usa Alta.</translation>
         <translation type="vanished">Monitor spento:</translation>
     </message>
     <message>
+        <location line="-2"/>
         <source>Mono</source>
-        <translation type="vanished">Mono</translation>
+        <translation>Mono</translation>
     </message>
     <message>
         <source>Multicast TTL:</source>
@@ -21944,8 +24841,11 @@ Nel dubbio, usa Alta.</translation>
         <translation type="vanished">Non-QSL&apos;d:</translation>
     </message>
     <message>
+        <location line="-245"/>
+        <location line="+220"/>
+        <location line="+17"/>
         <source>None</source>
-        <translation type="vanished">Nessuna</translation>
+        <translation>Nessuna</translation>
     </message>
     <message>
         <source>Normal</source>
@@ -21956,8 +24856,9 @@ Nel dubbio, usa Alta.</translation>
         <translation type="vanished">Richiesta di notifica:</translation>
     </message>
     <message>
+        <location line="+797"/>
         <source>OK</source>
-        <translation type="vanished">OK</translation>
+        <translation>OK</translation>
     </message>
     <message>
         <source>OPERATING MODE</source>
@@ -21984,12 +24885,14 @@ Nel dubbio, usa Alta.</translation>
         <translation type="vanished">URL OTP:</translation>
     </message>
     <message>
+        <location line="-791"/>
         <source>Off</source>
-        <translation type="vanished">Spento</translation>
+        <translation>Spento</translation>
     </message>
     <message>
+        <location line="-2"/>
         <source>On</source>
-        <translation type="vanished">Su</translation>
+        <translation>Su</translation>
     </message>
     <message>
         <source>Op Call:</source>
@@ -22104,8 +25007,9 @@ Nel dubbio, usa Alta.</translation>
         <translation type="vanished">RX&gt;TX dopo QSO:</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Rear/Data</source>
-        <translation type="vanished">Posteriore/Dati</translation>
+        <translation>Posteriore/Dati</translation>
     </message>
     <message>
         <source>Record RX:</source>
@@ -22120,16 +25024,18 @@ Nel dubbio, usa Alta.</translation>
         <translation type="vanished">Richiesto per LAN/WAN</translation>
     </message>
     <message>
+        <location line="+695"/>
         <source>Reset</source>
-        <translation type="vanished">Ripristina</translation>
+        <translation>Ripristina</translation>
     </message>
     <message>
         <source>Restore Win:</source>
         <translation type="vanished">Ripristina vittoria:</translation>
     </message>
     <message>
+        <location line="-731"/>
         <source>Rig</source>
-        <translation type="vanished">Impianto</translation>
+        <translation>Impianto</translation>
     </message>
     <message>
         <source>Rig Info:</source>
@@ -22140,8 +25046,9 @@ Nel dubbio, usa Alta.</translation>
         <translation type="vanished">Impianto di perforazione:</translation>
     </message>
     <message>
+        <location line="+32"/>
         <source>Right</source>
-        <translation type="vanished">Destro</translation>
+        <translation>Destro</translation>
     </message>
     <message>
         <source>SERIAL PARAMETERS</source>
@@ -22688,1076 +25595,1461 @@ Nel dubbio, usa Alta.</translation>
         <translation type="vanished">Legge solo ciò che il sistema già sa: non apre porte e non invia comandi</translation>
     </message>
     <message>
+        <location line="+849"/>
         <source>Callsign</source>
-        <translation type="vanished">Nominativo</translation>
+        <translation>Nominativo</translation>
     </message>
     <message>
+        <location line="-335"/>
         <source>173045  -21  0.1  1045  CQ LB9ZG JP20</source>
-        <translation type="vanished">173045  -21  0.1  1045  CQ LB9ZG JP20</translation>
+        <translation>173045  -21  0.1  1045  CQ LB9ZG JP20</translation>
     </message>
     <message>
+        <location line="+211"/>
         <source>✕</source>
-        <translation type="vanished">✕</translation>
+        <translation>✕</translation>
     </message>
 </context>
 <context>
     <name>SettingsPage</name>
     <message>
+        <location filename="../qml/decodium/rotor/SettingsPage.qml" line="+35"/>
         <source>CONTROL BOX CONNECTION</source>
-        <translation type="vanished">CONNESSIONE CONTROL BOX</translation>
+        <translation>CONNESSIONE CONTROL BOX</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Rotator</source>
-        <translation type="vanished">Rotore</translation>
+        <translation>Rotore</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>on</source>
-        <translation type="vanished">acceso</translation>
+        <translation>acceso</translation>
     </message>
     <message>
+        <location line="+1"/>
+        <location line="+86"/>
         <source>off</source>
-        <translation type="vanished">spento</translation>
+        <translation>spento</translation>
     </message>
     <message>
+        <location line="-81"/>
         <source>Simulator</source>
-        <translation type="vanished">Simulatore</translation>
+        <translation>Simulatore</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>simulated rotator</source>
-        <translation type="vanished">rotore simulato</translation>
+        <translation>rotore simulato</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>real control box</source>
-        <translation type="vanished">control box reale</translation>
+        <translation>control box reale</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Serial port</source>
-        <translation type="vanished">Porta seriale</translation>
+        <translation>Porta seriale</translation>
     </message>
     <message>
+        <location line="+16"/>
         <source>choose…</source>
-        <translation type="vanished">scegli…</translation>
+        <translation>scegli…</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>Model</source>
-        <translation type="vanished">Modello</translation>
+        <translation>Modello</translation>
     </message>
     <message>
+        <location line="+21"/>
         <source>Speed</source>
-        <translation type="vanished">Velocità</translation>
+        <translation>Velocità</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>%1 baud, 8N1</source>
-        <translation type="vanished">%1 baud, 8N1</translation>
+        <translation>%1 baud, 8N1</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Status</source>
-        <translation type="vanished">Stato</translation>
+        <translation>Stato</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>connected</source>
-        <translation type="vanished">connesso</translation>
+        <translation>connesso</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>missing</source>
-        <translation type="vanished">assente</translation>
+        <translation>assente</translation>
     </message>
     <message>
+        <location line="+14"/>
         <source>Network access</source>
-        <translation type="vanished">Accesso di rete</translation>
+        <translation>Accesso di rete</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>phone, web and station software</source>
-        <translation type="vanished">telefono, web e software di stazione</translation>
+        <translation>telefono, web e software di stazione</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>closed</source>
-        <translation type="vanished">chiuso</translation>
+        <translation>chiuso</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Token</source>
-        <translation type="vanished">Token</translation>
+        <translation>Token</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>empty = open access</source>
-        <translation type="vanished">vuoto = accesso aperto</translation>
+        <translation>vuoto = accesso aperto</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Port, model and network apply immediately. The rotator stays off until you turn it on.</source>
-        <translation type="vanished">Porta, modello e rete si applicano subito. Il rotore resta spento finché non lo accendi.</translation>
+        <translation>Porta, modello e rete si applicano subito. Il rotore resta spento finché non lo accendi.</translation>
     </message>
 </context>
 <context>
     <name>SettingsPanel</name>
     <message>
+        <location filename="../qml/decodium/rotor/SettingsPanel.qml" line="+8"/>
         <source>STATION AND SAFETY</source>
-        <translation type="vanished">STAZIONE E SICUREZZA</translation>
+        <translation>STAZIONE E SICUREZZA</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Callsign</source>
-        <translation type="vanished">Nominativo</translation>
+        <translation>Nominativo</translation>
     </message>
     <message>
+        <location line="+14"/>
         <source>QTH locator</source>
-        <translation type="vanished">Locatore QTH</translation>
+        <translation>Locatore QTH</translation>
     </message>
     <message>
+        <location line="+14"/>
         <source>Beamwidth: %1°</source>
-        <translation type="vanished">Apertura del fascio: %1°</translation>
+        <translation>Apertura del fascio: %1°</translation>
     </message>
     <message>
+        <location line="+44"/>
         <source>Azimuth limits</source>
-        <translation type="vanished">Limiti di azimut</translation>
+        <translation>Limiti di azimut</translation>
     </message>
     <message>
+        <location line="+30"/>
         <source>Park position</source>
-        <translation type="vanished">Posizione di park</translation>
+        <translation>Posizione di park</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>Stop if the link drops</source>
-        <translation type="vanished">Ferma se il collegamento cade</translation>
+        <translation>Ferma se il collegamento cade</translation>
     </message>
     <message>
+        <location line="+36"/>
+        <location line="+21"/>
         <source>on</source>
-        <translation type="vanished">acceso</translation>
+        <translation>acceso</translation>
     </message>
     <message>
+        <location line="-21"/>
+        <location line="+21"/>
         <source>off</source>
-        <translation type="vanished">spento</translation>
+        <translation>spento</translation>
     </message>
     <message>
+        <location line="-12"/>
         <source>Stations heard by Decodium</source>
-        <translation type="vanished">Stazioni ascoltate da Decodium</translation>
+        <translation>Stazioni ascoltate da Decodium</translation>
     </message>
     <message>
+        <location line="+28"/>
         <source>Callsign and locator are those set in Decodium. Changes are saved immediately.</source>
-        <translation type="vanished">Nominativo e locatore sono quelli impostati in Decodium. Le modifiche vengono salvate subito.</translation>
+        <translation>Nominativo e locatore sono quelli impostati in Decodium. Le modifiche vengono salvate subito.</translation>
     </message>
 </context>
 <context>
     <name>SettingsTab0</name>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab0.qml" line="+67"/>
         <source>STATION DETAILS</source>
-        <translation type="vanished">DETTAGLI STAZIONE</translation>
+        <translation>DETTAGLI STAZIONE</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>My Call:</source>
-        <translation type="vanished">Mio nominativo:</translation>
+        <translation>Mio nominativo:</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>The active callsign transmitted by Decodium and written as STATION_CALLSIGN in ADIF.</source>
-        <translation type="vanished">Il nominativo attivo che Decodium trasmette e scrive come STATION_CALLSIGN nell&apos;ADIF.</translation>
+        <translation>Il nominativo attivo che Decodium trasmette e scrive come STATION_CALLSIGN nell&apos;ADIF.</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>My Grid:</source>
-        <translation type="vanished">Mio locator:</translation>
+        <translation>Mio locator:</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Auto Grid:</source>
-        <translation type="vanished">Locator automatico:</translation>
+        <translation>Locator automatico:</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>IARU Region:</source>
-        <translation type="vanished">Regione IARU:</translation>
+        <translation>Regione IARU:</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>Type 2 Msg Gen:</source>
-        <translation type="vanished">Generazione messaggio di tipo 2:</translation>
+        <translation>Generazione messaggio di tipo 2:</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Full</source>
-        <translation type="vanished">Pieno</translation>
+        <translation>Pieno</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Type 1 prefix</source>
-        <translation type="vanished">Prefisso di tipo 1</translation>
+        <translation>Prefisso di tipo 1</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Type 2 prefix</source>
-        <translation type="vanished">Prefisso di tipo 2</translation>
+        <translation>Prefisso di tipo 2</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Op Call:</source>
-        <translation type="vanished">Nominativo operatore:</translation>
+        <translation>Nominativo operatore:</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Optional legacy operator-callsign setting. It never replaces My Call for transmission or STATION_CALLSIGN in ADIF.</source>
-        <translation type="vanished">Impostazione legacy facoltativa del nominativo dell&apos;operatore. Non sostituisce mai My Call in trasmissione né STATION_CALLSIGN nell&apos;ADIF.</translation>
+        <translation>Impostazione legacy facoltativa del nominativo dell&apos;operatore. Non sostituisce mai My Call in trasmissione né STATION_CALLSIGN nell&apos;ADIF.</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>Optional operator callsign</source>
-        <translation type="vanished">Nominativo dell&apos;operatore (facoltativo)</translation>
+        <translation>Nominativo dell&apos;operatore (facoltativo)</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>STATION INFO</source>
-        <translation type="vanished">INFO STAZIONE</translation>
+        <translation>INFO STAZIONE</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Station label:</source>
-        <translation type="vanished">Etichetta della stazione:</translation>
+        <translation>Etichetta della stazione:</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Optional descriptive label for this station or operating setup. It is not a callsign or a radio model.</source>
-        <translation type="vanished">Etichetta descrittiva facoltativa per questa stazione o postazione. Non è un nominativo né un modello di radio.</translation>
+        <translation>Etichetta descrittiva facoltativa per questa stazione o postazione. Non è un nominativo né un modello di radio.</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>Optional - e.g. Home station</source>
-        <translation type="vanished">Facoltativo - es. Stazione di casa</translation>
+        <translation>Facoltativo - es. Stazione di casa</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>QTH:</source>
-        <translation type="vanished">QTH:</translation>
+        <translation>QTH:</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>Rig / radio:</source>
-        <translation type="vanished">Apparato / radio:</translation>
+        <translation>Apparato / radio:</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Optional transceiver or radio description, for example Icom IC-7100. If left empty, Decodium uses the CAT rig name when available for PSK Reporter metadata.</source>
-        <translation type="vanished">Descrizione facoltativa del ricetrasmettitore o della radio, per esempio Icom IC-7100. Se lasciato vuoto, Decodium usa il nome dell&apos;apparato dal CAT, quando disponibile, per i metadati di PSK Reporter.</translation>
+        <translation>Descrizione facoltativa del ricetrasmettitore o della radio, per esempio Icom IC-7100. Se lasciato vuoto, Decodium usa il nome dell&apos;apparato dal CAT, quando disponibile, per i metadati di PSK Reporter.</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>Optional - e.g. Icom IC-7100</source>
-        <translation type="vanished">Facoltativo - es. Icom IC-7100</translation>
+        <translation>Facoltativo - es. Icom IC-7100</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Antenna:</source>
-        <translation type="vanished">Antenna:</translation>
+        <translation>Antenna:</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Power (W):</source>
-        <translation type="vanished">Potenza (W):</translation>
+        <translation>Potenza (W):</translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>STATION + WEATHER TELEMETRY</source>
+        <translation>TELEMETRIA STAZIONE + METEO</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Sends one extra FT8/FT4 message right after a QSO is logged, with your radio, antenna, power, locator and current weather packed into a compact code (no free text, no callsign field in this message type). Off by default.</source>
+        <translation>Invia un messaggio FT8/FT4 aggiuntivo subito dopo la registrazione di un QSO, con radio, antenna, potenza, locator e meteo attuale compressi in un codice compatto (nessun testo libero, nessun campo nominativo in questo tipo di messaggio). Disattivato per impostazione predefinita.</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Radio model:</source>
+        <translation>Modello radio:</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Antenna type:</source>
+        <translation>Tipo di antenna:</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Auto weather:</source>
+        <translation>Meteo automatico:</translation>
+    </message>
+    <message>
+        <location line="+22"/>
+        <source>After each QSO:</source>
+        <translation>Dopo ogni QSO:</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Send station + weather info</source>
+        <translation>Invia info stazione + meteo</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>On receive:</source>
+        <translation>In ricezione:</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Show popup with correspondent&apos;s info</source>
+        <translation>Mostra popup con le info del corrispondente</translation>
     </message>
 </context>
 <context>
     <name>SettingsTab1</name>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="+162"/>
         <source>BACKEND CAT</source>
-        <translation type="vanished">BACKEND CAT</translation>
+        <translation>BACKEND CAT</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Backend:</source>
-        <translation type="vanished">Backend:</translation>
+        <translation>Backend:</translation>
     </message>
     <message>
         <source>Native (15 radios)</source>
         <translation type="vanished">Nativo (15 radio)</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Hamlib (300+ radios)</source>
-        <translation type="vanished">Hamlib (oltre 300 radio)</translation>
+        <translation>Hamlib (oltre 300 radio)</translation>
     </message>
     <message>
+        <location line="+21"/>
         <source>Profile:</source>
-        <translation type="vanished">Profilo:</translation>
+        <translation>Profilo:</translation>
     </message>
     <message>
+        <location line="+24"/>
         <source>No profile</source>
-        <translation type="vanished">Nessun profilo</translation>
+        <translation>Nessun profilo</translation>
     </message>
     <message>
+        <location line="+20"/>
         <source>Profile name</source>
-        <translation type="vanished">Nome profilo</translation>
+        <translation>Nome profilo</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Load</source>
-        <translation type="vanished">Carica</translation>
+        <translation>Carica</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>Save</source>
-        <translation type="vanished">Salva</translation>
+        <translation>Salva</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>New</source>
-        <translation type="vanished">Nuovo</translation>
+        <translation>Nuovo</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Delete</source>
-        <translation type="vanished">Elimina</translation>
+        <translation>Elimina</translation>
     </message>
     <message>
+        <location line="+29"/>
         <source>Tip: close OmniRig from the Windows tray icon, then press Connect again.</source>
-        <translation type="vanished">Suggerimento: chiudi OmniRig dalla tray icon di Windows, poi premi di nuovo Connetti.</translation>
+        <translation>Suggerimento: chiudi OmniRig dalla tray icon di Windows, poi premi di nuovo Connetti.</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>Status:</source>
-        <translation type="vanished">Stato:</translation>
+        <translation>Stato:</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Connected</source>
-        <translation type="vanished">Connesso</translation>
+        <translation>Connesso</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Disconnected</source>
-        <translation type="vanished">Disconnesso</translation>
+        <translation>Disconnesso</translation>
     </message>
     <message>
+        <location line="+6"/>
+        <location line="+1405"/>
         <source>Disconnect</source>
-        <translation type="vanished">Disconnetti</translation>
+        <translation>Disconnetti</translation>
     </message>
     <message>
+        <location line="-1405"/>
+        <location line="+1397"/>
         <source>Connect</source>
-        <translation type="vanished">Connetti</translation>
+        <translation>Connetti</translation>
     </message>
     <message>
+        <location line="-1380"/>
         <source>CAT CONTROL</source>
-        <translation type="vanished">CONTROLLO CAT</translation>
+        <translation>CONTROLLO CAT</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>Auto-detect:</source>
-        <translation type="vanished">Rilevamento automatico:</translation>
+        <translation>Rilevamento automatico:</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Detect my radio</source>
-        <translation type="vanished">Rileva la mia radio</translation>
+        <translation>Rileva la mia radio</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Reads what the system already knows: it opens no port and sends no command</source>
-        <translation type="vanished">Legge solo ciò che il sistema già sa: non apre porte e non invia comandi</translation>
+        <translation>Legge solo ciò che il sistema già sa: non apre porte e non invia comandi</translation>
     </message>
     <message>
+        <location line="+21"/>
         <source>Rig:</source>
-        <translation type="vanished">Impianto di perforazione:</translation>
+        <translation>Impianto di perforazione:</translation>
     </message>
     <message>
+        <location line="+101"/>
         <source>Search radio, model or brand...</source>
-        <translation type="vanished">Cerca radio, modello o marca...</translation>
+        <translation>Cerca radio, modello o marca...</translation>
     </message>
     <message>
+        <location line="+53"/>
         <source>Management:</source>
-        <translation type="vanished">Gestione:</translation>
+        <translation>Gestione:</translation>
     </message>
     <message>
+        <location line="+20"/>
         <source>Control:</source>
-        <translation type="vanished">Controllo:</translation>
+        <translation>Controllo:</translation>
     </message>
     <message>
+        <location line="+20"/>
         <source>Radio group:</source>
-        <translation type="vanished">Gruppo radio:</translation>
+        <translation>Gruppo radio:</translation>
     </message>
     <message>
+        <location line="+15"/>
         <source>Automatic discovery</source>
-        <translation type="vanished">Rilevamento automatico</translation>
+        <translation>Rilevamento automatico</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>Radio:</source>
-        <translation type="vanished">Radio:</translation>
+        <translation>Radio:</translation>
     </message>
     <message>
+        <location line="+15"/>
         <source>First available radio</source>
-        <translation type="vanished">Prima radio disponibile</translation>
+        <translation>Prima radio disponibile</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>Ownership:</source>
-        <translation type="vanished">Controllo esclusivo:</translation>
+        <translation>Controllo esclusivo:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Request control automatically</source>
-        <translation type="vanished">Richiedi automaticamente il controllo</translation>
+        <translation>Richiedi automaticamente il controllo</translation>
     </message>
     <message>
+        <location line="+17"/>
         <source>Serial Port:</source>
-        <translation type="vanished">Porta Seriale:</translation>
+        <translation>Porta Seriale:</translation>
     </message>
     <message>
+        <location line="+69"/>
         <source>Refresh serial ports</source>
-        <translation type="vanished">Aggiorna porte seriali</translation>
+        <translation>Aggiorna porte seriali</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Baud Rate:</source>
-        <translation type="vanished">Velocità in baud:</translation>
+        <translation>Velocità in baud:</translation>
     </message>
     <message>
+        <location line="+34"/>
         <source>CI-V Addr:</source>
-        <translation type="vanished">CI-V Indirizzo:</translation>
+        <translation>CI-V Indirizzo:</translation>
     </message>
     <message>
+        <location line="+58"/>
         <source>Host:Port:</source>
-        <translation type="vanished">Ospite:Porto:</translation>
+        <translation>Ospite:Porto:</translation>
     </message>
     <message>
+        <location line="+26"/>
         <source>HRD Radio:</source>
-        <translation type="vanished">Radio HRD:</translation>
+        <translation>Radio HRD:</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Strict match (abort if configured radio is not current in HRD)</source>
-        <translation type="vanished">Corrispondenza rigorosa (annulla se la radio configurata non è quella attuale in HRD)</translation>
+        <translation>Corrispondenza rigorosa (annulla se la radio configurata non è quella attuale in HRD)</translation>
     </message>
     <message>
+        <location line="+20"/>
         <source>TCI Host:Port:</source>
-        <translation type="vanished">Host TCI:Porto:</translation>
+        <translation>Host TCI:Porto:</translation>
     </message>
     <message>
+        <location line="+26"/>
         <source>TCI Audio:</source>
-        <translation type="vanished">Audio TCI:</translation>
+        <translation>Audio TCI:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>RX/TX via TCI</source>
-        <translation type="vanished">RX/TX tramite TCI</translation>
+        <translation>RX/TX tramite TCI</translation>
     </message>
     <message>
+        <location line="+54"/>
         <source>PTT Method:</source>
-        <translation type="vanished">Metodo PTT:</translation>
+        <translation>Metodo PTT:</translation>
     </message>
     <message>
+        <location line="+47"/>
         <source>PTT Port:</source>
-        <translation type="vanished">Porta PTT:</translation>
+        <translation>Porta PTT:</translation>
     </message>
     <message>
+        <location line="+34"/>
         <source>Poll Interval (s):</source>
-        <translation type="vanished">Intervallo/i sondaggio:</translation>
+        <translation>Intervallo/i sondaggio:</translation>
     </message>
     <message>
+        <location line="+16"/>
         <source>CAT keep-alive:</source>
-        <translation type="vanished">CAT keep-alive:</translation>
+        <translation>CAT keep-alive:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Light polling for interface activity LEDs</source>
-        <translation type="vanished">Polling leggero per i LED di attività dell&apos;interfaccia</translation>
+        <translation>Polling leggero per i LED di attività dell&apos;interfaccia</translation>
     </message>
     <message>
+        <location line="+21"/>
         <source>SERIAL PARAMETERS</source>
-        <translation type="vanished">PARAMETRI SERIALI</translation>
+        <translation>PARAMETRI SERIALI</translation>
     </message>
     <message>
+        <location line="+15"/>
         <source>Data Bits:</source>
-        <translation type="vanished">Bit di dati:</translation>
+        <translation>Bit di dati:</translation>
     </message>
     <message>
+        <location line="+20"/>
         <source>Stop Bits:</source>
-        <translation type="vanished">Bit di arresto:</translation>
+        <translation>Bit di arresto:</translation>
     </message>
     <message>
+        <location line="+19"/>
         <source>Handshake:</source>
-        <translation type="vanished">Stretta di mano:</translation>
+        <translation>Stretta di mano:</translation>
     </message>
     <message>
+        <location line="+25"/>
         <source>Force DTR:</source>
-        <translation type="vanished">Forza DTR:</translation>
+        <translation>Forza DTR:</translation>
     </message>
     <message>
+        <location line="+22"/>
         <source>Force RTS:</source>
-        <translation type="vanished">Forza RTS:</translation>
+        <translation>Forza RTS:</translation>
     </message>
     <message>
+        <location line="+22"/>
         <source>SPLIT OPERATION</source>
-        <translation type="vanished">OPERAZIONE SPLIT</translation>
+        <translation>OPERAZIONE SPLIT</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Split:</source>
-        <translation type="vanished">Diviso:</translation>
+        <translation>Diviso:</translation>
     </message>
     <message>
+        <location line="+24"/>
         <source>Mode:</source>
-        <translation type="vanished">Modalità:</translation>
+        <translation>Modalità:</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>TX Audio Src:</source>
-        <translation type="vanished">TX Origine audio:</translation>
+        <translation>TX Origine audio:</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>TX Audio:</source>
-        <translation type="vanished">TX Audio:</translation>
+        <translation>TX Audio:</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>TCI Audio</source>
-        <translation type="vanished">Audio TCI</translation>
+        <translation>Audio TCI</translation>
     </message>
     <message>
+        <location line="+86"/>
+        <source>SHARED SPOTS</source>
+        <translation>SPOT CONDIVISI</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Share spots:</source>
+        <translation>Condividi spot:</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Spot port:</source>
+        <translation>Porta spot:</translation>
+    </message>
+    <message>
+        <location line="+25"/>
+        <source>Spot sharing not started: %1</source>
+        <translation>Condivisione spot non avviata: %1</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Spots stay on this computer. Share them to read the cluster from a phone on the same WiFi.</source>
+        <translation>Gli spot restano su questo computer. Condividili per leggere il cluster da un telefono sulla stessa WiFi.</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Listening on port %1 · connected clients: %2</source>
+        <translation>In ascolto sulla porta %1 · client connessi: %2</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>needs the DX Cluster connected</source>
+        <translation>richiede il DX Cluster connesso</translation>
+    </message>
+    <message>
+        <location line="+177"/>
+        <source>Search</source>
+        <translation>Cerca</translation>
+    </message>
+    <message>
+        <location line="+23"/>
+        <source>searching...</source>
+        <translation>ricerca in corso...</translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>found %1 on %2</source>
+        <translation>trovato %1 su %2</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>no amplifier answered</source>
+        <translation>nessun amplificatore ha risposto</translation>
+    </message>
+    <message>
+        <location line="+65"/>
         <source>DIAGNOSTICS</source>
-        <translation type="vanished">DIAGNOSTICA</translation>
+        <translation>DIAGNOSTICA</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Check SWR:</source>
-        <translation type="vanished">Controlla SWR:</translation>
+        <translation>Controlla SWR:</translation>
     </message>
     <message>
+        <location line="+16"/>
         <source>PWR and SWR:</source>
-        <translation type="vanished">PWR e SWR:</translation>
+        <translation>PWR e SWR:</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>SWR max:</source>
-        <translation type="vanished">SWR max:</translation>
+        <translation>SWR max:</translation>
     </message>
     <message>
+        <location line="+19"/>
         <source>Connecting...</source>
-        <translation type="vanished">Connessione...</translation>
+        <translation>Connessione...</translation>
     </message>
     <message>
+        <location line="+14"/>
         <source>Hamlib:</source>
-        <translation type="vanished">Hamlib:</translation>
+        <translation>Hamlib:</translation>
     </message>
     <message>
+        <location line="+14"/>
         <source>Open Hamlib update</source>
-        <translation type="vanished">Apri update Hamlib</translation>
+        <translation>Apri update Hamlib</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>Windows: DLL updated from the Hamlib site. macOS/Linux: official documentation and releases.</source>
-        <translation type="vanished">Windows: DLL aggiornata dal sito Hamlib. macOS/Linux: documentazione e release ufficiali.</translation>
+        <translation>Windows: DLL aggiornata dal sito Hamlib. macOS/Linux: documentazione e release ufficiali.</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>ALC AUTO CALIBRATION</source>
-        <translation type="vanished">CALIBRAZIONE AUTOMATICA ALC</translation>
+        <translation>CALIBRAZIONE AUTOMATICA ALC</translation>
     </message>
     <message>
+        <location line="+15"/>
         <source>ALC target:</source>
-        <translation type="vanished">Target ALC:</translation>
+        <translation>Target ALC:</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>ALC scale 0-100. FT8/data: typically 15-25. Values &gt;60 risk overdriving the PA.</source>
-        <translation type="vanished">Scala ALC 0-100. FT8/dati: tipicamente 15-25. Valori &gt;60 rischiano di sovrapilotare il PA.</translation>
+        <translation>Scala ALC 0-100. FT8/dati: tipicamente 15-25. Valori &gt;60 rischiano di sovrapilotare il PA.</translation>
     </message>
     <message>
+        <location line="+50"/>
         <source>Transmits a tune carrier and auto-adjusts the TX audio level until the radio&apos;s ALC reaches the target. One-shot. Requires Hamlib CAT connected.</source>
-        <translation type="vanished">Trasmette una portante di tune e regola automaticamente il livello audio TX finché l&apos;ALC della radio raggiunge il target. Una tantum. Richiede CAT Hamlib connesso.</translation>
+        <translation>Trasmette una portante di tune e regola automaticamente il livello audio TX finché l&apos;ALC della radio raggiunge il target. Una tantum. Richiede CAT Hamlib connesso.</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Cancel calibration</source>
-        <translation type="vanished">Annulla calibrazione</translation>
+        <translation>Annulla calibrazione</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Calibrate ALC (transmits a carrier)</source>
-        <translation type="vanished">Calibra ALC (trasmette una portante)</translation>
+        <translation>Calibra ALC (trasmette una portante)</translation>
     </message>
     <message>
+        <location line="-960"/>
         <source>localhost:50001</source>
-        <translation type="vanished">localhost:50001</translation>
+        <translation>localhost:50001</translation>
     </message>
     <message>
+        <location line="+41"/>
         <source>TCI RX gain:</source>
-        <translation type="vanished">Guadagno RX TCI:</translation>
+        <translation>Guadagno RX TCI:</translation>
     </message>
     <message>
+        <location line="-147"/>
         <source>Enter the radio CI-V address in hexadecimal, from 0x00 to 0xFF. The address is saved with the CAT settings.</source>
-        <translation type="vanished">Inserisci l&apos;indirizzo CI-V della radio in esadecimale, da 0x00 a 0xFF. L&apos;indirizzo viene salvato con le impostazioni CAT.</translation>
+        <translation>Inserisci l&apos;indirizzo CI-V della radio in esadecimale, da 0x00 a 0xFF. L&apos;indirizzo viene salvato con le impostazioni CAT.</translation>
     </message>
     <message>
+        <location line="+499"/>
         <source>SHARED CAT</source>
-        <translation type="vanished">CAT CONDIVISA</translation>
+        <translation>CAT CONDIVISA</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Share CAT:</source>
-        <translation type="vanished">Condividi CAT:</translation>
+        <translation>Condividi CAT:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Shared port:</source>
-        <translation type="vanished">Porta condivisa:</translation>
+        <translation>Porta condivisa:</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>Allow control:</source>
-        <translation type="vanished">Permetti controllo:</translation>
+        <translation>Permetti controllo:</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>Allow transmit:</source>
-        <translation type="vanished">Permetti trasmissione:</translation>
+        <translation>Permetti trasmissione:</translation>
     </message>
     <message>
+        <location line="+28"/>
         <source>Listening on 127.0.0.1:%1 · connected programs: %2</source>
-        <translation type="vanished">In ascolto su 127.0.0.1:%1 · programmi collegati: %2</translation>
+        <translation>In ascolto su 127.0.0.1:%1 · programmi collegati: %2</translation>
     </message>
     <message>
+        <location line="-2"/>
         <source>Not shared: other programs cannot use the radio while Decodium holds the serial port.</source>
-        <translation type="vanished">Non condivisa: nessun altro programma può usare la radio finché Decodium tiene la porta seriale.</translation>
+        <translation>Non condivisa: nessun altro programma può usare la radio finché Decodium tiene la porta seriale.</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>in other programs choose &quot;Hamlib NET rigctl&quot;</source>
-        <translation type="vanished">negli altri programmi scegli «Hamlib NET rigctl»</translation>
+        <translation>negli altri programmi scegli «Hamlib NET rigctl»</translation>
     </message>
     <message>
+        <location line="-5"/>
         <source>Sharing not started: %1</source>
-        <translation type="vanished">Condivisione non avviata: %1</translation>
+        <translation>Condivisione non avviata: %1</translation>
     </message>
     <message>
+        <location line="+204"/>
         <source>AMPLIFIER</source>
-        <translation type="vanished">AMPLIFICATORE</translation>
+        <translation>AMPLIFICATORE</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Read amplifier:</source>
-        <translation type="vanished">Leggi l&apos;amplificatore:</translation>
+        <translation>Leggi l&apos;amplificatore:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Amplifier port:</source>
-        <translation type="vanished">Porta dell&apos;amplificatore:</translation>
+        <translation>Porta dell&apos;amplificatore:</translation>
     </message>
     <message>
+        <location line="+71"/>
         <source>Listen only:</source>
-        <translation type="vanished">Solo ascolto:</translation>
+        <translation>Solo ascolto:</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Speed:</source>
-        <translation type="vanished">Velocità:</translation>
+        <translation>Velocità:</translation>
     </message>
     <message>
+        <location line="+23"/>
         <source>Reading: %1 W, SWR %2</source>
-        <translation type="vanished">Lettura: %1 W, ROS %2</translation>
+        <translation>Lettura: %1 W, ROS %2</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Port not open: %1</source>
-        <translation type="vanished">Porta non aperta: %1</translation>
+        <translation>Porta non aperta: %1</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Port open, but no valid frame yet.</source>
-        <translation type="vanished">Porta aperta, ma nessuna trama valida finora.</translation>
+        <translation>Porta aperta, ma nessuna trama valida finora.</translation>
     </message>
     <message>
+        <location line="-16"/>
         <source>The DECOMETER shows the exciter&apos;s power. Reading the amplifier requires its serial port, or a mirrored virtual port if its own software must stay open.</source>
-        <translation type="vanished">Il DECØMETER mostra la potenza dell&apos;eccitatrice. Per leggere l&apos;amplificatore serve la sua porta seriale, oppure una porta virtuale rispecchiata se il suo programma deve restare aperto.</translation>
+        <translation>Il DECØMETER mostra la potenza dell&apos;eccitatrice. Per leggere l&apos;amplificatore serve la sua porta seriale, oppure una porta virtuale rispecchiata se il suo programma deve restare aperto.</translation>
     </message>
     <message>
+        <location line="-252"/>
         <source>Use a shared CAT:</source>
-        <translation type="vanished">Usa una CAT condivisa:</translation>
+        <translation>Usa una CAT condivisa:</translation>
     </message>
     <message>
+        <location line="+24"/>
         <source>Connect to it</source>
-        <translation type="vanished">Collegati</translation>
+        <translation>Collegati</translation>
     </message>
     <message>
+        <location line="+34"/>
         <source>For a second instance of Decodium on the same radio: start it with --rig-name and connect it here. The serial port stays with the first one, which shares it.</source>
-        <translation type="vanished">Per una seconda istanza di Decodium sulla stessa radio: avviala con --rig-name e collegala qui. La porta seriale resta alla prima, che la condivide.</translation>
+        <translation>Per una seconda istanza di Decodium sulla stessa radio: avviala con --rig-name e collegala qui. La porta seriale resta alla prima, che la condivide.</translation>
     </message>
     <message>
+        <location line="+205"/>
         <source>No port set: type the amplifier&apos;s serial port, or the mirrored virtual port if its own software has to stay open.</source>
-        <translation type="vanished">Nessuna porta indicata: scrivi la porta seriale dell&apos;amplificatore, o la porta virtuale rispecchiata se il suo programma deve restare aperto.</translation>
+        <translation>Nessuna porta indicata: scrivi la porta seriale dell&apos;amplificatore, o la porta virtuale rispecchiata se il suo programma deve restare aperto.</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Port %1 is held by another program - usually the amplifier&apos;s own software. Windows gives a serial port to one program at a time, reading included: close that program, or mirror the port and point Decodium at the copy.</source>
-        <translation type="vanished">La porta %1 ce l&apos;ha un altro programma - di solito quello del costruttore dell&apos;amplificatore. Windows dà una seriale a un programma alla volta, lettura compresa: chiudi quel programma, oppure rispecchia la porta e punta Decodium sulla copia.</translation>
+        <translation>La porta %1 ce l&apos;ha un altro programma - di solito quello del costruttore dell&apos;amplificatore. Windows dà una seriale a un programma alla volta, lettura compresa: chiudi quel programma, oppure rispecchia la porta e punta Decodium sulla copia.</translation>
     </message>
     <message>
+        <location line="-199"/>
         <source>Second instance:</source>
-        <translation type="vanished">Seconda istanza:</translation>
+        <translation>Seconda istanza:</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>name, e.g. RX2</source>
-        <translation type="vanished">nome, per esempio RX2</translation>
+        <translation>nome, per esempio RX2</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>On shared CAT:</source>
-        <translation type="vanished">Su CAT condivisa:</translation>
+        <translation>Su CAT condivisa:</translation>
     </message>
     <message>
+        <location line="+19"/>
         <source>Open a second Decodium</source>
-        <translation type="vanished">Apri un secondo Decodium</translation>
+        <translation>Apri un secondo Decodium</translation>
     </message>
     <message>
+        <location line="+33"/>
         <source>Second instance started. Choose its own audio device and, if it has a receiver of its own, its own radio: that is what lets you listen on two bands at once.</source>
-        <translation type="vanished">Seconda istanza avviata. Scegli lì una scheda audio sua e, se hai un ricevitore a parte, la sua radio: è così che si ascoltano due bande insieme.</translation>
+        <translation>Seconda istanza avviata. Scegli lì una scheda audio sua e, se hai un ricevitore a parte, la sua radio: è così che si ascoltano due bande insieme.</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>A second Decodium with its own settings profile. It does not take the serial port - this one keeps it and shares it.</source>
-        <translation type="vanished">Un secondo Decodium con un profilo di impostazioni suo. Non prende la porta seriale: la tiene questa, e gliela condivide.</translation>
+        <translation>Un secondo Decodium con un profilo di impostazioni suo. Non prende la porta seriale: la tiene questa, e gliela condivide.</translation>
     </message>
 </context>
 <context>
     <name>SettingsTab10</name>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab10.qml" line="+67"/>
         <source>AUDIO ALERTS</source>
-        <translation type="vanished">AUDIO ALERTS</translation>
+        <translation>AUDIO ALERTS</translation>
     </message>
     <message>
+        <location line="+3"/>
+        <source>Wanted callsign alert:</source>
+        <translation>Allarme nominativo ricercato:</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Calls (comma/space separated, * wildcard):</source>
+        <translation>Nominativi (separati da virgola/spazio, * jolly):</translation>
+    </message>
+    <message>
+        <location line="+8"/>
         <source>Alerts Enabled:</source>
-        <translation type="vanished">Avvisi abilitati:</translation>
+        <translation>Avvisi abilitati:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Test</source>
-        <translation type="vanished">Test</translation>
+        <translation>Test</translation>
     </message>
     <message>
+        <location line="+22"/>
         <source>CQ in Msg:</source>
-        <translation type="vanished">CQ nel messaggio:</translation>
+        <translation>CQ nel messaggio:</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>My Call:</source>
-        <translation type="vanished">Mio nominativo:</translation>
+        <translation>Mio nominativo:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>New DXCC:</source>
-        <translation type="vanished">Nuovo DXCC:</translation>
+        <translation>Nuovo DXCC:</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>New DXCC Band:</source>
-        <translation type="vanished">Nuovo cinturino DXCC:</translation>
+        <translation>Nuovo cinturino DXCC:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>New Grid:</source>
-        <translation type="vanished">Nuovo locator:</translation>
+        <translation>Nuovo locator:</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>New Grid Band:</source>
-        <translation type="vanished">Nuovo locator per banda:</translation>
+        <translation>Nuovo locator per banda:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>New Continent:</source>
-        <translation type="vanished">Nuovo continente:</translation>
+        <translation>Nuovo continente:</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>New Cont Band:</source>
-        <translation type="vanished">Nuova banda continua:</translation>
+        <translation>Nuova banda continua:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>New CQ Zone:</source>
-        <translation type="vanished">Nuova zona CQ:</translation>
+        <translation>Nuova zona CQ:</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>CQ Zone Band:</source>
-        <translation type="vanished">CQ Banda di zona:</translation>
+        <translation>CQ Banda di zona:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>New ITU Zone:</source>
-        <translation type="vanished">Nuova zona ITU:</translation>
+        <translation>Nuova zona ITU:</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>ITU Zone Band:</source>
-        <translation type="vanished">Banda di zona ITU:</translation>
+        <translation>Banda di zona ITU:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>DX Call/Grid:</source>
-        <translation type="vanished">Nominativo/locator DX:</translation>
+        <translation>Nominativo/locator DX:</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>QSY Message:</source>
-        <translation type="vanished">QSY Messaggio:</translation>
+        <translation>QSY Messaggio:</translation>
     </message>
 </context>
 <context>
     <name>SettingsTab11</name>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="+67"/>
         <source>BLACKLIST</source>
-        <translation type="vanished">LISTA NERA</translation>
+        <translation>LISTA NERA</translation>
     </message>
     <message>
+        <location line="+3"/>
+        <location line="+56"/>
+        <location line="+55"/>
         <source>Enabled:</source>
-        <translation type="vanished">Abilitato:</translation>
+        <translation>Abilitato:</translation>
     </message>
     <message>
+        <location line="-101"/>
         <source>Blacklist 1:</source>
-        <translation type="vanished">Lista nera 1:</translation>
+        <translation>Lista nera 1:</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Blacklist 2:</source>
-        <translation type="vanished">Lista nera 2:</translation>
+        <translation>Lista nera 2:</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Blacklist 3:</source>
-        <translation type="vanished">Lista nera 3:</translation>
+        <translation>Lista nera 3:</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Blacklist 4:</source>
-        <translation type="vanished">Lista nera 4:</translation>
+        <translation>Lista nera 4:</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Blacklist 5:</source>
-        <translation type="vanished">Lista nera 5:</translation>
+        <translation>Lista nera 5:</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Blacklist 6:</source>
-        <translation type="vanished">Lista nera 6:</translation>
+        <translation>Lista nera 6:</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Blacklist 7:</source>
-        <translation type="vanished">Lista nera 7:</translation>
+        <translation>Lista nera 7:</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Blacklist 8:</source>
-        <translation type="vanished">Lista nera 8:</translation>
+        <translation>Lista nera 8:</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Blacklist 9:</source>
-        <translation type="vanished">Lista nera 9:</translation>
+        <translation>Lista nera 9:</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Blacklist 10:</source>
-        <translation type="vanished">Lista nera 10:</translation>
+        <translation>Lista nera 10:</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Blacklist 11:</source>
-        <translation type="vanished">Lista nera 11:</translation>
+        <translation>Lista nera 11:</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Blacklist 12:</source>
-        <translation type="vanished">Lista nera 12:</translation>
+        <translation>Lista nera 12:</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>WHITELIST</source>
-        <translation type="vanished">LISTA BIANCA</translation>
+        <translation>LISTA BIANCA</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Whitelist 1:</source>
-        <translation type="vanished">Lista bianca 1:</translation>
+        <translation>Lista bianca 1:</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Whitelist 2:</source>
-        <translation type="vanished">Lista bianca 2:</translation>
+        <translation>Lista bianca 2:</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Whitelist 3:</source>
-        <translation type="vanished">Lista bianca 3:</translation>
+        <translation>Lista bianca 3:</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Whitelist 4:</source>
-        <translation type="vanished">Lista bianca 4:</translation>
+        <translation>Lista bianca 4:</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Whitelist 5:</source>
-        <translation type="vanished">Lista bianca 5:</translation>
+        <translation>Lista bianca 5:</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Whitelist 6:</source>
-        <translation type="vanished">Lista bianca 6:</translation>
+        <translation>Lista bianca 6:</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Whitelist 7:</source>
-        <translation type="vanished">Lista bianca 7:</translation>
+        <translation>Lista bianca 7:</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Whitelist 8:</source>
-        <translation type="vanished">Lista bianca 8:</translation>
+        <translation>Lista bianca 8:</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Whitelist 9:</source>
-        <translation type="vanished">Lista bianca 9:</translation>
+        <translation>Lista bianca 9:</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Whitelist 10:</source>
-        <translation type="vanished">Lista bianca 10:</translation>
+        <translation>Lista bianca 10:</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Whitelist 11:</source>
-        <translation type="vanished">Lista bianca 11:</translation>
+        <translation>Lista bianca 11:</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Whitelist 12:</source>
-        <translation type="vanished">Lista bianca 12:</translation>
+        <translation>Lista bianca 12:</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>ALWAYS PASS</source>
-        <translation type="vanished">PASSA SEMPRE</translation>
+        <translation>PASSA SEMPRE</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Always Pass 1:</source>
-        <translation type="vanished">Passa sempre 1:</translation>
+        <translation>Passa sempre 1:</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Always Pass 2:</source>
-        <translation type="vanished">Passa sempre 2:</translation>
+        <translation>Passa sempre 2:</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Always Pass 3:</source>
-        <translation type="vanished">Passa sempre 3:</translation>
+        <translation>Passa sempre 3:</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Always Pass 4:</source>
-        <translation type="vanished">Passa sempre 4:</translation>
+        <translation>Passa sempre 4:</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Always Pass 5:</source>
-        <translation type="vanished">Passa sempre 5:</translation>
+        <translation>Passa sempre 5:</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Always Pass 6:</source>
-        <translation type="vanished">Passa sempre 6:</translation>
+        <translation>Passa sempre 6:</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Always Pass 7:</source>
-        <translation type="vanished">Passa sempre 7:</translation>
+        <translation>Passa sempre 7:</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Always Pass 8:</source>
-        <translation type="vanished">Passa sempre 8:</translation>
+        <translation>Passa sempre 8:</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Always Pass 9:</source>
-        <translation type="vanished">Passa sempre 9:</translation>
+        <translation>Passa sempre 9:</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Always Pass 10:</source>
-        <translation type="vanished">Passa sempre 10:</translation>
+        <translation>Passa sempre 10:</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Always Pass 11:</source>
-        <translation type="vanished">Passa sempre 11:</translation>
+        <translation>Passa sempre 11:</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Always Pass 12:</source>
-        <translation type="vanished">Passa sempre 12:</translation>
+        <translation>Passa sempre 12:</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>EXCLUDE TERRITORY</source>
-        <translation type="vanished">ESCLUDI TERRITORIO</translation>
+        <translation>ESCLUDI TERRITORIO</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Europe:</source>
-        <translation type="vanished">Europa:</translation>
+        <translation>Europa:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Africa:</source>
-        <translation type="vanished">Africa:</translation>
+        <translation>Africa:</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Oceania:</source>
-        <translation type="vanished">Oceania:</translation>
+        <translation>Oceania:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Asia:</source>
-        <translation type="vanished">Asia:</translation>
+        <translation>Asia:</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>North America:</source>
-        <translation type="vanished">Nord America:</translation>
+        <translation>Nord America:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>South America:</source>
-        <translation type="vanished">Sud America:</translation>
+        <translation>Sud America:</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>FILTER OPTIONS</source>
-        <translation type="vanished">OPZIONI FILTRO</translation>
+        <translation>OPZIONI FILTRO</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Worked on Band:</source>
-        <translation type="vanished">Lavorate su banda:</translation>
+        <translation>Lavorate su banda:</translation>
     </message>
     <message>
+        <location line="+0"/>
+        <location line="+12"/>
+        <location line="+12"/>
+        <location line="+14"/>
+        <source>Hide</source>
+        <translation>Nascondi</translation>
+    </message>
+    <message>
+        <location line="-29"/>
         <source>Hide stations already worked on the current band.</source>
-        <translation type="vanished">Nasconde le stazioni già lavorate sulla banda corrente.</translation>
+        <translation>Nasconde le stazioni già lavorate sulla banda corrente.</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Worked Today:</source>
-        <translation type="vanished">Lavorate oggi:</translation>
+        <translation>Lavorate oggi:</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Hide stations already logged today in UTC.</source>
-        <translation type="vanished">Nasconde le stazioni già registrate oggi in UTC.</translation>
+        <translation>Nasconde le stazioni già registrate oggi in UTC.</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Worked Yesterday Too:</source>
-        <translation type="vanished">Lavorate anche ieri:</translation>
+        <translation>Lavorate anche ieri:</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>Widen Worked Today to cover today and yesterday in UTC.</source>
-        <translation type="vanished">Estende “Lavorate oggi” a oggi e ieri in UTC.</translation>
+        <translation>Estende “Lavorate oggi” a oggi e ieri in UTC.</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Worked Ever:</source>
-        <translation type="vanished">Lavorate in passato:</translation>
+        <translation>Lavorate in passato:</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Hide every station already present in the log, on any band and any date.</source>
-        <translation type="vanished">Nasconde tutte le stazioni già presenti nel log, su qualsiasi banda e data.</translation>
+        <translation>Nasconde tutte le stazioni già presenti nel log, su qualsiasi banda e data.</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Wait &amp; Pounce:</source>
-        <translation type="vanished">Aspetta e salta:</translation>
+        <translation>Aspetta e salta:</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Wait &amp; Pounce listens for filtered CQ decodes, but it only starts a reply when TX/CQ is already armed by the operator.</source>
-        <translation type="vanished">Wait &amp;amp; Pounce ascolta le decodifiche CQ filtrate, ma avvia una risposta solo quando la TX/CQ è già armata dall&apos;operatore.</translation>
+        <translation>Wait &amp;amp; Pounce ascolta le decodifiche CQ filtrate, ma avvia una risposta solo quando la TX/CQ è già armata dall&apos;operatore.</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>W&amp;P Filters Only:</source>
-        <translation type="vanished">Solo filtri W&amp;P:</translation>
+        <translation>Solo filtri W&amp;P:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Calling Only:</source>
-        <translation type="vanished">Solo stazioni chiamanti:</translation>
+        <translation>Solo stazioni chiamanti:</translation>
     </message>
 </context>
 <context>
     <name>SettingsTab12</name>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab12.qml" line="+78"/>
         <source>DX-Pedition (workspace)</source>
-        <translation type="vanished">DX-Pedition (workspace)</translation>
+        <translation>DX-Pedition (workspace)</translation>
     </message>
     <message>
+        <location line="-10"/>
         <source>Monitor (MON / STOP)</source>
-        <translation type="vanished">Monitor (MON / STOP)</translation>
+        <translation>Monitor (MON / STOP)</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Setup (⚙)</source>
-        <translation type="vanished">Setup (⚙)</translation>
+        <translation>Setup (⚙)</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>Layout (window reset)</source>
-        <translation type="vanished">Layout (reset finestre)</translation>
+        <translation>Layout (reset finestre)</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>History (decode history)</source>
-        <translation type="vanished">History (storico decodifiche)</translation>
+        <translation>History (storico decodifiche)</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Async FT2 (A)</source>
-        <translation type="vanished">Async FT2 (A)</translation>
+        <translation>Async FT2 (A)</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>DX Cluster (toolbar)</source>
-        <translation type="vanished">DX Cluster (toolbar)</translation>
+        <translation>DX Cluster (toolbar)</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>World Clock</source>
-        <translation type="vanished">Orologio mondiale</translation>
+        <translation>Orologio mondiale</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Show or hide UI buttons as you prefer. Changes are immediate and saved automatically.</source>
-        <translation type="vanished">Mostra o nascondi i pulsanti dell&apos;interfaccia a piacere. Le modifiche sono immediate e salvate automaticamente.</translation>
+        <translation>Mostra o nascondi i pulsanti dell&apos;interfaccia a piacere. Le modifiche sono immediate e salvate automaticamente.</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>TOP TOOLBAR</source>
-        <translation type="vanished">TOOLBAR IN ALTO</translation>
+        <translation>TOOLBAR IN ALTO</translation>
     </message>
     <message>
+        <location line="+19"/>
         <source>TOOLBAR BUTTON ORDER</source>
-        <translation type="vanished">ORDINE PULSANTI TOOLBAR</translation>
+        <translation>ORDINE PULSANTI TOOLBAR</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Drag the top toolbar buttons (long-press) to reorder them. Use the button below to restore the default order.</source>
-        <translation type="vanished">Trascina i pulsanti della toolbar superiore (pressione prolungata) per riordinarli. Usa il pulsante qui sotto per ripristinare l&apos;ordine predefinito.</translation>
+        <translation>Trascina i pulsanti della toolbar superiore (pressione prolungata) per riordinarli. Usa il pulsante qui sotto per ripristinare l&apos;ordine predefinito.</translation>
     </message>
     <message>
+        <location line="+18"/>
         <source>Restore default button order</source>
-        <translation type="vanished">Ripristina l&apos;ordine predefinito dei pulsanti</translation>
+        <translation>Ripristina l&apos;ordine predefinito dei pulsanti</translation>
     </message>
     <message>
+        <location line="+33"/>
         <source>Restore default TX panel order</source>
-        <translation type="vanished">Ripristina l&apos;ordine predefinito del pannello TX</translation>
+        <translation>Ripristina l&apos;ordine predefinito del pannello TX</translation>
     </message>
 </context>
 <context>
     <name>SettingsTab13</name>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="+139"/>
         <source>Download the LoTW QSLs received and synchronise them into the logbook. The password is reused from the Reporting → LoTW section; the LoTW login may differ from the operating callsign.</source>
-        <translation type="vanished">Scarica le QSL LoTW ricevute e sincronizzale nel logbook. La password viene riutilizzata dalla sezione Reporting → LoTW; il login LoTW può essere diverso dal callsign operativo.</translation>
+        <translation>Scarica le QSL LoTW ricevute e sincronizzale nel logbook. La password viene riutilizzata dalla sezione Reporting → LoTW; il login LoTW può essere diverso dal callsign operativo.</translation>
     </message>
     <message>
+        <location line="-30"/>
         <source>Download the eQSL InBox/Archive as ADIF and synchronise the confirmations into the active logbook. The default user name is the station callsign.</source>
-        <translation type="vanished">Scarica l&apos;InBox/Archivio eQSL in ADIF e sincronizza le conferme nel logbook attivo. Il nome utente predefinito è il callsign della stazione.</translation>
+        <translation>Scarica l&apos;InBox/Archivio eQSL in ADIF e sincronizza le conferme nel logbook attivo. Il nome utente predefinito è il callsign della stazione.</translation>
     </message>
     <message>
+        <location line="-19"/>
         <source>Close the panel after the QSO</source>
-        <translation type="vanished">Chiudi il pannello dopo il QSO</translation>
+        <translation>Chiudi il pannello dopo il QSO</translation>
     </message>
     <message>
+        <location line="-5"/>
         <source>Close automatically after logging</source>
-        <translation type="vanished">Chiusura automatica dopo logging</translation>
+        <translation>Chiusura automatica dopo logging</translation>
     </message>
     <message>
+        <location line="-2"/>
         <source>Open the lookup panel</source>
-        <translation type="vanished">Apri il pannello lookup</translation>
+        <translation>Apri il pannello lookup</translation>
     </message>
     <message>
+        <location line="-15"/>
         <source>Local lookup with DXCC fallback, SQLite cache and updatable providers. eQSL and Club Log credentials are stored in the keychain through the secure settings channel.</source>
-        <translation type="vanished">Lookup locale con fallback DXCC, cache SQLite e provider aggiornabili. Le credenziali eQSL e Club Log sono salvate nel portachiavi tramite il canale secure settings.</translation>
+        <translation>Lookup locale con fallback DXCC, cache SQLite e provider aggiornabili. Le credenziali eQSL e Club Log sono salvate nel portachiavi tramite il canale secure settings.</translation>
     </message>
     <message>
+        <location line="-3"/>
         <source>CALLSIGN INTELLIGENCE</source>
-        <translation type="vanished">INTELLIGENZA NOMINATIVI</translation>
+        <translation>INTELLIGENZA NOMINATIVI</translation>
     </message>
     <message>
         <source>Lookup locale con fallback DXCC, cache SQLite e provider aggiornabili. Le credenziali eQSL e Club Log sono salvate nel portachiavi tramite il canale secure settings.</source>
         <translation type="vanished">Lookup locale con fallback DXCC, cache SQLite e provider aggiornabili. Le credenziali eQSL e Club Log sono salvate nel portachiavi tramite il canale secure settings.</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>Apertura automatica all&apos;avvio QSO</source>
-        <translation type="vanished">Apertura automatica all&apos;avvio QSO</translation>
+        <translation>Apertura automatica all&apos;avvio QSO</translation>
     </message>
     <message>
         <source>Apri il pannello lookup</source>
@@ -23772,640 +27064,806 @@ Nel dubbio, usa Alta.</translation>
         <translation type="vanished">Chiudi il pannello dopo il QSO</translation>
     </message>
     <message>
+        <location line="+14"/>
         <source>Arricchimento campi mancanti</source>
-        <translation type="vanished">Arricchimento campi mancanti</translation>
+        <translation>Arricchimento campi mancanti</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Grid, nome e QTH nel prossimo log</source>
-        <translation type="vanished">Grid, nome e QTH nel prossimo log</translation>
+        <translation>Grid, nome e QTH nel prossimo log</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Durata cache (minuti)</source>
-        <translation type="vanished">Durata cache (minuti)</translation>
+        <translation>Durata cache (minuti)</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>eQSL INBOX — CONFERME RICEVUTE</source>
-        <translation type="vanished">eQSL INBOX — CONFERME RICEVUTE</translation>
+        <translation>eQSL INBOX — CONFERME RICEVUTE</translation>
     </message>
     <message>
         <source>Scarica l&apos;InBox/Archivio eQSL in ADIF e sincronizza le conferme nel logbook attivo. Il nome utente predefinito è il callsign della stazione.</source>
         <translation type="vanished">Scarica l&apos;InBox/Archivio eQSL in ADIF e sincronizza le conferme nel logbook attivo. Il nome utente predefinito è il callsign della stazione.</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>QRZ.com usa la chiave API già configurata nella sezione QRZ Logbook. Il pulsante Aggiorna scarica solo le conferme; in alternativa puoi importare qui un file ADI esportato da QRZ. Download, paginazione e sincronizzazione del logbook avvengono in background e lo stato resta visibile nella scheda.</source>
-        <translation type="vanished">QRZ.com usa la chiave API già configurata nella sezione QRZ Logbook. Il pulsante Aggiorna scarica solo le conferme; in alternativa puoi importare qui un file ADI esportato da QRZ. Download, paginazione e sincronizzazione del logbook avvengono in background e lo stato resta visibile nella scheda.</translation>
+        <translation>QRZ.com usa la chiave API già configurata nella sezione QRZ Logbook. Il pulsante Aggiorna scarica solo le conferme; in alternativa puoi importare qui un file ADI esportato da QRZ. Download, paginazione e sincronizzazione del logbook avvengono in background e lo stato resta visibile nella scheda.</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Username/callsign eQSL</source>
-        <translation type="vanished">Username/callsign eQSL</translation>
+        <translation>Username/callsign eQSL</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Callsign eQSL o nickname account</source>
-        <translation type="vanished">Callsign eQSL o nickname account</translation>
+        <translation>Callsign eQSL o nickname account</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Password eQSL</source>
-        <translation type="vanished">Password eQSL</translation>
+        <translation>Password eQSL</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>LoTW — CONFERME RICEVUTE</source>
-        <translation type="vanished">LoTW — CONFERME RICEVUTE</translation>
+        <translation>LoTW — CONFERME RICEVUTE</translation>
     </message>
     <message>
         <source>Scarica le QSL LoTW ricevute e sincronizzale nel logbook. La password viene riutilizzata dalla sezione Reporting → LoTW; il login LoTW può essere diverso dal callsign operativo.</source>
         <translation type="vanished">Scarica le QSL LoTW ricevute e sincronizzale nel logbook. La password viene riutilizzata dalla sezione Reporting → LoTW; il login LoTW può essere diverso dal callsign operativo.</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Username LoTW</source>
-        <translation type="vanished">Username LoTW</translation>
+        <translation>Username LoTW</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Callsign o username LoTW</source>
-        <translation type="vanished">Callsign o username LoTW</translation>
+        <translation>Callsign o username LoTW</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>CLUB LOG OQRS</source>
-        <translation type="vanished">CLUB LOG OQRS</translation>
+        <translation>CLUB LOG OQRS</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>API key</source>
-        <translation type="vanished">Chiave API</translation>
+        <translation>Chiave API</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Email</source>
-        <translation type="vanished">Email</translation>
+        <translation>Email</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>Application password</source>
-        <translation type="vanished">Password applicazione</translation>
+        <translation>Password applicazione</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Clear global lookup cache</source>
-        <translation type="vanished">Svuota cache lookup globale</translation>
+        <translation>Svuota cache lookup globale</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>LOCAL DATABASES</source>
-        <translation type="vanished">DATABASE LOCALI</translation>
+        <translation>DATABASE LOCALI</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>SQLite: %1</source>
-        <translation type="vanished">SQLite: %1</translation>
+        <translation>SQLite: %1</translation>
     </message>
     <message>
+        <location line="+47"/>
         <source>Update</source>
-        <translation type="vanished">Aggiorna</translation>
+        <translation>Aggiorna</translation>
     </message>
     <message>
+        <location line="+23"/>
         <source>Updating...</source>
-        <translation type="vanished">Aggiornamento...</translation>
+        <translation>Aggiornamento...</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>%1 record</source>
-        <translation type="vanished">%1 record</translation>
+        <translation>%1 record</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>No records</source>
-        <translation type="vanished">Nessun record</translation>
+        <translation>Nessun record</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Never updated</source>
-        <translation type="vanished">Mai aggiornato</translation>
+        <translation>Mai aggiornato</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Last update: %1</source>
-        <translation type="vanished">Ultimo aggiornamento: %1</translation>
+        <translation>Ultimo aggiornamento: %1</translation>
     </message>
     <message>
+        <location line="+15"/>
         <source>File: %1</source>
-        <translation type="vanished">File: %1</translation>
+        <translation>File: %1</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>File not found</source>
-        <translation type="vanished">File non trovato</translation>
+        <translation>File non trovato</translation>
     </message>
     <message>
+        <location line="+20"/>
         <source>Optional local file path</source>
-        <translation type="vanished">Percorso file locale opzionale</translation>
+        <translation>Percorso file locale opzionale</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Choose</source>
-        <translation type="vanished">Scegli</translation>
+        <translation>Scegli</translation>
     </message>
     <message>
+        <location line="+15"/>
         <source>Import callsign database</source>
-        <translation type="vanished">Importa database callsign</translation>
+        <translation>Importa database callsign</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Databases and CSV (*)</source>
-        <translation type="vanished">Database e CSV (*)</translation>
+        <translation>Database e CSV (*)</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>Import</source>
-        <translation type="vanished">Importa</translation>
+        <translation>Importa</translation>
     </message>
     <message>
+        <location line="-93"/>
         <source>%1 confirmations in last sync</source>
-        <translation type="vanished">%1 conferme nell&apos;ultima sincronizzazione</translation>
+        <translation>%1 conferme nell&apos;ultima sincronizzazione</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>No confirmations</source>
-        <translation type="vanished">Nessuna conferma</translation>
+        <translation>Nessuna conferma</translation>
     </message>
     <message>
+        <location line="+56"/>
         <source>Optional ADI file to merge into the logbook</source>
-        <translation type="vanished">File ADI facoltativo da unire al logbook</translation>
+        <translation>File ADI facoltativo da unire al logbook</translation>
     </message>
     <message>
+        <location line="+24"/>
         <source>Import confirmations ADI</source>
-        <translation type="vanished">Importa conferme da ADI</translation>
+        <translation>Importa conferme da ADI</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>ADIF files (*.adi *.adif)</source>
-        <translation type="vanished">File ADIF (*.adi *.adif)</translation>
+        <translation>File ADIF (*.adi *.adif)</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>All files (*)</source>
-        <translation type="vanished">Tutti i file (*)</translation>
+        <translation>Tutti i file (*)</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Import ADI</source>
-        <translation type="vanished">Importa ADI</translation>
+        <translation>Importa ADI</translation>
     </message>
     <message>
+        <location line="+18"/>
         <source>Manual recovery only: importing an ADI merges its confirmations into the active logbook, just like Update. It does not advance the online LoTW download cursor.</source>
-        <translation type="vanished">Solo recupero manuale: importare un ADI unisce le sue conferme al logbook attivo, come fa Aggiorna. Non fa avanzare il segnaposto dei download LoTW online.</translation>
+        <translation>Solo recupero manuale: importare un ADI unisce le sue conferme al logbook attivo, come fa Aggiorna. Non fa avanzare il segnaposto dei download LoTW online.</translation>
     </message>
 </context>
 <context>
     <name>SettingsTab2</name>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="+118"/>
         <source>AUDIO DEVICES</source>
-        <translation type="vanished">DISPOSITIVI AUDIO</translation>
+        <translation>DISPOSITIVI AUDIO</translation>
     </message>
     <message>
+        <location line="+11"/>
+        <location line="+105"/>
         <source>↻  Refresh</source>
-        <translation type="vanished">↻  Aggiorna</translation>
+        <translation>↻  Aggiorna</translation>
     </message>
     <message>
+        <location line="-90"/>
         <source>Input Device:</source>
-        <translation type="vanished">Dispositivo di input:</translation>
+        <translation>Dispositivo di input:</translation>
     </message>
     <message>
+        <location line="+22"/>
         <source>Linux: entries marked &apos;Pulse/PipeWire monitor&apos; capture the audio playing on that PipeWire/PulseAudio sink, useful for WebSDR/KiwiSDR browser audio. Selecting a Pulse/PipeWire source requires pactl and changes the current user&apos;s default capture source.</source>
-        <translation type="vanished">Linux: le voci marcate &apos;Pulse/PipeWire monitor&apos; catturano l&apos;audio che suona su quella destinazione PipeWire/PulseAudio, utile per l&apos;audio di WebSDR/KiwiSDR nel browser. Scegliere una sorgente Pulse/PipeWire richiede pactl e cambia la sorgente di cattura predefinita dell&apos;utente corrente.</translation>
+        <translation>Linux: le voci marcate &apos;Pulse/PipeWire monitor&apos; catturano l&apos;audio che suona su quella destinazione PipeWire/PulseAudio, utile per l&apos;audio di WebSDR/KiwiSDR nel browser. Scegliere una sorgente Pulse/PipeWire richiede pactl e cambia la sorgente di cattura predefinita dell&apos;utente corrente.</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Input Channel:</source>
-        <translation type="vanished">Canale di ingresso:</translation>
+        <translation>Canale di ingresso:</translation>
     </message>
     <message>
+        <location line="+3"/>
+        <location line="+38"/>
         <source>Mono</source>
-        <translation type="vanished">Mono</translation>
+        <translation>Mono</translation>
     </message>
     <message>
+        <location line="-38"/>
+        <location line="+38"/>
         <source>Left</source>
-        <translation type="vanished">Sinistro</translation>
+        <translation>Sinistro</translation>
     </message>
     <message>
+        <location line="-38"/>
+        <location line="+38"/>
         <source>Right</source>
-        <translation type="vanished">Destro</translation>
+        <translation>Destro</translation>
     </message>
     <message>
+        <location line="-38"/>
+        <location line="+38"/>
         <source>Both</source>
-        <translation type="vanished">Entrambi</translation>
+        <translation>Entrambi</translation>
     </message>
     <message>
+        <location line="-23"/>
         <source>Output Device:</source>
-        <translation type="vanished">Dispositivo di uscita:</translation>
+        <translation>Dispositivo di uscita:</translation>
     </message>
     <message>
+        <location line="+20"/>
         <source>Output Channel:</source>
-        <translation type="vanished">Canale di uscita:</translation>
+        <translation>Canale di uscita:</translation>
     </message>
     <message>
+        <location line="+19"/>
         <source>RTL-SDR RECEIVER</source>
-        <translation type="vanished">RICEVITORE RTL-SDR</translation>
+        <translation>RICEVITORE RTL-SDR</translation>
     </message>
     <message>
+        <location line="+20"/>
         <source>Use RTL-SDR:</source>
-        <translation type="vanished">Usa RTL-SDR:</translation>
+        <translation>Usa RTL-SDR:</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Receives directly from an RTL-SDR. This mode is receive-only: Tune and TX are disabled.</source>
-        <translation type="vanished">Riceve direttamente da un RTL-SDR. Questa modalità è di sola ricezione: Tune e TX sono disattivati.</translation>
+        <translation>Riceve direttamente da un RTL-SDR. Questa modalità è di sola ricezione: Tune e TX sono disattivati.</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Experimental function under development</source>
-        <translation type="vanished">Funzione sperimentale in fase di sviluppo</translation>
+        <translation>Funzione sperimentale in fase di sviluppo</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>No external audio cable is required. RX only.</source>
-        <translation type="vanished">Non serve alcun cavo audio esterno. Solo RX.</translation>
+        <translation>Non serve alcun cavo audio esterno. Solo RX.</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>RTL-SDR support is not included in this build.</source>
-        <translation type="vanished">Il supporto RTL-SDR non è incluso in questa build.</translation>
+        <translation>Il supporto RTL-SDR non è incluso in questa build.</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Receiver:</source>
-        <translation type="vanished">Ricevitore:</translation>
+        <translation>Ricevitore:</translation>
     </message>
     <message>
+        <location line="+23"/>
         <source>Input mode:</source>
-        <translation type="vanished">Modo d&apos;ingresso:</translation>
+        <translation>Modo d&apos;ingresso:</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>SDR Radio</source>
-        <translation type="vanished">Radio SDR</translation>
+        <translation>Radio SDR</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Direct Sampling</source>
-        <translation type="vanished">Campionamento diretto</translation>
+        <translation>Campionamento diretto</translation>
     </message>
     <message>
+        <location line="+27"/>
+        <location line="+3"/>
+        <location line="+5"/>
         <source>Uses the tuner path. RTL-SDR Blog V4 handles its HF upconverter automatically.</source>
-        <translation type="vanished">Usa il percorso del sintonizzatore. RTL-SDR Blog V4 gestisce da solo il proprio convertitore HF.</translation>
+        <translation>Usa il percorso del sintonizzatore. RTL-SDR Blog V4 gestisce da solo il proprio convertitore HF.</translation>
     </message>
     <message>
+        <location line="-6"/>
         <source>Uses the RTL2832 direct-sampling Q ADC for HF reception from 500 kHz to 24 MHz.</source>
-        <translation type="vanished">Usa il convertitore Q a campionamento diretto dell&apos;RTL2832 per la ricezione HF da 500 kHz a 24 MHz.</translation>
+        <translation>Usa il convertitore Q a campionamento diretto dell&apos;RTL2832 per la ricezione HF da 500 kHz a 24 MHz.</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>Demodulator:</source>
-        <translation type="vanished">Demodulatore:</translation>
+        <translation>Demodulatore:</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Weak signal / FT8 audio</source>
-        <translation type="vanished">Segnali deboli / audio FT8</translation>
+        <translation>Segnali deboli / audio FT8</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Wide FM broadcast</source>
-        <translation type="vanished">FM larga (radiodiffusione)</translation>
+        <translation>FM larga (radiodiffusione)</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Narrow FM</source>
-        <translation type="vanished">FM stretta</translation>
+        <translation>FM stretta</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>AM</source>
-        <translation type="vanished">AM</translation>
+        <translation>AM</translation>
     </message>
     <message>
+        <location line="+0"/>
+        <location line="+111"/>
         <source>USB</source>
-        <translation type="vanished">USB</translation>
+        <translation>USB</translation>
     </message>
     <message>
+        <location line="-110"/>
+        <location line="+110"/>
         <source>LSB</source>
-        <translation type="vanished">LSB</translation>
+        <translation>LSB</translation>
     </message>
     <message>
+        <location line="-110"/>
         <source>CW</source>
-        <translation type="vanished">CW</translation>
+        <translation>CW</translation>
     </message>
     <message>
+        <location line="+25"/>
         <source>Sends decoder PCM only to Decodium&apos;s weak-signal modes; the RF panadapter remains IQ-based.</source>
-        <translation type="vanished">Invia il PCM del decodificatore solo ai modi deboli di Decodium; il panadapter RF resta basato su IQ.</translation>
+        <translation>Invia il PCM del decodificatore solo ai modi deboli di Decodium; il panadapter RF resta basato su IQ.</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Demodulates receive audio separately. TX and Tune remain disabled with RTL-SDR.</source>
-        <translation type="vanished">Demodula l&apos;audio di ricezione a parte. Con RTL-SDR, TX e Tune restano disattivati.</translation>
+        <translation>Demodula l&apos;audio di ricezione a parte. Con RTL-SDR, TX e Tune restano disattivati.</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Listen to receiver audio:</source>
-        <translation type="vanished">Ascolta l&apos;audio del ricevitore:</translation>
+        <translation>Ascolta l&apos;audio del ricevitore:</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Plays demodulated mono audio through the dedicated receiver output below. It is asynchronous and never feeds the FT8 decoder.</source>
-        <translation type="vanished">Riproduce l&apos;audio mono demodulato sull&apos;uscita dedicata qui sotto. È asincrono e non alimenta mai il decodificatore FT8.</translation>
+        <translation>Riproduce l&apos;audio mono demodulato sull&apos;uscita dedicata qui sotto. È asincrono e non alimenta mai il decodificatore FT8.</translation>
     </message>
     <message>
+        <location line="+20"/>
         <source>Follow dial frequency:</source>
-        <translation type="vanished">Segui la frequenza del VFO:</translation>
+        <translation>Segui la frequenza del VFO:</translation>
     </message>
     <message>
+        <location line="+14"/>
         <source>Use receiver IF output:</source>
-        <translation type="vanished">Usa l&apos;uscita IF del ricevitore:</translation>
+        <translation>Usa l&apos;uscita IF del ricevitore:</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>Keeps the radio dial frequency for display, logging and decoding while the RTL-SDR is tuned to the receiver&apos;s fixed IF output.</source>
-        <translation type="vanished">Mantiene la frequenza di sintonia della radio per visualizzazione, log e decodifica mentre l&apos;RTL-SDR è sintonizzato sull&apos;uscita IF fissa del ricevitore.</translation>
+        <translation>Mantiene la frequenza di sintonia della radio per visualizzazione, log e decodifica mentre l&apos;RTL-SDR è sintonizzato sull&apos;uscita IF fissa del ricevitore.</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>IF frequency (Hz):</source>
-        <translation type="vanished">Frequenza IF (Hz):</translation>
+        <translation>Frequenza IF (Hz):</translation>
     </message>
     <message>
+        <location line="+16"/>
         <source>IF sideband:</source>
-        <translation type="vanished">Banda laterale IF:</translation>
+        <translation>Banda laterale IF:</translation>
     </message>
     <message>
+        <location line="+4"/>
+        <location line="+204"/>
         <source>Automatic</source>
-        <translation type="vanished">Automatica</translation>
+        <translation>Automatica</translation>
     </message>
     <message>
+        <location line="-189"/>
         <source>Automatic uses LSB only with the LSB demodulator; weak-signal modes such as FT8 use USB.</source>
-        <translation type="vanished">Automatica usa LSB solo con il demodulatore LSB; i modi a segnale debole come FT8 usano USB.</translation>
+        <translation>Automatica usa LSB solo con il demodulatore LSB; i modi a segnale debole come FT8 usano USB.</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>USB shift (Hz):</source>
-        <translation type="vanished">Shift USB (Hz):</translation>
+        <translation>Shift USB (Hz):</translation>
     </message>
     <message>
+        <location line="+16"/>
         <source>LSB shift (Hz):</source>
-        <translation type="vanished">Shift LSB (Hz):</translation>
+        <translation>Shift LSB (Hz):</translation>
     </message>
     <message>
+        <location line="+16"/>
         <source>Invert IF spectrum:</source>
-        <translation type="vanished">Inverti spettro IF:</translation>
+        <translation>Inverti spettro IF:</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>Enable this when signals move in the opposite direction on the panadapter because the receiver&apos;s IF mixer reverses the spectrum.</source>
-        <translation type="vanished">Attiva questa opzione quando i segnali si muovono nella direzione opposta sul panadapter perché il mixer IF del ricevitore inverte lo spettro.</translation>
+        <translation>Attiva questa opzione quando i segnali si muovono nella direzione opposta sul panadapter perché il mixer IF del ricevitore inverte lo spettro.</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>IF mode: Decodium keeps the radio dial frequency on screen and tunes the RTL-SDR to IF plus the selected USB/LSB shift.</source>
-        <translation type="vanished">Modalità IF: Decodium mantiene sullo schermo la frequenza della radio e sintonizza l&apos;RTL-SDR sulla IF più lo shift USB/LSB selezionato.</translation>
+        <translation>Modalità IF: Decodium mantiene sullo schermo la frequenza della radio e sintonizza l&apos;RTL-SDR sulla IF più lo shift USB/LSB selezionato.</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Receiver speaker output:</source>
-        <translation type="vanished">Uscita altoparlanti del ricevitore:</translation>
+        <translation>Uscita altoparlanti del ricevitore:</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>System default</source>
-        <translation type="vanished">Predefinito di sistema</translation>
+        <translation>Predefinito di sistema</translation>
     </message>
     <message>
+        <location line="+33"/>
         <source>System default normally selects the computer speakers and is independent from Decodium&apos;s TX audio output.</source>
-        <translation type="vanished">Il predefinito di sistema di solito sceglie gli altoparlanti del computer ed è indipendente dall&apos;uscita audio TX di Decodium.</translation>
+        <translation>Il predefinito di sistema di solito sceglie gli altoparlanti del computer ed è indipendente dall&apos;uscita audio TX di Decodium.</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>RF frequency (Hz):</source>
-        <translation type="vanished">Frequenza RF (Hz):</translation>
+        <translation>Frequenza RF (Hz):</translation>
     </message>
     <message>
+        <location line="+20"/>
         <source>Sample rate:</source>
-        <translation type="vanished">Frequenza di campionamento:</translation>
+        <translation>Frequenza di campionamento:</translation>
     </message>
     <message>
+        <location line="+26"/>
         <source>RF spectrum: centre ±480 kHz or more; receiver audio is Wide FM at 48 kHz.</source>
-        <translation type="vanished">Spettro RF: centro ±480 kHz o più; l&apos;audio del ricevitore è FM larga a 48 kHz.</translation>
+        <translation>Spettro RF: centro ±480 kHz o più; l&apos;audio del ricevitore è FM larga a 48 kHz.</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>RF spectrum is derived from complex IQ, independent from decoder audio.</source>
-        <translation type="vanished">Lo spettro RF è ricavato dall&apos;IQ complesso, indipendente dall&apos;audio del decodificatore.</translation>
+        <translation>Lo spettro RF è ricavato dall&apos;IQ complesso, indipendente dall&apos;audio del decodificatore.</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>PPM correction:</source>
-        <translation type="vanished">Correzione PPM:</translation>
+        <translation>Correzione PPM:</translation>
     </message>
     <message>
+        <location line="+16"/>
         <source>Tuner AGC:</source>
-        <translation type="vanished">AGC del sintonizzatore:</translation>
+        <translation>AGC del sintonizzatore:</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Manual gain (dB):</source>
-        <translation type="vanished">Guadagno manuale (dB):</translation>
+        <translation>Guadagno manuale (dB):</translation>
     </message>
     <message>
+        <location line="+18"/>
         <source>Digital AGC:</source>
-        <translation type="vanished">AGC digitale:</translation>
+        <translation>AGC digitale:</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>Usually leave this disabled. It can raise the noise floor on RTL-SDR Blog V4 receivers.</source>
-        <translation type="vanished">Di norma lascialo disattivato. Sui ricevitori RTL-SDR Blog V4 può alzare il rumore di fondo.</translation>
+        <translation>Di norma lascialo disattivato. Sui ricevitori RTL-SDR Blog V4 può alzare il rumore di fondo.</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Bias tee:</source>
-        <translation type="vanished">Bias tee:</translation>
+        <translation>Bias tee:</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>Supplies power to an external active antenna or LNA only when required by that equipment.</source>
-        <translation type="vanished">Alimenta un&apos;antenna attiva o un LNA esterni solo se quell&apos;apparato lo richiede.</translation>
+        <translation>Alimenta un&apos;antenna attiva o un LNA esterni solo se quell&apos;apparato lo richiede.</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Audio gain:</source>
-        <translation type="vanished">Guadagno audio:</translation>
+        <translation>Guadagno audio:</translation>
     </message>
     <message>
+        <location line="+166"/>
         <source>LEVELS</source>
-        <translation type="vanished">LIVELLI</translation>
+        <translation>LIVELLI</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>RX Input Level:</source>
-        <translation type="vanished">Livello di ingresso RX:</translation>
+        <translation>Livello di ingresso RX:</translation>
     </message>
     <message>
+        <location line="+55"/>
         <source>Auto RX level active</source>
-        <translation type="vanished">Livello RX automatico attivo</translation>
+        <translation>Livello RX automatico attivo</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Auto RX level disabled</source>
-        <translation type="vanished">Livello RX automatico disattivato</translation>
+        <translation>Livello RX automatico disattivato</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>TX Output Level:</source>
-        <translation type="vanished">Livello di uscita TX:</translation>
+        <translation>Livello di uscita TX:</translation>
     </message>
     <message>
+        <location line="+19"/>
         <source>DIRECTORY</source>
-        <translation type="vanished">DIRECTORY</translation>
+        <translation>DIRECTORY</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Save Directory:</source>
-        <translation type="vanished">Salva directory:</translation>
+        <translation>Salva directory:</translation>
     </message>
     <message>
+        <location line="+16"/>
         <source>AzEl Directory:</source>
-        <translation type="vanished">Rubrica AzEl:</translation>
+        <translation>Rubrica AzEl:</translation>
     </message>
     <message>
+        <location line="+17"/>
         <source>POWER MEMORY</source>
-        <translation type="vanished">MEMORIA DI POTENZA</translation>
+        <translation>MEMORIA DI POTENZA</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Band TX Memory:</source>
-        <translation type="vanished">Banda TX Memoria:</translation>
+        <translation>Banda TX Memoria:</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Band Tune Mem:</source>
-        <translation type="vanished">Mem sintonia banda:</translation>
+        <translation>Mem sintonia banda:</translation>
     </message>
     <message>
+        <location line="-277"/>
         <source>SSB voice bandwidth:</source>
-        <translation type="vanished">Larghezza di banda SSB:</translation>
+        <translation>Larghezza di banda SSB:</translation>
     </message>
     <message>
+        <location line="+28"/>
         <source>Post-demodulation audio filter only. It does not change the radio dial or RTL-SDR tuning.</source>
-        <translation type="vanished">Filtro audio solo dopo la demodulazione. Non cambia la sintonia della radio né quella dell&apos;RTL-SDR.</translation>
+        <translation>Filtro audio solo dopo la demodulazione. Non cambia la sintonia della radio né quella dell&apos;RTL-SDR.</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>SSB audio AGC:</source>
-        <translation type="vanished">AGC audio SSB:</translation>
+        <translation>AGC audio SSB:</translation>
     </message>
     <message>
+        <location line="+11"/>
+        <location line="+64"/>
         <source>Off</source>
-        <translation type="vanished">Spento</translation>
+        <translation>Spento</translation>
     </message>
     <message>
+        <location line="-64"/>
         <source>Slow</source>
-        <translation type="vanished">Lento</translation>
+        <translation>Lento</translation>
     </message>
     <message>
+        <location line="+0"/>
+        <location line="+64"/>
         <source>Medium</source>
-        <translation type="vanished">Medio</translation>
+        <translation>Medio</translation>
     </message>
     <message>
+        <location line="-47"/>
         <source>Adjusts listening level after SSB demodulation. Off preserves the raw receiver level.</source>
-        <translation type="vanished">Regola il livello di ascolto dopo la demodulazione SSB. Spento mantiene il livello grezzo del ricevitore.</translation>
+        <translation>Regola il livello di ascolto dopo la demodulazione SSB. Spento mantiene il livello grezzo del ricevitore.</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>SSB notch (Hz):</source>
-        <translation type="vanished">Notch SSB (Hz):</translation>
+        <translation>Notch SSB (Hz):</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>0 = Off</source>
-        <translation type="vanished">0 = spento</translation>
+        <translation>0 = spento</translation>
     </message>
     <message>
+        <location line="+15"/>
         <source>Set the audible whistle frequency to remove a persistent carrier. Use 0 to disable.</source>
-        <translation type="vanished">Imposta la frequenza del fischio da togliere per eliminare una portante persistente. Usa 0 per disattivarlo.</translation>
+        <translation>Imposta la frequenza del fischio da togliere per eliminare una portante persistente. Usa 0 per disattivarlo.</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>SSB noise reduction:</source>
-        <translation type="vanished">Riduzione del rumore SSB:</translation>
+        <translation>Riduzione del rumore SSB:</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>Light</source>
-        <translation type="vanished">Leggera</translation>
+        <translation>Leggera</translation>
     </message>
     <message>
+        <location line="+17"/>
         <source>Adaptive speech gate for background noise in pauses. It never affects digital-mode decoder audio.</source>
-        <translation type="vanished">Soglia vocale adattiva per il rumore di fondo nelle pause. Non tocca mai l&apos;audio del decodificatore dei modi digitali.</translation>
+        <translation>Soglia vocale adattiva per il rumore di fondo nelle pause. Non tocca mai l&apos;audio del decodificatore dei modi digitali.</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>These controls apply only to RTL-SDR USB/LSB listening after demodulation; they never alter FT8 or the radio tuning reference.</source>
-        <translation type="vanished">Questi comandi valgono solo per l&apos;ascolto USB/LSB da RTL-SDR dopo la demodulazione; non alterano mai l&apos;FT8 né il riferimento di sintonia della radio.</translation>
+        <translation>Questi comandi valgono solo per l&apos;ascolto USB/LSB da RTL-SDR dopo la demodulazione; non alterano mai l&apos;FT8 né il riferimento di sintonia della radio.</translation>
     </message>
 </context>
 <context>
     <name>SettingsTab3</name>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="+67"/>
         <source>FREQUENCY AND TIMING</source>
-        <translation type="vanished">FREQUENZA E TIMING</translation>
+        <translation>FREQUENZA E TIMING</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>TX Frequency:</source>
-        <translation type="vanished">TX Frequenza:</translation>
+        <translation>TX Frequenza:</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>TX Slot:</source>
-        <translation type="vanished">TX Slot:</translation>
+        <translation>TX Slot:</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Second (:15/:45)</source>
-        <translation type="vanished">Secondo (:15/:45)</translation>
+        <translation>Secondo (:15/:45)</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>First (:00/:30)</source>
-        <translation type="vanished">Primo (:00/:30)</translation>
+        <translation>Primo (:00/:30)</translation>
     </message>
     <message>
+        <location line="+14"/>
         <source>TX Delay (s):</source>
-        <translation type="vanished">Ritardo TX (s):</translation>
+        <translation>Ritardo TX (s):</translation>
     </message>
     <message>
+        <location line="+15"/>
         <source>Allow TX QSY:</source>
-        <translation type="vanished">Consenti TX QSY:</translation>
+        <translation>Consenti TX QSY:</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>READY PROFILES</source>
-        <translation type="vanished">PROFILI PRONTI</translation>
+        <translation>PROFILI PRONTI</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Balanced (daily QSO) - default</source>
-        <translation type="vanished">Bilanciato (QSO quotidiano) - default</translation>
+        <translation>Bilanciato (QSO quotidiano) - default</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Conservative ON · full decode AutoCQ ON · close strong partners ON · adaptive decode ON · AP cache rescue ON · skip end-slot OFF · MAM OFF · partner memory ON · TX2 resend ON · smooth flow ON · caller retries 5.</source>
-        <translation type="vanished">Conservativo ON · decodifica completa AutoCQ ON · partner forti vicini ON · decodifica adattiva ON · recupero cache AP ON · salta fine-slot OFF · MAM OFF · memoria partner ON · reinvio TX2 ON · flusso fluido ON · tentativi chiamante 5.</translation>
+        <translation>Conservativo ON · decodifica completa AutoCQ ON · partner forti vicini ON · decodifica adattiva ON · recupero cache AP ON · salta fine-slot OFF · MAM OFF · memoria partner ON · reinvio TX2 ON · flusso fluido ON · tentativi chiamante 5.</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Weak-signal / DX hunting</source>
-        <translation type="vanished">Segnale debole / caccia DX</translation>
+        <translation>Segnale debole / caccia DX</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Like Balanced, but: caller retries 7 · adaptive decode OFF (maximum sensitivity) · AP cache rescue ON (accepts some false positives) · skip end-slot OFF (do not lose late decodes).</source>
-        <translation type="vanished">Come Bilanciato, ma: tentativi chiamante 7 · decodifica adattiva OFF (massima sensibilità) · recupero cache AP ON (accetta qualche falso positivo) · salta fine-slot OFF (non perdere decode tardivi).</translation>
+        <translation>Come Bilanciato, ma: tentativi chiamante 7 · decodifica adattiva OFF (massima sensibilità) · recupero cache AP ON (accetta qualche falso positivo) · salta fine-slot OFF (non perdere decode tardivi).</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Contest / high density</source>
-        <translation type="vanished">Contest / alta densità</translation>
+        <translation>Contest / alta densità</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>close strong partners ON · skip end-slot ON (minimum latency) · MAM multi-stream ON (2 streams, experimental) · full decode AutoCQ ON · caller retries 3 · partner memory ON · conservative OFF.</source>
-        <translation type="vanished">partner forti vicini ON · salta fine-slot ON (latenza minima) · MAM multi-stream ON (2 stream, sperimentale) · decodifica completa AutoCQ ON · tentativi chiamante 3 · memoria partner ON · conservativo OFF.</translation>
+        <translation>partner forti vicini ON · salta fine-slot ON (latenza minima) · MAM multi-stream ON (2 stream, sperimentale) · decodifica completa AutoCQ ON · tentativi chiamante 3 · memoria partner ON · conservativo OFF.</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>CPU-limited (Decodium Console / mini PC)</source>
-        <translation type="vanished">CPU limitata (Decodium Console / mini PC)</translation>
+        <translation>CPU limitata (Decodium Console / mini PC)</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>adaptive decode ON · MAM OFF · full decode AutoCQ OFF · smooth flow ON · rest at defaults. Watchdogs unchanged.</source>
-        <translation type="vanished">decodifica adattiva ON · MAM OFF · decodifica completa AutoCQ OFF · flusso fluido ON · resto ai valori predefiniti. Watchdog invariati.</translation>
+        <translation>decodifica adattiva ON · MAM OFF · decodifica completa AutoCQ OFF · flusso fluido ON · resto ai valori predefiniti. Watchdog invariati.</translation>
     </message>
     <message>
+        <location line="+23"/>
         <source>● active</source>
-        <translation type="vanished">● attivo</translation>
+        <translation>● attivo</translation>
     </message>
     <message>
+        <location line="+16"/>
         <source>AUTO SEQUENCE</source>
-        <translation type="vanished">SEQUENZA AUTOMATICA</translation>
+        <translation>SEQUENZA AUTOMATICA</translation>
     </message>
     <message>
+        <location line="+19"/>
         <source>Auto Sequence:</source>
-        <translation type="vanished">Sequenza automatica:</translation>
+        <translation>Sequenza automatica:</translation>
     </message>
     <message>
+        <location line="+21"/>
         <source>Send RR73:</source>
-        <translation type="vanished">Invia RR73:</translation>
+        <translation>Invia RR73:</translation>
     </message>
     <message>
+        <location line="+21"/>
         <source>Quick QSO:</source>
-        <translation type="vanished">QSO rapido:</translation>
+        <translation>QSO rapido:</translation>
     </message>
     <message>
+        <location line="+23"/>
         <source>Resume QSO on partner reply:</source>
-        <translation type="vanished">Riprendi QSO se il partner risponde:</translation>
+        <translation>Riprendi QSO se il partner risponde:</translation>
     </message>
     <message>
+        <location line="+23"/>
         <source>If you Halt during an active QSO and that same station sends a direct reply to your callsign within 2 minutes, Decodium can resume that QSO.
 
 Applies only to FT8/FT4/FT2 and only to the saved QSO state.
 
 Default: OFF (= Halt fully stops the sequence by default).</source>
-        <translation type="vanished">Se fai Halt durante un QSO attivo e quella stessa stazione invia una risposta diretta al tuo callsign entro 2 minuti, Decodium può riprendere quel QSO.
+        <translation>Se fai Halt durante un QSO attivo e quella stessa stazione invia una risposta diretta al tuo callsign entro 2 minuti, Decodium può riprendere quel QSO.
 
 Vale solo per FT8/FT4/FT2 e solo per lo stato QSO salvato.
 
 Default: OFF (= Halt ferma completamente la sequenza per impostazione predefinita).</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Disable TX after 73:</source>
-        <translation type="vanished">Disabilita TX dopo 73:</translation>
+        <translation>Disabilita TX dopo 73:</translation>
     </message>
     <message>
+        <location line="+18"/>
         <source>MSK/Q65 TX until 73:</source>
-        <translation type="vanished">MSK/Q65 TX fino al 73:</translation>
+        <translation>MSK/Q65 TX fino al 73:</translation>
     </message>
     <message>
+        <location line="+18"/>
         <source>FT2 UTILITY</source>
-        <translation type="vanished">FT2 UTILITY</translation>
+        <translation>FT2 UTILITY</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>FT2: signoff retries (73/RR73):</source>
-        <translation type="vanished">FT2: ripetizioni signoff (73/RR73):</translation>
+        <translation>FT2: ripetizioni signoff (73/RR73):</translation>
     </message>
     <message>
+        <location line="+21"/>
         <source>How many times to repeat the final 73/RR73 in FT2 waiting for the partner&apos;s ack before logging and closing.
 
 Default: 4 (~28s).
@@ -24414,7 +27872,7 @@ Lower = closes earlier (less &apos;stuck&apos; on the same station).
 Higher = more patient with weak/QSB partners.
 
 Doesn&apos;t affect FT8/FT4.</source>
-        <translation type="vanished">Quante volte ripetere il 73/RR73 finale in FT2 aspettando l&apos;ack del partner prima di loggare e chiudere.
+        <translation>Quante volte ripetere il 73/RR73 finale in FT2 aspettando l&apos;ack del partner prima di loggare e chiudere.
 
 Default: 4 (~28s).
 
@@ -24424,10 +27882,12 @@ Più alto = più paziente con partner deboli/QSB.
 Non tocca FT8/FT4.</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>FT4: signoff retries (73/RR73):</source>
-        <translation type="vanished">FT4: ripetizioni signoff (73/RR73):</translation>
+        <translation>FT4: ripetizioni signoff (73/RR73):</translation>
     </message>
     <message>
+        <location line="+21"/>
         <source>How many times to repeat the final 73/RR73 in FT4.
 
 Default: 4 (~30s).
@@ -24435,7 +27895,7 @@ Default: 4 (~30s).
 Increase to 6-8 for weak/QSB partners (replaces the former automatic weak/conservative extras).
 
 Doesn&apos;t affect FT2/FT8.</source>
-        <translation type="vanished">Quante volte ripetere il 73/RR73 finale in FT4.
+        <translation>Quante volte ripetere il 73/RR73 finale in FT4.
 
 Default: 4 (~30s).
 
@@ -24444,10 +27904,12 @@ Aumenta a 6-8 per partner deboli/QSB (sostituisce gli ex extra weak/conservative
 Non tocca FT2/FT8.</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>FT8: signoff retries (73/RR73):</source>
-        <translation type="vanished">FT8: ripetizioni signoff (73/RR73):</translation>
+        <translation>FT8: ripetizioni signoff (73/RR73):</translation>
     </message>
     <message>
+        <location line="+21"/>
         <source>How many times to repeat the final 73/RR73 in FT8.
 
 Default: 3 (~45s).
@@ -24455,7 +27917,7 @@ Default: 3 (~45s).
 Increase to 6-8 for weak/QSB partners (replaces the former automatic weak/conservative extras).
 
 Doesn&apos;t affect FT2/FT4.</source>
-        <translation type="vanished">Quante volte ripetere il 73/RR73 finale in FT8.
+        <translation>Quante volte ripetere il 73/RR73 finale in FT8.
 
 Default: 3 (~45s).
 
@@ -24464,70 +27926,82 @@ Aumenta a 6-8 per partner deboli/QSB (sostituisce gli ex extra weak/conservative
 Non tocca FT2/FT4.</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Weak-partner signoff boost (FT2/4/8):</source>
-        <translation type="vanished">Boost signoff partner deboli (FT2/4/8):</translation>
+        <translation>Boost signoff partner deboli (FT2/4/8):</translation>
     </message>
     <message>
+        <location line="+19"/>
         <source>When ON, automatically grants extra final 73/RR73 retries when the active partner is weak (SNR at or below the threshold below), giving fragile QSOs more chances to close.
 
 Default OFF = unchanged behavior. Applies to FT2/FT4/FT8, always clamped to max 8 and still bounded by the TX watchdog.</source>
-        <translation type="vanished">Quando attivo, concede automaticamente tentativi finali 73/RR73 aggiuntivi quando il partner attivo è debole (SNR pari o inferiore alla soglia sotto), dando ai QSO fragili più possibilità di chiudere.
+        <translation>Quando attivo, concede automaticamente tentativi finali 73/RR73 aggiuntivi quando il partner attivo è debole (SNR pari o inferiore alla soglia sotto), dando ai QSO fragili più possibilità di chiudere.
 
 Predefinito OFF = comportamento invariato. Si applica a FT2/FT4/FT8, sempre limitato a max 8 e comunque vincolato dal watchdog TX.</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>  weak SNR threshold (dB):</source>
-        <translation type="vanished">  soglia SNR debole (dB):</translation>
+        <translation>  soglia SNR debole (dB):</translation>
     </message>
     <message>
+        <location line="+23"/>
         <source>A partner whose SNR is at or below this value is treated as &apos;weak&apos; and receives the extra signoff retries.
 
 Default: -15 dB.</source>
-        <translation type="vanished">Un partner con SNR pari o inferiore a questo valore è considerato &apos;debole&apos; e riceve i tentativi di signoff aggiuntivi.
+        <translation>Un partner con SNR pari o inferiore a questo valore è considerato &apos;debole&apos; e riceve i tentativi di signoff aggiuntivi.
 
 Predefinito: -15 dB.</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>  extra signoff retries:</source>
-        <translation type="vanished">  tentativi signoff extra:</translation>
+        <translation>  tentativi signoff extra:</translation>
     </message>
     <message>
+        <location line="+23"/>
         <source>How many extra final 73/RR73 retries to add on top of the per-mode cap for weak partners.
 
 Default: +3 (capped so the total never exceeds 8).</source>
-        <translation type="vanished">Quanti tentativi finali 73/RR73 aggiuntivi aggiungere oltre al limite per modo per i partner deboli.
+        <translation>Quanti tentativi finali 73/RR73 aggiuntivi aggiungere oltre al limite per modo per i partner deboli.
 
 Predefinito: +3 (limitato così che il totale non superi mai 8).</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Post-log RRR re-engage guard (FT2):</source>
-        <translation type="vanished">Guardia ri-aggancio RRR post-log (FT2):</translation>
+        <translation>Guardia ri-aggancio RRR post-log (FT2):</translation>
     </message>
     <message>
+        <location line="+19"/>
         <source>When ON, after a QSO is logged (&apos;partner left&apos;) stop re-sending RR73 to a partner that keeps calling you with R+report because they did not copy your signoff (the 9H1SR too-many-calls case).
 
 A few courtesy repeats are still allowed (see max), then suppressed within the 30s cooldown. Default OFF. FT2 only.</source>
-        <translation type="vanished">Quando attivo, dopo che un QSO è stato loggato (&apos;partner uscito&apos;) interrompe il reinvio di RR73 a un partner che continua a chiamarti con R+rapporto perché non ha copiato la tua chiusura (il caso 9H1SR con troppe richiamate).
+        <translation>Quando attivo, dopo che un QSO è stato loggato (&apos;partner uscito&apos;) interrompe il reinvio di RR73 a un partner che continua a chiamarti con R+rapporto perché non ha copiato la tua chiusura (il caso 9H1SR con troppe richiamate).
 
 Sono ancora consentite alcune ripetizioni di cortesia (vedi max), poi soppresse entro la pausa di 30s. Predefinito OFF. Solo FT2.</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>  courtesy RRR max:</source>
-        <translation type="vanished">  max RRR di cortesia:</translation>
+        <translation>  max RRR di cortesia:</translation>
     </message>
     <message>
+        <location line="+23"/>
         <source>How many courtesy RR73 to still send to a just-logged partner before suppressing further re-engagements.
 
 0 = suppress immediately. Default: 1.</source>
-        <translation type="vanished">Quanti RR73 di cortesia inviare ancora a un partner appena loggato prima di sopprimere ulteriori ri-agganci.
+        <translation>Quanti RR73 di cortesia inviare ancora a un partner appena loggato prima di sopprimere ulteriori ri-agganci.
 
 0 = sopprimi subito. Predefinito: 1.</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Immediate TX on click (1.0.283 style):</source>
-        <translation type="vanished">TX immediato al click (stile 1.0.283):</translation>
+        <translation>TX immediato al click (stile 1.0.283):</translation>
     </message>
     <message>
+        <location line="+22"/>
         <source>Restores the &apos;TX starts IMMEDIATELY on double-click&apos; behaviour of 1.0.283.
 
 • FT2: relaxes the period-gate (TX1 from click bypasses waiting for the next slot)
@@ -24536,7 +28010,7 @@ Sono ancora consentite alcune ripetizioni di cortesia (vedi max), poi soppresse 
 Default: OFF (= safe upstream behaviour).
 
 Enable if it bothers you to wait 1 cycle after the click.</source>
-        <translation type="vanished">Ripristina il comportamento &apos;TX parte SUBITO al doppio-click&apos; della 1.0.283.
+        <translation>Ripristina il comportamento &apos;TX parte SUBITO al doppio-click&apos; della 1.0.283.
 
 • FT2: rilassa il period-gate (TX1 da click bypassa l&apos;attesa del prossimo slot)
 • FT8/FT4: alza il cap della finestra cliccabile a d3CapMs (~11s su FT8, 5.6s su FT4) = comportamento 1.0.283 reale
@@ -24546,26 +28020,30 @@ Default: OFF (= comportamento sicuro upstream).
 Attiva se ti dà fastidio aspettare 1 ciclo dopo il click.</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Log RR73 even if partner leaves (FT2):</source>
-        <translation type="vanished">Logga RR73 anche se il partner se ne va (FT2):</translation>
+        <translation>Logga RR73 anche se il partner se ne va (FT2):</translation>
     </message>
     <message>
+        <location line="+22"/>
         <source>FT2 + async AutoCQ: when WE close with RR73 (TX4) after the partner R+report and the partner then disappears, log the QSO anyway (at the signoff cap) instead of leaving it unlogged.
 
 Matches TX5/73 and sync mode behaviour.
 
 Default: OFF.</source>
-        <translation type="vanished">FT2 + AutoCQ async: quando SIAMO NOI a chiudere con RR73 (TX4) dopo il R+report del partner e il partner poi scompare, logga comunque il QSO (al cap di signoff) invece di lasciarlo non loggato.
+        <translation>FT2 + AutoCQ async: quando SIAMO NOI a chiudere con RR73 (TX4) dopo il R+report del partner e il partner poi scompare, logga comunque il QSO (al cap di signoff) invece di lasciarlo non loggato.
 
 Coerente col comportamento di TX5/73 e della modalità sync.
 
 Default: OFF.</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>FT8: fast sequences (WSJT-X/JTDX style):</source>
-        <translation type="vanished">FT8: sequenze veloci (stile WSJT-X/JTDX):</translation>
+        <translation>FT8: sequenze veloci (stile WSJT-X/JTDX):</translation>
     </message>
     <message>
+        <location line="+22"/>
         <source>Reduces FT8 sequence waits for users who prefer WSJT-X/JTDX-style reactivity.
 
 Two changes:
@@ -24575,7 +28053,7 @@ Two changes:
 SAFETY: under CPU pressure the pre-existing clamp forces grace ≥900ms (safety &gt; reactivity on loaded PCs).
 
 Default: OFF (= conservative upstream behaviour, max decode reliability).</source>
-        <translation type="vanished">Riduce le attese sequenza FT8 per chi preferisce reattività stile WSJT-X/JTDX.
+        <translation>Riduce le attese sequenza FT8 per chi preferisce reattività stile WSJT-X/JTDX.
 
 Due cambi:
   (1) Grace al boundary 1200ms → 400ms = TX parte ~800ms prima dopo il boundary slot
@@ -24586,17 +28064,19 @@ SICUREZZA: sotto pressione CPU il clamp pre-esistente forza grace ≥900ms (sicu
 Default: OFF (= comportamento upstream conservativo, massima affidabilità decode).</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>FT2: conservative TX window (no truncated frames):</source>
-        <translation type="vanished">FT2: finestra TX conservativa (nessun frame troncato):</translation>
+        <translation>FT2: finestra TX conservativa (nessun frame troncato):</translation>
     </message>
     <message>
+        <location line="+22"/>
         <source>Controls how late in a slot the async FT2 TX may start.
 
 • ON (default): the TX starts only if the FULL payload (~2520ms) still fits — window ~18% of the slot. If it would arrive late, the TX is deferred to the next slot instead of sending a TRUNCATED frame the partner can&apos;t decode. Calm, Decodium-3.0-style stability.
 • OFF: FIX B (1.0.353) behaviour — window up to ~76% of the slot (only ~700ms of useful payload required). More reactive but can transmit truncated frames on a late reply.
 
 Enable OFF only if you want maximum reactivity and accept occasional non-decodable late TX.</source>
-        <translation type="vanished">Controlla quanto tardi in uno slot può partire la TX FT2 async.
+        <translation>Controlla quanto tardi in uno slot può partire la TX FT2 async.
 
 • ON (default): la TX parte solo se il payload COMPLETO (~2520ms) ci sta ancora — finestra ~18% dello slot. Se arriverebbe tardi, la TX viene rinviata allo slot successivo invece di inviare un frame TRONCATO che il partner non può decodificare. Stabilità calma, in stile Decodium-3.0.
 • OFF: comportamento FIX B (1.0.353) — finestra fino al ~76% dello slot (servono solo ~700ms di payload utile). Più reattivo ma può trasmettere frame troncati su una risposta tardiva.
@@ -24604,26 +28084,30 @@ Enable OFF only if you want maximum reactivity and accept occasional non-decodab
 Attiva OFF solo se vuoi la massima reattività e accetti TX tardive occasionalmente non decodificabili.</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>FT2: manual one-shot disarm (1.0.300+):</source>
-        <translation type="vanished">FT2: disarmo one-shot manuale (1.0.300+):</translation>
+        <translation>FT2: disarmo one-shot manuale (1.0.300+):</translation>
     </message>
     <message>
+        <location line="+22"/>
         <source>When ON (upstream 1.0.300+ behaviour): after a manual TX1-TX3 in FT2 the TX is disarmed and re-armed ONLY when a partner decode arrives. Avoids TX1 looping forever on double-click, but on WEAK partners that don&apos;t decode in the first RX period the QSO is lost (= &apos;TX1 stops without completing&apos;).
 
 When OFF (default on this fork, pre-1.0.300): TX1 keeps repeating until &apos;Caller Retries&apos; is reached — better for weak-signal QSOs (Pasquale&apos;s case).
 
 Enable only if you double-click stations that consistently reply on the first attempt.</source>
-        <translation type="vanished">Quando ON (comportamento upstream 1.0.300+): dopo una TX1-TX3 manuale in FT2 la TX viene disarmata e ri-armata SOLO quando arriva una decodifica del partner. Evita che la TX1 vada in loop all&apos;infinito sul doppio-click, ma su partner DEBOLI che non decodificano nel primo periodo RX il QSO va perso (= &apos;la TX1 si ferma senza completare&apos;).
+        <translation>Quando ON (comportamento upstream 1.0.300+): dopo una TX1-TX3 manuale in FT2 la TX viene disarmata e ri-armata SOLO quando arriva una decodifica del partner. Evita che la TX1 vada in loop all&apos;infinito sul doppio-click, ma su partner DEBOLI che non decodificano nel primo periodo RX il QSO va perso (= &apos;la TX1 si ferma senza completare&apos;).
 
 Quando OFF (default su questo fork, pre-1.0.300): la TX1 continua a ripetersi finché non si raggiunge &apos;Caller Retries&apos; — meglio per i QSO con segnali deboli (il caso di Pasquale).
 
 Attiva solo se fai doppio-click su stazioni che rispondono sistematicamente al primo tentativo.</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Caller retries (max TX repeats per step):</source>
-        <translation type="vanished">Caller retries (ripetizioni TX max per step):</translation>
+        <translation>Caller retries (ripetizioni TX max per step):</translation>
     </message>
     <message>
+        <location line="+25"/>
         <source>Maximum times the same TX step (TX1/TX2/TX3) repeats before halting if the partner doesn&apos;t reply.
 
 Default: 10.
@@ -24635,7 +28119,7 @@ Lower (4-6) = less time wasted on stations that don&apos;t reply.
 Higher (15-20) = patience for weak DX / marginal propagation.
 
 Note: with &apos;FT2 manual one-shot disarm&apos; OFF (default) this is what stops TX1 from looping forever.</source>
-        <translation type="vanished">Numero massimo di volte che lo stesso step TX (TX1/TX2/TX3) si ripete prima di fermarsi se il partner non risponde.
+        <translation>Numero massimo di volte che lo stesso step TX (TX1/TX2/TX3) si ripete prima di fermarsi se il partner non risponde.
 
 Default: 10.
 
@@ -24648,49 +28132,58 @@ Più alto (15-20) = pazienza per DX deboli / propagazione marginale.
 Nota: con &apos;FT2 disarmo one-shot manuale&apos; OFF (default) è questo che impedisce alla TX1 di andare in loop all&apos;infinito.</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>⚠ TX Watchdog is active and &apos;hard cap&apos; below is OFF: the Caller-retries limit above is IGNORED until the watchdog timeout.</source>
-        <translation type="vanished">⚠ Il watchdog TX è attivo e il &apos;limite rigido&apos; qui sotto è OFF: il limite Tentativi chiamante qui sopra viene IGNORATO fino al timeout del watchdog.</translation>
+        <translation>⚠ Il watchdog TX è attivo e il &apos;limite rigido&apos; qui sotto è OFF: il limite Tentativi chiamante qui sopra viene IGNORATO fino al timeout del watchdog.</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Caller retries hard cap (even with watchdog):</source>
-        <translation type="vanished">Limite rigido tentativi chiamante (anche con watchdog):</translation>
+        <translation>Limite rigido tentativi chiamante (anche con watchdog):</translation>
     </message>
     <message>
+        <location line="+22"/>
         <source>When ON (default), the &apos;Caller retries&apos; cap on TX1/TX2 halts the call even if the TX Watchdog is enabled — the number you set is a real hard limit.
 
 When OFF (upstream 1.0.438 behaviour): the TX Watchdog takes priority and ignores the Caller-retries cap until its own timeout, so a call can repeat for the whole watchdog duration (default 6 min).</source>
-        <translation type="vanished">Quando attivo (predefinito), il limite &apos;Tentativi chiamante&apos; su TX1/TX2 interrompe la chiamata anche se il watchdog TX è abilitato — il numero impostato è un vero limite rigido.
+        <translation>Quando attivo (predefinito), il limite &apos;Tentativi chiamante&apos; su TX1/TX2 interrompe la chiamata anche se il watchdog TX è abilitato — il numero impostato è un vero limite rigido.
 
 Quando OFF (comportamento upstream 1.0.438): il watchdog TX ha la priorità e ignora il limite dei tentativi chiamante fino al proprio timeout, quindi una chiamata può ripetersi per tutta la durata del watchdog (predefinito 6 min).</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>FT2 state transition census (log only):</source>
-        <translation type="vanished">Censimento transizioni di stato FT2 (solo log):</translation>
+        <translation>Censimento transizioni di stato FT2 (solo log):</translation>
     </message>
     <message>
+        <location line="+22"/>
         <source>Diagnostic only (off by default): logs every FT2 QSO state transition (from/to/progress) to the diagnostic log, to empirically map the real sequencer state machine. No behaviour change at all - it only writes log lines. Used to design future deterministic-transition guards safely.</source>
-        <translation type="vanished">Solo diagnostico (disattivato di default): registra ogni transizione di stato del QSO FT2 (da/a/progresso) nel log diagnostico, per mappare empiricamente la reale macchina a stati del sequencer. Nessuna modifica del comportamento: scrive solo righe di log. Serve a progettare in sicurezza future protezioni a transizione deterministica.</translation>
+        <translation>Solo diagnostico (disattivato di default): registra ogni transizione di stato del QSO FT2 (da/a/progresso) nel log diagnostico, per mappare empiricamente la reale macchina a stati del sequencer. Nessuna modifica del comportamento: scrive solo righe di log. Serve a progettare in sicurezza future protezioni a transizione deterministica.</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Adaptive async TX timing (experimental):</source>
-        <translation type="vanished">Timing TX asincrono adattivo (sperimentale):</translation>
+        <translation>Timing TX asincrono adattivo (sperimentale):</translation>
     </message>
     <message>
+        <location line="+22"/>
         <source>Experimental, off by default. Makes the FT2 async-TX timing gates (RMS-quiet, decode-quiet, anti-collision jitter) adapt to channel occupancy: a bit more reactive when the channel is clear, more conservative when it is crowded. With this OFF the timing is byte-identical to the standard behaviour. It never transmits before hearing the partner.</source>
-        <translation type="vanished">Sperimentale, disattivato di default. Fa sì che i gate di timing della TX asincrona FT2 (silenzio RMS, silenzio di decodifica, jitter anti-collisione) si adattino all’occupazione del canale: un po’ più reattivo quando il canale è libero, più conservativo quando è affollato. Con questa opzione DISATTIVATA il timing è identico byte per byte al comportamento standard. Non trasmette mai prima di aver ascoltato il corrispondente.</translation>
+        <translation>Sperimentale, disattivato di default. Fa sì che i gate di timing della TX asincrona FT2 (silenzio RMS, silenzio di decodifica, jitter anti-collisione) si adattino all’occupazione del canale: un po’ più reattivo quando il canale è libero, più conservativo quando è affollato. Con questa opzione DISATTIVATA il timing è identico byte per byte al comportamento standard. Non trasmette mai prima di aver ascoltato il corrispondente.</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Conservative FT2 (weak-signal mode):</source>
-        <translation type="vanished">Conservative FT2 (modo weak-signal):</translation>
+        <translation>Conservative FT2 (modo weak-signal):</translation>
     </message>
     <message>
+        <location line="+21"/>
         <source>Anti-QSB tuning:
   • Ghost filter -24 dB instead of -22
   • Retry cap extended SNR-adaptive (+2..+4 extra)
   • Same-step wait relaxed for weak partners
 
 Default: OFF — enable it if you have weak DX partners or marginal propagation.</source>
-        <translation type="vanished">Tuning anti-QSB:
+        <translation>Tuning anti-QSB:
   • Ghost filter -24 dB invece di -22
   • Retry cap esteso SNR-adattivo (+2..+4 extra)
   • Same-step wait rilassato per partner deboli
@@ -24698,42 +28191,66 @@ Default: OFF — enable it if you have weak DX partners or marginal propagation.
 Default: OFF — attivalo se hai partner DX deboli o propagazione marginale.</translation>
     </message>
     <message>
-        <source>FT2: full decode in AutoCQ:</source>
-        <translation type="vanished">FT2: full decode in AutoCQ:</translation>
+        <location line="+9"/>
+        <source>FT2: accumulate repeated slots (RX):</source>
+        <translation>FT2: accumula gli slot ripetuti (RX):</translation>
     </message>
     <message>
+        <location line="+21"/>
+        <source>Sums the signal energy of repeated FT2 transmissions from the same station across slots, to decode weaker signals than a single slot allows.
+
+Experimental, never confirmed on real air traffic. Resets to OFF on every restart.
+
+Default: OFF.</source>
+        <translation>Somma l&apos;energia del segnale di trasmissioni FT2 ripetute della stessa stazione su più slot, per decodificare segnali più deboli di quanto consenta un singolo slot.
+
+Sperimentale, mai confermato su traffico reale. Torna su OFF a ogni riavvio.
+
+Predefinito: OFF.</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>FT2: full decode in AutoCQ:</source>
+        <translation>FT2: full decode in AutoCQ:</translation>
+    </message>
+    <message>
+        <location line="+21"/>
         <source>While calling CQ (AutoCQ), keeps the decode depth at full (OSD + 4th subtraction pass + weak-signal averaging) instead of reducing it to 2.
 
 Helps you hear weak responders. Reduces automatically under CPU pressure anyway.
 
 Default: OFF.</source>
-        <translation type="vanished">Mentre chiami CQ (AutoCQ), mantiene la profondità di decodifica piena (OSD + 4ª passata di sottrazione + weak-signal averaging) invece di ridurla a 2.
+        <translation>Mentre chiami CQ (AutoCQ), mantiene la profondità di decodifica piena (OSD + 4ª passata di sottrazione + weak-signal averaging) invece di ridurla a 2.
 
 Aiuta a sentire i risponditori deboli. Si riduce comunque automaticamente sotto pressione CPU.
 
 Default: OFF.</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>FT2: close strong partners earlier:</source>
-        <translation type="vanished">FT2: chiudi prima i partner forti:</translation>
+        <translation>FT2: chiudi prima i partner forti:</translation>
     </message>
     <message>
+        <location line="+21"/>
         <source>If a STRONG partner (SNR &gt; 0 dB) doesn&apos;t send the final 73, reduces RR73 repetitions from 8 to 4 (~15s instead of 30s) before logging and returning to CQ.
 
 Weak partners keep the extra anti-QSB repetitions.
 
 Default: OFF.</source>
-        <translation type="vanished">Se un partner FORTE (SNR &gt; 0 dB) non manda il 73 finale, riduce le ripetizioni del RR73 da 8 a 4 (~15s invece di 30s) prima di loggare e tornare in CQ.
+        <translation>Se un partner FORTE (SNR &gt; 0 dB) non manda il 73 finale, riduce le ripetizioni del RR73 da 8 a 4 (~15s invece di 30s) prima di loggare e tornare in CQ.
 
 I partner deboli mantengono le ripetizioni extra anti-QSB.
 
 Default: OFF.</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>FT2: adaptive decode (CPU saver):</source>
-        <translation type="vanished">FT2: decode adattivo (risparmio CPU):</translation>
+        <translation>FT2: decode adattivo (risparmio CPU):</translation>
     </message>
     <message>
+        <location line="+21"/>
         <source>In LISTEN-ONLY mode (not calling CQ nor in a QSO), thins async re-decode from 100ms to ~350ms: doesn&apos;t re-decode 95%-overlapping audio → saves CPU and reduces the peaks that may lower decode depth.
 
 When waiting for a reply (AutoCQ/QSO) it stays at full cadence. Loses no decodes.
@@ -24741,7 +28258,7 @@ When waiting for a reply (AutoCQ/QSO) it stays at full cadence. Loses no decodes
 Useful mainly on modest PCs.
 
 Default: OFF.</source>
-        <translation type="vanished">In SOLO-ASCOLTO (non stai chiamando CQ né in QSO) dirada il re-decode async da 100ms a ~350ms: non ridecodifica audio sovrapposto al 95% → risparmia CPU e riduce i picchi che possono abbassare la profondità decode.
+        <translation>In SOLO-ASCOLTO (non stai chiamando CQ né in QSO) dirada il re-decode async da 100ms a ~350ms: non ridecodifica audio sovrapposto al 95% → risparmia CPU e riduce i picchi che possono abbassare la profondità decode.
 
 Quando aspetti una risposta (AutoCQ/QSO) resta a piena cadenza. Non perde decode.
 
@@ -24750,42 +28267,48 @@ Utile soprattutto su PC modesti.
 Default: OFF.</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>FT2: narrow reply decode (experimental):</source>
-        <translation type="vanished">FT2: decodifica ristretta della risposta (sperimentale):</translation>
+        <translation>FT2: decodifica ristretta della risposta (sperimentale):</translation>
     </message>
     <message>
+        <location line="+21"/>
         <source>When WAITING FOR A REPLY (AutoCQ or active QSO), decodes a narrow window around your RX frequency (±150 Hz) instead of the whole band, with a full-band pass every 4th cycle.
 
 The reply is decoded earlier in the slot (less CPU per attempt), so TX can react in the same slot instead of the next one. Band activity is still scanned 1 cycle out of 4.
 
 Default: OFF.</source>
-        <translation type="vanished">Quando si è IN ATTESA DI UNA RISPOSTA (AutoCQ o QSO attivo), decodifica una finestra ristretta attorno alla tua frequenza RX (±150 Hz) invece dell&apos;intera banda, con un pass full-band ogni 4° ciclo.
+        <translation>Quando si è IN ATTESA DI UNA RISPOSTA (AutoCQ o QSO attivo), decodifica una finestra ristretta attorno alla tua frequenza RX (±150 Hz) invece dell&apos;intera banda, con un pass full-band ogni 4° ciclo.
 
 La risposta viene decodificata prima nello slot (meno CPU per tentativo), così la TX può reagire nello stesso slot invece che nel successivo. L&apos;attività di banda viene comunque scansionata 1 ciclo su 4.
 
 Default: OFF.</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>FT2: AP cache rescue (experimental):</source>
-        <translation type="vanished">FT2: AP cache rescue (sperimentale):</translation>
+        <translation>FT2: AP cache rescue (sperimentale):</translation>
     </message>
     <message>
+        <location line="+21"/>
         <source>Experimental FT2 AP cache: stores callsigns seen in-band as hashes (TTL 30 min) and may rescue borderline FT2 decodes when a decoded callsign is already in the cache.
 
 Safety gate: AP-cache-rescued rows are shown/audited, but they do not drive AutoSeq, AutoCQ, or automatic TX. They are also not used to seed the AP cache again.
 
 Default: OFF.</source>
-        <translation type="vanished">AP cache FT2 sperimentale: memorizza i callsign visti in banda come hash (TTL 30 min) e può recuperare decodifiche FT2 al limite quando un callsign decodificato è già nella cache.
+        <translation>AP cache FT2 sperimentale: memorizza i callsign visti in banda come hash (TTL 30 min) e può recuperare decodifiche FT2 al limite quando un callsign decodificato è già nella cache.
 
 Gate di sicurezza: le righe recuperate dall&apos;AP cache vengono mostrate/auditate, ma non guidano AutoSeq, AutoCQ o la TX automatica. Non vengono nemmeno usate per ri-popolare l&apos;AP cache.
 
 Default: OFF.</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>FT2: skip redundant end-slot decode (reduces lock-in latency):</source>
-        <translation type="vanished">FT2: salta la decodifica ridondante di fine slot (riduce la latenza di aggancio):</translation>
+        <translation>FT2: salta la decodifica ridondante di fine slot (riduce la latenza di aggancio):</translation>
     </message>
     <message>
+        <location line="+24"/>
         <source>FT2 async only: when the asynchronous decode (incremental every 100 ms) has ALREADY decoded a slot, skip the end-of-slot synchronous decode pass for that slot.
 
 Benefit: removes contention (~1.8 s after TX) on the same worker, so the partner reply is picked up faster.
@@ -24793,7 +28316,7 @@ Benefit: removes contention (~1.8 s after TX) on the same worker, so the partner
 Cost: for slots already covered by async you lose the full end-of-slot weak-averaging pass, which can recover weak/marginal stations. Slots where async returned EMPTY still keep the sync decode.
 
 Default: OFF.</source>
-        <translation type="vanished">Solo FT2 async: quando la decodifica asincrona (incrementale ogni 100 ms) ha GIÀ decodificato uno slot, salta il pass di decodifica sincrona di fine-slot per quello slot.
+        <translation>Solo FT2 async: quando la decodifica asincrona (incrementale ogni 100 ms) ha GIÀ decodificato uno slot, salta il pass di decodifica sincrona di fine-slot per quello slot.
 
 Vantaggio: rimuove la contesa (~1.8 s dopo la TX) sullo stesso worker, così la risposta del partner viene raccolta più rapidamente.
 
@@ -24802,20 +28325,50 @@ Costo: per gli slot già coperti dall&apos;async perdi il pass completo di weak-
 Default: OFF.</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>FT2/FT8 MAM multi-stream (MSHV, sperimentale):</source>
-        <translation type="vanished">FT2/FT8 MAM multi-stream (MSHV, sperimentale):</translation>
+        <translation>FT2/FT8 MAM multi-stream (MSHV, sperimentale):</translation>
     </message>
     <message>
+        <location line="+24"/>
         <source>MSHV multi-stream mode: in a single period it replies to MULTIPLE callers at the same time, each on ITS own audio frequency (like a DX-pedition station).
 
 This is an ADDITIONAL MAM option: MAM (Multi-Answer Mode) or AutoCQ must be active before it can run. With this OFF, MAM remains serial, one caller at a time, as before.
 
 EXPERIMENTAL. Default: OFF.</source>
-        <translation type="vanished">Modalità multi-stream MSHV: in un singolo periodo risponde a PIÙ chiamanti contemporaneamente, ciascuno sulla SUA frequenza audio (come una stazione DX-pedition).
+        <translation>Modalità multi-stream MSHV: in un singolo periodo risponde a PIÙ chiamanti contemporaneamente, ciascuno sulla SUA frequenza audio (come una stazione DX-pedition).
 
 Questa è un&apos;opzione MAM AGGIUNTIVA: MAM (Multi-Answer Mode) o AutoCQ devono essere attivi prima che possa funzionare. Con questa su OFF, MAM resta seriale, un chiamante alla volta, come prima.
 
 SPERIMENTALE. Default: OFF.</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>MAM multi-stream: max stream simultanei (1-10):</source>
+        <translation>MAM multi-stream: max stream simultanei (1-10):</translation>
+    </message>
+    <message>
+        <location line="+28"/>
+        <source>How many parallel QSOs MAM multi-stream can run at the same time, each on its own frequency.
+
+Range 1-10. Default: 3. With 1 you answer one caller at a time, but still on THEIR frequency (MSHV style).
+
+Higher values split the TX power across the streams (about 1/sqrt(N) each) and need more CPU to generate the overlapping audio. Enabled only when MAM multi-stream is active.</source>
+        <translation>Quanti QSO paralleli il MAM multi-stream può gestire contemporaneamente, ciascuno sulla propria frequenza.
+
+Intervallo 1-10. Predefinito: 3. Con 1 rispondi a un chiamante alla volta, ma sulla SUA frequenza (stile MSHV).
+
+Valori più alti dividono la potenza TX tra gli stream (circa 1/radice(N) ciascuno) e richiedono più CPU per generare l&apos;audio sovrapposto. Attivo solo quando il MAM multi-stream è attivo.</translation>
+    </message>
+    <message>
+        <location line="+95"/>
+        <source>Elapsed periods (not CQ calls)</source>
+        <translation>Periodi trascorsi (non chiamate CQ)</translation>
+    </message>
+    <message>
+        <location line="+38"/>
+        <source>TX Watchdog periods:</source>
+        <translation>Periodi del watchdog TX:</translation>
     </message>
     <message>
         <source>MAM multi-stream: max stream simultanei:</source>
@@ -24834,209 +28387,251 @@ Range 2-5. Default: 3.
 Valori più alti richiedono più CPU per generare flussi audio sovrapposti. Abilitato solo quando MAM multi-stream è attivo.</translation>
     </message>
     <message>
+        <location line="-128"/>
         <source>FT2 partner-memory (anti-QSB):</source>
-        <translation type="vanished">FT2 partner-memory (anti-QSB):</translation>
+        <translation>FT2 partner-memory (anti-QSB):</translation>
     </message>
     <message>
+        <location line="+22"/>
         <source>Caches partner state (callsign + TX num + qsoProgress + SNR) for 30 seconds: if the partner disappears for QSB and reappears within 30s, restores the qsoProgress instead of restarting from TX1.
 
 Requires Conservative FT2 active.
 
 Default: OFF (opt-in after the 1.0.186 revert — strict gate + [FT2WS-F] log). Automatically disabled if Conservative is OFF.</source>
-        <translation type="vanished">Cache stato partner (callsign + TX num + qsoProgress + SNR) per 30 secondi: se il partner sparisce per QSB e ricompare entro 30s, ripristina il qsoProgress invece di ripartire da TX1.
+        <translation>Cache stato partner (callsign + TX num + qsoProgress + SNR) per 30 secondi: se il partner sparisce per QSB e ricompare entro 30s, ripristina il qsoProgress invece di ripartire da TX1.
 
 Richiede Conservative FT2 attivo.
 
 Default: OFF (opt-in dopo revert 1.0.186 — gate stretto + log [FT2WS-F]). Disattivato in automatico se Conservative OFF.</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>FT2 TX2 re-send on stall:</source>
-        <translation type="vanished">FT2 TX2 re-invio su stallo:</translation>
+        <translation>FT2 TX2 re-invio su stallo:</translation>
     </message>
     <message>
+        <location line="+22"/>
         <source>If you&apos;re in TX3 (R+report) and the partner doesn&apos;t reply for 2 periods (~7.5s), re-sends TX2 (signal report) once before leaving the QSO.
 
 Helps with weak partners that didn&apos;t ack the first time. Capped to 1 re-send per QSO (no loops).
 
 Requires Conservative FT2 active. Default: ON under Conservative.</source>
-        <translation type="vanished">Se sei in TX3 (R+report) e il partner non risponde per 2 periodi (~7.5s), ri-trasmette TX2 (signal report) una volta sola prima di lasciare il QSO.
+        <translation>Se sei in TX3 (R+report) e il partner non risponde per 2 periodi (~7.5s), ri-trasmette TX2 (signal report) una volta sola prima di lasciare il QSO.
 
 Aiuta sui partner deboli che non hanno acked la prima volta. Cap a 1 re-send per QSO (no loop).
 
 Richiede Conservative FT2 attivo. Default: ON sotto Conservative.</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Smooth decode flow:</source>
-        <translation type="vanished">Smooth decode flow:</translation>
+        <translation>Smooth decode flow:</translation>
     </message>
     <message>
+        <location line="+21"/>
         <source>Spreads FT8/FT4 decodes from the final end-of-period batch into continuous streaming with animated fade (~100 ms per row). FT2 async is unchanged because it already streams. Default: ON; auto-fallback if UI stalls are detected on modest PCs. Disable for legacy batch behavior.</source>
-        <translation type="vanished">Distribuisce le decodifiche FT8/FT4 dal batch finale di fine-periodo in uno streaming continuo con dissolvenza animata (~100 ms per riga). FT2 async è invariato perché già in streaming. Default: ON; fallback automatico se vengono rilevati stalli UI su PC modesti. Disattiva per il comportamento batch legacy.</translation>
+        <translation>Distribuisce le decodifiche FT8/FT4 dal batch finale di fine-periodo in uno streaming continuo con dissolvenza animata (~100 ms per riga). FT2 async è invariato perché già in streaming. Default: ON; fallback automatico se vengono rilevati stalli UI su PC modesti. Disattiva per il comportamento batch legacy.</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>WATCHDOG</source>
-        <translation type="vanished">CANE DA GUARDIA</translation>
+        <translation>CANE DA GUARDIA</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>TX Watchdog Mode:</source>
-        <translation type="vanished">Modalità TX Watchdog:</translation>
+        <translation>Modalità TX Watchdog:</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Off</source>
-        <translation type="vanished">Spento</translation>
+        <translation>Spento</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Time</source>
-        <translation type="vanished">Tempo</translation>
+        <translation>Tempo</translation>
     </message>
     <message>
         <source>Count</source>
         <translation type="vanished">Conteggio</translation>
     </message>
     <message>
+        <location line="+20"/>
         <source>TX Watchdog Time (min):</source>
-        <translation type="vanished">Tempo TX Watchdog (min):</translation>
+        <translation>Tempo TX Watchdog (min):</translation>
     </message>
     <message>
         <source>TX Watchdog Count:</source>
         <translation type="vanished">Conteggio TX Watchdog:</translation>
     </message>
     <message>
+        <location line="+37"/>
         <source>Log QSO at watchdog timeout:</source>
-        <translation type="vanished">Logga QSO al timeout del watchdog:</translation>
+        <translation>Logga QSO al timeout del watchdog:</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>When ON, if the TX watchdog fires while a QSO has already completed the two-way report exchange (both reports exchanged, progress &gt;= ROGER_REPORT), the QSO is logged instead of abandoned.
 
 Default OFF = 1.0.445 behavior (only a deferred snapshot, recovered only if the partner re-sends 73; in a manual QSO it is lost).</source>
-        <translation type="vanished">Quando attivo, se il watchdog TX scatta mentre un QSO ha già completato lo scambio bidirezionale dei rapporti (entrambi i rapporti scambiati, progresso &gt;= ROGER_REPORT), il QSO viene loggato invece di essere abbandonato.
+        <translation>Quando attivo, se il watchdog TX scatta mentre un QSO ha già completato lo scambio bidirezionale dei rapporti (entrambi i rapporti scambiati, progresso &gt;= ROGER_REPORT), il QSO viene loggato invece di essere abbandonato.
 
 Predefinito OFF = comportamento 1.0.445 (solo uno snapshot differito, recuperato solo se il partner reinvia 73; in un QSO manuale va perso).</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Tune Watchdog (s):</source>
-        <translation type="vanished">Ottimizzazione del watchdog:</translation>
+        <translation>Ottimizzazione del watchdog:</translation>
     </message>
     <message>
+        <location line="+21"/>
         <source>CW ID</source>
-        <translation type="vanished">ID CW</translation>
+        <translation>ID CW</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>CW ID after 73:</source>
-        <translation type="vanished">ID CW dopo 73:</translation>
+        <translation>ID CW dopo 73:</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>CW ID Interval (min):</source>
-        <translation type="vanished">Intervallo ID CW (min):</translation>
+        <translation>Intervallo ID CW (min):</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>TONE SPACING</source>
-        <translation type="vanished">SPAZIATURA TONO</translation>
+        <translation>SPAZIATURA TONO</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>2x Tone Spacing:</source>
-        <translation type="vanished">2x Spaziatura toni:</translation>
+        <translation>2x Spaziatura toni:</translation>
     </message>
     <message>
+        <location line="+14"/>
         <source>4x Tone Spacing:</source>
-        <translation type="vanished">Spaziatura tono 4x:</translation>
+        <translation>Spaziatura tono 4x:</translation>
     </message>
     <message>
+        <location line="+21"/>
         <source>Alt F1-F6 Bind:</source>
-        <translation type="vanished">Alt F1-F6 Rilega:</translation>
+        <translation>Alt F1-F6 Rilega:</translation>
     </message>
 </context>
 <context>
     <name>SettingsTab4</name>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="+69"/>
         <source>ASPETTO / TEMA</source>
-        <translation type="vanished">ASPETTO / TEMA</translation>
+        <translation>ASPETTO / TEMA</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Theme:</source>
-        <translation type="vanished">Tema:</translation>
+        <translation>Tema:</translation>
     </message>
     <message>
+        <location line="+28"/>
         <source>Accent:</source>
-        <translation type="vanished">Accento:</translation>
+        <translation>Accento:</translation>
     </message>
     <message>
+        <location line="+37"/>
         <source>Density:</source>
-        <translation type="vanished">Densità:</translation>
+        <translation>Densità:</translation>
     </message>
     <message>
+        <location line="+41"/>
         <source>DX-Pedition Workspace (3-column tactical layout)</source>
-        <translation type="vanished">Workspace DX-Pedition (layout tattico a 3 colonne)</translation>
+        <translation>Workspace DX-Pedition (layout tattico a 3 colonne)</translation>
     </message>
     <message>
+        <location line="+15"/>
         <source>Alternative single-panel operator view optimized for DX pile-ups: a tactical 3-column dashboard (Cluster / Waterfall / TX) instead of the classic workspace. Opt-in, default OFF: the standard layout is unchanged when disabled.</source>
-        <translation type="vanished">Vista operatore a pannello singolo alternativa, ottimizzata per i pile-up DX: una dashboard tattica a 3 colonne (Cluster / Waterfall / TX) invece del workspace classico. Opt-in, default OFF: il layout standard resta invariato quando disabilitato.</translation>
+        <translation>Vista operatore a pannello singolo alternativa, ottimizzata per i pile-up DX: una dashboard tattica a 3 colonne (Cluster / Waterfall / TX) invece del workspace classico. Opt-in, default OFF: il layout standard resta invariato quando disabilitato.</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>UI Scale:</source>
-        <translation type="vanished">Scala interfaccia:</translation>
+        <translation>Scala interfaccia:</translation>
     </message>
     <message>
+        <location line="+32"/>
         <source>↻ restart to apply</source>
-        <translation type="vanished">↻ riavvia per applicare</translation>
+        <translation>↻ riavvia per applicare</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>OPERATING BANDS</source>
-        <translation type="vanished">BANDE OPERATIVE</translation>
+        <translation>BANDE OPERATIVE</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Click to show/hide bands in the selector. Deselected bands disappear from the HF / V-U / SHF bar.</source>
-        <translation type="vanished">Clicca per mostrare/nascondere le bande nel selettore. Le bande deselezionate spariscono dalla barra HF / V-U / SHF.</translation>
+        <translation>Clicca per mostrare/nascondere le bande nel selettore. Le bande deselezionate spariscono dalla barra HF / V-U / SHF.</translation>
     </message>
     <message>
+        <location line="+29"/>
         <source>visible (click to hide)</source>
-        <translation type="vanished">visibile (clic per nascondere)</translation>
+        <translation>visibile (clic per nascondere)</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>hidden (click to show)</source>
-        <translation type="vanished">nascosta (clic per mostrare)</translation>
+        <translation>nascosta (clic per mostrare)</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>UI — PERFORMANCE</source>
-        <translation type="vanished">UI — PERFORMANCE</translation>
+        <translation>UI — PERFORMANCE</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>UI Quality preset:</source>
-        <translation type="vanished">UI Quality preset:</translation>
+        <translation>UI Quality preset:</translation>
     </message>
     <message>
+        <location line="+17"/>
         <source>Low = no effects (modest PCs).
 Medium = light animations.
 High = all available animations.
 
 Default: Medium.</source>
-        <translation type="vanished">Low = nessun effetto (PC modesti).
+        <translation>Low = nessun effetto (PC modesti).
 Medium = animazioni leggere.
 High = tutte le animazioni disponibili.
 
 Default: Medium.</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Process priority:</source>
-        <translation type="vanished">Priorità processo:</translation>
+        <translation>Priorità processo:</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Normal</source>
-        <translation type="vanished">Normale</translation>
+        <translation>Normale</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Above normal</source>
-        <translation type="vanished">Sopra il normale</translation>
+        <translation>Sopra il normale</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>High (recommended)</source>
-        <translation type="vanished">Alta (consigliata)</translation>
+        <translation>Alta (consigliata)</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Realtime ⚠️</source>
-        <translation type="vanished">Tempo reale ⚠️</translation>
+        <translation>Tempo reale ⚠️</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>CPU scheduling priority for the Decodium process (Windows).
 
 Normal / Above normal (default) = safe.
@@ -25044,7 +28639,7 @@ High = smoother audio/decode with low risk (recommended if you notice stutters).
 Realtime ⚠️ = maximum scheduling priority, but it can make the PC unresponsive (mouse/keyboard) and requires administrator privileges. Without admin rights Windows downgrades it to High.
 
 If unsure, use High.</source>
-        <translation type="vanished">Priorità di scheduling CPU per il processo Decodium (Windows).
+        <translation>Priorità di scheduling CPU per il processo Decodium (Windows).
 
 Normale / Sopra il normale (predefinita) = sicura.
 Alta = audio/decodifica più fluidi con rischio basso (consigliata se noti scatti).
@@ -25053,70 +28648,81 @@ Tempo reale ⚠️ = priorità di scheduling massima, ma può rendere il PC non 
 Nel dubbio, usa Alta.</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>UI Style (restart):</source>
-        <translation type="vanished">UI Style (restart):</translation>
+        <translation>UI Style (restart):</translation>
     </message>
     <message>
+        <location line="+23"/>
         <source>QML Quick Controls style (requires restart):
 • Material (recommended) — Google Material 3, customizable, Decodium&apos;s historical default
 • FluentWinUI3 — native Windows 11 (Mica/acrylic). Automatic fallback for SplitView/StackView.
 • Universal — Microsoft Universal (WinPhone-style)
 • Fusion — neutral cross-platform desktop</source>
-        <translation type="vanished">Stile QML Quick Controls (richiede riavvio):
+        <translation>Stile QML Quick Controls (richiede riavvio):
 • Material (consigliato) — Google Material 3, personalizzabile, default storico di Decodium
 • FluentWinUI3 — nativo Windows 11 (Mica/acrilico). Fallback automatico per SplitView/StackView.
 • Universal — Microsoft Universal (stile WinPhone)
 • Fusion — desktop cross-platform neutro</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>Frameless pop-out:</source>
-        <translation type="vanished">Frameless pop-out:</translation>
+        <translation>Frameless pop-out:</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>Pop-out windows (Waterfall, Period1, DecoSync) become frameless with drag via the border.
 
 Windows 11 aesthetic.
 
 Default: OFF. Requires closing and reopening the window.</source>
-        <translation type="vanished">Le finestre pop-out (Waterfall, Period1, DecoSync) diventano frameless con drag tramite il bordo.
+        <translation>Le finestre pop-out (Waterfall, Period1, DecoSync) diventano frameless con drag tramite il bordo.
 
 Estetica Windows 11.
 
 Default: OFF. Richiede chiusura e riapertura della finestra.</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Detach Full Spectrum:</source>
-        <translation type="vanished">Sgancia Full Spectrum:</translation>
+        <translation>Sgancia Full Spectrum:</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>At startup, opens Full Spectrum (Band Activity) in a separate window, isolating the Main render thread from ListView animations.
 
 Reduces stalls on modest PCs.
 
 Default: OFF. Requires restart.</source>
-        <translation type="vanished">All&apos;avvio apre il Full Spectrum (Band Activity) in finestra separata, isolando il render thread del Main dalle animazioni ListView.
+        <translation>All&apos;avvio apre il Full Spectrum (Band Activity) in finestra separata, isolando il render thread del Main dalle animazioni ListView.
 
 Riduce stall su PC modesti.
 
 Default: OFF. Richiede riavvio.</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Full screen:</source>
-        <translation type="vanished">Schermo intero:</translation>
+        <translation>Schermo intero:</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Enable (F11)</source>
-        <translation type="vanished">Attiva (F11)</translation>
+        <translation>Attiva (F11)</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Switch Decodium to full screen. To exit: F11, Esc, or the top ✕ button. This is not saved: Decodium starts in normal window mode after restart.</source>
-        <translation type="vanished">Passa Decodium a schermo intero. Per uscire: F11, Esc o il pulsante ✕ in alto. Questa impostazione non viene salvata: al riavvio Decodium parte in modalità finestra normale.</translation>
+        <translation>Passa Decodium a schermo intero. Per uscire: F11, Esc o il pulsante ✕ in alto. Questa impostazione non viene salvata: al riavvio Decodium parte in modalità finestra normale.</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Spectrum FPS cap:</source>
-        <translation type="vanished">Spectrum FPS cap:</translation>
+        <translation>Spectrum FPS cap:</translation>
     </message>
     <message>
+        <location line="+20"/>
         <source>Maximum frame rate of the embedded waterfall/panadapter.
 
   • 15 = modest PCs
@@ -25124,7 +28730,7 @@ Default: OFF. Richiede riavvio.</translation>
   • 30 = modern hardware
 
 When Full Spectrum is detached the separate render thread holds 30 fps without affecting the decoder.</source>
-        <translation type="vanished">Frame rate massimo del waterfall/panadapter integrato.
+        <translation>Frame rate massimo del waterfall/panadapter integrato.
 
   • 15 = PC modesti
   • 20 = default bilanciato
@@ -25133,295 +28739,388 @@ When Full Spectrum is detached the separate render thread holds 30 fps without a
 Quando Full Spectrum è detached il render thread separato regge i 30 fps senza impatto sul decode.</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>CPU pressure:</source>
-        <translation type="vanished">Pressione CPU:</translation>
+        <translation>Pressione CPU:</translation>
     </message>
     <message>
+        <location line="+14"/>
         <source>events: total=%1 · severe=%2 (session)</source>
-        <translation type="vanished">eventi: totale=%1 · gravi=%2 (sessione)</translation>
+        <translation>eventi: totale=%1 · gravi=%2 (sessione)</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>events: total=0 · severe=0</source>
-        <translation type="vanished">eventi: totale=0 · gravi=0</translation>
+        <translation>eventi: totale=0 · gravi=0</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>cpuPressure event counters for the current session.
 
 Severe ones (≥1100ms or burst of 4+ short stalls) are the strongest signal: if you see ≥5 after an hour of use, lower UI Quality to Low or Spectrum FPS cap to 15.</source>
-        <translation type="vanished">Contatori eventi cpuPressure dalla sessione corrente.
+        <translation>Contatori eventi cpuPressure dalla sessione corrente.
 
 Severi (≥1100ms o burst 4+ short stall) sono il segnale più forte: se vedi ≥5 dopo un&apos;ora di uso, abbassa UI Quality a Low oppure Spectrum FPS cap a 15.</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>FONT</source>
-        <translation type="vanished">CARATTERE</translation>
+        <translation>CARATTERE</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Font:</source>
-        <translation type="vanished">Carattere:</translation>
+        <translation>Carattere:</translation>
     </message>
     <message>
+        <location line="+25"/>
+        <location line="+36"/>
         <source>Choose</source>
-        <translation type="vanished">Scegli</translation>
+        <translation>Scegli</translation>
     </message>
     <message>
+        <location line="-29"/>
+        <location line="+36"/>
         <source>Reset</source>
-        <translation type="vanished">Ripristina</translation>
+        <translation>Ripristina</translation>
     </message>
     <message>
+        <location line="-32"/>
         <source>Decoded Font:</source>
-        <translation type="vanished">Carattere decodificato:</translation>
+        <translation>Carattere decodificato:</translation>
     </message>
     <message>
+        <location line="+38"/>
         <source>DECODES</source>
-        <translation type="vanished">DECODIFICHE</translation>
+        <translation>DECODIFICHE</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Show DXCC:</source>
-        <translation type="vanished">Mostra DXCC:</translation>
+        <translation>Mostra DXCC:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>US State:</source>
-        <translation type="vanished">Stato US:</translation>
+        <translation>Stato US:</translation>
     </message>
     <message>
+        <location line="+14"/>
         <source>Updating...</source>
-        <translation type="vanished">Aggiornamento...</translation>
+        <translation>Aggiornamento...</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>%1 calls</source>
-        <translation type="vanished">%1 callsign</translation>
+        <translation>%1 callsign</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Not loaded</source>
-        <translation type="vanished">Non caricato</translation>
+        <translation>Non caricato</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Update</source>
-        <translation type="vanished">Aggiorna</translation>
+        <translation>Aggiorna</translation>
     </message>
     <message>
+        <location line="+18"/>
         <source>TX Msg to RX:</source>
-        <translation type="vanished">TX Messaggio a RX:</translation>
+        <translation>TX Messaggio a RX:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Waterfall Calls:</source>
-        <translation type="vanished">Waterfall Calls:</translation>
+        <translation>Waterfall Calls:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>FS Dist:</source>
-        <translation type="vanished">FS Dist:</translation>
+        <translation>FS Dist:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>FS Az:</source>
-        <translation type="vanished">FS Az:</translation>
+        <translation>FS Az:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>RX Freq:</source>
-        <translation type="vanished">RX Freq:</translation>
+        <translation>RX Freq:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>RX Dist:</source>
-        <translation type="vanished">RX Dist:</translation>
+        <translation>RX Dist:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>RX Az:</source>
-        <translation type="vanished">RX Az:</translation>
+        <translation>RX Az:</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>MAP AND DISTANCE</source>
-        <translation type="vanished">MAPPA E DISTANZA</translation>
+        <translation>MAPPA E DISTANZA</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Miles:</source>
-        <translation type="vanished">Miglia:</translation>
+        <translation>Miglia:</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Greyline:</source>
-        <translation type="vanished">Linea grigia:</translation>
+        <translation>Linea grigia:</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Map All Msgs:</source>
-        <translation type="vanished">Mappa tutti i messaggi:</translation>
+        <translation>Mappa tutti i messaggi:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Click TX:</source>
-        <translation type="vanished">Fare clic su TX:</translation>
+        <translation>Fare clic su TX:</translation>
     </message>
     <message>
+        <location line="+8"/>
+        <source>Map GPU:</source>
+        <translation>GPU mappa:</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Use GPU rendering for the live map (default). Disable to use the CPU renderer if station markers are missing or the map has graphical problems.</source>
+        <translation>Usa il rendering GPU per la mappa live (predefinito). Disattiva per usare il renderer CPU se mancano i marcatori delle stazioni o la mappa ha problemi grafici.</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Disable if map markers are missing. Uses CPU rendering when off.</source>
+        <translation>Disattiva se mancano i marcatori della mappa. Usa il rendering CPU quando è disattivato.</translation>
+    </message>
+    <message>
+        <location line="+9"/>
         <source>ALIGNMENT</source>
-        <translation type="vanished">ALLINEAMENTO</translation>
+        <translation>ALLINEAMENTO</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Align:</source>
-        <translation type="vanished">Allinea:</translation>
+        <translation>Allinea:</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Align Steps:</source>
-        <translation type="vanished">Allinea i passaggi:</translation>
+        <translation>Allinea i passaggi:</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Align Steps 2:</source>
-        <translation type="vanished">Allinea i passaggi 2:</translation>
+        <translation>Allinea i passaggi 2:</translation>
     </message>
 </context>
 <context>
     <name>SettingsTab5</name>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="+67"/>
         <source>REMOTE WEB SERVER (iPad / mobile PWA)</source>
-        <translation type="vanished">WEB SERVER REMOTO (iPad / mobile PWA)</translation>
+        <translation>WEB SERVER REMOTO (iPad / mobile PWA)</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Enable Web Server:</source>
-        <translation type="vanished">Abilita Web Server:</translation>
+        <translation>Abilita Web Server:</translation>
     </message>
     <message>
+        <location line="+14"/>
+        <location line="+22"/>
         <source>(not active)</source>
-        <translation type="vanished">(non attivo)</translation>
+        <translation>(non attivo)</translation>
     </message>
     <message>
+        <location line="-16"/>
         <source>Porta TCP:</source>
-        <translation type="vanished">Porta TCP:</translation>
+        <translation>Porta TCP:</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>URL accesso:</source>
-        <translation type="vanished">URL accesso:</translation>
+        <translation>URL accesso:</translation>
     </message>
     <message>
+        <location line="+11"/>
+        <source></source>
+        <translation></translation>
+    </message>
+    <message>
+        <location line="+3"/>
         <source>📱 Open Remote for iPad</source>
-        <translation type="vanished">📱 Apri Remote per iPad</translation>
+        <translation>📱 Apri Remote per iPad</translation>
     </message>
     <message>
+        <location line="+24"/>
         <source>DECODE LIST DISPLAY</source>
-        <translation type="vanished">VISUALIZZAZIONE LISTA DECODE</translation>
+        <translation>VISUALIZZAZIONE LISTA DECODE</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Colored period separator:</source>
-        <translation type="vanished">Separatore di periodo colorato:</translation>
+        <translation>Separatore di periodo colorato:</translation>
     </message>
     <message>
+        <location line="+14"/>
         <source>Newest first:</source>
-        <translation type="vanished">Più recenti in alto:</translation>
+        <translation>Più recenti in alto:</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>DECODE PARAMETERS</source>
-        <translation type="vanished">PARAMETRI DECODIFICA</translation>
+        <translation>PARAMETRI DECODIFICA</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Decode Depth:</source>
-        <translation type="vanished">Profondità di decodifica:</translation>
+        <translation>Profondità di decodifica:</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Fast</source>
-        <translation type="vanished">Veloce</translation>
+        <translation>Veloce</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Normal</source>
-        <translation type="vanished">Normale</translation>
+        <translation>Normale</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Deep</source>
-        <translation type="vanished">Profondo</translation>
+        <translation>Profondo</translation>
     </message>
     <message>
+        <location line="+14"/>
         <source>Low Freq (Hz):</source>
-        <translation type="vanished">Bassa frequenza (Hz):</translation>
+        <translation>Bassa frequenza (Hz):</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>High Freq (Hz):</source>
-        <translation type="vanished">Alta frequenza (Hz):</translation>
+        <translation>Alta frequenza (Hz):</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>RX Bandwidth:</source>
-        <translation type="vanished">RX Larghezza di banda:</translation>
+        <translation>RX Larghezza di banda:</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Decode at 52s:</source>
-        <translation type="vanished">Decodifica a 52s:</translation>
+        <translation>Decodifica a 52s:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Single Decode:</source>
-        <translation type="vanished">Decodifica singola:</translation>
+        <translation>Decodifica singola:</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>JT65 VHF/UHF</source>
-        <translation type="vanished">JT65 VHF/UHF</translation>
+        <translation>JT65 VHF/UHF</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Erasure Patterns:</source>
-        <translation type="vanished">Modelli di cancellazione:</translation>
+        <translation>Modelli di cancellazione:</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Aggressive:</source>
-        <translation type="vanished">Aggressivo:</translation>
+        <translation>Aggressivo:</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Two-Pass:</source>
-        <translation type="vanished">Due passaggi:</translation>
+        <translation>Due passaggi:</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>SIDELOBE CONTROL</source>
-        <translation type="vanished">CONTROLLO DEL LOBO LATERALE</translation>
+        <translation>CONTROLLO DEL LOBO LATERALE</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Sidelobe Mode:</source>
-        <translation type="vanished">Modalità lobo laterale:</translation>
+        <translation>Modalità lobo laterale:</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Low Sidelobes</source>
-        <translation type="vanished">Lobi laterali bassi</translation>
+        <translation>Lobi laterali bassi</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Max Sensitivity</source>
-        <translation type="vanished">Sensibilità massima</translation>
+        <translation>Sensibilità massima</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Degrade S/N:</source>
-        <translation type="vanished">Degradare S/N:</translation>
+        <translation>Degradare S/N:</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>DECODE FILTERS</source>
-        <translation type="vanished">FILTRI DECODIFICA</translation>
+        <translation>FILTRI DECODIFICA</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>CQ Only:</source>
-        <translation type="vanished">Solo CQ:</translation>
+        <translation>Solo CQ:</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>CQ filter:</source>
-        <translation type="vanished">Filtro CQ:</translation>
+        <translation>Filtro CQ:</translation>
     </message>
     <message>
+        <location line="+20"/>
         <source>My Call Only:</source>
-        <translation type="vanished">Solo mio nominativo:</translation>
+        <translation>Solo mio nominativo:</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>Zap:</source>
-        <translation type="vanished">Zappa:</translation>
+        <translation>Zappa:</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Deep Search:</source>
-        <translation type="vanished">Ricerca approfondita:</translation>
+        <translation>Ricerca approfondita:</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>AP Decode:</source>
-        <translation type="vanished">Decodifica AP:</translation>
+        <translation>Decodifica AP:</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>Avg Decode:</source>
-        <translation type="vanished">Decodifica media:</translation>
+        <translation>Decodifica media:</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>Deep decode of last RX slot during TX (list only):</source>
-        <translation type="vanished">Decodifica profonda dell&apos;ultimo slot RX durante TX (solo lista):</translation>
+        <translation>Decodifica profonda dell&apos;ultimo slot RX durante TX (solo lista):</translation>
     </message>
     <message>
+        <location line="+19"/>
         <source>While operating/in QSO in FT8, ALSO launch the deep decode depth-4 (decode-list only) in addition to the fast depth-2 that drives TX.
 
 Recovers third-party stations that the fast pass would miss during operation, WITHOUT touching timing or QSO closure (it&apos;s pure decode-list, not auto-seq).
 
 Costs extra CPU during QSOs. Default: OFF.</source>
-        <translation type="vanished">Mentre operi/in QSO in FT8, lancia ANCHE il deep decode depth-4 (solo per la lista decode) oltre al fast depth-2 che decide il TX.
+        <translation>Mentre operi/in QSO in FT8, lancia ANCHE il deep decode depth-4 (solo per la lista decode) oltre al fast depth-2 che decide il TX.
 
 Recupera le stazioni di terzi che il fast pass perde durante l&apos;operazione, SENZA toccare il timing né la chiusura del QSO (è puramente decode-list, non auto-seq).
 
@@ -25431,1077 +29130,1405 @@ Costa CPU extra durante i QSO. Default: OFF.</translation>
 <context>
     <name>SettingsTab6</name>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="+300"/>
         <source>QSOs reach DecoLog over UDP as they do any logger. With DecoLink, DecoLog sends Decodium its own log (worked-before, new DXCC), the acknowledgement of every stored QSO and the FT2 Award status. 127.0.0.1 only.</source>
-        <translation type="vanished">I QSO vanno a DecoLog via UDP come a ogni logger. Con DecoLink, DecoLog manda a Decodium il suo log (worked-before, nuovi DXCC), la conferma di ogni QSO salvato e lo stato dell&apos;FT2 Award. Solo 127.0.0.1.</translation>
+        <translation>I QSO vanno a DecoLog via UDP come a ogni logger. Con DecoLink, DecoLog manda a Decodium il suo log (worked-before, nuovi DXCC), la conferma di ogni QSO salvato e lo stato dell&apos;FT2 Award. Solo 127.0.0.1.</translation>
     </message>
     <message>
+        <location line="-20"/>
         <source>disabled</source>
-        <translation type="vanished">disattivato</translation>
+        <translation>disattivato</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>DecoLog not running: retrying every 5 s</source>
-        <translation type="vanished">DecoLog non aperto: nuovo tentativo ogni 5 s</translation>
+        <translation>DecoLog non aperto: nuovo tentativo ogni 5 s</translation>
     </message>
     <message>
+        <location line="+738"/>
         <source>FT2 LOG BRIDGE</source>
-        <translation type="vanished">FT2 LOG BRIDGE</translation>
+        <translation>FT2 LOG BRIDGE</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>The FT2 Community client that uploads every logged QSO to the Online Log on community.ft2.it. Download it already configured from the Dashboard of the site: Decodium finds it and starts it together with itself.</source>
-        <translation type="vanished">Il client di FT2 Community che carica ogni QSO loggato nel Log Online di community.ft2.it. Scaricalo già configurato dalla Dashboard del sito: Decodium lo trova e lo avvia insieme a sé.</translation>
+        <translation>Il client di FT2 Community che carica ogni QSO loggato nel Log Online di community.ft2.it. Scaricalo già configurato dalla Dashboard del sito: Decodium lo trova e lo avvia insieme a sé.</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Start with Decodium:</source>
-        <translation type="vanished">Avvio con Decodium:</translation>
+        <translation>Avvio con Decodium:</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Start FT2 Log Bridge automatically</source>
-        <translation type="vanished">Avvia FT2 Log Bridge automaticamente</translation>
+        <translation>Avvia FT2 Log Bridge automaticamente</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Program:</source>
-        <translation type="vanished">Programma:</translation>
+        <translation>Programma:</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>ft2logbridge.exe (found automatically)</source>
-        <translation type="vanished">ft2logbridge.exe (trovato automaticamente)</translation>
+        <translation>ft2logbridge.exe (trovato automaticamente)</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Browse...</source>
-        <translation type="vanished">Sfoglia...</translation>
+        <translation>Sfoglia...</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>Find automatically</source>
-        <translation type="vanished">Cerca automaticamente</translation>
+        <translation>Cerca automaticamente</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Looks in Downloads, Documents and Desktop for the most recent ft2logbridge with a config.json containing your API key.</source>
-        <translation type="vanished">Cerca in Download, Documenti e Desktop l&apos;ft2logbridge più recente con un config.json che contiene la tua chiave API.</translation>
+        <translation>Cerca in Download, Documenti e Desktop l&apos;ft2logbridge più recente con un config.json che contiene la tua chiave API.</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Start now</source>
-        <translation type="vanished">Avvia ora</translation>
+        <translation>Avvia ora</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Not started in this session.</source>
-        <translation type="vanished">Non avviato in questa sessione.</translation>
+        <translation>Non avviato in questa sessione.</translation>
     </message>
     <message>
+        <location line="+18"/>
         <source>Select the FT2 Log Bridge program</source>
-        <translation type="vanished">Seleziona il programma FT2 Log Bridge</translation>
+        <translation>Seleziona il programma FT2 Log Bridge</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>FT2 Log Bridge (ft2logbridge*.exe)</source>
-        <translation type="vanished">FT2 Log Bridge (ft2logbridge*.exe)</translation>
+        <translation>FT2 Log Bridge (ft2logbridge*.exe)</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Programs (*.exe)</source>
-        <translation type="vanished">Programmi (*.exe)</translation>
+        <translation>Programmi (*.exe)</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>FT2 Log Bridge (ft2logbridge*)</source>
-        <translation type="vanished">FT2 Log Bridge (ft2logbridge*)</translation>
+        <translation>FT2 Log Bridge (ft2logbridge*)</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>All files (*)</source>
-        <translation type="vanished">Tutti i file (*)</translation>
+        <translation>Tutti i file (*)</translation>
     </message>
     <message>
+        <location line="-972"/>
         <source>NETWORK SERVICES</source>
-        <translation type="vanished">SERVIZI DI RETE</translation>
+        <translation>SERVIZI DI RETE</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>PSK Reporter:</source>
-        <translation type="vanished">PSK Reporter:</translation>
+        <translation>PSK Reporter:</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>TCP/IP:</source>
-        <translation type="vanished">TCP/IP:</translation>
+        <translation>TCP/IP:</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Query history:</source>
-        <translation type="vanished">Cronologia delle interrogazioni:</translation>
+        <translation>Cronologia delle interrogazioni:</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>PSK Reporter look-back period for callsign search and heard-by results.</source>
-        <translation type="vanished">Periodo di consultazione all&apos;indietro di PSK Reporter per la ricerca dei nominativi e i risultati di chi ti ha sentito.</translation>
+        <translation>Periodo di consultazione all&apos;indietro di PSK Reporter per la ricerca dei nominativi e i risultati di chi ti ha sentito.</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>DX CLUSTER</source>
-        <translation type="vanished">DX CLUSTER</translation>
+        <translation>DX CLUSTER</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Server:</source>
-        <translation type="vanished">Server:</translation>
+        <translation>Server:</translation>
     </message>
     <message>
+        <location line="+14"/>
         <source>Port:</source>
-        <translation type="vanished">Porta:</translation>
+        <translation>Porta:</translation>
     </message>
     <message>
+        <location line="+17"/>
+        <location line="+194"/>
+        <location line="+681"/>
         <source>Status:</source>
-        <translation type="vanished">Stato:</translation>
+        <translation>Stato:</translation>
     </message>
     <message>
+        <location line="-868"/>
         <source>Connected</source>
-        <translation type="vanished">Connesso</translation>
+        <translation>Connesso</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Disconnected</source>
-        <translation type="vanished">Disconnesso</translation>
+        <translation>Disconnesso</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Connect</source>
-        <translation type="vanished">Connetti</translation>
+        <translation>Connetti</translation>
     </message>
     <message>
+        <location line="+20"/>
         <source>Disconnect</source>
-        <translation type="vanished">Disconnetti</translation>
+        <translation>Disconnetti</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>Detail:</source>
-        <translation type="vanished">Dettaglio:</translation>
+        <translation>Dettaglio:</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>No message</source>
-        <translation type="vanished">Nessun messaggio</translation>
+        <translation>Nessun messaggio</translation>
     </message>
     <message>
+        <location line="+9"/>
+        <source>DECOLOG</source>
+        <translation>DECOLOG</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>DecoLink:</source>
+        <translation>DecoLink:</translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <source>Porta:</source>
+        <translation>Porta:</translation>
+    </message>
+    <message>
+        <location line="+21"/>
         <source>CLOUDLOG</source>
-        <translation type="vanished">CLOUDLOG</translation>
+        <translation>CLOUDLOG</translation>
     </message>
     <message>
+        <location line="+3"/>
+        <location line="+49"/>
+        <location line="+252"/>
         <source>Enabled:</source>
-        <translation type="vanished">Abilitato:</translation>
+        <translation>Abilitato:</translation>
     </message>
     <message>
+        <location line="-289"/>
         <source>API URL:</source>
-        <translation type="vanished">API URL:</translation>
+        <translation>API URL:</translation>
     </message>
     <message>
+        <location line="+11"/>
+        <location line="+52"/>
         <source>API Key:</source>
-        <translation type="vanished">API Chiave:</translation>
+        <translation>API Chiave:</translation>
     </message>
     <message>
+        <location line="-41"/>
         <source>Station ID:</source>
-        <translation type="vanished">Identificativo della stazione:</translation>
+        <translation>Identificativo della stazione:</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>QRZ LOGBOOK</source>
-        <translation type="vanished">QRZ LOGBOOK</translation>
+        <translation>QRZ LOGBOOK</translation>
     </message>
     <message>
+        <location line="+16"/>
         <source>Replace duplicates:</source>
-        <translation type="vanished">Sostituisci duplicati:</translation>
+        <translation>Sostituisci duplicati:</translation>
     </message>
     <message>
+        <location line="+35"/>
         <source>Testing...</source>
-        <translation type="vanished">Test in corso...</translation>
+        <translation>Test in corso...</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Test</source>
-        <translation type="vanished">Test</translation>
+        <translation>Test</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>Testing QRZ API key...</source>
-        <translation type="vanished">Test della chiave API QRZ...</translation>
+        <translation>Test della chiave API QRZ...</translation>
     </message>
     <message>
+        <location line="+18"/>
         <source>LOTW</source>
-        <translation type="vanished">MOLTO</translation>
+        <translation>MOLTO</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>LotW Enabled:</source>
-        <translation type="vanished">LotW Abilitato:</translation>
+        <translation>LotW Abilitato:</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Password:</source>
-        <translation type="vanished">Parola d&apos;ordine:</translation>
+        <translation>Parola d&apos;ordine:</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Non-QSL&apos;d:</source>
-        <translation type="vanished">Non-QSL&apos;d:</translation>
+        <translation>Non-QSL&apos;d:</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Days Upload:</source>
-        <translation type="vanished">Giorni di caricamento:</translation>
+        <translation>Giorni di caricamento:</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>LOGGING</source>
-        <translation type="vanished">REGISTRAZIONE</translation>
+        <translation>REGISTRAZIONE</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Prompt to Log:</source>
-        <translation type="vanished">Richiedi di accedere:</translation>
+        <translation>Richiedi di accedere:</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>Auto Log:</source>
-        <translation type="vanished">Registro automatico:</translation>
+        <translation>Registro automatico:</translation>
     </message>
     <message>
+        <location line="+15"/>
         <source>Log as RTTY:</source>
-        <translation type="vanished">Accedi come RTTY:</translation>
+        <translation>Accedi come RTTY:</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>4-digit Grids:</source>
-        <translation type="vanished">Locator a 4 caratteri:</translation>
+        <translation>Locator a 4 caratteri:</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Contest Only:</source>
-        <translation type="vanished">Solo concorso:</translation>
+        <translation>Solo concorso:</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Spec Op Cmts:</source>
-        <translation type="vanished">Cmt operazioni specifiche:</translation>
+        <translation>Cmt operazioni specifiche:</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>dB in Cmts:</source>
-        <translation type="vanished">dB in cm:</translation>
+        <translation>dB in cm:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>ZZ00:</source>
-        <translation type="vanished">ZZ00:</translation>
+        <translation>ZZ00:</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>RECORDING</source>
-        <translation type="vanished">REGISTRAZIONE</translation>
+        <translation>REGISTRAZIONE</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Record RX:</source>
-        <translation type="vanished">Registra RX:</translation>
+        <translation>Registra RX:</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Record TX:</source>
-        <translation type="vanished">Registra TX:</translation>
+        <translation>Registra TX:</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>WSPR Upload:</source>
-        <translation type="vanished">WSPR Caricamento:</translation>
+        <translation>WSPR Caricamento:</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>REMOTE WEB DASHBOARD (LAN)</source>
-        <translation type="vanished">DASHBOARD WEB REMOTO (LAN)</translation>
+        <translation>DASHBOARD WEB REMOTO (LAN)</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>HTTP port:</source>
-        <translation type="vanished">Porta HTTP:</translation>
+        <translation>Porta HTTP:</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>WS socket port:</source>
-        <translation type="vanished">Porta presa WS:</translation>
+        <translation>Porta presa WS:</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>WS bind:</source>
-        <translation type="vanished">WS vincolante:</translation>
+        <translation>WS vincolante:</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Username:</source>
-        <translation type="vanished">Nome utente:</translation>
+        <translation>Nome utente:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Access token:</source>
-        <translation type="vanished">Token di accesso:</translation>
+        <translation>Token di accesso:</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Required for LAN/WAN</source>
-        <translation type="vanished">Richiesto per LAN/WAN</translation>
+        <translation>Richiesto per LAN/WAN</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>App restart required. For LAN/WAN, use a token of at least 12 characters.</source>
-        <translation type="vanished">Richiede riavvio dell&apos;app. Su LAN/WAN usa un token di almeno 12 caratteri.</translation>
+        <translation>Richiede riavvio dell&apos;app. Su LAN/WAN usa un token di almeno 12 caratteri.</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>UDP SERVER</source>
-        <translation type="vanished">SERVER UDP</translation>
+        <translation>SERVER UDP</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Client ID:</source>
-        <translation type="vanished">Client ID:</translation>
+        <translation>Client ID:</translation>
     </message>
     <message>
+        <location line="+22"/>
+        <location line="+126"/>
+        <location line="+111"/>
         <source>Preset:</source>
-        <translation type="vanished">Preset:</translation>
+        <translation>Preset:</translation>
     </message>
     <message>
+        <location line="-218"/>
         <source>Server Name:</source>
-        <translation type="vanished">Nome del server:</translation>
+        <translation>Nome del server:</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Server Port:</source>
-        <translation type="vanished">Porta del server:</translation>
+        <translation>Porta del server:</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Listen Port:</source>
-        <translation type="vanished">Porta di ascolto:</translation>
+        <translation>Porta di ascolto:</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Multicast TTL:</source>
-        <translation type="vanished">Multicast.TTL:</translation>
+        <translation>Multicast.TTL:</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Interface Used:</source>
-        <translation type="vanished">Interfaccia utilizzata:</translation>
+        <translation>Interfaccia utilizzata:</translation>
     </message>
     <message>
+        <location line="+3"/>
+        <location line="+108"/>
+        <location line="+115"/>
         <source>All interfaces</source>
-        <translation type="vanished">Tutte le interfacce</translation>
+        <translation>Tutte le interfacce</translation>
     </message>
     <message>
         <source>Send ADIF:</source>
         <translation type="vanished">Invia ADIF:</translation>
     </message>
     <message>
+        <location line="-194"/>
         <source>Secondary UDP:</source>
-        <translation type="vanished">UDP secondario:</translation>
+        <translation>UDP secondario:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Secondary Server:</source>
-        <translation type="vanished">Server secondario:</translation>
+        <translation>Server secondario:</translation>
     </message>
     <message>
+        <location line="+49"/>
         <source>Secondary Port:</source>
-        <translation type="vanished">Porta secondaria:</translation>
+        <translation>Porta secondaria:</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Secondary TTL:</source>
-        <translation type="vanished">TTL secondario:</translation>
+        <translation>TTL secondario:</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Secondary Interface:</source>
-        <translation type="vanished">Interfaccia secondaria:</translation>
+        <translation>Interfaccia secondaria:</translation>
     </message>
     <message>
         <source>Secondary ADIF:</source>
         <translation type="vanished">ADIF secondario:</translation>
     </message>
     <message>
+        <location line="+33"/>
         <source>Tertiary UDP:</source>
-        <translation type="vanished">UDP terziario:</translation>
+        <translation>UDP terziario:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Tertiary Server:</source>
-        <translation type="vanished">Server terziario:</translation>
+        <translation>Server terziario:</translation>
     </message>
     <message>
+        <location line="+51"/>
         <source>Tertiary Port:</source>
-        <translation type="vanished">Porta terziaria:</translation>
+        <translation>Porta terziaria:</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>Tertiary TTL:</source>
-        <translation type="vanished">TTL terziario:</translation>
+        <translation>TTL terziario:</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Tertiary Interface:</source>
-        <translation type="vanished">Interfaccia terziaria:</translation>
+        <translation>Interfaccia terziaria:</translation>
     </message>
     <message>
         <source>Tertiary ADIF:</source>
         <translation type="vanished">ADIF terziario:</translation>
     </message>
     <message>
+        <location line="+139"/>
         <source>N1MM / HRD LOGBOOK / EASYLOG</source>
-        <translation type="vanished">N1MM / HRD LOGBOOK / EASYLOG</translation>
+        <translation>N1MM / HRD LOGBOOK / EASYLOG</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Use this ADIF UDP output for N1MM Logger+ or HRD Logbook QSO Forwarding. HRD normally listens on 127.0.0.1:2333; this is different from the primary WSJT-X UDP Server above.</source>
-        <translation type="vanished">Usa questa uscita ADIF via UDP per N1MM Logger+ o per il QSO Forwarding di HRD Logbook. HRD di norma ascolta su 127.0.0.1:2333; è diverso dal server UDP WSJT-X principale qui sopra.</translation>
+        <translation>Usa questa uscita ADIF via UDP per N1MM Logger+ o per il QSO Forwarding di HRD Logbook. HRD di norma ascolta su 127.0.0.1:2333; è diverso dal server UDP WSJT-X principale qui sopra.</translation>
     </message>
     <message>
+        <location line="+8"/>
+        <source>EasyLog band format:</source>
+        <translation>Formato banda EasyLog:</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Send BAND as 20m (lowercase)</source>
+        <translation>Invia BAND come 20m (minuscolo)</translation>
+    </message>
+    <message>
+        <location line="+6"/>
         <source>Use HRD Logbook preset</source>
-        <translation type="vanished">Usa la preimpostazione di HRD Logbook</translation>
+        <translation>Usa la preimpostazione di HRD Logbook</translation>
     </message>
     <message>
+        <location line="+32"/>
         <source>Enables the N1MM-compatible ADIF UDP output and sets 127.0.0.1:2333. In HRD Logbook, enable UDP Receive / WSJT-X QSO Forwarding on port 2333.</source>
-        <translation type="vanished">Abilita l&apos;uscita ADIF via UDP compatibile con N1MM e imposta 127.0.0.1:2333. In HRD Logbook, abilita UDP Receive / WSJT-X QSO Forwarding sulla porta 2333.</translation>
+        <translation>Abilita l&apos;uscita ADIF via UDP compatibile con N1MM e imposta 127.0.0.1:2333. In HRD Logbook, abilita UDP Receive / WSJT-X QSO Forwarding sulla porta 2333.</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Enable output:</source>
-        <translation type="vanished">Abilita l&apos;uscita:</translation>
+        <translation>Abilita l&apos;uscita:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>UDP Port:</source>
-        <translation type="vanished">Porta UDP:</translation>
+        <translation>Porta UDP:</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>UDP Server:</source>
-        <translation type="vanished">Server UDP:</translation>
+        <translation>Server UDP:</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Accept UDP:</source>
-        <translation type="vanished">Accetta UDP:</translation>
+        <translation>Accetta UDP:</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Notify Request:</source>
-        <translation type="vanished">Richiesta di notifica:</translation>
+        <translation>Richiesta di notifica:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Restore Win:</source>
-        <translation type="vanished">Ripristina vittoria:</translation>
+        <translation>Ripristina vittoria:</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>ADIF TCP</source>
-        <translation type="vanished">ADIF TCP</translation>
+        <translation>ADIF TCP</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Enable TCP ADIF:</source>
-        <translation type="vanished">Abilita TCP ADIF:</translation>
+        <translation>Abilita TCP ADIF:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>TCP Port:</source>
-        <translation type="vanished">Porta TCP:</translation>
+        <translation>Porta TCP:</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>TCP Server:</source>
-        <translation type="vanished">Server TCP:</translation>
+        <translation>Server TCP:</translation>
     </message>
     <message>
+        <location line="-1073"/>
         <source>dx.iz7auh.net</source>
-        <translation type="vanished">dx.iz7auh.net</translation>
+        <translation>dx.iz7auh.net</translation>
     </message>
     <message>
+        <location line="+588"/>
         <source>Primary traffic:</source>
-        <translation type="vanished">Traffico primario:</translation>
+        <translation>Traffico primario:</translation>
     </message>
     <message>
+        <location line="+5"/>
+        <location line="+108"/>
+        <location line="+118"/>
         <source>Decode</source>
-        <translation type="vanished">Decodifiche</translation>
+        <translation>Decodifiche</translation>
     </message>
     <message>
+        <location line="-225"/>
+        <location line="+108"/>
+        <location line="+118"/>
         <source>Status</source>
-        <translation type="vanished">Stato</translation>
+        <translation>Stato</translation>
     </message>
     <message>
+        <location line="-224"/>
+        <location line="+108"/>
+        <location line="+118"/>
         <source>QSO logged</source>
-        <translation type="vanished">QSO registrati</translation>
+        <translation>QSO registrati</translation>
     </message>
     <message>
+        <location line="-223"/>
+        <location line="+109"/>
+        <location line="+118"/>
         <source>WSPR</source>
-        <translation type="vanished">WSPR</translation>
+        <translation>WSPR</translation>
     </message>
     <message>
+        <location line="-207"/>
         <source>Secondary Client ID:</source>
-        <translation type="vanished">ID client secondario:</translation>
+        <translation>ID client secondario:</translation>
     </message>
     <message>
+        <location line="+77"/>
         <source>Secondary traffic:</source>
-        <translation type="vanished">Traffico secondario:</translation>
+        <translation>Traffico secondario:</translation>
     </message>
     <message>
+        <location line="+34"/>
         <source>Tertiary Client ID:</source>
-        <translation type="vanished">ID client terziario:</translation>
+        <translation>ID client terziario:</translation>
     </message>
     <message>
+        <location line="+84"/>
         <source>Tertiary traffic:</source>
-        <translation type="vanished">Traffico terziario:</translation>
+        <translation>Traffico terziario:</translation>
     </message>
 </context>
 <context>
     <name>SettingsTab7</name>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="+86"/>
         <source>FREQUENCY CALIBRATION</source>
-        <translation type="vanished">CALIBRAZIONE FREQUENZA</translation>
+        <translation>CALIBRAZIONE FREQUENZA</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Refresh</source>
-        <translation type="vanished">Aggiorna</translation>
+        <translation>Aggiorna</translation>
     </message>
     <message>
+        <location line="+26"/>
         <source>Slope:</source>
-        <translation type="vanished">Pendenza:</translation>
+        <translation>Pendenza:</translation>
     </message>
     <message>
+        <location line="+18"/>
         <source>ppm</source>
-        <translation type="vanished">ppm</translation>
+        <translation>ppm</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Intercept:</source>
-        <translation type="vanished">Intercetta:</translation>
+        <translation>Intercetta:</translation>
     </message>
     <message>
+        <location line="+18"/>
         <source>Hz</source>
-        <translation type="vanished">Hz</translation>
+        <translation>Hz</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Reset</source>
-        <translation type="vanished">Ripristina</translation>
+        <translation>Ripristina</translation>
     </message>
     <message>
+        <location line="+15"/>
         <source>Reset calibration (slope=0, intercept=0). The frequency is written to the rig without correction (fast path).</source>
-        <translation type="vanished">Reimposta calibrazione (slope=0, intercept=0). La frequenza viene scritta nella radio senza correzione (percorso veloce).</translation>
+        <translation>Reimposta calibrazione (slope=0, intercept=0). La frequenza viene scritta nella radio senza correzione (percorso veloce).</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Preview correzione:</source>
-        <translation type="vanished">Anteprima correzione:</translation>
+        <translation>Anteprima correzione:</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>14.074 MHz → %1 Hz · 28.074 MHz → %2 Hz</source>
-        <translation type="vanished">14.074 MHz → %1 Hz · 28.074 MHz → %2 Hz</translation>
+        <translation>14.074 MHz → %1 Hz · 28.074 MHz → %2 Hz</translation>
     </message>
     <message>
+        <location line="+15"/>
         <source>WORKING FREQUENCIES</source>
-        <translation type="vanished">WORKING FREQUENCIES</translation>
+        <translation>WORKING FREQUENCIES</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Load</source>
-        <translation type="vanished">Carica</translation>
+        <translation>Carica</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Merge</source>
-        <translation type="vanished">Unisci</translation>
+        <translation>Unisci</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Save as</source>
-        <translation type="vanished">Salva come</translation>
+        <translation>Salva come</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Defaults</source>
-        <translation type="vanished">Predefiniti</translation>
+        <translation>Predefiniti</translation>
     </message>
     <message>
+        <location line="+30"/>
         <source>Region:</source>
-        <translation type="vanished">Regione:</translation>
+        <translation>Regione:</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Mode:</source>
-        <translation type="vanished">Modalità:</translation>
+        <translation>Modalità:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Freq MHz:</source>
-        <translation type="vanished">Freq MHz:</translation>
+        <translation>Freq MHz:</translation>
     </message>
     <message>
+        <location line="+22"/>
+        <location line="+128"/>
         <source>Pref</source>
-        <translation type="vanished">Pref</translation>
+        <translation>Pref</translation>
     </message>
     <message>
+        <location line="-119"/>
         <source>Description:</source>
-        <translation type="vanished">Descrizione:</translation>
+        <translation>Descrizione:</translation>
     </message>
     <message>
+        <location line="+14"/>
         <source>Start:</source>
-        <translation type="vanished">Inizio:</translation>
+        <translation>Inizio:</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>End:</source>
-        <translation type="vanished">Fine:</translation>
+        <translation>Fine:</translation>
     </message>
     <message>
+        <location line="+19"/>
+        <location line="+218"/>
         <source>Add</source>
-        <translation type="vanished">Aggiungi</translation>
+        <translation>Aggiungi</translation>
     </message>
     <message>
+        <location line="-208"/>
+        <location line="+218"/>
         <source>Update</source>
-        <translation type="vanished">Aggiorna</translation>
+        <translation>Aggiorna</translation>
     </message>
     <message>
+        <location line="-207"/>
+        <location line="+218"/>
         <source>Delete</source>
-        <translation type="vanished">Elimina</translation>
+        <translation>Elimina</translation>
     </message>
     <message>
+        <location line="-208"/>
         <source>New</source>
-        <translation type="vanished">Nuovo</translation>
+        <translation>Nuovo</translation>
     </message>
     <message>
+        <location line="+41"/>
         <source>IARU Region</source>
-        <translation type="vanished">Regione IARU</translation>
+        <translation>Regione IARU</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Mode</source>
-        <translation type="vanished">Modo</translation>
+        <translation>Modo</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Frequency</source>
-        <translation type="vanished">Frequenza</translation>
+        <translation>Frequenza</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Description</source>
-        <translation type="vanished">Descrizione</translation>
+        <translation>Descrizione</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Start Date/Time</source>
-        <translation type="vanished">Data/Ora inizio</translation>
+        <translation>Data/Ora inizio</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>End Date/Time</source>
-        <translation type="vanished">Data/Ora fine</translation>
+        <translation>Data/Ora fine</translation>
     </message>
     <message>
+        <location line="+53"/>
         <source>STATION INFORMATION</source>
-        <translation type="vanished">INFORMAZIONI STAZIONE</translation>
+        <translation>INFORMAZIONI STAZIONE</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Band offset is the transverter/station frequency offset for that band; use 0.000000 when unused.</source>
-        <translation type="vanished">L&apos;offset di banda è l&apos;offset di frequenza transverter/stazione per quella banda; usa 0.000000 quando non utilizzato.</translation>
+        <translation>L&apos;offset di banda è l&apos;offset di frequenza transverter/stazione per quella banda; usa 0.000000 quando non utilizzato.</translation>
     </message>
     <message>
+        <location line="+24"/>
         <source>Band:</source>
-        <translation type="vanished">Banda:</translation>
+        <translation>Banda:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Offset MHz:</source>
-        <translation type="vanished">Offset MHz:</translation>
+        <translation>Offset MHz:</translation>
     </message>
     <message>
+        <location line="+23"/>
         <source>Antenna:</source>
-        <translation type="vanished">Antenna:</translation>
+        <translation>Antenna:</translation>
     </message>
     <message>
+        <location line="+76"/>
         <source>Band</source>
-        <translation type="vanished">Banda</translation>
+        <translation>Banda</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Offset</source>
-        <translation type="vanished">Offset</translation>
+        <translation>Offset</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Antenna Description</source>
-        <translation type="vanished">Descrizione Antenna</translation>
+        <translation>Descrizione Antenna</translation>
     </message>
 </context>
 <context>
     <name>SettingsTab8</name>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab8.qml" line="+69"/>
         <source>DECODE COLORS</source>
-        <translation type="vanished">COLORI DECODIFICA</translation>
+        <translation>COLORI DECODIFICA</translation>
     </message>
     <message>
+        <location line="+53"/>
         <source>Use this specific decode color. When OFF, this category uses the shared default color.</source>
-        <translation type="vanished">Usa questo colore di decodifica specifico. Quando OFF, questa categoria usa il colore predefinito condiviso.</translation>
+        <translation>Usa questo colore di decodifica specifico. Quando OFF, questa categoria usa il colore predefinito condiviso.</translation>
     </message>
     <message>
+        <location line="+76"/>
         <source>Reset</source>
-        <translation type="vanished">Ripristina</translation>
+        <translation>Ripristina</translation>
     </message>
     <message>
+        <location line="+23"/>
         <source>Bold</source>
-        <translation type="vanished">Grassetto</translation>
+        <translation>Grassetto</translation>
     </message>
     <message>
+        <location line="+16"/>
         <source>BG:</source>
-        <translation type="vanished">BG:</translation>
+        <translation>BG:</translation>
     </message>
     <message>
+        <location line="+14"/>
         <source>Colors the row BACKGROUND (in addition to the text) for this category. OFF = no custom background.</source>
-        <translation type="vanished">Colora lo SFONDO della riga (oltre al testo) per questa categoria. OFF = nessuno sfondo personalizzato.</translation>
+        <translation>Colora lo SFONDO della riga (oltre al testo) per questa categoria. OFF = nessuno sfondo personalizzato.</translation>
     </message>
     <message>
+        <location line="+75"/>
         <source>B4 Strikethrough:</source>
-        <translation type="vanished">B4 Barrato:</translation>
+        <translation>B4 Barrato:</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>Decode Boost:</source>
-        <translation type="vanished">Decode Boost:</translation>
+        <translation>Decode Boost:</translation>
     </message>
     <message>
+        <location line="+27"/>
         <source>Visual contrast only; it does not change decoder sensitivity.</source>
-        <translation type="vanished">Solo contrasto visivo; non modifica la sensibilità del decoder.</translation>
+        <translation>Solo contrasto visivo; non modifica la sensibilità del decoder.</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>HIGHLIGHTING</source>
-        <translation type="vanished">IN EVIDENZA</translation>
+        <translation>IN EVIDENZA</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Highlight 73:</source>
-        <translation type="vanished">Evidenzia 73:</translation>
+        <translation>Evidenzia 73:</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>HL Orange:</source>
-        <translation type="vanished">HL Arancione:</translation>
+        <translation>HL Arancione:</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Orange Calls:</source>
-        <translation type="vanished">Nominativi arancioni:</translation>
+        <translation>Nominativi arancioni:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>HL Blue:</source>
-        <translation type="vanished">HL Blu:</translation>
+        <translation>HL Blu:</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Blue Calls:</source>
-        <translation type="vanished">Nominativi blu:</translation>
+        <translation>Nominativi blu:</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>COLORI INTERFACCIA (sfondo + testo)</source>
-        <translation type="vanished">COLORI INTERFACCIA (sfondo + testo)</translation>
+        <translation>COLORI INTERFACCIA (sfondo + testo)</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Usa colori personalizzati:</source>
-        <translation type="vanished">Usa colori personalizzati:</translation>
+        <translation>Usa colori personalizzati:</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>(overrides theme background and text)</source>
-        <translation type="vanished">(sovrascrive lo sfondo e il testo del tema)</translation>
+        <translation>(sovrascrive lo sfondo e il testo del tema)</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Background:</source>
-        <translation type="vanished">Sfondo:</translation>
+        <translation>Sfondo:</translation>
     </message>
     <message>
+        <location line="+20"/>
         <source>Text:</source>
-        <translation type="vanished">Testo:</translation>
+        <translation>Testo:</translation>
     </message>
     <message>
+        <location line="+17"/>
         <source>SPECTRUM</source>
-        <translation type="vanished">SPETTRO</translation>
+        <translation>SPETTRO</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Palette:</source>
-        <translation type="vanished">Tavolozza:</translation>
+        <translation>Tavolozza:</translation>
     </message>
     <message>
+        <location line="+16"/>
         <source>Black Level:</source>
-        <translation type="vanished">Livello del nero:</translation>
+        <translation>Livello del nero:</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>Color Gain:</source>
-        <translation type="vanished">Guadagno di colore:</translation>
+        <translation>Guadagno di colore:</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>Contrast:</source>
-        <translation type="vanished">Contrasto:</translation>
+        <translation>Contrasto:</translation>
     </message>
 </context>
 <context>
     <name>SettingsTab9</name>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="+67"/>
         <source>STARTUP</source>
-        <translation type="vanished">AVVIO</translation>
+        <translation>AVVIO</translation>
     </message>
     <message>
+        <location line="+17"/>
         <source>Monitor OFF:</source>
-        <translation type="vanished">Monitor spento:</translation>
+        <translation>Monitor spento:</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Monitor Last:</source>
-        <translation type="vanished">Monitora per ultimo:</translation>
+        <translation>Monitora per ultimo:</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Auto Astro:</source>
-        <translation type="vanished">Astro automatico:</translation>
+        <translation>Astro automatico:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>kHz no k:</source>
-        <translation type="vanished">kHz no k:</translation>
+        <translation>kHz no k:</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Progress Red:</source>
-        <translation type="vanished">Progresso Rosso:</translation>
+        <translation>Progresso Rosso:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>High DPI:</source>
-        <translation type="vanished">DPI elevati:</translation>
+        <translation>DPI elevati:</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Larger Tab:</source>
-        <translation type="vanished">Scheda più grande:</translation>
+        <translation>Scheda più grande:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Direct Visual:</source>
-        <translation type="vanished">Direct Visual:</translation>
+        <translation>Direct Visual:</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>Fast visual panadapter. In legacy mode it may open a second audio capture; in normal mode it only increases the visual refresh rate. Default: OFF.</source>
-        <translation type="vanished">Panadapter visivo veloce. In modalità legacy può aprire una seconda cattura audio; in modalità normale aumenta solo la frequenza di refresh visivo. Default: OFF.</translation>
+        <translation>Panadapter visivo veloce. In modalità legacy può aprire una seconda cattura audio; in modalità normale aumenta solo la frequenza di refresh visivo. Default: OFF.</translation>
     </message>
     <message>
+        <location line="+38"/>
         <source>Slow-PC mode:</source>
-        <translation type="vanished">Modalità PC lento:</translation>
+        <translation>Modalità PC lento:</translation>
     </message>
     <message>
         <source>One switch for old/slow PCs. Enables: OpenGL graphics (stable on old GPUs, needs restart), Low CPU mode, max 4 FT threads, normal process priority, CPU decode profile, and hides Live Map / Full Spectrum by default. Default: OFF.</source>
         <translation type="vanished">Un unico interruttore per PC vecchi/lenti. Abilita: grafica OpenGL (stabile su GPU vecchie, richiede riavvio), modalità CPU ridotta, massimo 4 thread FT, priorità di processo normale, profilo di decodifica CPU e nasconde Mappa live / Full Spectrum in modo predefinito. Predefinito: OFF.</translation>
     </message>
     <message>
+        <location line="+15"/>
+        <source>Reset graphics on next launch:</source>
+        <translation>Reimposta la grafica al prossimo avvio:</translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>On the next launch, clears persistent graphics fallback settings and scene-graph caches, equivalent to --reset-safe-graphics. The option is one-shot and clears itself after startup.</source>
+        <translation>Al prossimo avvio cancella le impostazioni grafiche di ripiego persistenti e le cache dello scene-graph, equivalente a --reset-safe-graphics. L&apos;opzione è una tantum e si disattiva dopo l&apos;avvio.</translation>
+    </message>
+    <message>
+        <location line="+5"/>
         <source>Low CPU:</source>
-        <translation type="vanished">Low CPU:</translation>
+        <translation>Low CPU:</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Profile for slow PCs: maximum 2 FT threads, slower waterfall, reduced early/deep decoding. Default: OFF.</source>
-        <translation type="vanished">Profilo per PC lenti: massimo 2 thread FT, waterfall più lento, decodifica early/deep ridotta. Default: OFF.</translation>
+        <translation>Profilo per PC lenti: massimo 2 thread FT, waterfall più lento, decodifica early/deep ridotta. Default: OFF.</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Reduces FT threads, waterfall refresh, and QML rendering during monitor/TX.</source>
-        <translation type="vanished">Riduce i thread FT, il refresh della waterfall e il rendering QML durante monitor/TX.</translation>
+        <translation>Riduce i thread FT, il refresh della waterfall e il rendering QML durante monitor/TX.</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>DATA UPDATES</source>
-        <translation type="vanished">AGGIORNAMENTI DATI</translation>
+        <translation>AGGIORNAMENTI DATI</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>LotW Users:</source>
-        <translation type="vanished">Utenti LoTW:</translation>
+        <translation>Utenti LoTW:</translation>
     </message>
     <message>
+        <location line="+2"/>
+        <location line="+13"/>
+        <location line="+48"/>
+        <location line="+13"/>
         <source>Updating...</source>
-        <translation type="vanished">Aggiornamento...</translation>
+        <translation>Aggiornamento...</translation>
     </message>
     <message>
+        <location line="-73"/>
         <source>%1 users</source>
-        <translation type="vanished">%1 utenti</translation>
+        <translation>%1 utenti</translation>
     </message>
     <message>
+        <location line="+1"/>
+        <location line="+61"/>
         <source>Not loaded</source>
-        <translation type="vanished">Non caricato</translation>
+        <translation>Non caricato</translation>
     </message>
     <message>
+        <location line="-50"/>
+        <location line="+61"/>
         <source>Force Update</source>
-        <translation type="vanished">Forza aggiornamento</translation>
+        <translation>Forza aggiornamento</translation>
     </message>
     <message>
+        <location line="-15"/>
         <source>US States:</source>
-        <translation type="vanished">US States:</translation>
+        <translation>US States:</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>%1 calls, %2 locators</source>
-        <translation type="vanished">%1 nominativi, %2 locatori</translation>
+        <translation>%1 nominativi, %2 locatori</translation>
     </message>
     <message>
+        <location line="+59"/>
         <source>BEHAVIOR</source>
-        <translation type="vanished">COMPORTAMENTO</translation>
+        <translation>COMPORTAMENTO</translation>
     </message>
     <message>
+        <location line="+17"/>
         <source>Quick Call:</source>
-        <translation type="vanished">Chiamata rapida:</translation>
+        <translation>Chiamata rapida:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Force Call 1st:</source>
-        <translation type="vanished">Forza chiamata per primo:</translation>
+        <translation>Forza chiamata per primo:</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>VHF/UHF:</source>
-        <translation type="vanished">VHF/UHF:</translation>
+        <translation>VHF/UHF:</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Wait Features:</source>
-        <translation type="vanished">Caratteristiche di attesa:</translation>
+        <translation>Caratteristiche di attesa:</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Erase Band Act:</source>
-        <translation type="vanished">Legge sulla banda di cancellazione:</translation>
+        <translation>Legge sulla banda di cancellazione:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Clear DX Grid:</source>
-        <translation type="vanished">Cancella locator DX:</translation>
+        <translation>Cancella locator DX:</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Clear DX Call:</source>
-        <translation type="vanished">Cancella nominativo DX:</translation>
+        <translation>Cancella nominativo DX:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>RX&gt;TX after QSO:</source>
-        <translation type="vanished">RX&gt;TX dopo QSO:</translation>
+        <translation>RX&gt;TX dopo QSO:</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Alt Erase Btn:</source>
-        <translation type="vanished">Alt Cancella Btn:</translation>
+        <translation>Alt Cancella Btn:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>No Btn Color:</source>
-        <translation type="vanished">Nessun colore BTN:</translation>
+        <translation>Nessun colore BTN:</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>OPERATING MODE</source>
-        <translation type="vanished">MODO OPERATIVO</translation>
+        <translation>MODO OPERATIVO</translation>
     </message>
     <message>
+        <location line="+17"/>
         <source>Fox Mode:</source>
-        <translation type="vanished">Modalità Fox:</translation>
+        <translation>Modalità Fox:</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>Hound Mode:</source>
-        <translation type="vanished">Modalità Hound:</translation>
+        <translation>Modalità Hound:</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>SuperFox:</source>
-        <translation type="vanished">SuperFox:</translation>
+        <translation>SuperFox:</translation>
     </message>
     <message>
+        <location line="+8"/>
+        <source>To work a SuperFox DXpedition, select FT8 and enable Hound Mode as well. This option alone does not enable SuperHound reception.</source>
+        <translation>Per lavorare una DXpedition SuperFox, seleziona FT8 e attiva anche la modalità Hound. Questa opzione da sola non abilita la ricezione SuperHound.</translation>
+    </message>
+    <message>
+        <location line="+4"/>
         <source>Show OTP:</source>
-        <translation type="vanished">Mostra OTP:</translation>
+        <translation>Mostra OTP:</translation>
     </message>
     <message>
+        <location line="+12"/>
         <source>CONTEST</source>
-        <translation type="vanished">CONCORSO</translation>
+        <translation>CONCORSO</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Activity:</source>
-        <translation type="vanished">Attività:</translation>
+        <translation>Attività:</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>None</source>
-        <translation type="vanished">Nessuna</translation>
+        <translation>Nessuna</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Field Day</source>
-        <translation type="vanished">Giornata campale</translation>
+        <translation>Giornata campale</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Fox</source>
-        <translation type="vanished">Volpe</translation>
+        <translation>Volpe</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Hound</source>
-        <translation type="vanished">Segugio</translation>
+        <translation>Segugio</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>FD Exchange:</source>
-        <translation type="vanished">FD Scambio:</translation>
+        <translation>FD Scambio:</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>RTTY Exchange:</source>
-        <translation type="vanished">RTTY Scambio:</translation>
+        <translation>RTTY Scambio:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Contest Name:</source>
-        <translation type="vanished">Nome del concorso:</translation>
+        <translation>Nome del concorso:</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Indiv Name:</source>
-        <translation type="vanished">Nome individuale:</translation>
+        <translation>Nome individuale:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>NCCC Sprint:</source>
-        <translation type="vanished">NCCC Sprint:</translation>
+        <translation>NCCC Sprint:</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>NTP TIME SYNC</source>
-        <translation type="vanished">NTP SINCRONIZZAZIONE ORARIO</translation>
+        <translation>NTP SINCRONIZZAZIONE ORARIO</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Enable NTP:</source>
-        <translation type="vanished">Abilita NTP:</translation>
+        <translation>Abilita NTP:</translation>
     </message>
     <message>
+        <location line="+17"/>
         <source>Custom Server:</source>
-        <translation type="vanished">Server personalizzato:</translation>
+        <translation>Server personalizzato:</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Empty = automatic public servers</source>
-        <translation type="vanished">Vuoto = server pubblici automatici</translation>
+        <translation>Vuoto = server pubblici automatici</translation>
     </message>
     <message>
+        <location line="+15"/>
         <source>Sync Now</source>
-        <translation type="vanished">Sincronizza ora</translation>
+        <translation>Sincronizza ora</translation>
     </message>
     <message>
+        <location line="+16"/>
         <source>Leave the server empty to automatically use pool.ntp.org, Apple, Cloudflare, and Google.</source>
-        <translation type="vanished">Lascia il server vuoto per usare automaticamente pool.ntp.org, Apple, Cloudflare e Google.</translation>
+        <translation>Lascia il server vuoto per usare automaticamente pool.ntp.org, Apple, Cloudflare e Google.</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>RF self-calibration:</source>
-        <translation type="vanished">Auto-calibrazione RF:</translation>
+        <translation>Auto-calibrazione RF:</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Use received decode DT values only as a secondary time-sync hint after NTP/HTTPS is already locked. Default: OFF.</source>
-        <translation type="vanished">Usa i valori DT delle decodifiche ricevute solo come suggerimento secondario per il sync temporale dopo che NTP/HTTPS è già agganciato. Default: OFF.</translation>
+        <translation>Usa i valori DT delle decodifiche ricevute solo come suggerimento secondario per il sync temporale dopo che NTP/HTTPS è già agganciato. Default: OFF.</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Secondary hint only; it cannot create the first time lock.</source>
-        <translation type="vanished">Solo suggerimento secondario; non può creare il primo aggancio temporale.</translation>
+        <translation>Solo suggerimento secondario; non può creare il primo aggancio temporale.</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>ADV DECODING</source>
-        <translation type="vanished">DECODE AVANZATA</translation>
+        <translation>DECODE AVANZATA</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Auto Mode:</source>
-        <translation type="vanished">Modo Auto:</translation>
+        <translation>Modo Auto:</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>AUTO - enable the 3 technologies when needed</source>
-        <translation type="vanished">AUTO - abilita le 3 tecnologie quando servono</translation>
+        <translation>AUTO - abilita le 3 tecnologie quando servono</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>When ON, the 3 features below are managed automatically. Trigger: Neural+Turbo when decodes &lt; 2/slot for 4 slots. Coherent when Q65 SNR &lt; -22 dB.</source>
-        <translation type="vanished">Quando ON, le 3 funzioni sotto sono gestite automaticamente. Trigger: Neural+Turbo quando i decode sono &lt; 2/slot per 4 slot. Coherent quando l&apos;SNR Q65 &lt; -22 dB.</translation>
+        <translation>Quando ON, le 3 funzioni sotto sono gestite automaticamente. Trigger: Neural+Turbo quando i decode sono &lt; 2/slot per 4 slot. Coherent quando l&apos;SNR Q65 &lt; -22 dB.</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Live state:</source>
-        <translation type="vanished">Stato live:</translation>
+        <translation>Stato live:</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Neural</source>
-        <translation type="vanished">Neural</translation>
+        <translation>Neural</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Turbo</source>
-        <translation type="vanished">Turbo</translation>
+        <translation>Turbo</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Coherent</source>
-        <translation type="vanished">Coherent</translation>
+        <translation>Coherent</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Coherent Avg:</source>
-        <translation type="vanished">Coherent Avg:</translation>
+        <translation>Coherent Avg:</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Coherent Average (Q65/JT65)</source>
-        <translation type="vanished">Coherent Average (Q65/JT65)</translation>
+        <translation>Coherent Average (Q65/JT65)</translation>
     </message>
     <message>
+        <location line="+14"/>
         <source>Accumulates multi-slot averaging for Q65/JT65 decodes (+1-3 dB)</source>
-        <translation type="vanished">Accumula la media multi-slot per i decode Q65/JT65 (+1-3 dB)</translation>
+        <translation>Accumula la media multi-slot per i decode Q65/JT65 (+1-3 dB)</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Neural Sync:</source>
-        <translation type="vanished">Neural Sync:</translation>
+        <translation>Neural Sync:</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Neural Sync (FT8 OSD decoder)</source>
-        <translation type="vanished">Neural Sync (decoder FT8 OSD)</translation>
+        <translation>Neural Sync (decoder FT8 OSD)</translation>
     </message>
     <message>
+        <location line="+14"/>
         <source>Forces OSD-aware FT8 decoding (+2-3 dB on borderline signals)</source>
-        <translation type="vanished">Forza la decodifica FT8 OSD-aware (+2-3 dB su segnali borderline)</translation>
+        <translation>Forza la decodifica FT8 OSD-aware (+2-3 dB su segnali borderline)</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Turbo Feedback:</source>
-        <translation type="vanished">Turbo Feedback:</translation>
+        <translation>Turbo Feedback:</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Turbo Feedback (extended LDPC iterations)</source>
-        <translation type="vanished">Turbo Feedback (iterazioni LDPC estese)</translation>
+        <translation>Turbo Feedback (iterazioni LDPC estese)</translation>
     </message>
     <message>
+        <location line="+14"/>
         <source>Extended LDPC iterations for marginal decode recovery</source>
-        <translation type="vanished">Iterazioni LDPC estese per il recupero di decode marginali</translation>
+        <translation>Iterazioni LDPC estese per il recupero di decode marginali</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>OTP</source>
-        <translation type="vanished">OTP</translation>
+        <translation>OTP</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>OTP Enabled:</source>
-        <translation type="vanished">OTP Abilitato:</translation>
+        <translation>OTP Abilitato:</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>OTP Seed:</source>
-        <translation type="vanished">Seme OTP:</translation>
+        <translation>Seme OTP:</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>OTP Interval:</source>
-        <translation type="vanished">OTP Intervallo:</translation>
+        <translation>OTP Intervallo:</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>OTP URL:</source>
-        <translation type="vanished">URL OTP:</translation>
+        <translation>URL OTP:</translation>
     </message>
     <message>
+        <location line="-638"/>
         <source>One switch for old/slow PCs. Enables: conservative D3D11 graphics on Windows (needs restart), Low CPU mode, max 4 FT threads, normal process priority, CPU decode profile, and hides Live Map / Full Spectrum by default. Default: OFF.</source>
-        <translation type="vanished">Un solo interruttore per computer vecchi o lenti. Attiva: grafica D3D11 conservativa su Windows (richiede il riavvio), modalità CPU ridotta, al massimo 4 thread FT, priorità di processo normale, profilo di decodifica su CPU, e nasconde Live Map e Full Spectrum. Predefinito: spento.</translation>
+        <translation>Un solo interruttore per computer vecchi o lenti. Attiva: grafica D3D11 conservativa su Windows (richiede il riavvio), modalità CPU ridotta, al massimo 4 thread FT, priorità di processo normale, profilo di decodifica su CPU, e nasconde Live Map e Full Spectrum. Predefinito: spento.</translation>
     </message>
     <message>
+        <location line="-40"/>
         <source>OpenGL GPU FFT:</source>
-        <translation type="vanished">FFT su GPU OpenGL:</translation>
+        <translation>FFT su GPU OpenGL:</translation>
     </message>
     <message>
+        <location line="+15"/>
         <source>After restart, offloads the visual panadapter FFT to OpenGL compute on supported Linux drivers. It does not move FT decoding to the GPU. A failed or stalled GPU path falls back automatically to asynchronous CPU FFT. Default: OFF.</source>
-        <translation type="vanished">Dopo il riavvio sposta la FFT visiva del panadapter sul calcolo OpenGL, sui driver Linux che lo supportano. Non sposta sulla GPU la decodifica FT. Se la strada GPU fallisce o si blocca, si torna da soli alla FFT su CPU asincrona. Di serie: spenta.</translation>
+        <translation>Dopo il riavvio sposta la FFT visiva del panadapter sul calcolo OpenGL, sui driver Linux che lo supportano. Non sposta sulla GPU la decodifica FT. Se la strada GPU fallisce o si blocca, si torna da soli alla FFT su CPU asincrona. Di serie: spenta.</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>Visual FFT only; restart required; safe CPU fallback remains active.</source>
-        <translation type="vanished">Solo la FFT visiva; serve riavviare; il ripiego sicuro su CPU resta attivo.</translation>
+        <translation>Solo la FFT visiva; serve riavviare; il ripiego sicuro su CPU resta attivo.</translation>
     </message>
 </context>
 <context>
@@ -26515,8 +30542,9 @@ Costa CPU extra durante i QSO. Default: OFF.</translation>
         <translation type="vanished">cambia subito</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/SetupDialog.qml" line="+45"/>
         <source>STATION</source>
-        <translation type="vanished">STAZIONE</translation>
+        <translation>STAZIONE</translation>
     </message>
     <message>
         <source>MY CALL</source>
@@ -26531,27 +30559,37 @@ Costa CPU extra durante i QSO. Default: OFF.</translation>
         <translation type="vanished">QTH</translation>
     </message>
     <message>
+        <location line="+18"/>
+        <source>Callsign, station name and QTH come from Decodium station settings.</source>
+        <translation>Nominativo, nome della stazione e QTH provengono dalle impostazioni stazione di Decodium.</translation>
+    </message>
+    <message>
+        <location line="+19"/>
         <source>MACROS</source>
-        <translation type="vanished">MACRO</translation>
+        <translation>MACRO</translation>
     </message>
     <message>
+        <location line="+99"/>
         <source>Restore defaults</source>
-        <translation type="vanished">Ripristina</translation>
+        <translation>Ripristina</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>Close</source>
-        <translation type="vanished">Chiudi</translation>
+        <translation>Chiudi</translation>
     </message>
 </context>
 <context>
     <name>SignalRxPanel</name>
     <message>
+        <location filename="../qml/decodium/components/SignalRxPanel.qml" line="+265"/>
         <source>QSO LOCK</source>
-        <translation type="vanished">BLOCCO QSO</translation>
+        <translation>BLOCCO QSO</translation>
     </message>
     <message>
+        <location line="+217"/>
         <source>No RX-frequency decodes</source>
-        <translation type="vanished">Nessuna decodifica sulla frequenza RX</translation>
+        <translation>Nessuna decodifica sulla frequenza RX</translation>
     </message>
 </context>
 <context>
@@ -26679,12 +30717,12 @@ Costa CPU extra durante i QSO. Default: OFF.</translation>
     <message>
         <location line="+28"/>
         <source>Audio TX ownership conflict: another transmission tried to replace an active tracked playback.</source>
-        <translation>Conflitto di proprietà TX audio: un'altra trasmissione ha tentato di sostituire una riproduzione tracciata attiva.</translation>
+        <translation>Conflitto di proprietà TX audio: un&apos;altra trasmissione ha tentato di sostituire una riproduzione tracciata attiva.</translation>
     </message>
     <message>
         <location line="+9"/>
         <source>Audio TX output start failed: the generated source is null.</source>
-        <translation>Avvio dell'uscita TX audio non riuscito: la sorgente generata è nulla.</translation>
+        <translation>Avvio dell&apos;uscita TX audio non riuscito: la sorgente generata è nulla.</translation>
     </message>
     <message>
         <location line="+77"/>
@@ -26770,307 +30808,609 @@ Costa CPU extra durante i QSO. Default: OFF.</translation>
 <context>
     <name>SplashScreen</name>
     <message>
+        <location filename="../qml/decodium/components/SplashScreen.qml" line="+192"/>
         <source>Loading…</source>
-        <translation type="vanished">Caricamento in corso…</translation>
+        <translation>Caricamento in corso…</translation>
     </message>
     <message>
+        <location line="+20"/>
         <source>☕  Buy me a coffee</source>
-        <translation type="vanished">☕  Offrimi un caffè</translation>
+        <translation>☕  Offrimi un caffè</translation>
     </message>
     <message>
+        <location line="+21"/>
         <source>Start  ▶</source>
-        <translation type="vanished">Avvia  ▶</translation>
+        <translation>Avvia  ▶</translation>
     </message>
     <message>
+        <location line="+22"/>
         <source>Named after Robert G. Gallager · Father of LDPC Codes</source>
-        <translation type="vanished">Dedicato a Robert G. Gallager · Padre dei codici LDPC</translation>
+        <translation>Dedicato a Robert G. Gallager · Padre dei codici LDPC</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>© 2024-2026 IU8LMC  ·  GPL Open Source  ·  Based on WSJT-X by K1JT et al. &amp; WSJT-X by K1JT</source>
-        <translation type="vanished">© 2024-2026 IU8LMC  ·  GPL Open Source  ·  Basato su WSJT-X di K1JT et al. &amp; WSJT-X by K1JT</translation>
+        <translation>© 2024-2026 IU8LMC  ·  GPL Open Source  ·  Basato su WSJT-X di K1JT et al. &amp; WSJT-X by K1JT</translation>
     </message>
     <message>
+        <location line="-131"/>
         <source>Core Gallager</source>
-        <translation type="vanished">Core Gallager</translation>
+        <translation>Core Gallager</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>Advanced Digital Mode Decoder for Amateur Radio</source>
-        <translation type="vanished">Decodificatore avanzato per i modi digitali radioamatoriali</translation>
+        <translation>Decodificatore avanzato per i modi digitali radioamatoriali</translation>
     </message>
 </context>
 <context>
     <name>SsbWindow</name>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="+13"/>
         <source>SSB — PC microphone</source>
-        <translation type="vanished">SSB — Microfono PC</translation>
+        <translation>SSB — Microfono PC</translation>
     </message>
     <message>
+        <location line="+170"/>
         <source>REMOTE RADIO</source>
-        <translation type="vanished">RADIO REMOTA</translation>
+        <translation>RADIO REMOTA</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>LOCAL RADIO</source>
-        <translation type="vanished">RADIO LOCALE</translation>
+        <translation>RADIO LOCALE</translation>
     </message>
     <message>
+        <location line="+20"/>
         <source>CAT disconnected</source>
-        <translation type="vanished">CAT disconnesso</translation>
+        <translation>CAT disconnesso</translation>
     </message>
     <message>
+        <location line="-9"/>
         <source>Frequency in MHz. Press Enter to tune.</source>
-        <translation type="vanished">Frequenza in MHz. Premi Invio per sintonizzare.</translation>
+        <translation>Frequenza in MHz. Premi Invio per sintonizzare.</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>USB/data audio input</source>
-        <translation type="vanished">Ingresso audio USB/dati</translation>
+        <translation>Ingresso audio USB/dati</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Activate SSB</source>
-        <translation type="vanished">Attiva SSB</translation>
+        <translation>Attiva SSB</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>TX uses the radio audio output selected in Settings. USB/LSB requires the radio to accept PC audio; use data input when needed.</source>
-        <translation type="vanished">La TX usa l’uscita audio radio scelta nelle Impostazioni. In USB/LSB la radio deve accettare l’audio PC; se necessario usa l’ingresso dati.</translation>
+        <translation>La TX usa l’uscita audio radio scelta nelle Impostazioni. In USB/LSB la radio deve accettare l’audio PC; se necessario usa l’ingresso dati.</translation>
     </message>
     <message>
+        <location line="+291"/>
         <source>PC microphone • voice processing</source>
-        <translation type="vanished">Microfono PC • Elaborazione voce</translation>
+        <translation>Microfono PC • Elaborazione voce</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Select PC microphone…</source>
-        <translation type="vanished">Seleziona microfono PC…</translation>
+        <translation>Seleziona microfono PC…</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Mic gain</source>
-        <translation type="vanished">Guadagno mic</translation>
+        <translation>Guadagno mic</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Automatic gain</source>
-        <translation type="vanished">Guadagno automatico</translation>
+        <translation>Guadagno automatico</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Voice filter</source>
-        <translation type="vanished">Filtro voce</translation>
+        <translation>Filtro voce</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Hz • limiter active</source>
-        <translation type="vanished">Hz • Limitatore attivo</translation>
+        <translation>Hz • Limitatore attivo</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Voice level</source>
-        <translation type="vanished">Livello voce</translation>
+        <translation>Livello voce</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Radio • CAT controls</source>
-        <translation type="vanished">Radio • Controlli CAT</translation>
+        <translation>Radio • Controlli CAT</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>RF power %</source>
-        <translation type="vanished">Potenza RF %</translation>
+        <translation>Potenza RF %</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>RX filter Hz</source>
-        <translation type="vanished">Filtro RX Hz</translation>
+        <translation>Filtro RX Hz</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Radio AGC</source>
-        <translation type="vanished">AGC radio</translation>
+        <translation>AGC radio</translation>
     </message>
     <message>
+        <location line="+17"/>
         <source>RF gain %</source>
-        <translation type="vanished">Guadagno RF %</translation>
+        <translation>Guadagno RF %</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Radio mic gain %</source>
-        <translation type="vanished">Mic radio %</translation>
+        <translation>Mic radio %</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Read radio</source>
-        <translation type="vanished">Leggi radio</translation>
+        <translation>Leggi radio</translation>
     </message>
     <message>
+        <location line="+59"/>
         <source>AGC OFF enables manual reception gain using RF gain. Unavailable controls are disabled.</source>
-        <translation type="vanished">Con AGC OFF regola manualmente la ricezione con Guadagno RF. I comandi non disponibili sono disabilitati.</translation>
+        <translation>Con AGC OFF regola manualmente la ricezione con Guadagno RF. I comandi non disponibili sono disabilitati.</translation>
     </message>
     <message>
+        <location line="+70"/>
         <source>RF: </source>
-        <translation type="vanished">RF: </translation>
+        <translation>RF: </translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>SWR: </source>
-        <translation type="vanished">ROS: </translation>
+        <translation>ROS: </translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Listen RX</source>
-        <translation type="vanished">Ascolto RX</translation>
+        <translation>Ascolto RX</translation>
     </message>
     <message>
+        <location line="-526"/>
         <source>TRANSMITTING — release to receive</source>
-        <translation type="vanished">TRASMISSIONE — rilascia per ricevere</translation>
+        <translation>TRASMISSIONE — rilascia per ricevere</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>HOLD TO TALK • PTT</source>
-        <translation type="vanished">TIENI PREMUTO PER PARLARE • PTT</translation>
+        <translation>TIENI PREMUTO PER PARLARE • PTT</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Hold the space bar to talk (Esc stops).</source>
-        <translation type="vanished">Tieni premuta la barra spaziatrice per parlare (Esc ferma).</translation>
+        <translation>Tieni premuta la barra spaziatrice per parlare (Esc ferma).</translation>
     </message>
     <message>
+        <location line="-72"/>
         <source>AF gain %</source>
-        <translation type="vanished">Guadagno AF %</translation>
+        <translation>Guadagno AF %</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Squelch %</source>
-        <translation type="vanished">Squelch %</translation>
+        <translation>Squelch %</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Noise reduction %</source>
-        <translation type="vanished">Riduzione rumore %</translation>
+        <translation>Riduzione rumore %</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Noise blanker %</source>
-        <translation type="vanished">Noise blanker %</translation>
+        <translation>Noise blanker %</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Speech compressor %</source>
-        <translation type="vanished">Compressore vocale %</translation>
+        <translation>Compressore vocale %</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>VOX gain %</source>
-        <translation type="vanished">Guadagno VOX %</translation>
+        <translation>Guadagno VOX %</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>IF shift Hz</source>
-        <translation type="vanished">IF shift Hz</translation>
+        <translation>IF shift Hz</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Notch Hz</source>
-        <translation type="vanished">Notch Hz</translation>
+        <translation>Notch Hz</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Preamp dB</source>
-        <translation type="vanished">Preamplificatore dB</translation>
+        <translation>Preamplificatore dB</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Attenuator dB</source>
-        <translation type="vanished">Attenuatore dB</translation>
+        <translation>Attenuatore dB</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Noise blanker</source>
-        <translation type="vanished">Noise blanker</translation>
+        <translation>Noise blanker</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Noise reduction</source>
-        <translation type="vanished">Riduzione rumore</translation>
+        <translation>Riduzione rumore</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Auto notch</source>
-        <translation type="vanished">Notch automatico</translation>
+        <translation>Notch automatico</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Speech compressor</source>
-        <translation type="vanished">Compressore vocale</translation>
+        <translation>Compressore vocale</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>VOX</source>
-        <translation type="vanished">VOX</translation>
+        <translation>VOX</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Dial lock</source>
-        <translation type="vanished">Blocco sintonia</translation>
+        <translation>Blocco sintonia</translation>
     </message>
     <message>
+        <location line="+32"/>
+        <source>Radio ATU disabled</source>
+        <translation>ATU della radio disattivato</translation>
+    </message>
+    <message>
+        <location line="+69"/>
+        <source>Voice keyer • preregistered messages</source>
+        <translation>Voice keyer • messaggi preregistrati</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Hold Record while speaking, release to save. Play sends the message on SSB; Preview plays it only on this computer. Esc stops.</source>
+        <translation>Tieni premuto Registra mentre parli, rilascia per salvare. Riproduci invia il messaggio in SSB; Anteprima lo riproduce solo su questo computer. Esc ferma.</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Voice speed</source>
+        <translation>Velocità della voce</translation>
+    </message>
+    <message>
+        <location line="+47"/>
+        <source>text of the message</source>
+        <translation>testo del messaggio</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Record</source>
+        <translation>Registra</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Preview</source>
+        <translation>Anteprima</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>AI help</source>
+        <translation>Aiuto IA</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Ask the assistant to rewrite this text so it reads well on the air</source>
+        <translation>Chiedi all&apos;assistente di riscrivere questo testo perché si legga bene in onda</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Rewrite this message so that a radio operator reads it aloud: short, clear, in the same language, no abbreviations that are hard to pronounce. Reply with the message only: </source>
+        <translation>Riscrivi questo messaggio in modo che un radioamatore lo legga ad alta voce: breve, chiaro, nella stessa lingua, senza abbreviazioni difficili da pronunciare. Rispondi solo con il messaggio: </translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>recorded</source>
+        <translation>registrato</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>text only</source>
+        <translation>solo testo</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <location line="+43"/>
+        <location line="+50"/>
+        <source>Clear</source>
+        <translation>Cancella</translation>
+    </message>
+    <message>
+        <location line="-88"/>
+        <source>Play</source>
+        <translation>Riproduci</translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <source>Hold to listen</source>
+        <translation>Tieni premuto per ascoltare</translation>
+    </message>
+    <message>
+        <location line="+15"/>
+        <source>What you said appears here</source>
+        <translation>Quello che dici appare qui</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Assistant • helps you write and read your messages</source>
+        <translation>Assistente • ti aiuta a scrivere e leggere i tuoi messaggi</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Install the Assistant pack (in the right column) to chat here. Nothing leaves this computer.</source>
+        <translation>Installa il pacchetto Assistente (nella colonna di destra) per chattare qui. Nulla esce da questo computer.</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Ask for a CQ call, a signal report, a short reply. Press AI help on a message to have it rewritten for the voice.</source>
+        <translation>Chiedi una chiamata CQ, un rapporto di segnale, una breve risposta. Premi Aiuto IA su un messaggio per farlo riscrivere per la voce.</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>The conversation appears here</source>
+        <translation>La conversazione appare qui</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Ask something…</source>
+        <translation>Chiedi qualcosa…</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Ask</source>
+        <translation>Chiedi</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Stop</source>
+        <translation>Stop</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Preview reply</source>
+        <translation>Anteprima risposta</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Send reply by voice (transmits)</source>
+        <translation>Invia la risposta a voce (trasmette)</translation>
+    </message>
+    <message>
+        <location line="+19"/>
+        <source>Optional packs • install only what you use</source>
+        <translation>Pacchetti opzionali • installa solo ciò che usi</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Install only what you need. Untick Use to switch a pack off without deleting it; Remove frees its disk space. Nothing goes to the internet during use, and no account is needed.</source>
+        <translation>Installa solo ciò che ti serve. Deseleziona Usa per disattivare un pacchetto senza eliminarlo; Rimuovi libera lo spazio su disco. Nulla va su Internet durante l&apos;uso e non serve alcun account.</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Voice (Italian and English)</source>
+        <translation>Voce (italiano e inglese)</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Speech recognition</source>
+        <translation>Riconoscimento vocale</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Assistant (local language model)</source>
+        <translation>Assistente (modello linguistico locale)</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>installed</source>
+        <translation>installato</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>not installed</source>
+        <translation>non installato</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Use</source>
+        <translation>Usa</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Install</source>
+        <translation>Installa</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Remove</source>
+        <translation>Rimuovi</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Cancel</source>
+        <translation>Annulla</translation>
+    </message>
+    <message>
+        <location line="+69"/>
+        <source>ATU state: </source>
+        <translation>Stato ATU: </translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>ON</source>
+        <translation>ON</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>OFF</source>
+        <translation>OFF</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>unknown</source>
+        <translation>sconosciuto</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>—</source>
+        <translation>—</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Read ATU state</source>
+        <translation>Leggi stato ATU</translation>
+    </message>
+    <message>
+        <location line="+16"/>
+        <source>ATU OFF</source>
+        <translation>ATU OFF</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Disable the radio&apos;s automatic antenna tuner.</source>
+        <translation>Disattiva il sintonizzatore d&apos;antenna automatico della radio.</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Ask a supported radio to power on through direct Hamlib CAT. The selected CAT port must remain available while the radio is in standby.</source>
+        <translation>Chiede a una radio supportata di accendersi tramite CAT Hamlib diretto. La porta CAT selezionata deve restare disponibile mentre la radio è in standby.</translation>
+    </message>
+    <message>
+        <location line="+23"/>
         <source>Receive • radio settings (read and set by CAT)</source>
-        <translation type="vanished">Ricezione • impostazioni radio (lette e impostate via CAT)</translation>
+        <translation>Ricezione • impostazioni radio (lette e impostate via CAT)</translation>
     </message>
     <message>
+        <location line="+40"/>
+        <location line="+37"/>
         <source>Off</source>
-        <translation type="vanished">Off</translation>
+        <translation>Off</translation>
     </message>
     <message>
+        <location line="-3"/>
         <source>Listen AGC</source>
-        <translation type="vanished">AGC ascolto</translation>
+        <translation>AGC ascolto</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Auto</source>
-        <translation type="vanished">Auto</translation>
+        <translation>Auto</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Fast</source>
-        <translation type="vanished">Veloce</translation>
+        <translation>Veloce</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Medium</source>
-        <translation type="vanished">Medio</translation>
+        <translation>Medio</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Slow</source>
-        <translation type="vanished">Lento</translation>
+        <translation>Lento</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Long</source>
-        <translation type="vanished">Lungo</translation>
+        <translation>Lungo</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Threshold</source>
-        <translation type="vanished">Soglia</translation>
+        <translation>Soglia</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Gain %1 dB</source>
-        <translation type="vanished">Guadagno %1 dB</translation>
+        <translation>Guadagno %1 dB</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Software AGC on the listening audio only (from DECODIUM SDR). Auto follows the noise floor by itself. It does not touch the decoder or the radio&apos;s AGC.</source>
-        <translation type="vanished">AGC software solo sull’audio di ascolto (da DECODIUM SDR). Auto segue da solo il rumore di fondo. Non agisce sul decoder né sull’AGC della radio.</translation>
+        <translation>AGC software solo sull’audio di ascolto (da DECODIUM SDR). Auto segue da solo il rumore di fondo. Non agisce sul decoder né sull’AGC della radio.</translation>
     </message>
     <message>
+        <location line="-591"/>
         <source>Power off radio?</source>
-        <translation type="vanished">Spegnere la radio?</translation>
+        <translation>Spegnere la radio?</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>This will switch off the radio connected through Hamlib CAT. The CAT session is kept open so you can try Power On afterward.</source>
-        <translation type="vanished">La radio collegata tramite CAT Hamlib verrà spenta. La sessione CAT resta aperta, così potrai provare l’accensione dopo.</translation>
+        <translation>La radio collegata tramite CAT Hamlib verrà spenta. La sessione CAT resta aperta, così potrai provare l’accensione dopo.</translation>
     </message>
     <message>
+        <location line="+24"/>
         <source>Radio ATU command sent</source>
-        <translation type="vanished">Comando ATU inviato alla radio</translation>
+        <translation>Comando ATU inviato alla radio</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Radio power-on command sent</source>
-        <translation type="vanished">Comando di accensione inviato alla radio</translation>
+        <translation>Comando di accensione inviato alla radio</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Radio power-off command sent</source>
-        <translation type="vanished">Comando di spegnimento inviato alla radio</translation>
+        <translation>Comando di spegnimento inviato alla radio</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Radio command failed</source>
-        <translation type="vanished">Comando radio non riuscito</translation>
+        <translation>Comando radio non riuscito</translation>
     </message>
     <message>
+        <location line="+420"/>
         <source>ATU Tune</source>
-        <translation type="vanished">Sintonia ATU</translation>
+        <translation>Sintonia ATU</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Ask the radio to start its internal antenna tuner.</source>
-        <translation type="vanished">Chiede alla radio di avviare l’accordatore d’antenna interno.</translation>
+        <translation>Chiede alla radio di avviare l’accordatore d’antenna interno.</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>Power on radio</source>
-        <translation type="vanished">Accendi radio</translation>
+        <translation>Accendi radio</translation>
     </message>
     <message>
         <source>Ask the radio to power on through Hamlib CAT, if supported by the model.</source>
         <translation type="vanished">Chiede alla radio di accendersi tramite CAT Hamlib, se supportato dal modello.</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Power off radio</source>
-        <translation type="vanished">Spegni radio</translation>
+        <translation>Spegni radio</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>failed</source>
-        <translation type="vanished">non riuscito</translation>
+        <translation>non riuscito</translation>
     </message>
 </context>
 <context>
@@ -30881,19 +35221,100 @@ Costa CPU extra durante i QSO. Default: OFF.</translation>
     </message>
 </context>
 <context>
+    <name>StationTelemetryDialog</name>
+    <message>
+        <location filename="../qml/decodium/components/StationTelemetryDialog.qml" line="+12"/>
+        <source>Station info received</source>
+        <translation>Info stazione ricevute</translation>
+    </message>
+    <message>
+        <location line="+32"/>
+        <source>Presumably from %1</source>
+        <translation>Presumibilmente da %1</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Sender unknown — this message type carries no callsign</source>
+        <translation>Mittente sconosciuto — questo tipo di messaggio non contiene il nominativo</translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>Temperature:</source>
+        <translation>Temperatura:</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>unknown</source>
+        <translation>sconosciuto</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>%1 °C</source>
+        <translation>%1 °C</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Wind:</source>
+        <translation>Vento:</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>%1 km/h %2</source>
+        <translation>%1 km/h %2</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Sky:</source>
+        <translation>Cielo:</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Locator:</source>
+        <translation>Locator:</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Power:</source>
+        <translation>Potenza:</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>%1 W</source>
+        <translation>%1 W</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Radio:</source>
+        <translation>Radio:</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Antenna:</source>
+        <translation>Antenna:</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Close</source>
+        <translation>Chiudi</translation>
+    </message>
+</context>
+<context>
     <name>StationWeather</name>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab0.qml" line="-20"/>
         <location filename="../src/bridge/DecodiumBridge.cpp" line="-5390"/>
         <source>Now: %1°C, wind %2 km/h %3, %4</source>
         <translation>Ora: %1°C, vento %2 km/h %3, %4</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Fetching…</source>
-        <translation type="vanished">Recupero dati…</translation>
+        <translation>Recupero dati…</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Off — temperature/wind sent as “unknown”</source>
-        <translation type="vanished">Disattivato — temperatura/vento inviati come “sconosciuti”</translation>
+        <translation>Disattivato — temperatura/vento inviati come “sconosciuti”</translation>
     </message>
     <message>
         <location filename="../src/radio/StationTelemetryCodec.cpp" line="+186"/>
@@ -30939,84 +35360,156 @@ Costa CPU extra durante i QSO. Default: OFF.</translation>
 <context>
     <name>StatsPanel</name>
     <message>
+        <location filename="../qml/decodium/rotor/StatsPanel.qml" line="+7"/>
         <source>OPERATION</source>
-        <translation type="vanished">OPERAZIONE</translation>
+        <translation>OPERAZIONE</translation>
     </message>
     <message>
+        <location line="+8"/>
         <source>Frames sent</source>
-        <translation type="vanished">Frame inviati</translation>
+        <translation>Frame inviati</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Frames received</source>
-        <translation type="vanished">Frame ricevuti</translation>
+        <translation>Frame ricevuti</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Lost replies</source>
-        <translation type="vanished">Risposte perse</translation>
+        <translation>Risposte perse</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Reconnections</source>
-        <translation type="vanished">Riconnessioni</translation>
+        <translation>Riconnessioni</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Up for</source>
-        <translation type="vanished">Attivo da</translation>
+        <translation>Attivo da</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Connected clients</source>
-        <translation type="vanished">Client connessi</translation>
+        <translation>Client connessi</translation>
     </message>
     <message>
+        <location line="+39"/>
         <source>Control box</source>
-        <translation type="vanished">Control box</translation>
+        <translation>Control box</translation>
     </message>
 </context>
 <context>
     <name>StatusBar</name>
     <message>
+        <location filename="../qml/decodium/components/StatusBar.qml" line="+579"/>
         <source>ALC meter 0..100
 &gt;60 = excessive ALC (TX power too high)</source>
-        <translation type="vanished">ALC meter 0..100
+        <translation>ALC meter 0..100
 &gt;60 = ALC eccessivo (potenza TX troppo alta)</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>ALC is not reported by Hamlib for this rig/backend</source>
-        <translation type="vanished">L&apos;ALC non viene riportato da Hamlib per questa radio/backend</translation>
+        <translation>L&apos;ALC non viene riportato da Hamlib per questa radio/backend</translation>
     </message>
     <message>
+        <location line="-187"/>
         <source>FT Decoder Threads: </source>
-        <translation type="vanished">Thread del decodificatore FT: </translation>
+        <translation>Thread del decodificatore FT: </translation>
     </message>
     <message>
+        <location line="+68"/>
+        <source>no address</source>
+        <translation>nessun indirizzo</translation>
+    </message>
+    <message>
+        <location line="+21"/>
+        <location line="+7"/>
+        <source>Click to open DecoPort</source>
+        <translation>Clicca per aprire DecoPort</translation>
+    </message>
+    <message>
+        <location line="-4"/>
+        <source>This radio is published on the network, %1 client connected</source>
+        <translation>Questa radio è pubblicata in rete, %1 client connesso</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>also reachable at: </source>
+        <translation>raggiungibile anche su: </translation>
+    </message>
+    <message>
+        <location line="+330"/>
         <source>Decodium 4.0</source>
-        <translation type="vanished">Decodium 4.0</translation>
+        <translation>Decodium 4.0</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/StatusBar.qml" line="+77"/>
         <source>Decodium&apos;s radio</source>
-        <translation type="vanished">la radio di Decodium</translation>
+        <translation>la radio di Decodium</translation>
     </message>
 </context>
 <context>
     <name>StatusStrip</name>
     <message>
+        <location filename="../qml/decodium/rotor/StatusStrip.qml" line="+25"/>
         <source>ready</source>
-        <translation type="vanished">pronto</translation>
+        <translation>pronto</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>app</source>
-        <translation type="vanished">app</translation>
+        <translation>app</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>web</source>
-        <translation type="vanished">web</translation>
+        <translation>web</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>rotctld</source>
-        <translation type="vanished">rotctld</translation>
+        <translation>rotctld</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>%1 %2</source>
-        <translation type="vanished">%1 %2</translation>
+        <translation>%1 %2</translation>
+    </message>
+</context>
+<context>
+    <name>SuperFoxIndicator</name>
+    <message>
+        <location filename="../qml/decodium/components/SuperFoxIndicator.qml" line="+25"/>
+        <source>SuperFox will activate after the current QSO is logged</source>
+        <translation>SuperFox si attiverà dopo la registrazione del QSO in corso</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>SuperHound reception active</source>
+        <translation>Ricezione SuperHound attiva</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>SuperFox transmission mode active</source>
+        <translation>Modo di trasmissione SuperFox attivo</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Click to enable SuperFox reception in FT8</source>
+        <translation>Clicca per abilitare la ricezione SuperFox in FT8</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>SuperFox requires FT8 mode</source>
+        <translation>SuperFox richiede il modo FT8</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Enable Hound or Fox mode to use SuperFox</source>
+        <translation>Abilita la modalità Hound o Fox per usare SuperFox</translation>
     </message>
 </context>
 <context>
@@ -31245,12 +35738,13 @@ Costa CPU extra durante i QSO. Default: OFF.</translation>
         <translation>Tempi di decodifica</translation>
     </message>
     <message>
-        <location line="+6"/>
+        <location filename="../qml/panels/TimeSyncPanel.qml" line="+237"/>
+        <location filename="../widgets/TimeSyncPanel.ui" line="+6"/>
         <source>Avg DT:</source>
         <translation>DT medio:</translation>
     </message>
     <message>
-        <location line="+14"/>
+        <location filename="../widgets/TimeSyncPanel.ui" line="+14"/>
         <source>DT Correction:</source>
         <translation>Correzione DT:</translation>
     </message>
@@ -31325,101 +35819,124 @@ Costa CPU extra durante i QSO. Default: OFF.</translation>
         <translation>Cancella cronologia</translation>
     </message>
     <message>
+        <location filename="../qml/panels/TimeSyncPanel.qml" line="-162"/>
         <source>TIME SYNC</source>
-        <translation type="vanished">SINCRONISMO</translation>
+        <translation>SINCRONISMO</translation>
     </message>
     <message>
+        <location line="+117"/>
         <source>NTP Offset:</source>
-        <translation type="vanished">Scarto NTP:</translation>
+        <translation>Scarto NTP:</translation>
     </message>
     <message>
+        <location line="+25"/>
         <source>SC Drift:</source>
-        <translation type="vanished">Deriva SC:</translation>
+        <translation>Deriva SC:</translation>
     </message>
     <message>
+        <location line="+50"/>
         <source>Decode Latency:</source>
-        <translation type="vanished">Ritardo di decodifica:</translation>
+        <translation>Ritardo di decodifica:</translation>
     </message>
     <message>
+        <location line="+25"/>
         <source>Settings:</source>
-        <translation type="vanished">Impostazioni:</translation>
+        <translation>Impostazioni:</translation>
     </message>
     <message>
+        <location line="+16"/>
         <source>Open</source>
-        <translation type="vanished">Apri</translation>
+        <translation>Apri</translation>
     </message>
     <message>
+        <location line="-62"/>
         <source>No qualifying decodes</source>
-        <translation type="vanished">Nessuna decodifica utile</translation>
+        <translation>Nessuna decodifica utile</translation>
     </message>
     <message>
+        <location line="+0"/>
+        <location line="+30"/>
         <source>Waiting cycle</source>
-        <translation type="vanished">In attesa del ciclo</translation>
+        <translation>In attesa del ciclo</translation>
     </message>
     <message>
+        <location line="-27"/>
         <source>LOCKED</source>
-        <translation type="vanished">AGGANCIATO</translation>
+        <translation>AGGANCIATO</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Converging</source>
-        <translation type="vanished">In convergenza</translation>
+        <translation>In convergenza</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Adjusting</source>
-        <translation type="vanished">In regolazione</translation>
+        <translation>In regolazione</translation>
     </message>
 </context>
 <context>
     <name>TopBar</name>
     <message>
+        <location filename="../qml/decodium/rotor/TopBar.qml" line="+54"/>
         <source>%1 · %2</source>
-        <translation type="vanished">%1 · %2</translation>
+        <translation>%1 · %2</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>CONTROL BOX %1</source>
-        <translation type="vanished">CONTROL BOX %1</translation>
+        <translation>CONTROL BOX %1</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>CONTROL BOX MISSING</source>
-        <translation type="vanished">CONTROL BOX ASSENTE</translation>
+        <translation>CONTROL BOX ASSENTE</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>ROTATING</source>
-        <translation type="vanished">IN ROTAZIONE</translation>
+        <translation>IN ROTAZIONE</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>STOPPED</source>
-        <translation type="vanished">FERMO</translation>
+        <translation>FERMO</translation>
     </message>
     <message numerus="yes">
+        <location line="+6"/>
         <source>%n client</source>
-        <translation type="vanished">
+        <translation>
             <numerusform>%n client</numerusform>
             <numerusform>%n client</numerusform>
         </translation>
     </message>
     <message>
+        <location line="+38"/>
         <source>Switch to the light dial</source>
-        <translation type="vanished">Passa al quadrante chiaro</translation>
+        <translation>Passa al quadrante chiaro</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Switch to the night dial</source>
-        <translation type="vanished">Passa al quadrante notturno</translation>
+        <translation>Passa al quadrante notturno</translation>
     </message>
 </context>
 <context>
     <name>TrafficPanel</name>
     <message>
+        <location filename="../qml/decodium/rotor/TrafficPanel.qml" line="+8"/>
         <source>SERIAL TRAFFIC</source>
-        <translation type="vanished">TRAFFICO SERIALE</translation>
+        <translation>TRAFFICO SERIALE</translation>
     </message>
     <message>
+        <location line="+11"/>
         <source>%1 @ %2 8N1</source>
-        <translation type="vanished">%1 @ %2 8N1</translation>
+        <translation>%1 @ %2 8N1</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>%1 frame</source>
-        <translation type="vanished">%1 frame</translation>
+        <translation>%1 frame</translation>
     </message>
 </context>
 <context>
@@ -31433,32 +35950,48 @@ Costa CPU extra durante i QSO. Default: OFF.</translation>
 <context>
     <name>TransmitPanel</name>
     <message>
+        <location filename="../qml/decodium/rtty/TransmitPanel.qml" line="+74"/>
         <source>Select RTTY and an available audio output</source>
-        <translation type="vanished">Seleziona RTTY e un&apos;uscita audio disponibile</translation>
+        <translation>Seleziona RTTY e un&apos;uscita audio disponibile</translation>
     </message>
     <message>
+        <location line="-1"/>
         <source>Type here — Enter sends the line</source>
-        <translation type="vanished">Scrivi qui — Invio manda</translation>
+        <translation>Scrivi qui — Invio manda</translation>
     </message>
     <message>
         <source>Connect a radio to transmit</source>
         <translation type="vanished">Collega una radio</translation>
     </message>
     <message>
+        <location line="+31"/>
         <source>TRANSMITTING</source>
-        <translation type="vanished">IN ARIA</translation>
+        <translation>IN ARIA</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>TRANSMIT</source>
-        <translation type="vanished">TRASMETTI</translation>
+        <translation>TRASMETTI</translation>
     </message>
     <message>
+        <location line="+42"/>
         <source>Abort</source>
-        <translation type="vanished">Annulla</translation>
+        <translation>Annulla</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Clear</source>
-        <translation type="vanished">Pulisci</translation>
+        <translation>Pulisci</translation>
+    </message>
+    <message>
+        <location line="+81"/>
+        <source>QMX FSK requires 100% application audio; RF power is set on the radio.</source>
+        <translation>L&apos;FSK QMX richiede il 100% dell&apos;audio dell&apos;applicazione; la potenza RF si imposta sulla radio.</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Set the level so the radio&apos;s ALC barely moves.</source>
+        <translation>Imposta il livello in modo che l&apos;ALC della radio si muova appena.</translation>
     </message>
     <message>
         <source>High enough to drive the ALC — check the meter.</source>
@@ -31468,443 +36001,569 @@ Costa CPU extra durante i QSO. Default: OFF.</translation>
 <context>
     <name>TuningScope</name>
     <message>
+        <location filename="../qml/decodium/rtty/TuningScope.qml" line="+26"/>
         <source>TUNING</source>
-        <translation type="vanished">SINTONIA</translation>
+        <translation>SINTONIA</translation>
     </message>
 </context>
 <context>
     <name>TxPanel</name>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="+1563"/>
         <source>TX slot
 1st: :00/:30
 2nd: :15/:45</source>
-        <translation type="vanished">Slot TX
+        <translation>Slot TX
 1st: :00/:30
 2nd: :15/:45</translation>
     </message>
     <message>
+        <location line="-1211"/>
         <source>TX Power</source>
-        <translation type="vanished">Potenza TX</translation>
+        <translation>Potenza TX</translation>
     </message>
     <message>
+        <location line="+153"/>
+        <source>Freq</source>
+        <translation>Freq</translation>
+    </message>
+    <message>
+        <location line="+534"/>
+        <source>Select a %1 working frequency; starred entries are preferred</source>
+        <translation>Seleziona una frequenza di lavoro %1; le voci con la stella sono preferite</translation>
+    </message>
+    <message>
+        <location line="+277"/>
         <source>Multi-Answer Mode (MAM) - right-click opens the window (default OFF)</source>
-        <translation type="vanished">Multi-Answer Mode (MAM) - il clic destro apre la finestra (default OFF)</translation>
+        <translation>Multi-Answer Mode (MAM) - il clic destro apre la finestra (default OFF)</translation>
     </message>
     <message>
+        <location line="+29"/>
         <source>Deep Search: deeper weak-signal search using known callsigns (default OFF)</source>
-        <translation type="vanished">Deep Search: ricerca segnali deboli più profonda usando callsign noti (default OFF)</translation>
+        <translation>Deep Search: ricerca segnali deboli più profonda usando callsign noti (default OFF)</translation>
     </message>
     <message>
+        <location line="+24"/>
         <source>A priori decode (AP): uses known information to recover weak signals (default OFF)</source>
-        <translation type="vanished">Decodifica a priori (AP): usa informazioni note per recuperare segnali deboli (default OFF)</translation>
+        <translation>Decodifica a priori (AP): usa informazioni note per recuperare segnali deboli (default OFF)</translation>
     </message>
     <message>
+        <location line="+24"/>
         <source>Automatic QSO sequencing (default OFF)</source>
-        <translation type="vanished">Sequenziamento automatico del QSO (default OFF)</translation>
+        <translation>Sequenziamento automatico del QSO (default OFF)</translation>
     </message>
     <message>
+        <location line="+24"/>
         <source>Quick QSO: skips TX1 and starts from TX2 (direct report) (default OFF)</source>
-        <translation type="vanished">Quick QSO: salta TX1 e parte da TX2 (report diretto) (default OFF)</translation>
+        <translation>Quick QSO: salta TX1 e parte da TX2 (report diretto) (default OFF)</translation>
     </message>
     <message>
+        <location line="+26"/>
         <source>Enable TX
 Right button + mouse wheel: adjust TX power</source>
-        <translation type="vanished">Abilita TX
+        <translation>Abilita TX
 Tasto destro + rotella del mouse: regola la potenza TX</translation>
     </message>
     <message>
+        <location line="+35"/>
         <source>Lock the TX frequency
 (Hold Tx Freq)</source>
-        <translation type="vanished">Blocca la frequenza TX
+        <translation>Blocca la frequenza TX
 (Hold Tx Freq)</translation>
     </message>
     <message>
+        <location line="+25"/>
         <source>Repeated Auto CQ
 Automatically calls CQ until a reply arrives (default OFF)</source>
-        <translation type="vanished">Auto CQ ripetuto
+        <translation>Auto CQ ripetuto
 Chiama CQ automaticamente finché non arriva una risposta (default OFF)</translation>
     </message>
     <message>
+        <location line="+199"/>
         <source>CQ filter active (%1). Click: change level / turn off.</source>
-        <translation type="vanished">Filtro CQ attivo (%1). Clic: cambia livello / disattiva.</translation>
+        <translation>Filtro CQ attivo (%1). Clic: cambia livello / disattiva.</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>CQ only</source>
-        <translation type="vanished">Solo CQ</translation>
+        <translation>Solo CQ</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>CQ filter off. Click: show only CQ, then cycle 73 / RR73 / RRR.</source>
-        <translation type="vanished">Filtro CQ disattivato. Clic: mostra solo CQ, poi cicla 73 / RR73 / RRR.</translation>
+        <translation>Filtro CQ disattivato. Clic: mostra solo CQ, poi cicla 73 / RR73 / RRR.</translation>
     </message>
     <message>
+        <location line="+824"/>
         <source>Locator (e.g. JN71) — enter manually</source>
-        <translation type="vanished">Locatore (es. JN71) — inserisci manualmente</translation>
+        <translation>Locatore (es. JN71) — inserisci manualmente</translation>
     </message>
     <message>
+        <location line="+246"/>
+        <source>RX / downlink MHz:</source>
+        <translation>MHz RX / downlink:</translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>e.g. 10489.540000</source>
+        <translation>es. 10489.540000</translation>
+    </message>
+    <message>
+        <location line="+238"/>
         <source>Edit TX%1 message</source>
-        <translation type="vanished">Modifica messaggio TX%1</translation>
+        <translation>Modifica messaggio TX%1</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>Re-enable TX%1</source>
-        <translation type="vanished">Riabilita TX%1</translation>
+        <translation>Riabilita TX%1</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Skip TX%1 (skip auto-seq)</source>
-        <translation type="vanished">Salta TX%1 (salta auto-seq)</translation>
+        <translation>Salta TX%1 (salta auto-seq)</translation>
     </message>
     <message>
+        <location line="-1496"/>
         <source>Active call: %1 (missed target %2/%3)
 Click to open the panel</source>
-        <translation type="vanished">Chiamata attiva: %1 (target mancato %2/%3)
+        <translation>Chiamata attiva: %1 (target mancato %2/%3)
 Clic per aprire il pannello</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Direct call (CALL)
 Open the direct callsign call panel
 with missed-target limit, timeout, and period control</source>
-        <translation type="vanished">Chiamata diretta (CALL)
+        <translation>Chiamata diretta (CALL)
 Apre il pannello di chiamata diretta del callsign
 con limite target-mancato, timeout e controllo del periodo</translation>
     </message>
     <message>
+        <location line="+52"/>
         <source>Auto CQ: alternates TX/RX phases after repeated unanswered CQs (default OFF)</source>
-        <translation type="vanished">Auto CQ: alterna le fasi TX/RX dopo ripetuti CQ senza risposta (default OFF)</translation>
+        <translation>Auto CQ: alterna le fasi TX/RX dopo ripetuti CQ senza risposta (default OFF)</translation>
     </message>
     <message>
+        <location line="+25"/>
         <source>Stop TX</source>
-        <translation type="vanished">Ferma TX</translation>
+        <translation>Ferma TX</translation>
     </message>
     <message>
+        <location line="+27"/>
         <source>Clear DX, reports, and TX1-TX5</source>
-        <translation type="vanished">Cancella DX, report e TX1-TX5</translation>
+        <translation>Cancella DX, report e TX1-TX5</translation>
     </message>
     <message>
+        <location line="+25"/>
         <source>Tune (transmits the tuning carrier)</source>
-        <translation type="vanished">Tune (trasmette la portante di sintonia)</translation>
+        <translation>Tune (trasmette la portante di sintonia)</translation>
     </message>
     <message>
+        <location line="+68"/>
         <source>Async FT2 mode - sine wave: green=RX, red=TX (default OFF)</source>
-        <translation type="vanished">Modalità FT2 async - onda sinusoidale: verde=RX, rosso=TX (default OFF)</translation>
+        <translation>Modalità FT2 async - onda sinusoidale: verde=RX, rosso=TX (default OFF)</translation>
     </message>
     <message>
+        <location line="+15"/>
         <source>Hound mode active</source>
-        <translation type="vanished">Modo Hound attivo</translation>
+        <translation>Modo Hound attivo</translation>
     </message>
     <message>
+        <location line="+582"/>
         <source>Cancel</source>
-        <translation type="vanished">Annulla</translation>
+        <translation>Annulla</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Standard</source>
-        <translation type="vanished">Standard</translation>
+        <translation>Standard</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Apply</source>
-        <translation type="vanished">Applica</translation>
+        <translation>Applica</translation>
     </message>
     <message>
+        <location line="+18"/>
+        <location line="+129"/>
         <source>Confirm QSO logging</source>
-        <translation type="vanished">Conferma registrazione QSO</translation>
+        <translation>Conferma registrazione QSO</translation>
     </message>
     <message>
+        <location line="+513"/>
         <source>TX%1 disabled (right-click -&gt; menu to re-enable)</source>
-        <translation type="vanished">TX%1 disabilitata (clic destro -&gt; menu per riabilitare)</translation>
+        <translation>TX%1 disabilitata (clic destro -&gt; menu per riabilitare)</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Click: send now
 Right-click: menu (Edit / Skip TX%1)
 Long-press: edit message</source>
-        <translation type="vanished">Click: invia ora
+        <translation>Click: invia ora
 Clic destro: menu (Modifica / Salta TX%1)
 Pressione prolungata: modifica messaggio</translation>
     </message>
     <message>
+        <location line="-457"/>
         <source>Start UTC:</source>
-        <translation type="vanished">Inizio UTC:</translation>
+        <translation>Inizio UTC:</translation>
     </message>
     <message>
+        <location line="+20"/>
         <source>End UTC:</source>
-        <translation type="vanished">Fine UTC:</translation>
+        <translation>Fine UTC:</translation>
     </message>
     <message>
+        <location line="+193"/>
         <source>Sat Mode:</source>
-        <translation type="vanished">Modo sat:</translation>
+        <translation>Modo sat:</translation>
     </message>
     <message>
+        <location line="+36"/>
         <source>DX Cluster:</source>
-        <translation type="vanished">Cluster DX:</translation>
+        <translation>Cluster DX:</translation>
     </message>
     <message>
+        <location line="+14"/>
         <source>Spot to cluster</source>
-        <translation type="vanished">Spot sul cluster</translation>
+        <translation>Spot sul cluster</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Cluster not connected</source>
-        <translation type="vanished">Cluster non connesso</translation>
+        <translation>Cluster non connesso</translation>
     </message>
     <message>
         <source>Close</source>
         <translation type="vanished">Chiudi</translation>
     </message>
     <message>
+        <location line="+43"/>
         <source>Add</source>
-        <translation type="vanished">Aggiungi</translation>
+        <translation>Aggiungi</translation>
     </message>
     <message>
+        <location line="-739"/>
         <source>Finish TX before logging the QSO</source>
-        <translation type="vanished">Termina la trasmissione prima di registrare il QSO</translation>
+        <translation>Termina la trasmissione prima di registrare il QSO</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Log current QSO</source>
-        <translation type="vanished">Registra il QSO corrente</translation>
+        <translation>Registra il QSO corrente</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>No active QSO to log</source>
-        <translation type="vanished">Nessun QSO attivo da registrare</translation>
+        <translation>Nessun QSO attivo da registrare</translation>
     </message>
     <message>
+        <location line="+710"/>
         <source>Skip</source>
-        <translation type="vanished">Salta</translation>
+        <translation>Salta</translation>
     </message>
     <message>
+        <location line="-315"/>
         <source>Call:</source>
-        <translation type="vanished">Nominativo:</translation>
+        <translation>Nominativo:</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Grid:</source>
-        <translation type="vanished">Locator:</translation>
+        <translation>Locator:</translation>
     </message>
     <message>
+        <location line="+23"/>
         <source>Report:</source>
-        <translation type="vanished">Rapporto:</translation>
+        <translation>Rapporto:</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Mode:</source>
-        <translation type="vanished">Modalità:</translation>
+        <translation>Modalità:</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Freq:</source>
-        <translation type="vanished">Freq:</translation>
+        <translation>Freq:</translation>
     </message>
     <message>
+        <location line="+43"/>
         <source>Comment:</source>
-        <translation type="vanished">Commento:</translation>
+        <translation>Commento:</translation>
     </message>
     <message>
+        <location line="+159"/>
         <source>Satellite:</source>
-        <translation type="vanished">Satellite:</translation>
+        <translation>Satellite:</translation>
     </message>
     <message>
+        <location line="-96"/>
         <source>Copy</source>
-        <translation type="vanished">Copia</translation>
+        <translation>Copia</translation>
     </message>
     <message>
+        <location line="-27"/>
         <source>Cut</source>
-        <translation type="vanished">Taglia</translation>
+        <translation>Taglia</translation>
     </message>
     <message>
+        <location line="+53"/>
         <source>Paste</source>
-        <translation type="vanished">Incolla</translation>
+        <translation>Incolla</translation>
     </message>
     <message>
+        <location line="+34"/>
         <source>Select All</source>
-        <translation type="vanished">Seleziona tutto</translation>
+        <translation>Seleziona tutto</translation>
     </message>
 </context>
 <context>
     <name>UpdateDialog</name>
     <message>
+        <location filename="../qml/decodium/components/UpdateDialog.qml" line="+89"/>
         <source>Update available</source>
-        <translation type="vanished">Aggiornamento disponibile</translation>
+        <translation>Aggiornamento disponibile</translation>
     </message>
     <message>
         <source>Decodium %1 is available</source>
         <translation type="vanished">Decodium %1 è disponibile</translation>
     </message>
     <message>
+        <location line="+51"/>
         <source>You are running %1.</source>
-        <translation type="vanished">Stai usando %1.</translation>
+        <translation>Stai usando %1.</translation>
     </message>
     <message>
+        <location line="+21"/>
         <source>What&apos;s new:</source>
-        <translation type="vanished">Novità:</translation>
+        <translation>Novità:</translation>
     </message>
     <message>
+        <location line="+80"/>
         <source>Decodium will close and the installer will start. Your settings and QSO log are kept.</source>
-        <translation type="vanished">Decodium si chiuderà e verrà avviato il programma di installazione. Le tue impostazioni e il log QSO vengono mantenuti.</translation>
+        <translation>Decodium si chiuderà e verrà avviato il programma di installazione. Le tue impostazioni e il log QSO vengono mantenuti.</translation>
     </message>
     <message>
+        <location line="-7"/>
         <source>The current AppImage will be replaced safely and Decodium will restart. Your settings and QSO log are kept.</source>
-        <translation type="vanished">L’AppImage corrente verrà sostituita in modo sicuro e Decodium verrà riavviato. Le impostazioni e il log QSO saranno mantenuti.</translation>
+        <translation>L’AppImage corrente verrà sostituita in modo sicuro e Decodium verrà riavviato. Le impostazioni e il log QSO saranno mantenuti.</translation>
     </message>
     <message>
+        <location line="-85"/>
+        <source>Source: %1</source>
+        <translation>Sorgente: %1</translation>
+    </message>
+    <message>
+        <location line="+88"/>
         <source>The new AppImage will be saved to your Downloads folder. Launch it manually to complete the update.</source>
-        <translation type="vanished">La nuova AppImage verrà salvata nella cartella Download. Avviala manualmente per completare l’aggiornamento.</translation>
+        <translation>La nuova AppImage verrà salvata nella cartella Download. Avviala manualmente per completare l’aggiornamento.</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>The update package will be downloaded and opened. Your settings and QSO log are kept.</source>
-        <translation type="vanished">Il pacchetto di aggiornamento verrà scaricato e aperto. Le impostazioni e il log QSO saranno mantenuti.</translation>
+        <translation>Il pacchetto di aggiornamento verrà scaricato e aperto. Le impostazioni e il log QSO saranno mantenuti.</translation>
     </message>
     <message>
+        <location line="+41"/>
         <source>Skip this version</source>
-        <translation type="vanished">Ignora questa versione</translation>
+        <translation>Ignora questa versione</translation>
     </message>
     <message>
+        <location line="+17"/>
         <source>Later</source>
-        <translation type="vanished">Più tardi</translation>
+        <translation>Più tardi</translation>
     </message>
     <message>
+        <location line="+19"/>
         <source>Update now</source>
-        <translation type="vanished">Aggiorna ora</translation>
+        <translation>Aggiorna ora</translation>
     </message>
     <message>
+        <location line="-2"/>
         <source>Update AppImage</source>
-        <translation type="vanished">Aggiorna AppImage</translation>
+        <translation>Aggiorna AppImage</translation>
     </message>
     <message>
+        <location line="+2"/>
         <source>Download update</source>
-        <translation type="vanished">Scarica aggiornamento</translation>
+        <translation>Scarica aggiornamento</translation>
     </message>
 </context>
 <context>
     <name>Waterfall</name>
     <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="+964"/>
         <source>Hide</source>
-        <translation type="vanished">Nascondi</translation>
+        <translation>Nascondi</translation>
     </message>
     <message>
+        <location line="+23"/>
         <source>Hide waterfall controls</source>
-        <translation type="vanished">Nascondi controlli waterfall</translation>
+        <translation>Nascondi controlli waterfall</translation>
     </message>
     <message>
+        <location line="+1163"/>
         <source>4096-bin panadapter · SmartSDR style
 Click MONITOR to start</source>
-        <translation type="vanished">Panadapter a 4096 bin · stile SmartSDR
+        <translation>Panadapter a 4096 bin · stile SmartSDR
 Clicca MONITOR per iniziare</translation>
     </message>
     <message>
+        <location line="+46"/>
         <source>Show controls</source>
-        <translation type="vanished">Mostra controlli</translation>
+        <translation>Mostra controlli</translation>
     </message>
     <message>
+        <location line="+62"/>
         <source>Show waterfall controls</source>
-        <translation type="vanished">Mostra controlli waterfall</translation>
+        <translation>Mostra controlli waterfall</translation>
     </message>
     <message>
+        <location line="-1408"/>
         <source>Traces:</source>
-        <translation type="vanished">Tracce:</translation>
+        <translation>Tracce:</translation>
     </message>
     <message>
+        <location line="+25"/>
         <source>Floor:</source>
-        <translation type="vanished">Fondo:</translation>
+        <translation>Fondo:</translation>
     </message>
     <message>
+        <location line="-47"/>
         <source>Stacked-trace 3D spectrum: shows the history of the band receding into the distance. It costs more to draw, so leave it off on modest machines.</source>
-        <translation type="vanished">Spettro 3D a tracce impilate: mostra la storia della banda che si allontana. Costa di più da disegnare, quindi sulle macchine modeste conviene lasciarlo spento.</translation>
+        <translation>Spettro 3D a tracce impilate: mostra la storia della banda che si allontana. Costa di più da disegnare, quindi sulle macchine modeste conviene lasciarlo spento.</translation>
     </message>
     <message>
+        <location line="-1"/>
         <source>Stacked-trace 3D spectrum: on. Click to go back to the 2D trace.</source>
-        <translation type="vanished">Spettro 3D a tracce impilate: acceso. Premi per tornare alla traccia 2D.</translation>
+        <translation>Spettro 3D a tracce impilate: acceso. Premi per tornare alla traccia 2D.</translation>
     </message>
     <message>
+        <location line="+37"/>
         <source>How many history traces are drawn. Fewer traces separate the ridges; more of them show a longer history.</source>
-        <translation type="vanished">Quante tracce di storia vengono disegnate. Poche tracce separano le creste, molte mostrano una storia più lunga.</translation>
+        <translation>Quante tracce di storia vengono disegnate. Poche tracce separano le creste, molte mostrano una storia più lunga.</translation>
     </message>
     <message>
+        <location line="+25"/>
         <source>How far above the minimum the ridges start. Raise it to flatten the noise and leave only the signals standing.</source>
-        <translation type="vanished">Quanto sopra il minimo partono le creste. Alzalo per appiattire il rumore e lasciare in piedi solo i segnali.</translation>
+        <translation>Quanto sopra il minimo partono le creste. Alzalo per appiattire il rumore e lasciare in piedi solo i segnali.</translation>
     </message>
     <message>
+        <location line="-416"/>
         <source>Calls:</source>
-        <translation type="vanished">Nominativi:</translation>
+        <translation>Nominativi:</translation>
     </message>
     <message>
+        <location line="+16"/>
         <source>Show decoded callsigns on the waterfall</source>
-        <translation type="vanished">Mostra i nominativi decodificati sulla cascata</translation>
+        <translation>Mostra i nominativi decodificati sulla cascata</translation>
     </message>
     <message>
+        <location line="+14"/>
         <source>Font</source>
-        <translation type="vanished">Carattere</translation>
+        <translation>Carattere</translation>
     </message>
     <message>
+        <location line="+20"/>
         <source>Gap</source>
-        <translation type="vanished">Spaziatura</translation>
+        <translation>Spaziatura</translation>
     </message>
     <message>
+        <location line="+36"/>
         <source>Bold</source>
-        <translation type="vanished">Grassetto</translation>
+        <translation>Grassetto</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Color</source>
-        <translation type="vanished">Colore</translation>
+        <translation>Colore</translation>
     </message>
     <message>
+        <location line="+110"/>
         <source>Palette:</source>
-        <translation type="vanished">Tavolozza:</translation>
+        <translation>Tavolozza:</translation>
     </message>
     <message>
+        <location line="+85"/>
         <source>Automatic noise threshold (IIR)</source>
-        <translation type="vanished">Soglia di rumore automatica (IIR)</translation>
+        <translation>Soglia di rumore automatica (IIR)</translation>
     </message>
     <message>
+        <location line="+174"/>
         <source>Show DX Cluster spots on the waterfall (click to call)</source>
-        <translation type="vanished">Mostra gli spot del DX Cluster sulla cascata (clic per chiamare)</translation>
+        <translation>Mostra gli spot del DX Cluster sulla cascata (clic per chiamare)</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Cluster</source>
-        <translation type="vanished">Cluster</translation>
+        <translation>Cluster</translation>
     </message>
     <message>
+        <location line="+28"/>
         <source>▴</source>
-        <translation type="vanished">▴</translation>
+        <translation>▴</translation>
     </message>
     <message>
+        <location line="+30"/>
         <source>Peak Hold: keeps spectrum peaks visible</source>
-        <translation type="vanished">Tieni i picchi: mantiene visibili i picchi dello spettro</translation>
+        <translation>Tieni i picchi: mantiene visibili i picchi dello spettro</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Peak</source>
-        <translation type="vanished">Peak</translation>
+        <translation>Peak</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Zoom</source>
-        <translation type="vanished">Zoom</translation>
+        <translation>Zoom</translation>
     </message>
     <message>
+        <location line="+32"/>
         <source>Measured noise threshold</source>
-        <translation type="vanished">Soglia di rumore misurata</translation>
+        <translation>Soglia di rumore misurata</translation>
     </message>
     <message>
+        <location line="+14"/>
         <source>Black:</source>
-        <translation type="vanished">Nero:</translation>
+        <translation>Nero:</translation>
     </message>
     <message>
+        <location line="+13"/>
         <source>Gain:</source>
-        <translation type="vanished">Guadagno:</translation>
+        <translation>Guadagno:</translation>
     </message>
     <message>
+        <location line="+15"/>
         <source>Contrasto:</source>
-        <translation type="vanished">Contrasto:</translation>
+        <translation>Contrasto:</translation>
     </message>
     <message>
+        <location line="+16"/>
         <source>Vel:</source>
-        <translation type="vanished">Vel:</translation>
+        <translation>Vel:</translation>
     </message>
     <message>
+        <location line="+1087"/>
         <source>☰</source>
-        <translation type="vanished">☰</translation>
+        <translation>☰</translation>
     </message>
     <message>
+        <location line="+36"/>
         <source>⠿</source>
-        <translation type="vanished">⠿</translation>
+        <translation>⠿</translation>
     </message>
     <message>
+        <location line="-1453"/>
         <source>Cut:</source>
-        <translation type="vanished">Taglio:</translation>
+        <translation>Taglio:</translation>
     </message>
     <message>
+        <location line="+15"/>
         <source>How much of the spectrum the automatic threshold calls noise and cuts away. 10 is the historical setting: raise it to clean up an empty band, lower it if weak signals disappear.</source>
-        <translation type="vanished">Quanta parte dello spettro la soglia automatica considera rumore e taglia via. 10 è la taratura storica: alzalo per ripulire una banda vuota, abbassalo se spariscono i segnali deboli.</translation>
+        <translation>Quanta parte dello spettro la soglia automatica considera rumore e taglia via. 10 è la taratura storica: alzalo per ripulire una banda vuota, abbassalo se spariscono i segnali deboli.</translation>
     </message>
 </context>
 <context>
@@ -34687,197 +39346,315 @@ Fare clic con il tasto destro per inserire ed eliminare le opzioni.</translation
 <context>
     <name>decodium::cw::CwController</name>
     <message>
+        <location filename="../src/cw/CwController.cpp" line="+242"/>
         <source>Cannot tune: check CAT connection and stop transmitting.</source>
-        <translation type="vanished">Sintonia non disponibile: verifica il CAT e termina la trasmissione.</translation>
+        <translation>Sintonia non disponibile: verifica il CAT e termina la trasmissione.</translation>
     </message>
     <message>
+        <location line="+21"/>
         <source>Wait for a CW signal with Decoder tone set to Auto.</source>
-        <translation type="vanished">Attendi un segnale CW con Tono del decodificatore impostato su Auto.</translation>
+        <translation>Attendi un segnale CW con Tono del decodificatore impostato su Auto.</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>CW is already centered.</source>
-        <translation type="vanished">CW già centrato.</translation>
+        <translation>CW già centrato.</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>CW centered at %1 Hz.</source>
-        <translation type="vanished">CW centrato a %1 Hz.</translation>
+        <translation>CW centrato a %1 Hz.</translation>
     </message>
     <message>
+        <location line="+232"/>
+        <source>%1 is a TCP CAT/rigctld address, not a local %2 port. Configure it under CAT and select a real COM or tty device here.</source>
+        <translation>%1 è un indirizzo CAT/rigctld TCP, non una porta %2 locale. Configuralo in CAT e seleziona qui un vero dispositivo COM o tty.</translation>
+    </message>
+    <message>
+        <location line="+18"/>
+        <source>%1 cannot be used for the %2 because it is already reserved by %3. A serial CW keyer needs a different local COM or tty port. Select Audio tone, the radio CAT keyer, or a separate keyer port.</source>
+        <translation>%1 non può essere usato per %2 perché è già riservato da %3. Un keyer CW seriale richiede un&apos;altra porta COM o tty locale. Seleziona Tono audio, il keyer CAT della radio o una porta keyer separata.</translation>
+    </message>
+    <message>
+        <location line="+88"/>
+        <location line="+13"/>
         <source>CW transmit is not ready</source>
-        <translation type="vanished">La trasmissione CW non è pronta</translation>
+        <translation>La trasmissione CW non è pronta</translation>
     </message>
     <message>
+        <location line="+50"/>
         <source>The CW audio did not start</source>
-        <translation type="vanished">L&apos;audio CW non è partito</translation>
+        <translation>L&apos;audio CW non è partito</translation>
     </message>
     <message>
+        <location line="+43"/>
+        <location line="+3"/>
+        <source>The radio CAT keyer did not accept the CW text</source>
+        <translation>Il keyer CAT della radio non ha accettato il testo CW</translation>
+    </message>
+    <message>
+        <location line="+47"/>
         <source>The CW key did not reach the remote radio</source>
-        <translation type="vanished">Il tasto CW non è arrivato alla radio remota</translation>
+        <translation>Il tasto CW non è arrivato alla radio remota</translation>
     </message>
     <message>
+        <location line="-276"/>
         <source>The WinKeyer on %1 did not open</source>
-        <translation type="vanished">Il WinKeyer su %1 non si è aperto</translation>
+        <translation>Il WinKeyer su %1 non si è aperto</translation>
     </message>
     <message>
+        <location line="-424"/>
+        <source>The CAT CW keyer did not confirm the send command</source>
+        <translation>Il keyer CW CAT non ha confermato il comando di invio</translation>
+    </message>
+    <message>
+        <location line="+70"/>
+        <location line="+242"/>
+        <location line="+98"/>
+        <location line="+2"/>
+        <source>serial keyer</source>
+        <translation>manipolatore seriale</translation>
+    </message>
+    <message>
+        <location line="-338"/>
+        <location line="+263"/>
+        <location line="+82"/>
+        <location line="+2"/>
+        <source>WinKeyer</source>
+        <translation>WinKeyer</translation>
+    </message>
+    <message>
+        <location line="-6"/>
         <source>The keyer port %1 did not open</source>
-        <translation type="vanished">La porta del manipolatore %1 non si è aperta</translation>
+        <translation>La porta del manipolatore %1 non si è aperta</translation>
+    </message>
+</context>
+<context>
+    <name>decodium::cw::CwKeyer</name>
+    <message>
+        <location filename="../src/cw/CwKeyer.cpp" line="+291"/>
+        <source>No serial port chosen for the CW keyer</source>
+        <translation>Nessuna porta seriale scelta per il keyer CW</translation>
+    </message>
+</context>
+<context>
+    <name>decodium::cw::CwKeyerWorker</name>
+    <message>
+        <location line="-213"/>
+        <source>Cannot open %1: %2</source>
+        <translation>Impossibile aprire %1: %2</translation>
+    </message>
+</context>
+<context>
+    <name>decodium::cw::CwSidetoneWorker</name>
+    <message>
+        <location filename="../src/cw/CwSidetone.cpp" line="+209"/>
+        <source>Cannot play the CW listening output %1 (audio error %2).</source>
+        <translation>Impossibile riprodurre sull&apos;uscita di ascolto CW %1 (errore audio %2).</translation>
+    </message>
+    <message>
+        <location line="+31"/>
+        <source>CW listening output is unavailable. Select speakers or headphones and try again.</source>
+        <translation>L&apos;uscita di ascolto CW non è disponibile. Seleziona altoparlanti o cuffie e riprova.</translation>
+    </message>
+    <message>
+        <location line="+21"/>
+        <source>CW listening output %1 does not support a compatible PCM audio format (preferred: %2 Hz, %3 channels).</source>
+        <translation>L&apos;uscita di ascolto CW %1 non supporta un formato audio PCM compatibile (preferito: %2 Hz, %3 canali).</translation>
     </message>
 </context>
 <context>
     <name>decodium::jtty::JttyController</name>
     <message>
+        <location filename="../src/jtty/JttyController.cpp" line="+41"/>
         <source>unknown ARRL/RAC section</source>
-        <translation type="vanished">sezione ARRL/RAC sconosciuta</translation>
+        <translation>sezione ARRL/RAC sconosciuta</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>invalid native atom</source>
-        <translation type="vanished">atomo nativo non valido</translation>
+        <translation>atomo nativo non valido</translation>
     </message>
     <message>
+        <location line="+178"/>
         <source>Transmission stopped by the watchdog.</source>
-        <translation type="vanished">Trasmissione fermata dal watchdog.</translation>
+        <translation>Trasmissione fermata dal watchdog.</translation>
     </message>
     <message>
+        <location line="+255"/>
         <source>The message does not fit in 16 JTTY frames.</source>
-        <translation type="vanished">Il messaggio non entra in 16 frame JTTY.</translation>
+        <translation>Il messaggio non entra in 16 frame JTTY.</translation>
     </message>
     <message>
+        <location line="+0"/>
         <source>Nothing to send.</source>
-        <translation type="vanished">Niente da trasmettere.</translation>
+        <translation>Niente da trasmettere.</translation>
     </message>
     <message>
+        <location line="+55"/>
         <source>too long (max 16 frames)</source>
-        <translation type="vanished">troppo lungo (max 16 frame)</translation>
+        <translation>troppo lungo (max 16 frame)</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>%1 frames, %2 s</source>
-        <translation type="vanished">%1 frame, %2 s</translation>
+        <translation>%1 frame, %2 s</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Cannot transmit: JTTY must be the active mode, the TX audio output must be available and no other transmission may be running.</source>
-        <translation type="vanished">Impossibile trasmettere: JTTY deve essere il modo attivo, l&apos;uscita audio TX disponibile e nessun&apos;altra trasmissione in corso.</translation>
+        <translation>Impossibile trasmettere: JTTY deve essere il modo attivo, l&apos;uscita audio TX disponibile e nessun&apos;altra trasmissione in corso.</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>The transmitter did not key (PTT refused).</source>
-        <translation type="vanished">Il trasmettitore non è andato in TX (PTT rifiutato).</translation>
+        <translation>Il trasmettitore non è andato in TX (PTT rifiutato).</translation>
     </message>
     <message>
+        <location line="+56"/>
         <source>Transmission interrupted: PTT dropped.</source>
-        <translation type="vanished">Trasmissione interrotta: PTT rilasciato.</translation>
+        <translation>Trasmissione interrotta: PTT rilasciato.</translation>
     </message>
     <message>
+        <location line="+71"/>
         <source>No DX call to log.</source>
-        <translation type="vanished">Nessun nominativo DX da registrare.</translation>
+        <translation>Nessun nominativo DX da registrare.</translation>
     </message>
 </context>
 <context>
     <name>decodium::rotor::RotorModule</name>
     <message>
+        <location filename="../src/rotor/RotorModule.cpp" line="+134"/>
         <source>rotctld port %1: %2</source>
-        <translation type="vanished">porta rotctld %1: %2</translation>
+        <translation>porta rotctld %1: %2</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>WebSocket port %1: %2</source>
-        <translation type="vanished">porta WebSocket %1: %2</translation>
+        <translation>porta WebSocket %1: %2</translation>
     </message>
     <message>
+        <location line="+7"/>
         <source>HTTP port %1: %2</source>
-        <translation type="vanished">porta HTTP %1: %2</translation>
+        <translation>porta HTTP %1: %2</translation>
     </message>
     <message>
+        <location line="+152"/>
         <source>app</source>
-        <translation type="vanished">app</translation>
+        <translation>app</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>web</source>
-        <translation type="vanished">web</translation>
+        <translation>web</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>rotctld</source>
-        <translation type="vanished">rotctld</translation>
+        <translation>rotctld</translation>
     </message>
     <message>
+        <location line="+25"/>
         <source>Auto-detect</source>
-        <translation type="vanished">Rilevamento automatico</translation>
+        <translation>Rilevamento automatico</translation>
     </message>
     <message>
+        <location line="+48"/>
         <source>Rotator is off: enable it in the Settings tab.</source>
-        <translation type="vanished">Il rotore è spento: abilitalo nella scheda Impostazioni.</translation>
+        <translation>Il rotore è spento: abilitalo nella scheda Impostazioni.</translation>
     </message>
     <message>
+        <location line="+20"/>
         <source>Enter at least one angle.</source>
-        <translation type="vanished">Inserisci almeno un angolo.</translation>
+        <translation>Inserisci almeno un angolo.</translation>
     </message>
     <message>
+        <location line="+21"/>
         <source>Stop sent to the control box.</source>
-        <translation type="vanished">Stop inviato al control box.</translation>
+        <translation>Stop inviato al control box.</translation>
     </message>
     <message>
+        <location line="+25"/>
         <source>Towards %1: %2°</source>
-        <translation type="vanished">Verso %1: %2°</translation>
+        <translation>Verso %1: %2°</translation>
     </message>
     <message>
+        <location line="+46"/>
         <source>Station no longer in the list.</source>
-        <translation type="vanished">La stazione non è più nell&apos;elenco.</translation>
+        <translation>La stazione non è più nell&apos;elenco.</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Towards %1: %2° at %3 km</source>
-        <translation type="vanished">Verso %1: %2° a %3 km</translation>
+        <translation>Verso %1: %2° a %3 km</translation>
     </message>
 </context>
 <context>
     <name>decodium::ssb::SsbController</name>
     <message>
+        <location filename="../src/ssb/SsbController.cpp" line="+13"/>
         <source>Audio devices changed; PTT released</source>
-        <translation type="vanished">Dispositivi audio cambiati; PTT rilasciato</translation>
+        <translation>Dispositivi audio cambiati; PTT rilasciato</translation>
     </message>
     <message>
+        <location line="+6"/>
         <source>Radio unavailable or mode changed; PTT released</source>
-        <translation type="vanished">Radio non disponibile o modo cambiato; PTT rilasciato</translation>
+        <translation>Radio non disponibile o modo cambiato; PTT rilasciato</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Microphone stopped; PTT released</source>
-        <translation type="vanished">Microfono fermo; PTT rilasciato</translation>
+        <translation>Microfono fermo; PTT rilasciato</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>Three-minute TX limit reached; release and press PTT again</source>
-        <translation type="vanished">Limite di tre minuti TX raggiunto; rilascia e premi nuovamente PTT</translation>
+        <translation>Limite di tre minuti TX raggiunto; rilascia e premi nuovamente PTT</translation>
     </message>
     <message>
+        <location line="+22"/>
         <source>Select a PC microphone</source>
-        <translation type="vanished">Seleziona un microfono PC</translation>
+        <translation>Seleziona un microfono PC</translation>
     </message>
     <message>
+        <location line="+10"/>
         <source>Microphone must support 48 kHz PCM</source>
-        <translation type="vanished">Il microfono deve supportare PCM a 48 kHz</translation>
+        <translation>Il microfono deve supportare PCM a 48 kHz</translation>
     </message>
     <message>
+        <location line="+4"/>
         <source>Cannot open microphone</source>
-        <translation type="vanished">Impossibile aprire il microfono</translation>
+        <translation>Impossibile aprire il microfono</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>PTT refused: check CAT, USB/LSB mode and TX audio output</source>
-        <translation type="vanished">PTT rifiutato: controlla CAT, modo USB/LSB e uscita audio TX</translation>
+        <translation>PTT rifiutato: controlla CAT, modo USB/LSB e uscita audio TX</translation>
     </message>
     <message>
+        <location line="+1"/>
         <source>SSB transmitting</source>
-        <translation type="vanished">SSB in trasmissione</translation>
+        <translation>SSB in trasmissione</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Microphone error; PTT released</source>
-        <translation type="vanished">Errore microfono; PTT rilasciato</translation>
+        <translation>Errore microfono; PTT rilasciato</translation>
     </message>
     <message>
+        <location line="+9"/>
         <source>Receiving</source>
-        <translation type="vanished">In ricezione</translation>
+        <translation>In ricezione</translation>
     </message>
     <message>
+        <location line="+5"/>
         <source>Radio unavailable; PTT released</source>
-        <translation type="vanished">Radio non disponibile; PTT rilasciato</translation>
+        <translation>Radio non disponibile; PTT rilasciato</translation>
     </message>
     <message>
+        <location line="+3"/>
         <source>Microphone backlog; PTT released</source>
-        <translation type="vanished">Accumulo audio microfono; PTT rilasciato</translation>
+        <translation>Accumulo audio microfono; PTT rilasciato</translation>
     </message>
 </context>
 <context>
@@ -35716,6 +40493,341 @@ Fare clic con il tasto destro per inserire ed eliminare le opzioni.</translation
     <message>
         <source>HAMDRM TX image cannot be archived as a bounded Gallery snapshot</source>
         <translation type="vanished">Impossibile archiviare l&apos;immagine TX HAMDRM come istantanea della Galleria entro i limiti</translation>
+    </message>
+</context>
+<context>
+    <name>decodium::voicekeyer::AssistantChat</name>
+    <message>
+        <location filename="../src/voicekeyer/AssistantChat.cpp" line="+50"/>
+        <source>Ask a question</source>
+        <translation>Fai una domanda</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <location line="+33"/>
+        <source>Assistant not installed or not selected: see Optional packs</source>
+        <translation>Assistente non installato o non selezionato: vedi Pacchetti opzionali</translation>
+    </message>
+    <message>
+        <location line="-16"/>
+        <source>You: </source>
+        <translation>Tu: </translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Decodium: </source>
+        <translation>Decodium: </translation>
+    </message>
+    <message>
+        <location line="+24"/>
+        <source>The assistant could not start</source>
+        <translation>L&apos;assistente non è riuscito ad avviarsi</translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>Thinking…</source>
+        <translation>Sto pensando…</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>The assistant took too long and was stopped</source>
+        <translation>L&apos;assistente ha impiegato troppo tempo ed è stato fermato</translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>The assistant stopped with an error: %1</source>
+        <translation>L&apos;assistente si è fermato con un errore: %1</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>No answer: try a shorter question</source>
+        <translation>Nessuna risposta: prova una domanda più breve</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Answered</source>
+        <translation>Risposto</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Stopped</source>
+        <translation>Fermato</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Conversation cleared</source>
+        <translation>Conversazione cancellata</translation>
+    </message>
+</context>
+<context>
+    <name>decodium::voicekeyer::PackManager</name>
+    <message>
+        <location filename="../src/voicekeyer/PackManager.cpp" line="+69"/>
+        <source>Optional packs: install only what you want</source>
+        <translation>Pacchetti opzionali: installa solo ciò che vuoi</translation>
+    </message>
+    <message>
+        <location line="+72"/>
+        <source>Downloading…</source>
+        <translation>Download in corso…</translation>
+    </message>
+    <message>
+        <location line="+17"/>
+        <source>Pack removed</source>
+        <translation>Pacchetto rimosso</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Download cancelled</source>
+        <translation>Download annullato</translation>
+    </message>
+    <message>
+        <location line="+18"/>
+        <source>Cannot write %1</source>
+        <translation>Impossibile scrivere %1</translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>Downloading %1…</source>
+        <translation>Download di %1…</translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>Download failed: %1</source>
+        <translation>Download non riuscito: %1</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Cannot read %1</source>
+        <translation>Impossibile leggere %1</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Checksum mismatch for %1: the file was discarded</source>
+        <translation>Checksum non corrispondente per %1: il file è stato scartato</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Unpacking…</source>
+        <translation>Decompressione…</translation>
+    </message>
+    <message>
+        <location line="+18"/>
+        <source>Cannot unpack %1</source>
+        <translation>Impossibile decomprimere %1</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Pack installed</source>
+        <translation>Pacchetto installato</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Pack incomplete: try installing again</source>
+        <translation>Pacchetto incompleto: prova a installarlo di nuovo</translation>
+    </message>
+</context>
+<context>
+    <name>decodium::voicekeyer::SpeechToText</name>
+    <message>
+        <location filename="../src/voicekeyer/SpeechToText.cpp" line="+37"/>
+        <source>Hold Listen and speak</source>
+        <translation>Tieni premuto Ascolta e parla</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Speech recognition not installed or not selected</source>
+        <translation>Riconoscimento vocale non installato o non selezionato</translation>
+    </message>
+    <message>
+        <location line="+18"/>
+        <source>Speech recognition is not installed or not selected: see Optional packs</source>
+        <translation>Il riconoscimento vocale non è installato o non è selezionato: vedi Pacchetti opzionali</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>No microphone found</source>
+        <translation>Nessun microfono trovato</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Microphone must support 48 kHz 16-bit PCM</source>
+        <translation>Il microfono deve supportare PCM a 16 bit a 48 kHz</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Cannot open the microphone</source>
+        <translation>Impossibile aprire il microfono</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Listening…</source>
+        <translation>In ascolto…</translation>
+    </message>
+    <message>
+        <location line="+33"/>
+        <source>Too short: keep Listen pressed while speaking</source>
+        <translation>Troppo breve: tieni premuto Ascolta mentre parli</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Cannot save the recording: %1</source>
+        <translation>Impossibile salvare la registrazione: %1</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Transcribing…</source>
+        <translation>Trascrizione…</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Recognition failed: %1</source>
+        <translation>Riconoscimento non riuscito: %1</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Nothing recognised</source>
+        <translation>Nulla riconosciuto</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Recognised</source>
+        <translation>Riconosciuto</translation>
+    </message>
+</context>
+<context>
+    <name>decodium::voicekeyer::VoiceKeyer</name>
+    <message>
+        <location filename="../src/voicekeyer/VoiceKeyer.cpp" line="+144"/>
+        <source>Ready</source>
+        <translation>Pronto</translation>
+    </message>
+    <message>
+        <location line="+91"/>
+        <location line="+10"/>
+        <source>To read text aloud install and enable the Voice pack first</source>
+        <translation>Per leggere il testo ad alta voce installa e abilita prima il pacchetto Voce</translation>
+    </message>
+    <message>
+        <location line="-7"/>
+        <source>reply</source>
+        <translation>risposta</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>preview</source>
+        <translation>anteprima</translation>
+    </message>
+    <message>
+        <location line="+17"/>
+        <source>Voice synthesis failed: %1</source>
+        <translation>Sintesi vocale non riuscita: %1</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Synthesising %1…</source>
+        <translation>Sintesi di %1…</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Voice synthesis failed: the engine stopped</source>
+        <translation>Sintesi vocale non riuscita: il motore si è fermato</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Voice synthesis failed: no audio produced</source>
+        <translation>Sintesi vocale non riuscita: nessun audio prodotto</translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <source>No speaker found for the preview</source>
+        <translation>Nessun altoparlante trovato per l&apos;anteprima</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Preview finished</source>
+        <translation>Anteprima terminata</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Preview on this computer (not transmitted)</source>
+        <translation>Anteprima su questo computer (non trasmessa)</translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>Cannot read the recording of %1: %2</source>
+        <translation>Impossibile leggere la registrazione di %1: %2</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>F%1 is empty: record it or write a text first</source>
+        <translation>F%1 è vuoto: registralo o scrivi prima un testo</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>To read text aloud install the voice pack first</source>
+        <translation>Per leggere il testo ad alta voce installa prima il pacchetto Voce</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>PTT refused: check CAT, SSB mode and the TX audio output</source>
+        <translation>PTT rifiutato: controlla il CAT, il modo SSB e l&apos;uscita audio TX</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Sending %1</source>
+        <translation>Invio di %1</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Radio unavailable; PTT released</source>
+        <translation>Radio non disponibile; PTT rilasciato</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Message sent</source>
+        <translation>Messaggio inviato</translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <location line="+7"/>
+        <source>Stopped</source>
+        <translation>Fermato</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>No microphone found</source>
+        <translation>Nessun microfono trovato</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Microphone must support 48 kHz 16-bit PCM</source>
+        <translation>Il microfono deve supportare PCM a 16 bit a 48 kHz</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Cannot open the microphone</source>
+        <translation>Impossibile aprire il microfono</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Recording F%1 (release to save)</source>
+        <translation>Registrazione di F%1 (rilascia per salvare)</translation>
+    </message>
+    <message>
+        <location line="+32"/>
+        <source>Recording too short: keep the key pressed while speaking</source>
+        <translation>Registrazione troppo breve: tieni premuto il tasto mentre parli</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Cannot save the recording: %1</source>
+        <translation>Impossibile salvare la registrazione: %1</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>F%1 recorded (%2 s)</source>
+        <translation>F%1 registrato (%2 s)</translation>
     </message>
 </context>
 <context>

@@ -133,36 +133,44 @@
 <context>
     <name>ActiveStationsPanel</name>
     <message>
+        <location filename="../qml/panels/ActiveStationsPanel.qml" line="95"/>
         <source>ACTIVE STATIONS</source>
-        <translation type="vanished">活跃电台</translation>
+        <translation>活跃电台</translation>
     </message>
     <message>
+        <location filename="../qml/panels/ActiveStationsPanel.qml" line="154"/>
         <source>CQ Only</source>
-        <translation type="vanished">仅 CQ</translation>
+        <translation>仅 CQ</translation>
     </message>
     <message>
+        <location filename="../qml/panels/ActiveStationsPanel.qml" line="171"/>
         <source>Wanted</source>
-        <translation type="vanished">需要</translation>
+        <translation>需要</translation>
     </message>
     <message>
+        <location filename="../qml/panels/ActiveStationsPanel.qml" line="184"/>
         <source>Clear</source>
-        <translation type="vanished">清除</translation>
+        <translation>清除</translation>
     </message>
     <message>
+        <location filename="../qml/panels/ActiveStationsPanel.qml" line="197"/>
         <source>Call</source>
-        <translation type="vanished">呼号</translation>
+        <translation>呼号</translation>
     </message>
     <message>
+        <location filename="../qml/panels/ActiveStationsPanel.qml" line="198"/>
         <source>Freq</source>
-        <translation type="vanished">Freq</translation>
+        <translation>Freq</translation>
     </message>
     <message>
+        <location filename="../qml/panels/ActiveStationsPanel.qml" line="200"/>
         <source>Grid</source>
-        <translation type="vanished">网格</translation>
+        <translation>网格</translation>
     </message>
     <message>
+        <location filename="../qml/panels/ActiveStationsPanel.qml" line="291"/>
         <source>No active stations</source>
-        <translation type="vanished">没有活跃电台</translation>
+        <translation>没有活跃电台</translation>
     </message>
 </context>
 <context>
@@ -350,175 +358,217 @@ Searched paths:
 <context>
     <name>AstroPanel</name>
     <message>
+        <location filename="../qml/panels/AstroPanel.qml" line="156"/>
         <source>ASTRO / EME</source>
-        <translation type="vanished">天文 / EME</translation>
+        <translation>天文 / EME</translation>
     </message>
     <message>
+        <location filename="../qml/panels/AstroPanel.qml" line="205"/>
         <source>Az</source>
-        <translation type="vanished">Az</translation>
+        <translation>Az</translation>
     </message>
     <message>
+        <location filename="../qml/panels/AstroPanel.qml" line="207"/>
         <source>El</source>
-        <translation type="vanished">El</translation>
+        <translation>El</translation>
     </message>
     <message>
+        <location filename="../qml/panels/AstroPanel.qml" line="215"/>
         <source>Doppler</source>
-        <translation type="vanished">Doppler</translation>
+        <translation>Doppler</translation>
     </message>
     <message>
+        <location filename="../qml/panels/AstroPanel.qml" line="217"/>
         <source>Sun El</source>
-        <translation type="vanished">太阳仰角</translation>
+        <translation>太阳仰角</translation>
     </message>
     <message>
+        <location filename="../qml/panels/AstroPanel.qml" line="225"/>
         <source>Phase</source>
-        <translation type="vanished">相位</translation>
+        <translation>相位</translation>
     </message>
     <message>
+        <location filename="../qml/panels/AstroPanel.qml" line="227"/>
         <source>Illum</source>
-        <translation type="vanished">照度</translation>
+        <translation>照度</translation>
     </message>
 </context>
 <context>
     <name>AstroWindow</name>
     <message>
+        <location filename="../qml/decodium/components/AstroWindow.qml" line="193"/>
         <source>🌙 Astronomical Data</source>
-        <translation type="vanished">🌙 天文数据</translation>
+        <translation>🌙 天文数据</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/AstroWindow.qml" line="206"/>
         <source>Satellite tracking</source>
-        <translation type="vanished">卫星跟踪</translation>
+        <translation>卫星跟踪</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/AstroWindow.qml" line="14"/>
         <source>Astronomical Data</source>
-        <translation type="vanished">天文数据</translation>
+        <translation>天文数据</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/AstroWindow.qml" line="241"/>
         <source>Minimize</source>
-        <translation type="vanished">最小化</translation>
+        <translation>最小化</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/AstroWindow.qml" line="272"/>
         <source>Close</source>
-        <translation type="vanished">关闭</translation>
+        <translation>关闭</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/AstroWindow.qml" line="337"/>
         <source>Location:</source>
-        <translation type="vanished">位置:</translation>
+        <translation>位置:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/AstroWindow.qml" line="429"/>
         <source>Moon</source>
-        <translation type="vanished">月亮</translation>
+        <translation>月亮</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/AstroWindow.qml" line="471"/>
         <source>Distance:</source>
-        <translation type="vanished">距离：</translation>
+        <translation>距离：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/AstroWindow.qml" line="487"/>
         <source>Rise:</source>
-        <translation type="vanished">升起：</translation>
+        <translation>升起：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/AstroWindow.qml" line="495"/>
         <source>Set:</source>
-        <translation type="vanished">落下：</translation>
+        <translation>落下：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/AstroWindow.qml" line="520"/>
         <source>Sun</source>
-        <translation type="vanished">太阳</translation>
+        <translation>太阳</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/AstroWindow.qml" line="547"/>
         <source>Sunrise:</source>
-        <translation type="vanished">日出：</translation>
+        <translation>日出：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/AstroWindow.qml" line="555"/>
         <source>Sunset:</source>
-        <translation type="vanished">日落：</translation>
+        <translation>日落：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/AstroWindow.qml" line="581"/>
         <source>EME (Earth-Moon-Earth)</source>
-        <translation type="vanished">EME（地月地）</translation>
+        <translation>EME（地月地）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/AstroWindow.qml" line="617"/>
         <source>Status:</source>
-        <translation type="vanished">状态：</translation>
+        <translation>状态：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/AstroWindow.qml" line="625"/>
         <source>Path Loss:</source>
-        <translation type="vanished">路径损耗：</translation>
+        <translation>路径损耗：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/AstroWindow.qml" line="643"/>
         <source>Frequency:</source>
-        <translation type="vanished">频率：</translation>
+        <translation>频率：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/AstroWindow.qml" line="651"/>
         <source>Window:</source>
-        <translation type="vanished">窗口：</translation>
+        <translation>窗口：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/AstroWindow.qml" line="680"/>
         <source>Propagation (HamQSL)</source>
-        <translation type="vanished">传播 (HamQSL)</translation>
+        <translation>传播 (HamQSL)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/AstroWindow.qml" line="705"/>
         <source>Solar Flux:</source>
-        <translation type="vanished">太阳流量：</translation>
+        <translation>太阳流量：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/AstroWindow.qml" line="713"/>
         <source>A-Index:</source>
-        <translation type="vanished">A 指数：</translation>
+        <translation>A 指数：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/AstroWindow.qml" line="721"/>
         <source>K-Index:</source>
-        <translation type="vanished">K 指数：</translation>
+        <translation>K 指数：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/AstroWindow.qml" line="729"/>
         <source>X-Ray:</source>
-        <translation type="vanished">X 射线：</translation>
+        <translation>X 射线：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/AstroWindow.qml" line="737"/>
         <source>Sunspots:</source>
-        <translation type="vanished">太阳黑子：</translation>
+        <translation>太阳黑子：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/AstroWindow.qml" line="745"/>
         <source>Solar Wind:</source>
-        <translation type="vanished">太阳风：</translation>
+        <translation>太阳风：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/AstroWindow.qml" line="761"/>
         <source>Geomagnetic:</source>
-        <translation type="vanished">地磁：</translation>
+        <translation>地磁：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/AstroWindow.qml" line="769"/>
         <source>Signal Noise:</source>
-        <translation type="vanished">噪声：</translation>
+        <translation>噪声：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/AstroWindow.qml" line="815"/>
         <source>HF Band Conditions</source>
-        <translation type="vanished">短波波段状况</translation>
+        <translation>短波波段状况</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/AstroWindow.qml" line="826"/>
         <source>Band</source>
-        <translation type="vanished">波段</translation>
+        <translation>波段</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/AstroWindow.qml" line="833"/>
         <source>Day</source>
-        <translation type="vanished">白天</translation>
+        <translation>白天</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/AstroWindow.qml" line="840"/>
         <source>Night</source>
-        <translation type="vanished">夜间</translation>
+        <translation>夜间</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/AstroWindow.qml" line="898"/>
         <source>No HF condition data available yet.</source>
-        <translation type="vanished">尚无短波状况数据。</translation>
+        <translation>尚无短波状况数据。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/AstroWindow.qml" line="921"/>
         <source>VHF Conditions</source>
-        <translation type="vanished">甚高频状况</translation>
+        <translation>甚高频状况</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/AstroWindow.qml" line="953"/>
         <source>No VHF condition data available yet.</source>
-        <translation type="vanished">尚无甚高频状况数据。</translation>
+        <translation>尚无甚高频状况数据。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/AstroWindow.qml" line="980"/>
         <source>Refresh</source>
-        <translation type="vanished">刷新</translation>
+        <translation>刷新</translation>
     </message>
 </context>
 <context>
@@ -542,14 +592,65 @@ Searched paths:
 <context>
     <name>BandBar</name>
     <message>
+        <location filename="../qml/decodium/rtty/BandBar.qml" line="44"/>
         <source>No radio connected.</source>
-        <translation type="vanished">未连接电台。</translation>
+        <translation>未连接电台。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/BandBar.qml" line="45"/>
         <source>Decodium&apos;s CAT is not connected, so the radio takes
 no commands. Connect it in Decodium.</source>
-        <translation type="vanished">Decodium 的 CAT 未连接，电台不接受指令。
+        <translation>Decodium 的 CAT 未连接，电台不接受指令。
 请在 Decodium 中连接。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/rtty/BandBar.qml" line="94"/>
+        <source>DIGU · AFSK</source>
+        <translation>DIGU · AFSK</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/rtty/BandBar.qml" line="95"/>
+        <source>DIGL · AFSK</source>
+        <translation>DIGL · AFSK</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/rtty/BandBar.qml" line="97"/>
+        <source> · FSK</source>
+        <translation> · FSK</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/rtty/BandBar.qml" line="120"/>
+        <source>QMX USB-audio FSK: Decodium selects its Digi/PKTUSB mode for transmission.</source>
+        <translation>QMX USB 音频 FSK：Decodium 选择其 Digi/PKTUSB 模式进行发射。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/rtty/BandBar.qml" line="121"/>
+        <source>True RTTY, upper sideband: the radio narrows
+its filter around the tones. Best for copying — but
+the radio waits for FSK keying, so transmitting from
+here sends nothing.</source>
+        <translation>真正的 RTTY，上边带：电台会在音调周围收窄滤波器。
+最适合抄收，但电台等待 FSK 键控，
+因此从这里发射不会发送任何内容。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/rtty/BandBar.qml" line="127"/>
+        <source>QMX reverse USB-audio FSK: Decodium selects its Digi/PKTLSB mode.</source>
+        <translation>QMX 反向 USB 音频 FSK：Decodium 选择其 Digi/PKTLSB 模式。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/rtty/BandBar.qml" line="128"/>
+        <source>True RTTY, lower sideband. Same as RTTY-U:
+receive only, the radio expects FSK keying to
+transmit.</source>
+        <translation>真正的 RTTY，下边带。与 RTTY-U 相同：
+仅接收，电台需要 FSK 键控
+才能发射。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/rtty/BandBar.qml" line="132"/>
+        <source>DIGU — RTTY via audio/AFSK. Selects upper-sideband data mode (DATA-U / USB-D). Configure the radio to accept computer audio. Use this for audio-based RTTY transmission.</source>
+        <translation>DIGU — 通过音频/AFSK 的 RTTY。选择上边带数据模式（DATA-U / USB-D）。请将电台配置为接受计算机音频。用于基于音频的 RTTY 发射。</translation>
     </message>
     <message>
         <source>%1 — RTTY at %2 MHz</source>
@@ -561,15 +662,17 @@ decoder is written for.</source>
         <translation type="vanished">上边带数据：本解码器所针对的模式。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/BandBar.qml" line="134"/>
         <source>Data on the lower sideband. The tones come out
 reversed — REV puts them back.</source>
-        <translation type="vanished">下边带数据。音调会反相输出 —
+        <translation>下边带数据。音调会反相输出 —
 REV 可以把它们转回来。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/BandBar.qml" line="135"/>
         <source>Voice sideband. RTTY is copied just the same,
 but the radio&apos;s filter is wider than it needs.</source>
-        <translation type="vanished">话音边带。RTTY 一样可以抄收，但电台的
+        <translation>话音边带。RTTY 一样可以抄收，但电台的
 滤波器比需要的更宽。</translation>
     </message>
 </context>
@@ -591,9 +694,10 @@ but the radio&apos;s filter is wider than it needs.</source>
 <context>
     <name>BandScale</name>
     <message>
+        <location filename="../qml/decodium/rtty/BandScale.qml" line="230"/>
         <source>Drag to move the radio; the wheel tunes by 1 kHz —
 100 Hz with Shift, 10 kHz with Ctrl.</source>
-        <translation type="vanished">拖动可移动电台；滚轮以 1 kHz 步进调谐 —
+        <translation>拖动可移动电台；滚轮以 1 kHz 步进调谐 —
 Shift 为 100 Hz，Ctrl 为 10 kHz。</translation>
     </message>
 </context>
@@ -633,160 +737,197 @@ Shift 为 100 Hz，Ctrl 为 10 kHz。</translation>
 <context>
     <name>BigReadout</name>
     <message>
+        <location filename="../qml/decodium/rotor/BigReadout.qml" line="61"/>
         <source>towards %1°</source>
-        <translation type="vanished">朝向 %1°</translation>
+        <translation>朝向 %1°</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/BigReadout.qml" line="62"/>
         <source>stable position</source>
-        <translation type="vanished">位置稳定</translation>
+        <translation>位置稳定</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/BigReadout.qml" line="62"/>
         <source>no reading</source>
-        <translation type="vanished">无读数</translation>
+        <translation>无读数</translation>
     </message>
 </context>
 <context>
     <name>BootLoader</name>
     <message>
+        <location filename="../qml/decodium/BootLoader.qml" line="21"/>
         <source>Decodium 4.0 — Loading...</source>
-        <translation type="vanished">Decodium 4.0 — 加载中...</translation>
+        <translation>Decodium 4.0 — 加载中...</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/BootLoader.qml" line="154"/>
         <source>DECODIUM 4.0</source>
-        <translation type="vanished">DECODIUM 4.0</translation>
+        <translation>DECODIUM 4.0</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/BootLoader.qml" line="161"/>
         <source>Core Gallager</source>
-        <translation type="vanished">Core Gallager</translation>
+        <translation>Core Gallager</translation>
     </message>
 </context>
 <context>
     <name>BugReportDialog</name>
     <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="8"/>
         <source>Report a problem</source>
-        <translation type="vanished">报告问题</translation>
+        <translation>报告问题</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="37"/>
         <source>CAT / HRD</source>
-        <translation type="vanished">CAT / HRD</translation>
+        <translation>CAT / HRD</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="38"/>
         <source>Reception / decoding</source>
-        <translation type="vanished">接收 / 解码</translation>
+        <translation>接收 / 解码</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="39"/>
         <source>Transmission</source>
-        <translation type="vanished">发射</translation>
+        <translation>发射</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="40"/>
         <source>Interface</source>
-        <translation type="vanished">界面</translation>
+        <translation>界面</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="41"/>
         <source>Audio &amp; peripherals</source>
-        <translation type="vanished">音频与外设</translation>
+        <translation>音频与外设</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="42"/>
         <source>Installation &amp; updates</source>
-        <translation type="vanished">安装与更新</translation>
+        <translation>安装与更新</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="43"/>
         <source>Translations</source>
-        <translation type="vanished">翻译</translation>
+        <translation>翻译</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="44"/>
         <source>General / Other</source>
-        <translation type="vanished">常规 / 其他</translation>
+        <translation>常规 / 其他</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="70"/>
         <source>Problem in %1</source>
-        <translation type="vanished">%1 中的问题</translation>
+        <translation>%1 中的问题</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="80"/>
         <source>Automatic self-check:</source>
-        <translation type="vanished">自动自检:</translation>
+        <translation>自动自检:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="119"/>
         <source>Your report is posted on the community forum, in your language, so others can help.</source>
-        <translation type="vanished">你的报告会以你的语言发布到社区论坛，以便他人提供帮助。</translation>
+        <translation>你的报告会以你的语言发布到社区论坛，以便他人提供帮助。</translation>
     </message>
     <message numerus="yes">
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="148"/>
         <source>Found %n likely cause(s) — please check these before reporting:</source>
-        <translation type="vanished">
+        <translation>
             <numerusform>发现 %n 个可能的原因 — 报告前请先检查:</numerusform>
         </translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="195"/>
         <source>Self-check found no known cause — please describe the problem below.</source>
-        <translation type="vanished">自检未发现已知原因 — 请在下方描述问题。</translation>
+        <translation>自检未发现已知原因 — 请在下方描述问题。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="206"/>
         <source>Category:</source>
-        <translation type="vanished">类别:</translation>
+        <translation>类别:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="222"/>
         <source>Describe the problem:</source>
-        <translation type="vanished">描述问题:</translation>
+        <translation>描述问题:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="249"/>
         <source>What happens, since when, and what you already tried. Paste any error messages too.</source>
-        <translation type="vanished">发生了什么、从何时开始、你已经尝试过什么。也请粘贴任何错误信息。</translation>
+        <translation>发生了什么、从何时开始、你已经尝试过什么。也请粘贴任何错误信息。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="258"/>
         <source>Diagnostic info (auto-collected):</source>
-        <translation type="vanished">诊断信息（自动收集）:</translation>
+        <translation>诊断信息（自动收集）:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="273"/>
         <source>Diagnostics not available</source>
-        <translation type="vanished">诊断信息不可用</translation>
+        <translation>诊断信息不可用</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="289"/>
         <source>Copy Report</source>
-        <translation type="vanished">复制报告</translation>
+        <translation>复制报告</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="300"/>
         <source>Copied!</source>
-        <translation type="vanished">已复制！</translation>
+        <translation>已复制！</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="309"/>
         <source>Sending...</source>
-        <translation type="vanished">正在发送...</translation>
+        <translation>正在发送...</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="309"/>
         <source>Upload last diagnostic log</source>
-        <translation type="vanished">上传最新诊断日志</translation>
+        <translation>上传最新诊断日志</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="316"/>
         <source>Diagnostic log — %1 — %2</source>
-        <translation type="vanished">诊断日志 — %1 — %2</translation>
+        <translation>诊断日志 — %1 — %2</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="323"/>
         <source>The diagnostic log could not be read.</source>
-        <translation type="vanished">无法读取诊断日志。</translation>
+        <translation>无法读取诊断日志。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="327"/>
         <source>Diagnostic log uploaded from Decodium.</source>
-        <translation type="vanished">已从 Decodium 上传诊断日志。</translation>
+        <translation>已从 Decodium 上传诊断日志。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="338"/>
         <source>Posting...</source>
-        <translation type="vanished">正在发布...</translation>
+        <translation>正在发布...</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="338"/>
         <source>Post to community</source>
-        <translation type="vanished">发布到社区</translation>
+        <translation>发布到社区</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="345"/>
         <source>You already reported this recently. Check the community for replies: %1</source>
-        <translation type="vanished">你最近已经报告过此问题。请在社区查看回复: %1</translation>
+        <translation>你最近已经报告过此问题。请在社区查看回复: %1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="357"/>
         <source>Close</source>
-        <translation type="vanished">关闭</translation>
+        <translation>关闭</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="380"/>
         <source>Posted! Open the groups: %1</source>
-        <translation type="vanished">已发布！打开群组: %1</translation>
+        <translation>已发布！打开群组: %1</translation>
     </message>
 </context>
 <context>
@@ -866,175 +1007,247 @@ Shift 为 100 Hz，Ctrl 为 10 kHz。</translation>
 <context>
     <name>CallDialog</name>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="28"/>
         <source>Chiamate (CALL)</source>
-        <translation type="vanished">呼叫 (CALL)</translation>
+        <translation>呼叫 (CALL)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="174"/>
         <source>Direct call</source>
-        <translation type="vanished">直接呼叫</translation>
+        <translation>直接呼叫</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="206"/>
         <source>Target callsign</source>
-        <translation type="vanished">目标 callsign</translation>
+        <translation>目标 callsign</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="192"/>
         <source>⏳ ARMED</source>
-        <translation type="vanished">⏳ 待命</translation>
+        <translation>⏳ 待命</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="192"/>
         <source>ACTIVE</source>
-        <translation type="vanished">活动</translation>
+        <translation>活动</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="236"/>
         <source>Max unanswered calls</source>
-        <translation type="vanished">最大未应答呼叫数</translation>
+        <translation>最大未应答呼叫数</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="237"/>
         <source>Total timeout (s)</source>
-        <translation type="vanished">总超时 (秒)</translation>
+        <translation>总超时 (秒)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="252"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="469"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="626"/>
         <source>∞</source>
-        <translation type="vanished">∞</translation>
+        <translation>∞</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="300"/>
         <source>Periodo FT8/FT4</source>
-        <translation type="vanished">FT8/FT4 周期</translation>
+        <translation>FT8/FT4 周期</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="306"/>
         <source>1st (:00/:30)</source>
-        <translation type="vanished">第1时段 (:00/:30)</translation>
+        <translation>第1时段 (:00/:30)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="336"/>
         <source>2nd (:15/:45)</source>
-        <translation type="vanished">第2时段 (:15/:45)</translation>
+        <translation>第2时段 (:15/:45)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="366"/>
         <source>Alterna</source>
-        <translation type="vanished">交替</translation>
+        <translation>交替</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="402"/>
         <source>Pausa fra cicli (s)</source>
-        <translation type="vanished">周期间暂停 (秒)</translation>
+        <translation>周期间暂停 (秒)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="425"/>
         <source>DX-watch armed — doesn&apos;t call immediately: waits for the target to be decoded</source>
-        <translation type="vanished">DX-watch 已待命 — 不会立即呼叫：等待目标被解码</translation>
+        <translation>DX-watch 已待命 — 不会立即呼叫：等待目标被解码</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="434"/>
         <source>Re-arm: if the target disappears, go back to listening (max 3 times, then manual Halt)</source>
-        <translation type="vanished">重新待命：如果目标消失，返回监听（最多3次，之后手动 Halt）</translation>
+        <translation>重新待命：如果目标消失，返回监听（最多3次，之后手动 Halt）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="460"/>
         <source>⏳ Listening: waiting for %1 to be decoded…</source>
-        <translation type="vanished">⏳ 监听中：等待 %1 被解码…</translation>
+        <translation>⏳ 监听中：等待 %1 被解码…</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="461"/>
         <source>Status: calling %1</source>
-        <translation type="vanished">状态：正在呼叫 %1</translation>
+        <translation>状态：正在呼叫 %1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="468"/>
         <source>Unanswered %1 / %2</source>
-        <translation type="vanished">未应答 %1 / %2</translation>
+        <translation>未应答 %1 / %2</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="664"/>
         <source>Generic AutoCQ (ACQ button)</source>
-        <translation type="vanished">通用 AutoCQ（ACQ 按钮）</translation>
+        <translation>通用 AutoCQ（ACQ 按钮）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="673"/>
         <source>Max CQ calls (0=∞)</source>
-        <translation type="vanished">最大 CQ 呼叫数 (0=∞)</translation>
+        <translation>最大 CQ 呼叫数 (0=∞)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="689"/>
+        <source>Pause after each CQ (s)</source>
+        <translation>每次 CQ 后暂停（秒）</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="702"/>
+        <source>Completed CQs only (including custom calls); QSO replies do not count. Pauses start after playback and TX resumes at the next permitted slot. Generic and burst pauses overlap. The safety watchdog remains active during listening: its period count is NOT a CQ count.</source>
+        <translation>仅统计已完成的 CQ（含自定义呼叫）；QSO 回复不计入。暂停在播放结束后开始，TX 在下一个允许的时隙恢复。通用暂停与突发暂停相互重叠。安全看门狗在监听期间保持有效：其周期计数不是 CQ 计数。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="709"/>
+        <source>CQ burst / listening cadence</source>
+        <translation>CQ 突发 / 监听节奏</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="719"/>
+        <source>CQs per burst (0 = continuous)</source>
+        <translation>每次突发的 CQ 数（0 = 连续）</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="735"/>
+        <source>Listening cycles between bursts</source>
+        <translation>突发之间的监听周期数</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="749"/>
+        <source>Set both values above zero to enable this cadence. Valid callers are still answered while listening.</source>
+        <translation>将两个值都设为大于零以启用此节奏。监听期间仍会回应有效的呼叫者。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="766"/>
         <source>Close</source>
-        <translation type="vanished">关闭</translation>
+        <translation>关闭</translation>
     </message>
     <message>
         <source>Pausa fra cicli CQ (s)</source>
         <translation type="vanished">CQ 周期间暂停 (秒)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="789"/>
         <source>Stop</source>
-        <translation type="vanished">停止</translation>
+        <translation>停止</translation>
     </message>
     <message>
         <source>▶ Start</source>
         <translation type="vanished">▶ 启动</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="484"/>
         <source>Auto Call</source>
-        <translation type="vanished">自动呼叫</translation>
+        <translation>自动呼叫</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="492"/>
         <source>Automatically call eligible CQ stations without selecting a target</source>
-        <translation type="vanished">自动呼叫符合条件的 CQ 电台，无需选定目标</translation>
+        <translation>自动呼叫符合条件的 CQ 电台，无需选定目标</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="502"/>
         <source>■ Stop Auto Call</source>
-        <translation type="vanished">■ 停止自动呼叫</translation>
+        <translation>■ 停止自动呼叫</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="503"/>
         <source>▶ Start Auto Call</source>
-        <translation type="vanished">▶ 开始自动呼叫</translation>
+        <translation>▶ 开始自动呼叫</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="529"/>
         <source>Answers eligible CQ stations, skips calls already worked on this band, and stops at the session limit.</source>
-        <translation type="vanished">应答符合条件的 CQ 电台，跳过本波段已通联过的呼号，并在会话上限处停止。</translation>
+        <translation>应答符合条件的 CQ 电台，跳过本波段已通联过的呼号，并在会话上限处停止。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="537"/>
         <source>Armed: waits for a valid CQ decode; TX starts on the next legal slot.</source>
-        <translation type="vanished">已就绪：等待有效的 CQ 解码；发射将在下一个合法时隙开始。</translation>
+        <translation>已就绪：等待有效的 CQ 解码；发射将在下一个合法时隙开始。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="538"/>
         <source>Idle: press Start Auto Call to arm automatic CQ replies.</source>
-        <translation type="vanished">空闲：按「开始自动呼叫」以就绪自动应答 CQ。</translation>
+        <translation>空闲：按「开始自动呼叫」以就绪自动应答 CQ。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="548"/>
         <source>Max QSOs this session (0=∞)</source>
-        <translation type="vanished">本次会话最多 QSO 数 (0=∞)</translation>
+        <translation>本次会话最多 QSO 数 (0=∞)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="556"/>
         <source>Candidate priority</source>
-        <translation type="vanished">候选优先级</translation>
+        <translation>候选优先级</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="559"/>
         <source>Last decoded</source>
-        <translation type="vanished">最近解码</translation>
+        <translation>最近解码</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="559"/>
         <source>Strongest signal</source>
-        <translation type="vanished">最强信号</translation>
+        <translation>最强信号</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="559"/>
         <source>Furthest grid</source>
-        <translation type="vanished">最远网格</translation>
+        <translation>最远网格</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="625"/>
         <source>QSOs completed: %1 / %2</source>
-        <translation type="vanished">已完成 QSO：%1 / %2</translation>
+        <translation>已完成 QSO：%1 / %2</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="632"/>
         <source>Reset count</source>
-        <translation type="vanished">重置计数</translation>
+        <translation>重置计数</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="821"/>
         <source>▶ Direct Call</source>
-        <translation type="vanished">▶ 直接呼叫</translation>
+        <translation>▶ 直接呼叫</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="211"/>
         <source>es. F4CQS</source>
-        <translation type="vanished">例：F4CQS</translation>
+        <translation>例：F4CQS</translation>
     </message>
 </context>
 <context>
     <name>CallerQueuePanel</name>
     <message>
+        <location filename="../qml/panels/CallerQueuePanel.qml" line="30"/>
         <source>FOX CALLER QUEUE</source>
-        <translation type="vanished">FOX 呼叫队列</translation>
+        <translation>FOX 呼叫队列</translation>
     </message>
     <message>
+        <location filename="../qml/panels/CallerQueuePanel.qml" line="123"/>
         <source>No callers in queue</source>
-        <translation type="vanished">队列中没有呼叫方</translation>
+        <translation>队列中没有呼叫方</translation>
     </message>
 </context>
 <context>
@@ -1605,68 +1818,82 @@ Shift 为 100 Hz，Ctrl 为 10 kHz。</translation>
 <context>
     <name>CallsignLookupWindow</name>
     <message>
+        <location filename="../qml/decodium/components/CallsignLookupWindow.qml" line="102"/>
         <source>CACHE</source>
-        <translation type="vanished">缓存</translation>
+        <translation>缓存</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallsignLookupWindow.qml" line="13"/>
         <source>Callsign intelligence</source>
-        <translation type="vanished">呼号智能</translation>
+        <translation>呼号智能</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallsignLookupWindow.qml" line="13"/>
         <source>Callsign intelligence — %1</source>
-        <translation type="vanished">呼号智能 — %1</translation>
+        <translation>呼号智能 — %1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallsignLookupWindow.qml" line="125"/>
         <source>CQ / ITU zone</source>
-        <translation type="vanished">CQ / ITU 分区</translation>
+        <translation>CQ / ITU 分区</translation>
     </message>
     <message>
         <source>Chiudi</source>
         <translation type="vanished">关闭</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallsignLookupWindow.qml" line="127"/>
         <source>Conferme</source>
-        <translation type="vanished">确认</translation>
+        <translation>确认</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallsignLookupWindow.qml" line="123"/>
         <source>DXCC / continente</source>
-        <translation type="vanished">DXCC / 大洲</translation>
+        <translation>DXCC / 大洲</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallsignLookupWindow.qml" line="64"/>
         <source>Lookup</source>
-        <translation type="vanished">查询</translation>
+        <translation>查询</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallsignLookupWindow.qml" line="64"/>
         <source>Lookup…</source>
-        <translation type="vanished">查询…</translation>
+        <translation>查询…</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallsignLookupWindow.qml" line="137"/>
         <source>Lookup esterni</source>
-        <translation type="vanished">外部查询</translation>
+        <translation>外部查询</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallsignLookupWindow.qml" line="117"/>
         <source>Nome</source>
-        <translation type="vanished">姓名</translation>
+        <translation>姓名</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallsignLookupWindow.qml" line="119"/>
         <source>QTH</source>
-        <translation type="vanished">QTH</translation>
+        <translation>QTH</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallsignLookupWindow.qml" line="129"/>
         <source>Provider</source>
-        <translation type="vanished">服务方</translation>
+        <translation>服务方</translation>
     </message>
     <message>
         <source>Service non disponibile</source>
         <translation type="vanished">服务不可用</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallsignLookupWindow.qml" line="177"/>
         <source>Ultimo risultato: %1</source>
-        <translation type="vanished">最后结果: %1</translation>
+        <translation>最后结果: %1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallsignLookupWindow.qml" line="130"/>
         <source>fallback DXCC</source>
-        <translation type="vanished">DXCC 回退</translation>
+        <translation>DXCC 回退</translation>
     </message>
     <message>
         <source>nessuna indicazione</source>
@@ -1677,83 +1904,107 @@ Shift 为 100 Hz，Ctrl 为 10 kHz。</translation>
         <translation type="vanished">不可用</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallsignLookupWindow.qml" line="57"/>
+        <location filename="../qml/decodium/components/CallsignLookupWindow.qml" line="115"/>
         <source>Callsign</source>
-        <translation type="vanished">呼号</translation>
+        <translation>呼号</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallsignLookupWindow.qml" line="74"/>
         <source>Refresh</source>
-        <translation type="vanished">刷新</translation>
+        <translation>刷新</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallsignLookupWindow.qml" line="121"/>
         <source>Grid</source>
-        <translation type="vanished">网格</translation>
+        <translation>网格</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallsignLookupWindow.qml" line="164"/>
         <source>Club Log</source>
-        <translation type="vanished">Club Log</translation>
+        <translation>Club Log</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallsignLookupWindow.qml" line="96"/>
         <source>Service unavailable</source>
-        <translation type="vanished">服务不可用</translation>
+        <translation>服务不可用</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallsignLookupWindow.qml" line="118"/>
+        <location filename="../qml/decodium/components/CallsignLookupWindow.qml" line="120"/>
+        <location filename="../qml/decodium/components/CallsignLookupWindow.qml" line="122"/>
+        <location filename="../qml/decodium/components/CallsignLookupWindow.qml" line="124"/>
         <source>not available</source>
-        <translation type="vanished">不可用</translation>
+        <translation>不可用</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallsignLookupWindow.qml" line="128"/>
         <source>no indication</source>
-        <translation type="vanished">无说明</translation>
+        <translation>无说明</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallsignLookupWindow.qml" line="182"/>
         <source>Close</source>
-        <translation type="vanished">关闭</translation>
+        <translation>关闭</translation>
     </message>
 </context>
 <context>
     <name>CatSettingsDialog</name>
     <message>
+        <location filename="../qml/decodium/CatSettingsDialog.qml" line="8"/>
         <source>CAT - Radio Settings</source>
-        <translation type="vanished">CAT - 电台设置</translation>
+        <translation>CAT - 电台设置</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/CatSettingsDialog.qml" line="35"/>
         <source>⚙ CAT — Radio Settings</source>
-        <translation type="vanished">⚙ CAT — 电台设置</translation>
+        <translation>⚙ CAT — 电台设置</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/CatSettingsDialog.qml" line="114"/>
         <source>Search radio...</source>
-        <translation type="vanished">搜索电台...</translation>
+        <translation>搜索电台...</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/CatSettingsDialog.qml" line="169"/>
         <source>Serial port:</source>
-        <translation type="vanished">串行端口：</translation>
+        <translation>串行端口：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/CatSettingsDialog.qml" line="215"/>
         <source>Refresh ports</source>
-        <translation type="vanished">刷新端口</translation>
+        <translation>刷新端口</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/CatSettingsDialog.qml" line="228"/>
         <source>Speed (baud):</source>
-        <translation type="vanished">速度（波特）：</translation>
+        <translation>速度（波特）：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/CatSettingsDialog.qml" line="292"/>
         <source>Auto-connect CAT on startup</source>
-        <translation type="vanished">启动时自动连接 CAT</translation>
+        <translation>启动时自动连接 CAT</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/CatSettingsDialog.qml" line="318"/>
         <source>Start audio on connect</source>
-        <translation type="vanished">连接时启动音频</translation>
+        <translation>连接时启动音频</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/CatSettingsDialog.qml" line="354"/>
         <source>Not connected</source>
-        <translation type="vanished">未连接</translation>
+        <translation>未连接</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/CatSettingsDialog.qml" line="366"/>
+        <location filename="../qml/decodium/CatSettingsDialog.qml" line="386"/>
         <source>Disconnect</source>
-        <translation type="vanished">断开连接</translation>
+        <translation>断开连接</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/CatSettingsDialog.qml" line="366"/>
         <source>Connect</source>
-        <translation type="vanished">连接</translation>
+        <translation>连接</translation>
     </message>
 </context>
 <context>
@@ -1881,43 +2132,52 @@ Please check your log.</source>
 <context>
     <name>ColorHighlightingDialog</name>
     <message>
+        <location filename="../qml/dialogs/ColorHighlightingDialog.qml" line="9"/>
         <source>Color Highlighting</source>
-        <translation type="vanished">颜色高亮</translation>
+        <translation>颜色高亮</translation>
     </message>
     <message>
+        <location filename="../qml/dialogs/ColorHighlightingDialog.qml" line="112"/>
         <source>B4 Strikethrough:</source>
-        <translation type="vanished">B4 删除线：</translation>
+        <translation>B4 删除线：</translation>
     </message>
     <message>
+        <location filename="../qml/dialogs/ColorHighlightingDialog.qml" line="131"/>
         <source>Alert Sounds:</source>
-        <translation type="vanished">提示音：</translation>
+        <translation>提示音：</translation>
     </message>
     <message>
+        <location filename="../qml/dialogs/ColorHighlightingDialog.qml" line="149"/>
         <source>Choose Color</source>
-        <translation type="vanished">选择颜色</translation>
+        <translation>选择颜色</translation>
     </message>
     <message>
+        <location filename="../qml/dialogs/ColorHighlightingDialog.qml" line="170"/>
         <source>Hex color (#RRGGBB):</source>
-        <translation type="vanished">十六进制颜色 (#RRGGBB)：</translation>
+        <translation>十六进制颜色 (#RRGGBB)：</translation>
     </message>
     <message>
+        <location filename="../qml/dialogs/ColorHighlightingDialog.qml" line="180"/>
         <source>#RRGGBB</source>
-        <translation type="vanished">#RRGGBB</translation>
+        <translation>#RRGGBB</translation>
     </message>
 </context>
 <context>
     <name>CommandBar</name>
     <message>
+        <location filename="../qml/decodium/rotor/CommandBar.qml" line="38"/>
         <source>STOP</source>
-        <translation type="vanished">STOP</translation>
+        <translation>STOP</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/CommandBar.qml" line="66"/>
         <source>PARK %1°</source>
-        <translation type="vanished">驻留 %1°</translation>
+        <translation>驻留 %1°</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/CommandBar.qml" line="73"/>
         <source>MEMORIES…</source>
-        <translation type="vanished">存储…</translation>
+        <translation>存储…</translation>
     </message>
 </context>
 <context>
@@ -2543,255 +2803,428 @@ Reverted Hamlib will be used after restart</source>
 <context>
     <name>ControlPage</name>
     <message>
+        <location filename="../qml/decodium/rotor/ControlPage.qml" line="104"/>
         <source>azimuthal map from the QTH</source>
-        <translation type="vanished">以QTH为中心的方位图</translation>
+        <translation>以QTH为中心的方位图</translation>
     </message>
 </context>
 <context>
     <name>CwWindow</name>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="44"/>
         <source>CW</source>
-        <translation type="vanished">CW</translation>
+        <translation>CW</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="83"/>
+        <source>The radio CAT keyer is not currently available. Check the CAT connection and the radio&apos;s CW keyer support. The decoder works anyway.</source>
+        <translation>电台的 CAT 键控器当前不可用。请检查 CAT 连接以及电台对 CW 键控器的支持。解码器仍可正常工作。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="85"/>
+        <source>The serial keyer is not open: choose its port in Setup. The decoder works anyway.</source>
+        <translation>串口键控器未打开：请在设置中选择其端口。解码器仍可正常工作。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="87"/>
+        <source>The WinKeyer is not open: choose its port in Setup. The decoder works anyway.</source>
+        <translation>WinKeyer 未打开：请在设置中选择其端口。解码器仍可正常工作。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="89"/>
+        <source>CW transmit is unavailable: choose a working serial keyer or WinKeyer in Setup, or use a radio with a supported CAT CW keyer.</source>
+        <translation>CW 发射不可用：请在设置中选择可用的串口键控器或 WinKeyer，或使用支持 CAT CW 键控器的电台。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="92"/>
+        <source>CW transmit is not ready. Check the selected keyer and its connection. The decoder works anyway.</source>
+        <translation>CW 发射未就绪。请检查所选键控器及其连接。解码器仍可正常工作。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="214"/>
         <source>MACROS</source>
-        <translation type="vanished">宏</translation>
+        <translation>宏</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="225"/>
         <source>Holes filled when sent: {MYCALL} {CALL} {RST} {NR} {EXCH} {NAME}. Anything left empty is dropped.</source>
-        <translation type="vanished">发送时填入的占位符：{MYCALL} {CALL} {RST} {NR} {EXCH} {NAME}。留空的内容会被丢弃。</translation>
+        <translation>发送时填入的占位符：{MYCALL} {CALL} {RST} {NR} {EXCH} {NAME}。留空的内容会被丢弃。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="259"/>
         <source>Add a key</source>
-        <translation type="vanished">添加按键</translation>
+        <translation>添加按键</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="260"/>
         <source>Restore the defaults</source>
-        <translation type="vanished">恢复默认值</translation>
+        <translation>恢复默认值</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="262"/>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="465"/>
         <source>Close</source>
-        <translation type="vanished">关闭</translation>
+        <translation>关闭</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="292"/>
         <source>CW TRANSMIT</source>
-        <translation type="vanished">CW 发射</translation>
+        <translation>CW 发射</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="303"/>
         <source>Send CW as</source>
-        <translation type="vanished">CW 发送方式</translation>
+        <translation>CW 发送方式</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="309"/>
         <source>Audio tone (works with a remote radio)</source>
-        <translation type="vanished">音频音调（适用于远程电台）</translation>
+        <translation>音频音调（适用于远程电台）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="310"/>
         <source>Serial keyer (DTR / RTS)</source>
-        <translation type="vanished">串口键控器（DTR / RTS）</translation>
+        <translation>串口键控器（DTR / RTS）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="311"/>
         <source>K1EL WinKeyer</source>
-        <translation type="vanished">K1EL WinKeyer</translation>
+        <translation>K1EL WinKeyer</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="320"/>
         <source>Port</source>
-        <translation type="vanished">端口</translation>
+        <translation>端口</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="345"/>
         <source>Refresh</source>
-        <translation type="vanished">刷新</translation>
+        <translation>刷新</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="356"/>
         <source>Key line</source>
-        <translation type="vanished">键控线</translation>
+        <translation>键控线</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="366"/>
+        <source>TX sidetone on this computer</source>
+        <translation>本机 TX 监听音</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="372"/>
+        <source>TX sidetone volume</source>
+        <translation>TX 监听音音量</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="380"/>
+        <source>TX tone test</source>
+        <translation>TX 音调测试</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="402"/>
+        <source>TX tone test plays a local V on the selected output; it does not key the radio. Use Test (V) below to test the configured CW transmitter.</source>
+        <translation>TX 音调测试在所选输出上播放本地 V；不会键控电台。使用下方的测试 (V) 来测试已配置的 CW 发射机。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="411"/>
         <source>Send the key, not audio (Decolink)</source>
-        <translation type="vanished">发送键控而不是音频（Decolink）</translation>
+        <translation>发送键控而不是音频（Decolink）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="415"/>
         <source>Tone</source>
-        <translation type="vanished">音调</translation>
+        <translation>音调</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="430"/>
         <source>%1 Hz</source>
-        <translation type="vanished">%1 Hz</translation>
+        <translation>%1 Hz</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="440"/>
         <source>A remote radio is in use: only the key timing goes over the link, and the gateway next to the radio makes the tone.</source>
-        <translation type="vanished">正在使用远程电台：链路上只传送键控时序，音调由电台旁的网关生成。</translation>
+        <translation>正在使用远程电台：链路上只传送键控时序，音调由电台旁的网关生成。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="441"/>
         <source>A remote radio is in use: the CW goes out as an audio tone through the link, whatever is chosen above.</source>
-        <translation type="vanished">正在使用远程电台：无论上面如何选择，CW 都以音频音调经链路发送。</translation>
+        <translation>正在使用远程电台：无论上面如何选择，CW 都以音频音调经链路发送。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="443"/>
+        <source>The radio&apos;s built-in CAT keyer sends CW while the rig stays in CW mode.</source>
+        <translation>电台内置的 CAT 键控器发送 CW，同时设备保持在 CW 模式。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="444"/>
         <source>The audio tone needs the radio in USB or DATA-U. A serial keyer or a WinKeyer keys the radio&apos;s own key input and needs the radio in CW.</source>
-        <translation type="vanished">音频音调需要电台处于 USB 或 DATA-U。串口键控器或 WinKeyer 操作电台自身的键控输入，需要电台处于 CW。</translation>
+        <translation>音频音调需要电台处于 USB 或 DATA-U。串口键控器或 WinKeyer 操作电台自身的键控输入，需要电台处于 CW。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="453"/>
+        <source>CW via the current CAT connection is unavailable: the radio or rigctld server does not expose Hamlib send_morse. A rigctld host:port belongs in CAT settings, not in Serial keyer or WinKeyer.</source>
+        <translation>通过当前 CAT 连接发送 CW 不可用：电台或 rigctld 服务器未提供 Hamlib send_morse。rigctld 的主机:端口应填写在 CAT 设置中，而不是串口键控器或 WinKeyer。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="457"/>
         <source>Test (V)</source>
-        <translation type="vanished">测试 (V)</translation>
+        <translation>测试 (V)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="462"/>
         <source>WinKeyer version %1</source>
-        <translation type="vanished">WinKeyer 版本 %1</translation>
+        <translation>WinKeyer 版本 %1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="493"/>
         <source>no CAT</source>
-        <translation type="vanished">无 CAT</translation>
+        <translation>无 CAT</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="494"/>
         <source>audio tone</source>
-        <translation type="vanished">音频音调</translation>
+        <translation>音频音调</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="495"/>
         <source>remote key</source>
-        <translation type="vanished">远程键控</translation>
+        <translation>远程键控</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="496"/>
+        <source>radio CAT keyer</source>
+        <translation>电台 CAT 键控器</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="497"/>
         <source>serial keyer</source>
-        <translation type="vanished">串口键控器</translation>
+        <translation>串口键控器</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="498"/>
         <source>remote radio</source>
-        <translation type="vanished">远程电台</translation>
+        <translation>远程电台</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="500"/>
         <source>Stop</source>
-        <translation type="vanished">停止</translation>
+        <translation>停止</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="501"/>
         <source>Macros…</source>
-        <translation type="vanished">宏…</translation>
+        <translation>宏…</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="502"/>
         <source>Setup…</source>
-        <translation type="vanished">设置…</translation>
+        <translation>设置…</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="509"/>
+        <source>Radio RX audio</source>
+        <translation>电台 RX 音频</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="513"/>
+        <source>RX volume</source>
+        <translation>RX 音量</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="91"/>
         <source>CW transmit is not ready: it needs the radio connected and a transmit audio output. The decoder works anyway, it only needs the radio audio.</source>
-        <translation type="vanished">CW 发射未就绪：需要已连接的电台和发射音频输出。解码器仍可工作，它只需要电台的音频。</translation>
+        <translation>CW 发射未就绪：需要已连接的电台和发射音频输出。解码器仍可工作，它只需要电台的音频。</translation>
     </message>
     <message>
         <source>The keyer is not open: choose its port in Setup. The decoder works anyway.</source>
         <translation type="vanished">键控器未打开：请在设置中选择其端口。解码器仍可工作。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="553"/>
         <source>Call</source>
-        <translation type="vanished">呼号</translation>
+        <translation>呼号</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="555"/>
         <source>RST</source>
-        <translation type="vanished">RST</translation>
+        <translation>RST</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="557"/>
         <source>Rcvd</source>
-        <translation type="vanished">收到</translation>
+        <translation>收到</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="559"/>
         <source>Nr</source>
-        <translation type="vanished">序号</translation>
+        <translation>序号</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="561"/>
         <source>Exch</source>
-        <translation type="vanished">交换</translation>
+        <translation>交换</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="563"/>
         <source>Name</source>
-        <translation type="vanished">姓名</translation>
+        <translation>姓名</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="566"/>
         <source>Log QSO</source>
-        <translation type="vanished">记录 QSO</translation>
+        <translation>记录 QSO</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="571"/>
         <source>QSO logged</source>
-        <translation type="vanished">QSO 已记录</translation>
+        <translation>QSO 已记录</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="571"/>
         <source>Nothing to log: enter the call</source>
-        <translation type="vanished">没有可记录的内容：请输入呼号</translation>
+        <translation>没有可记录的内容：请输入呼号</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="630"/>
         <source>Right click: change it</source>
-        <translation type="vanished">右键单击：修改</translation>
+        <translation>右键单击：修改</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="639"/>
         <source>Speed</source>
-        <translation type="vanished">速度</translation>
+        <translation>速度</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="649"/>
         <source>%1 wpm</source>
-        <translation type="vanished">%1 wpm</translation>
+        <translation>%1 wpm</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="663"/>
+        <source>TX while typing</source>
+        <translation>输入时发射</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="666"/>
+        <source>Transmit each new character as soon as the keyer is ready.</source>
+        <translation>键控器就绪后立即发射每个新字符。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="678"/>
         <source>write here and press Enter: it goes out in CW</source>
-        <translation type="vanished">在此输入并按回车：以 CW 发出</translation>
+        <translation>在此输入并按回车：以 CW 发出</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="687"/>
         <source>Send</source>
-        <translation type="vanished">发送</translation>
+        <translation>发送</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="700"/>
         <source>Decoder</source>
-        <translation type="vanished">解码器</translation>
+        <translation>解码器</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="741"/>
+        <source>Frequency in MHz. Press Enter to tune.</source>
+        <translation>频率（MHz）。按 Enter 键调谐。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="753"/>
+        <source>VFO step in Hz</source>
+        <translation>VFO 步进（Hz）</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="757"/>
+        <source>Center CW</source>
+        <translation>CW 居中</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="767"/>
+        <source>Center tone</source>
+        <translation>中心音调</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="776"/>
+        <source>Match the radio&apos;s CW pitch / sidetone.</source>
+        <translation>匹配电台的 CW 音调 / 监听音。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="785"/>
+        <source>Match the radio&apos;s receive sideband: upper or lower (also in CW-R).</source>
+        <translation>匹配电台的接收边带：上边带或下边带（CW-R 中同样适用）。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="789"/>
         <source>Decoder tone</source>
-        <translation type="vanished">解码音调</translation>
+        <translation>解码音调</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="795"/>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="808"/>
         <source>Auto</source>
-        <translation type="vanished">自动</translation>
+        <translation>自动</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="802"/>
         <source>Decoder speed</source>
-        <translation type="vanished">解码速度</translation>
+        <translation>解码速度</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="821"/>
         <source>fixed %1 WPM</source>
-        <translation type="vanished">固定 %1 WPM</translation>
+        <translation>固定 %1 WPM</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="822"/>
         <source>%1 WPM</source>
-        <translation type="vanished">%1 WPM</translation>
+        <translation>%1 WPM</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="824"/>
         <source>fixed %1 Hz · %2</source>
-        <translation type="vanished">固定 %1 Hz · %2</translation>
+        <translation>固定 %1 Hz · %2</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="825"/>
         <source>fixed %1 Hz · noise</source>
-        <translation type="vanished">固定 %1 Hz · 噪声</translation>
+        <translation>固定 %1 Hz · 噪声</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="826"/>
         <source>auto · %1 · %2 Hz</source>
-        <translation type="vanished">自动 · %1 · %2 Hz</translation>
+        <translation>自动 · %1 · %2 Hz</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="827"/>
         <source>listening…</source>
-        <translation type="vanished">正在监听…</translation>
+        <translation>正在监听…</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="833"/>
         <source>Clear</source>
-        <translation type="vanished">清除</translation>
+        <translation>清除</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="915"/>
         <source>waiting for audio…</source>
-        <translation type="vanished">正在等待音频…</translation>
+        <translation>正在等待音频…</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="916"/>
         <source>F: %1 Hz · S: %2 WPM · C: %3</source>
-        <translation type="vanished">F: %1 Hz · S: %2 WPM · C: %3</translation>
+        <translation>F: %1 Hz · S: %2 WPM · C: %3</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="930"/>
         <source>reading</source>
-        <translation type="vanished">正在读取</translation>
+        <translation>正在读取</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CwWindow.qml" line="930"/>
         <source>noise</source>
-        <translation type="vanished">噪声</translation>
+        <translation>噪声</translation>
     </message>
 </context>
 <context>
@@ -3022,8 +3455,9 @@ or contact DXLab support at DXLab@groups.io.</source>
 <context>
     <name>DecoComboBox</name>
     <message>
+        <location filename="../qml/decodium/components/DecoComboBox.qml" line="114"/>
         <source>▾</source>
-        <translation type="vanished">▾</translation>
+        <translation>▾</translation>
     </message>
 </context>
 <context>
@@ -3089,46 +3523,374 @@ or contact DXLab support at DXLab@groups.io.</source>
     </message>
 </context>
 <context>
+    <name>DecoPortWindow</name>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="51"/>
+        <source>DecoPort - radio on the network</source>
+        <translation>DecoPort - 网络上的电台</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="181"/>
+        <source>SECURITY</source>
+        <translation>安全</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="187"/>
+        <source>PASSWORD SET</source>
+        <translation>已设置密码</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="187"/>
+        <source>NO PASSWORD</source>
+        <translation>无密码</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="194"/>
+        <source>Every packet is signed. The same password is needed on the other computer.</source>
+        <translation>每个数据包都经过签名。另一台计算机上需要使用相同的密码。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="195"/>
+        <source>Without a password the radio is not published: the gateway refuses to start.</source>
+        <translation>没有密码时电台不会被发布：网关将拒绝启动。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="211"/>
+        <source>new password (at least 8 characters)</source>
+        <translation>新密码（至少 8 个字符）</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="212"/>
+        <source>password (at least 8 characters)</source>
+        <translation>密码（至少 8 个字符）</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="225"/>
+        <source>CHANGE</source>
+        <translation>更改</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="225"/>
+        <source>SET</source>
+        <translation>设置</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="236"/>
+        <source>Password saved. Use the same one on the other computer; anyone connected with the old one is now shut out.</source>
+        <translation>密码已保存。请在另一台计算机上使用相同的密码；使用旧密码连接的用户现在已被挡在门外。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="238"/>
+        <source>Password not accepted.</source>
+        <translation>密码未被接受。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="243"/>
+        <source>REMOVE</source>
+        <translation>移除</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="251"/>
+        <source>Password removed and gateway stopped: the radio is no longer published.</source>
+        <translation>密码已移除，网关已停止：电台不再被发布。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="266"/>
+        <source>The password is not stored as you type it: it becomes a key, and the password is discarded. It cannot be read back from here.</source>
+        <translation>密码不会按您输入的内容保存：它会变成密钥，而密码本身会被丢弃。无法从这里读回。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="276"/>
+        <source>THIS RADIO - PUBLISHED ON THE NETWORK</source>
+        <translation>此电台 - 已在网络上发布</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="280"/>
+        <source>unavailable</source>
+        <translation>不可用</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="295"/>
+        <source>CAT %1</source>
+        <translation>CAT %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="297"/>
+        <source>in: %1</source>
+        <translation>输入：%1</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="298"/>
+        <source>out: %1</source>
+        <translation>输出：%1</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="324"/>
+        <source>STOP</source>
+        <translation>STOP</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="324"/>
+        <source>PUBLISH</source>
+        <translation>发布</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="338"/>
+        <source>RESCAN</source>
+        <translation>重新扫描</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="342"/>
+        <source>ON AIR ON THE LAN</source>
+        <translation>局域网上在线</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="342"/>
+        <source>NOT PUBLISHED</source>
+        <translation>未发布</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="347"/>
+        <source>%1 client</source>
+        <translation>%1 个客户端</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="382"/>
+        <source>No packet has arrived: the client is not reaching this machine. Check network, firewall and port %1.</source>
+        <translation>没有数据包到达：客户端无法连到这台机器。请检查网络、防火墙和端口 %1。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="386"/>
+        <source>%1 s ago</source>
+        <translation>%1 秒前</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="387"/>
+        <source>%1 min ago</source>
+        <translation>%1 分钟前</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="393"/>
+        <source>%1 wrong password</source>
+        <translation>%1 密码错误</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="395"/>
+        <source>%1 clock out of step</source>
+        <translation>%1 时钟不同步</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="397"/>
+        <source>%1 not DecoPort traffic</source>
+        <translation>%1 非 DecoPort 流量</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="399"/>
+        <source>%1 from a blocked sender</source>
+        <translation>%1 来自被屏蔽的发送方</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="400"/>
+        <source>%1 packets from %2 (%3), all rejected: %4</source>
+        <translation>来自 %2（%3）的 %1 个数据包，全部被拒绝：%4</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="403"/>
+        <source>%1 packets received, %2 accepted - last from %3 (%4)</source>
+        <translation>已收到 %1 个数据包，已接受 %2 个 - 最后一个来自 %3（%4）</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="411"/>
+        <source>RADIOS FOUND ON THE NETWORK</source>
+        <translation>网络上发现的电台</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="416"/>
+        <source>Listening. A gateway announces itself every two seconds; nothing to type.</source>
+        <translation>正在监听。网关每两秒通告一次自身；无需输入任何内容。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="458"/>
+        <source>CAT</source>
+        <translation>CAT</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="458"/>
+        <source>NO CAT</source>
+        <translation>无 CAT</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="463"/>
+        <source>CONNECT</source>
+        <translation>连接</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="480"/>
+        <source>CONNECTED RADIO</source>
+        <translation>已连接的电台</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="496"/>
+        <source>Radio</source>
+        <translation>电台</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="503"/>
+        <source>Frequency</source>
+        <translation>频率</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="510"/>
+        <source>Hz</source>
+        <translation>Hz</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="525"/>
+        <source>TUNE</source>
+        <translation>调谐</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="531"/>
+        <source>Mode</source>
+        <translation>模式</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="551"/>
+        <source>Transmitter</source>
+        <translation>发射机</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="556"/>
+        <source>KEYED</source>
+        <translation>已键控</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="556"/>
+        <source>RECEIVING</source>
+        <translation>接收中</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="562"/>
+        <source>keying and transmit audio are not carried yet</source>
+        <translation>键控和发射音频暂未传输</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="596"/>
+        <source>IN USE</source>
+        <translation>使用中</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="596"/>
+        <source>NOT IN USE</source>
+        <translation>未使用</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="603"/>
+        <source>Decoding the remote radio — the local sound card is released</source>
+        <translation>正在解码远程电台 — 本地声卡已释放</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="604"/>
+        <source>Decoding the local sound card</source>
+        <translation>正在解码本地声卡</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="610"/>
+        <source>STOP USING</source>
+        <translation>停止使用</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="610"/>
+        <source>USE THIS RADIO</source>
+        <translation>使用此电台</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="622"/>
+        <source>LISTENING</source>
+        <translation>监听中</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="622"/>
+        <source>SILENT</source>
+        <translation>静音</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="628"/>
+        <source>Hear the remote radio on the speaker as well as decoding it</source>
+        <translation>除解码外，同时通过扬声器收听远程电台</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="634"/>
+        <source>MUTE</source>
+        <translation>静音</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="634"/>
+        <source>LISTEN</source>
+        <translation>收听</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="644"/>
+        <source>Its audio goes into the decoder and its frequency becomes the one shown in the application, in both directions. Transmission stays local.</source>
+        <translation>其音频会送入解码器，其频率会成为应用程序中显示的频率（双向）。发射仍为本地。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecoPortWindow.qml" line="657"/>
+        <source>DISCONNECT</source>
+        <translation>断开连接</translation>
+    </message>
+</context>
+<context>
     <name>DecoSyncPanel</name>
     <message>
+        <location filename="../qml/decodium/components/DecoSyncPanel.qml" line="54"/>
         <source>DecoSyncTime not available</source>
-        <translation type="vanished">DecoSyncTime 不可用</translation>
+        <translation>DecoSyncTime 不可用</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecoSyncPanel.qml" line="69"/>
         <source>DecoSyncTime Monitor</source>
-        <translation type="vanished">DecoSyncTime 监视器</translation>
+        <translation>DecoSyncTime 监视器</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecoSyncPanel.qml" line="160"/>
         <source>Source</source>
-        <translation type="vanished">来源</translation>
+        <translation>来源</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecoSyncPanel.qml" line="161"/>
         <source>Stato</source>
-        <translation type="vanished">状态</translation>
+        <translation>状态</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecoSyncPanel.qml" line="162"/>
         <source>Offset</source>
-        <translation type="vanished">偏移</translation>
+        <translation>偏移</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecoSyncPanel.qml" line="163"/>
         <source>Servers</source>
-        <translation type="vanished">服务器</translation>
+        <translation>服务器</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecoSyncPanel.qml" line="166"/>
         <source>NTP UDP</source>
-        <translation type="vanished">NTP UDP</translation>
+        <translation>NTP UDP</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecoSyncPanel.qml" line="176"/>
         <source>8 pool</source>
-        <translation type="vanished">8 pool</translation>
+        <translation>8 pool</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecoSyncPanel.qml" line="179"/>
         <source>HTTPS Date</source>
-        <translation type="vanished">HTTPS Date</translation>
+        <translation>HTTPS Date</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecoSyncPanel.qml" line="197"/>
         <source>SelfCal FT</source>
-        <translation type="vanished">SelfCal FT</translation>
+        <translation>SelfCal FT</translation>
     </message>
 </context>
 <context>
@@ -3270,163 +4032,243 @@ or contact DXLab support at DXLab@groups.io.</source>
 <context>
     <name>DecodeHistoryDialog</name>
     <message>
+        <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="18"/>
         <source>Decode History (DB)</source>
-        <translation type="vanished">解码历史 (DB)</translation>
+        <translation>解码历史 (DB)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="83"/>
         <source>Export ADIF</source>
-        <translation type="vanished">导出 ADIF</translation>
+        <translation>导出 ADIF</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="83"/>
         <source>ADIF (*.adi)</source>
-        <translation type="vanished">ADIF (*.adi)</translation>
+        <translation>ADIF (*.adi)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="115"/>
         <source>Decode History</source>
-        <translation type="vanished">解码历史</translation>
+        <translation>解码历史</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="123"/>
         <source>%1 total decodes  •  %2 sessions</source>
-        <translation type="vanished">%1 个总解码  •  %2 个会话</translation>
+        <translation>%1 个总解码  •  %2 个会话</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="124"/>
         <source>Empty DB</source>
-        <translation type="vanished">空数据库</translation>
+        <translation>空数据库</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="139"/>
         <source>Callsign</source>
-        <translation type="vanished">Callsign</translation>
+        <translation>Callsign</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="140"/>
         <source>Band</source>
-        <translation type="vanished">波段</translation>
+        <translation>波段</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="141"/>
         <source>Mode</source>
-        <translation type="vanished">模式</translation>
+        <translation>模式</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="142"/>
         <source>From (UTC)</source>
-        <translation type="vanished">起始 (UTC)</translation>
+        <translation>起始 (UTC)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="143"/>
         <source>To (UTC)</source>
-        <translation type="vanished">截止 (UTC)</translation>
+        <translation>截止 (UTC)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="144"/>
         <source>Limit</source>
-        <translation type="vanished">限制</translation>
+        <translation>限制</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="150"/>
         <source>e.g. F4CQS</source>
-        <translation type="vanished">例如 F4CQS</translation>
+        <translation>例如 F4CQS</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="362"/>
         <source>Search</source>
-        <translation type="vanished">搜索</translation>
+        <translation>搜索</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="381"/>
         <source>Clear filters</source>
-        <translation type="vanished">清除筛选</translation>
+        <translation>清除筛选</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="409"/>
         <source>%1 results</source>
-        <translation type="vanished">%1 个结果</translation>
+        <translation>%1 个结果</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="410"/>
         <source>No results</source>
-        <translation type="vanished">无结果</translation>
+        <translation>无结果</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="415"/>
         <source>Export ADIF…</source>
-        <translation type="vanished">导出 ADIF…</translation>
+        <translation>导出 ADIF…</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="568"/>
         <source>Close</source>
-        <translation type="vanished">关闭</translation>
+        <translation>关闭</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="458"/>
         <source>Grid</source>
-        <translation type="vanished">网格</translation>
+        <translation>网格</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="460"/>
         <source>Freq</source>
-        <translation type="vanished">Freq</translation>
+        <translation>Freq</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="461"/>
         <source>Message</source>
-        <translation type="vanished">信息</translation>
+        <translation>信息</translation>
     </message>
 </context>
 <context>
     <name>DecodeWindow</name>
     <message>
+        <location filename="../qml/decodium/components/DecodeWindow.qml" line="1333"/>
+        <location filename="../qml/decodium/components/DecodeWindow.qml" line="1885"/>
         <source>── PERIOD ──</source>
-        <translation type="vanished">── 周期 ──</translation>
+        <translation>── 周期 ──</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecodeWindow.qml" line="970"/>
         <source>Full Spectrum</source>
-        <translation type="vanished">全频谱</translation>
+        <translation>全频谱</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecodeWindow.qml" line="1049"/>
         <source>Freq</source>
-        <translation type="vanished">Freq</translation>
+        <translation>Freq</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecodeWindow.qml" line="1063"/>
         <source>Drift</source>
-        <translation type="vanished">漂移</translation>
+        <translation>漂移</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecodeWindow.qml" line="1102"/>
         <source>Az</source>
-        <translation type="vanished">Az</translation>
+        <translation>Az</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecodeWindow.qml" line="1547"/>
         <source>No decoded messages
 Click Monitor to start</source>
-        <translation type="vanished">没有解码的消息
+        <translation>没有解码的消息
 点击 Monitor 开始</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecodeWindow.qml" line="1581"/>
         <source>Signal RX</source>
-        <translation type="vanished">接收信号</translation>
+        <translation>接收信号</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecodeWindow.qml" line="979"/>
         <source>decodes</source>
-        <translation type="vanished">条解码</translation>
+        <translation>条解码</translation>
     </message>
 </context>
 <context>
     <name>DecoderPanel</name>
     <message>
+        <location filename="../qml/decodium/rtty/DecoderPanel.qml" line="76"/>
+        <source>Baud set: %1</source>
+        <translation>波特率已设置：%1</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/rtty/DecoderPanel.qml" line="123"/>
         <source>Correction</source>
-        <translation type="vanished">纠错</translation>
+        <translation>纠错</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/DecoderPanel.qml" line="145"/>
         <source>Off</source>
-        <translation type="vanished">关闭</translation>
+        <translation>关闭</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/DecoderPanel.qml" line="153"/>
         <source>Normal</source>
-        <translation type="vanished">普通</translation>
+        <translation>普通</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/DecoderPanel.qml" line="161"/>
         <source>Deep</source>
-        <translation type="vanished">深度</translation>
+        <translation>深度</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/DecoderPanel.qml" line="189"/>
+        <source>Swaps the two tones. When the other station is on the
+opposite sideband everything arrives as gibberish, and
+this is the one button that fixes it.</source>
+        <translation>交换两个音调。当对方电台在相反边带时，
+所有内容都会变成乱码，
+这是唯一能修复它的按钮。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/rtty/DecoderPanel.qml" line="204"/>
+        <source>Follows the drift of the signal already locked,
+within a few tens of hertz.</source>
+        <translation>在几十赫兹范围内，
+跟随已锁定信号的漂移。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/rtty/DecoderPanel.qml" line="218"/>
+        <source>Searches by itself whenever nothing is being
+copied, and tries the polarity too. While the
+decoder is locked it touches nothing.</source>
+        <translation>在没有任何信号被抄收时自行搜索，
+并同时尝试极性。解码器锁定期间
+不做任何改动。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/rtty/DecoderPanel.qml" line="224"/>
+        <source>CENTRE</source>
+        <translation>居中</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/rtty/DecoderPanel.qml" line="232"/>
+        <source>Finds the tone pair in the band and moves the
+tuning onto it. Once, now.</source>
+        <translation>在频段中找到音调对并将调谐
+移动到其上。仅执行一次，立即生效。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/rtty/DecoderPanel.qml" line="251"/>
         <source>Unshift on space — recovers a lost FIGS/LTRS, but
 breaks long figure groups such as serial numbers.</source>
-        <translation type="vanished">空格回到字母 — 找回丢失的 FIGS/LTRS，
+        <translation>空格回到字母 — 找回丢失的 FIGS/LTRS，
 但会打断流水号这类长数字串。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/DecoderPanel.qml" line="255"/>
         <source>Set radio</source>
-        <translation type="vanished">设置电台</translation>
+        <translation>设置电台</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/DecoderPanel.qml" line="264"/>
         <source>Puts the radio into DIGU and narrows its filter
 around the tones.</source>
-        <translation type="vanished">把电台设为 DIGU，并把滤波器收紧到
+        <translation>把电台设为 DIGU，并把滤波器收紧到
 两个音调附近。</translation>
     </message>
 </context>
@@ -3443,37 +4285,42 @@ around the tones.</source>
         <translation>%1 %2 已连接</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="57857"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="57907"/>
         <source>Update available: v%1</source>
         <translation>有可用更新：v%1</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="56700"/>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="56732"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="56750"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="56782"/>
         <source>Update in progress...</source>
         <translation>正在更新...</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="56702"/>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="56734"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="43247"/>
+        <source>CW tone test queued for the selected local audio output (V).</source>
+        <translation>CW 音调测试已排队，输出到所选本地音频输出 (V)。</translation>
+    </message>
+    <message>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="56752"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="56784"/>
         <source>Error</source>
         <translation>错误</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="56704"/>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="56736"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="56754"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="56786"/>
         <source>Loading...</source>
         <translation>正在加载...</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="56705"/>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="56737"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="56755"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="56787"/>
         <source>Local</source>
         <translation>本地</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="56706"/>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="56738"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="56756"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="56788"/>
         <source>File not loaded</source>
         <translation>文件未加载</translation>
     </message>
@@ -3494,335 +4341,334 @@ around the tones.</source>
         <translation type="vanished">已收到直接呼叫，但 callsign 未解析</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="47685"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="47734"/>
         <source>Map selection: %1 %2</source>
         <translation>地图选择：%1 %2</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="47686"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="47735"/>
         <source>Map selection: %1</source>
         <translation>地图选择：%1</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="57812"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="57862"/>
         <source>Update checks are disabled in this build.</source>
         <translation>此版本已禁用更新检查。</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="47717"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="47766"/>
         <source>Map CALL could not select TX1 for %1</source>
         <translation>地图 CALL 无法为 %1 选择 TX1</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="47777"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="47826"/>
         <source>QSO with %1 armed - TX%2 at next full slot</source>
         <translation>与 %1 的 QSO 已就绪 - 下一个完整时隙发送 TX%2</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="47837"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="47886"/>
         <source>QSO with %1 armed - TX%2</source>
         <translation>与 %1 的 QSO 已就绪 - TX%2</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="22499"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="22548"/>
         <source>Give the second instance a name.</source>
         <translation>请为第二个实例取一个名称。</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="17622"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="17671"/>
         <source>Invalid CAT frequency after EME/transverter correction</source>
         <translation>EME/变频器校正后的 CAT 频率无效</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="21802"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="21851"/>
         <source>Remote RX audio output is unavailable. Choose headphones or speakers.</source>
         <translation>远程 RX 音频输出不可用。请选择耳机或扬声器。</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="21827"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="21876"/>
         <source>Remote RX audio output does not support 12 or 48 kHz.</source>
         <translation>远程 RX 音频输出不支持 12 或 48 kHz。</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="21859"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="21908"/>
         <source>Transmit refused: no remote radio connected</source>
         <translation>发射被拒绝：未连接远程电台</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="21864"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="21913"/>
         <source>Transmit refused: the remote radio does not accept transmission (no CAT for its PTT, or it is already transmitting)</source>
         <translation>发射被拒绝：远程电台不接受发射（其 PTT 没有 CAT 控制，或正在发射）</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="22252"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="22301"/>
         <source>Using the remote radio %1 — decoding its audio</source>
         <translation>正在使用远程电台 %1 — 解码其音频</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="22503"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="22552"/>
         <source>The name cannot contain \ / or ,</source>
         <translation>名称不能包含 \ / 或 ,</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="22505"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="22554"/>
         <source>This instance is already using that name.</source>
         <translation>本实例已在使用该名称。</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="22529"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="22578"/>
         <source>Shared CAT is not listening on port %1: %2</source>
         <translation>共享 CAT 未在端口 %1 上侦听：%2</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="22531"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="22580"/>
         <source>not available</source>
         <translation>不可用</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="22563"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="22612"/>
         <source>Could not start %1</source>
         <translation>无法启动 %1</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="24049"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="24098"/>
         <source>Reception started via legacy backend - %1</source>
         <translation>已通过旧后端启动接收 - %1</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="24164"/>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="24181"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="24213"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="24230"/>
         <source>Reception stopped</source>
         <translation>接收已停止</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="24507"/>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="29682"/>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="29715"/>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="29742"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="24556"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="29731"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="29764"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="29791"/>
         <source>Tune finished</source>
         <translation>调谐结束</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="24511"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="24560"/>
         <source>Transmission finished</source>
         <translation>发射结束</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="27092"/>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="27146"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="27141"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="27195"/>
         <source>Transmission complete</source>
         <translation>发射完成</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="27857"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="27906"/>
         <source>Cannot transmit: no callsign set. Fill in your callsign (and locator) in Settings &gt; Station: without it no transmit message can be built.</source>
         <translation>无法发射：未设置呼号。请在 设置 &gt; 电台 中填写您的呼号（和网格定位）；没有呼号无法生成任何发射消息。</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="27863"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="27912"/>
         <source>No TX message selected</source>
         <translation>未选择发射消息</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="28010"/>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="28252"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="28059"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="28301"/>
         <source>Transmit audio device not found, using the default one: %1</source>
         <translation>未找到发射音频设备，改用默认设备：%1</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="28384"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="28433"/>
         <source>PTT unavailable: check the CAT connection (%1)</source>
         <translation>PTT 不可用：请检查 CAT 连接（%1）</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="29219"/>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="29251"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="29268"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="29300"/>
         <source>Transmission stopped</source>
         <translation>发射已停止</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="29402"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="29451"/>
         <source>Tune audio device not found, using the default one: %1</source>
         <translation>未找到调谐音频设备，改用默认设备：%1</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="30731"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="30780"/>
         <source>SSTV TX is releasing PTT: load the CAT profile again after transmission has stopped</source>
         <translation>SSTV 发射正在释放 PTT：发射停止后请重新加载 CAT 配置文件</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="30865"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="30914"/>
         <source>SSTV TX is releasing PTT: change the CAT backend again after transmission has stopped</source>
         <translation>SSTV 发射正在释放 PTT：发射停止后请重新更改 CAT 后端</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="35596"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="35645"/>
         <source>Settings saved</source>
         <translation>设置已保存</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="43172"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="43221"/>
         <source>System default output</source>
         <translation>系统默认输出</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="43180"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="43229"/>
         <source>CW tone test skipped: enable TX sidetone on this computer first.</source>
         <translation>已跳过 CW 音调测试：请先在本机启用发射侧音。</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="43188"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="43237"/>
         <source>CW tone test skipped while the radio is transmitting or tuning.</source>
         <translation>电台正在发射或调谐，已跳过 CW 音调测试。</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="43198"/>
         <source>CW tone test sent to the selected local audio output (V).</source>
-        <translation>CW 音调测试已发送到所选本地音频输出 (V)。</translation>
+        <translation type="vanished">CW 音调测试已发送到所选本地音频输出 (V)。</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="43301"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="43350"/>
         <source>the Hamlib CAT port %1</source>
         <translation>Hamlib CAT 端口 %1</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="43310"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="43359"/>
         <source>the Hamlib PTT port %1</source>
         <translation>Hamlib PTT 端口 %1</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="50657"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="50706"/>
         <source>Transmit watchdog: timed out, transmission stopped</source>
         <translation>发射看门狗：超时，发射已停止</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="52872"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="52922"/>
         <source>Audio capture started: %1</source>
         <translation>音频采集已启动：%1</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="56354"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="56404"/>
         <source>cty.dat download already under way...</source>
         <translation>cty.dat 已在下载中……</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="56471"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="56521"/>
         <source>cty.dat updated and loaded: %1</source>
         <translation>cty.dat 已更新并加载：%1</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="57699"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="57749"/>
         <source>No WAV file found in: %1</source>
         <translation>未在此处找到 WAV 文件：%1</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="59698"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="59748"/>
         <source>Choose a different file: the active logbook cannot be overwritten.</source>
         <translation>请选择其他文件：无法覆盖当前使用的日志。</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="59713"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="59763"/>
         <source>The logbook changed. Refresh it and select the QSOs again.</source>
         <translation>日志已更改。请刷新后重新选择 QSO。</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="59722"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="59772"/>
         <source>Unable to export the selected QSOs.</source>
         <translation>无法导出所选的 QSO。</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="60061"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="60111"/>
         <source>Searching for FT2 Log Bridge...</source>
         <translation>正在搜索 FT2 Log Bridge...</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="60071"/>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="60135"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="60121"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="60185"/>
         <source>No configured FT2 Log Bridge found: download it from the community.ft2.it Dashboard.</source>
         <translation>未找到已配置的 FT2 Log Bridge：请从 community.ft2.it 仪表板下载。</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="60075"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="60125"/>
         <source>Found: %1</source>
         <translation>已找到：%1</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="60107"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="60157"/>
         <source>Starting FT2 Log Bridge...</source>
         <translation>正在启动 FT2 Log Bridge...</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="60144"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="60194"/>
         <source>FT2 Log Bridge is already running.</source>
         <translation>FT2 Log Bridge 已在运行。</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="60146"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="60196"/>
         <source>FT2 Log Bridge started.</source>
         <translation>FT2 Log Bridge 已启动。</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="60148"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="60198"/>
         <source>FT2 Log Bridge could not start: %1</source>
         <translation>FT2 Log Bridge 无法启动：%1</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="60158"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="60208"/>
         <source>Warning: Decodium sends UDP to %1:%2, the bridge listens on 127.0.0.1:%3.</source>
         <translation>警告：Decodium 将 UDP 发送到 %1:%2，而桥接程序监听的是 127.0.0.1:%3。</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="60162"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="60212"/>
         <source>Warning: &quot;QSO logged&quot; is not sent over UDP.</source>
         <translation>警告：“QSO logged” 不会通过 UDP 发送。</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="60240"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="60290"/>
         <source>Decodium RX was not found next to Decodium: %1</source>
         <translation>在 Decodium 旁边未找到 Decodium RX：%1</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="60267"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="60317"/>
         <source>Decodium RX needs a terminal window: start %1 from a terminal</source>
         <translation>Decodium RX 需要终端窗口：请从终端启动 %1</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="60278"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="60328"/>
         <source>Decodium RX could not be started</source>
         <translation>无法启动 Decodium RX</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="36422"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="36471"/>
         <source>Transmission not started</source>
         <translation>发射未启动</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="36423"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="36472"/>
         <source>Compressed callsign not resolved</source>
         <translation>压缩呼号未解析</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="40837"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="40886"/>
         <source>AutoCQ stopped</source>
         <translation>AutoCQ 已停止</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="40838"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="40887"/>
         <source>Direct call received, but the callsign is not resolved</source>
         <translation>收到定向呼叫，但呼号未解析</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="21516"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="21565"/>
         <source>Decolink: enter e-mail and password</source>
         <translation>Decolink：请输入电子邮件和密码</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="21869"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="21918"/>
         <source>Transmit refused: %1</source>
         <translation>发射被拒绝：%1</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="27764"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="27813"/>
         <source>CW transmission in progress</source>
         <translation>CW 正在发射</translation>
     </message>
@@ -4724,34 +5570,41 @@ around the tones.</source>
 <context>
     <name>DecodiumCommunityReport</name>
     <message>
+        <location filename="../src/services/DecodiumCommunityReport.cpp" line="99"/>
         <source>Please describe the problem before sending.</source>
-        <translation type="vanished">发送前请描述问题。</translation>
+        <translation>发送前请描述问题。</translation>
     </message>
     <message>
+        <location filename="../src/services/DecodiumCommunityReport.cpp" line="123"/>
         <source>Cannot reach the community: %1</source>
-        <translation type="vanished">无法连接社区: %1</translation>
+        <translation>无法连接社区: %1</translation>
     </message>
     <message>
+        <location filename="../src/services/DecodiumCommunityReport.cpp" line="145"/>
         <source>The community form could not be prepared. Please try again later or post manually at %1</source>
-        <translation type="vanished">无法准备社区表单。请稍后重试或手动发布到 %1</translation>
+        <translation>无法准备社区表单。请稍后重试或手动发布到 %1</translation>
     </message>
     <message>
+        <location filename="../src/services/DecodiumCommunityReport.cpp" line="172"/>
         <source>
 [...truncated, %1 characters total...]</source>
-        <translation type="vanished">
+        <translation>
 [...已截断，共 %1 个字符...]</translation>
     </message>
     <message>
+        <location filename="../src/services/DecodiumCommunityReport.cpp" line="215"/>
         <source>The community rejected the report (likely too long). Please shorten it and try again.</source>
-        <translation type="vanished">社区拒绝了该报告（可能太长）。请缩短后重试。</translation>
+        <translation>社区拒绝了该报告（可能太长）。请缩短后重试。</translation>
     </message>
     <message>
+        <location filename="../src/services/DecodiumCommunityReport.cpp" line="222"/>
         <source>Could not send the report: %1</source>
-        <translation type="vanished">无法发送报告: %1</translation>
+        <translation>无法发送报告: %1</translation>
     </message>
     <message>
+        <location filename="../src/services/DecodiumCommunityReport.cpp" line="225"/>
         <source>unexpected server response (%1)</source>
-        <translation type="vanished">意外的服务器响应 (%1)</translation>
+        <translation>意外的服务器响应 (%1)</translation>
     </message>
 </context>
 <context>
@@ -5034,6 +5887,31 @@ around the tones.</source>
     </message>
 </context>
 <context>
+    <name>DecodiumLink</name>
+    <message>
+        <location filename="../src/rtty/link/DecodiumLink.cpp" line="26"/>
+        <location filename="../src/rtty/link/DecodiumLink.cpp" line="187"/>
+        <source>RTTY TX unavailable: check audio output and active mode</source>
+        <translation>RTTY 发射不可用：请检查音频输出和当前模式</translation>
+    </message>
+    <message>
+        <location filename="../src/rtty/link/DecodiumLink.cpp" line="45"/>
+        <location filename="../src/rtty/link/DecodiumLink.cpp" line="47"/>
+        <source>radio di Decodium</source>
+        <translation>Decodium 电台</translation>
+    </message>
+    <message>
+        <location filename="../src/rtty/link/DecodiumLink.cpp" line="185"/>
+        <source>collegato: %1</source>
+        <translation>已连接：%1</translation>
+    </message>
+    <message>
+        <location filename="../src/rtty/link/DecodiumLink.cpp" line="186"/>
+        <source>Audio/AFSK — use VOX or manual PTT</source>
+        <translation>音频/AFSK — 请使用 VOX 或手动 PTT</translation>
+    </message>
+</context>
+<context>
     <name>DecodiumPropagationManager</name>
     <message>
         <location filename="../src/services/DecodiumPropagationManager.cpp" line="87"/>
@@ -5160,80 +6038,187 @@ around the tones.</source>
 <context>
     <name>DecodiumTransceiverManager</name>
     <message>
+        <location filename="../src/radio/DecodiumTransceiverManager.cpp" line="1744"/>
+        <source>The selected transceiver is not available in Hamlib</source>
+        <translation>所选收发信机在 Hamlib 中不可用</translation>
+    </message>
+    <message>
+        <location filename="../src/radio/DecodiumTransceiverManager.cpp" line="1768"/>
+        <source>Waiting for configured CAT port %1 after radio power restore (%2/5)…</source>
+        <translation>电台恢复供电后，正在等待已配置的 CAT 端口 %1（%2/5）…</translation>
+    </message>
+    <message>
+        <location filename="../src/radio/DecodiumTransceiverManager.cpp" line="1837"/>
+        <source>Could not prepare the CAT power-on request: %1</source>
+        <translation>无法准备 CAT 开机请求：%1</translation>
+    </message>
+    <message>
+        <location filename="../src/radio/DecodiumTransceiverManager.cpp" line="1857"/>
+        <source>Could not prepare the CAT power-on request</source>
+        <translation>无法准备 CAT 开机请求</translation>
+    </message>
+    <message>
+        <location filename="../src/radio/DecodiumTransceiverManager.cpp" line="2106"/>
+        <source>CAT wake-up sent; waiting for %1 to return (%2/5)…</source>
+        <translation>CAT 唤醒已发送；正在等待 %1 返回（%2/5）…</translation>
+    </message>
+    <message>
+        <location filename="../src/radio/DecodiumTransceiverManager.cpp" line="2113"/>
+        <source>No reply arrived from the selected CAT port while sending the explicit power-on wake-up. Check the selected CAT port and its serial settings. If the radio&apos;s USB/serial interface disappears while it is off, it cannot be switched on through that interface.</source>
+        <translation>发送明确的开机唤醒时，所选 CAT 端口没有回复。请检查所选 CAT 端口及其串口设置。如果电台关机时其 USB/串口接口消失，则无法通过该接口开机。</translation>
+    </message>
+    <message>
+        <location filename="../src/radio/DecodiumTransceiverManager.cpp" line="2278"/>
+        <source>The configured CAT port did not return after the radio power was restored. Check that the radio supply is on and select its actual CAT port.</source>
+        <translation>电台恢复供电后，已配置的 CAT 端口没有返回。请检查电台电源是否已打开，并选择其实际的 CAT 端口。</translation>
+    </message>
+    <message>
         <location filename="../src/radio/DecodiumTransceiverManager.cpp" line="2296"/>
         <source>CAT interrotto, riconnessione automatica (%1/%2)...</source>
         <translation>CAT 已中断，正在自动重连 (%1/%2)…</translation>
     </message>
     <message>
         <location filename="../src/radio/DecodiumTransceiverManager.cpp" line="2695"/>
-        <location filename="../src/radio/DecodiumTransceiverManager.cpp" line="2716"/>
-        <location filename="../src/radio/DecodiumTransceiverManager.cpp" line="2737"/>
-        <location filename="../src/radio/DecodiumTransceiverManager.cpp" line="2904"/>
+        <location filename="../src/radio/DecodiumTransceiverManager.cpp" line="2725"/>
+        <location filename="../src/radio/DecodiumTransceiverManager.cpp" line="2876"/>
+        <location filename="../src/radio/DecodiumTransceiverManager.cpp" line="3043"/>
         <source>CAT disconnected</source>
         <translation>CAT 已断开</translation>
+    </message>
+    <message>
+        <location filename="../src/radio/DecodiumTransceiverManager.cpp" line="2792"/>
+        <source>Power On while disconnected requires a direct serial or USB Hamlib CAT connection.</source>
+        <translation>在断开连接状态下开机需要直接的串口或 USB Hamlib CAT 连接。</translation>
+    </message>
+    <message>
+        <location filename="../src/radio/DecodiumTransceiverManager.cpp" line="2798"/>
+        <source>A CAT connection attempt is already in progress</source>
+        <translation>CAT 连接尝试已在进行中</translation>
+    </message>
+    <message>
+        <location filename="../src/radio/DecodiumTransceiverManager.cpp" line="2803"/>
+        <source>Select the radio&apos;s CAT port before using Power On.</source>
+        <translation>使用开机之前，请先选择电台的 CAT 端口。</translation>
+    </message>
+    <message>
+        <location filename="../src/radio/DecodiumTransceiverManager.cpp" line="2819"/>
+        <source>Waiting for configured CAT port %1 after radio power restore…</source>
+        <translation>电台恢复供电后，正在等待已配置的 CAT 端口 %1…</translation>
+    </message>
+    <message>
+        <location filename="../src/radio/DecodiumTransceiverManager.cpp" line="2839"/>
+        <source>Sending CAT power-on wake-up to %1…</source>
+        <translation>正在向 %1 发送 CAT 开机唤醒…</translation>
     </message>
 </context>
 <context>
     <name>DecodiumUpdater</name>
     <message>
+        <location filename="../src/app/DecodiumUpdater.cpp" line="193"/>
         <source>Checking for updates...</source>
-        <translation type="vanished">正在检查更新...</translation>
+        <translation>正在检查更新...</translation>
     </message>
     <message>
+        <location filename="../src/app/DecodiumUpdater.cpp" line="305"/>
         <source>Could not check for updates: %1</source>
-        <translation type="vanished">无法检查更新: %1</translation>
+        <translation>无法检查更新: %1</translation>
     </message>
     <message>
+        <location filename="../src/app/DecodiumUpdater.cpp" line="273"/>
         <source>Could not read the release information.</source>
-        <translation type="vanished">无法读取发布信息。</translation>
+        <translation>无法读取发布信息。</translation>
     </message>
     <message>
+        <location filename="../src/app/DecodiumUpdater.cpp" line="241"/>
         <source>Decodium is up to date (%1).</source>
-        <translation type="vanished">Decodium 已是最新版本 (%1)。</translation>
+        <translation>Decodium 已是最新版本 (%1)。</translation>
     </message>
     <message>
+        <location filename="../src/app/DecodiumUpdater.cpp" line="347"/>
         <source>Version %1 is available.</source>
-        <translation type="vanished">版本 %1 可用。</translation>
+        <translation>版本 %1 可用。</translation>
     </message>
     <message>
+        <location filename="../src/app/DecodiumUpdater.cpp" line="364"/>
         <source>Version %1 will be skipped.</source>
-        <translation type="vanished">将跳过版本 %1。</translation>
+        <translation>将跳过版本 %1。</translation>
     </message>
     <message>
+        <location filename="../src/app/DecodiumUpdater.cpp" line="419"/>
+        <source>Cannot create the Downloads folder.</source>
+        <translation>无法创建“下载”文件夹。</translation>
+    </message>
+    <message>
+        <location filename="../src/app/DecodiumUpdater.cpp" line="429"/>
+        <source>Cannot write to the Downloads folder.</source>
+        <translation>无法写入“下载”文件夹。</translation>
+    </message>
+    <message>
+        <location filename="../src/app/DecodiumUpdater.cpp" line="446"/>
         <source>Cannot write to the temporary folder.</source>
-        <translation type="vanished">无法写入临时文件夹。</translation>
+        <translation>无法写入临时文件夹。</translation>
     </message>
     <message>
+        <location filename="../src/app/DecodiumUpdater.cpp" line="455"/>
         <source>Downloading %1...</source>
-        <translation type="vanished">正在下载 %1...</translation>
+        <translation>正在下载 %1...</translation>
     </message>
     <message>
+        <location filename="../src/app/DecodiumUpdater.cpp" line="493"/>
         <source>Download failed: %1</source>
-        <translation type="vanished">下载失败: %1</translation>
+        <translation>下载失败: %1</translation>
     </message>
     <message>
+        <location filename="../src/app/DecodiumUpdater.cpp" line="502"/>
         <source>The downloaded file is incomplete. Please try again.</source>
-        <translation type="vanished">下载的文件不完整。请重试。</translation>
+        <translation>下载的文件不完整。请重试。</translation>
     </message>
     <message>
+        <location filename="../src/app/DecodiumUpdater.cpp" line="513"/>
+        <source>The AppImage could not be installed safely: %1</source>
+        <translation>无法安全安装 AppImage：%1</translation>
+    </message>
+    <message>
+        <location filename="../src/app/DecodiumUpdater.cpp" line="528"/>
+        <source>The AppImage was updated successfully. Restarting Decodium...</source>
+        <translation>AppImage 已更新。正在重启 Decodium…</translation>
+    </message>
+    <message>
+        <location filename="../src/app/DecodiumUpdater.cpp" line="534"/>
+        <source>The AppImage was updated at %1. Please restart Decodium manually.</source>
+        <translation>AppImage 已在 %1 更新。请手动重启 Decodium。</translation>
+    </message>
+    <message>
+        <location filename="../src/app/DecodiumUpdater.cpp" line="545"/>
+        <source>The AppImage was saved to %1. Launch it manually to complete the update.</source>
+        <translation>AppImage 已保存到 %1。请手动启动以完成更新。</translation>
+    </message>
+    <message>
+        <location filename="../src/app/DecodiumUpdater.cpp" line="559"/>
         <source>Starting the installer...</source>
-        <translation type="vanished">正在启动安装程序...</translation>
+        <translation>正在启动安装程序...</translation>
     </message>
     <message>
+        <location filename="../src/app/DecodiumUpdater.cpp" line="563"/>
         <source>Could not start the installer.</source>
-        <translation type="vanished">无法启动安装程序。</translation>
+        <translation>无法启动安装程序。</translation>
     </message>
     <message>
+        <location filename="../src/app/DecodiumUpdater.cpp" line="370"/>
         <source>Offline: downloads disabled</source>
-        <translation type="vanished">离线: 已禁用下载</translation>
+        <translation>离线: 已禁用下载</translation>
     </message>
     <message>
+        <location filename="../src/app/DecodiumUpdater.cpp" line="152"/>
+        <location filename="../src/app/DecodiumUpdater.cpp" line="186"/>
+        <location filename="../src/app/DecodiumUpdater.cpp" line="252"/>
         <source>Offline: update checks disabled</source>
-        <translation type="vanished">离线: 已禁用更新检查</translation>
+        <translation>离线: 已禁用更新检查</translation>
     </message>
     <message>
+        <location filename="../src/app/DecodiumUpdater.cpp" line="154"/>
         <source>Online: update checks enabled</source>
-        <translation type="vanished">在线: 已启用更新检查</translation>
+        <translation>在线: 已启用更新检查</translation>
     </message>
 </context>
 <context>
@@ -5421,156 +6406,201 @@ around the tones.</source>
 <context>
     <name>DecolinkWindow</name>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="32"/>
         <source>Decolink - remote radio through the server</source>
-        <translation type="vanished">Decolink - 通过服务器使用远程电台</translation>
+        <translation>Decolink - 通过服务器使用远程电台</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="155"/>
         <source>ACCOUNT</source>
-        <translation type="vanished">账户</translation>
+        <translation>账户</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="161"/>
         <source>Server</source>
-        <translation type="vanished">服务器</translation>
+        <translation>服务器</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="163"/>
         <source>E-mail</source>
-        <translation type="vanished">电子邮件</translation>
+        <translation>电子邮件</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="165"/>
         <source>Password</source>
-        <translation type="vanished">密码</translation>
+        <translation>密码</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="169"/>
         <source>(saved)</source>
-        <translation type="vanished">（已保存）</translation>
+        <translation>（已保存）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="172"/>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="276"/>
         <source>Station</source>
-        <translation type="vanished">电台</translation>
+        <translation>电台</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="175"/>
         <source>empty = choose from the list</source>
-        <translation type="vanished">留空 = 从列表中选择</translation>
+        <translation>留空 = 从列表中选择</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="177"/>
         <source>Relay</source>
-        <translation type="vanished">中继</translation>
+        <translation>中继</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="180"/>
         <source>same as server</source>
-        <translation type="vanished">与服务器相同</translation>
+        <translation>与服务器相同</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="199"/>
         <source>Remember the password (system secure store)</source>
-        <translation type="vanished">记住密码（系统安全存储）</translation>
+        <translation>记住密码（系统安全存储）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="211"/>
         <source>Reconnect</source>
-        <translation type="vanished">重新连接</translation>
+        <translation>重新连接</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="211"/>
         <source>Connect</source>
-        <translation type="vanished">连接</translation>
+        <translation>连接</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="215"/>
         <source>Disconnect</source>
-        <translation type="vanished">断开</translation>
+        <translation>断开</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="224"/>
         <source>Forget password</source>
-        <translation type="vanished">忘记密码</translation>
+        <translation>忘记密码</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="233"/>
         <source>STATIONS</source>
-        <translation type="vanished">电台</translation>
+        <translation>电台</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="262"/>
         <source>LINK</source>
-        <translation type="vanished">链路</translation>
+        <translation>链路</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="278"/>
         <source>Role</source>
-        <translation type="vanished">角色</translation>
+        <translation>角色</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="280"/>
         <source>Frequency</source>
-        <translation type="vanished">频率</translation>
+        <translation>频率</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="286"/>
         <source>S-meter</source>
-        <translation type="vanished">S 表</translation>
+        <translation>S 表</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="296"/>
         <source>Round trip</source>
-        <translation type="vanished">往返延迟</translation>
+        <translation>往返延迟</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="298"/>
         <source>Transmit</source>
-        <translation type="vanished">发射</translation>
+        <translation>发射</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="305"/>
         <source>allowed</source>
-        <translation type="vanished">允许</translation>
+        <translation>允许</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="305"/>
         <source>listen only</source>
-        <translation type="vanished">仅收听</translation>
+        <translation>仅收听</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="311"/>
         <source>USE AS MY RADIO</source>
-        <translation type="vanished">用作我的电台</translation>
+        <translation>用作我的电台</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="317"/>
         <source>Decodium decodes the audio of the remote radio and drives its frequency, mode and PTT instead of the local sound card and CAT. Turning it off brings the local ones back.</source>
-        <translation type="vanished">Decodium 解码远程电台的音频，并代替本地声卡和 CAT 控制其频率、模式和 PTT。关闭后恢复本地设备。</translation>
+        <translation>Decodium 解码远程电台的音频，并代替本地声卡和 CAT 控制其频率、模式和 PTT。关闭后恢复本地设备。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="320"/>
         <source>Stop using the remote radio</source>
-        <translation type="vanished">停止使用远程电台</translation>
+        <translation>停止使用远程电台</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="320"/>
         <source>Use the remote radio</source>
-        <translation type="vanished">使用远程电台</translation>
+        <translation>使用远程电台</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="326"/>
+        <source>Listen to the remote radio (RX audio)</source>
+        <translation>收听远程电台（RX 音频）</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="63"/>
         <source>owner</source>
-        <translation type="vanished">所有者</translation>
+        <translation>所有者</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="64"/>
         <source>operator</source>
-        <translation type="vanished">操作员</translation>
+        <translation>操作员</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="65"/>
         <source>listener</source>
-        <translation type="vanished">听众</translation>
+        <translation>听众</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="187"/>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="288"/>
         <source>Audio</source>
-        <translation type="vanished">音频</translation>
+        <translation>音频</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="191"/>
         <source>Follow the station</source>
-        <translation type="vanished">跟随电台</translation>
+        <translation>跟随电台</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="191"/>
         <source>PCM 48 kHz (compatible)</source>
-        <translation type="vanished">PCM 48 kHz（兼容）</translation>
+        <translation>PCM 48 kHz（兼容）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="191"/>
         <source>Digital, lossless (12 kHz)</source>
-        <translation type="vanished">数字，无损（12 kHz）</translation>
+        <translation>数字，无损（12 kHz）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="293"/>
         <source>recovered</source>
-        <translation type="vanished">已恢复</translation>
+        <translation>已恢复</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="294"/>
         <source>lost</source>
-        <translation type="vanished">丢失</translation>
+        <translation>丢失</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecolinkWindow.qml" line="304"/>
         <source>busy: %1 is transmitting</source>
-        <translation type="vanished">占用：%1 正在发射</translation>
+        <translation>占用：%1 正在发射</translation>
     </message>
 </context>
 <context>
@@ -5580,84 +6610,129 @@ around the tones.</source>
         <translation type="vanished">射频测量表</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecometerWindow.qml" line="692"/>
         <source>RANGE</source>
-        <translation type="vanished">量程</translation>
+        <translation>量程</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecometerWindow.qml" line="1005"/>
         <source>SCREEN</source>
-        <translation type="vanished">屏幕</translation>
+        <translation>屏幕</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecometerWindow.qml" line="1059"/>
         <source>AUTO</source>
-        <translation type="vanished">自动</translation>
+        <translation>自动</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecometerWindow.qml" line="890"/>
         <source>IMPEDANCE</source>
-        <translation type="vanished">阻抗</translation>
+        <translation>阻抗</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecometerWindow.qml" line="889"/>
         <source>TX TIME</source>
-        <translation type="vanished">发射时间</translation>
+        <translation>发射时间</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecometerWindow.qml" line="931"/>
         <source>X: needs vector sensor</source>
-        <translation type="vanished">X：需要矢量传感器</translation>
+        <translation>X：需要矢量传感器</translation>
     </message>
     <message>
         <source>NO CAT TELEMETRY</source>
         <translation type="vanished">无 CAT 遥测</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecometerWindow.qml" line="181"/>
         <source>connected</source>
-        <translation type="vanished">已连接</translation>
+        <translation>已连接</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecometerWindow.qml" line="890"/>
+        <source>BAND</source>
+        <translation>乐队</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecometerWindow.qml" line="907"/>
+        <source>RX SIGNAL</source>
+        <translation>RX 信号</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecometerWindow.qml" line="908"/>
+        <source>TRANSMITTING</source>
+        <translation>正在发射</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecometerWindow.qml" line="908"/>
+        <source>NO S-METER</source>
+        <translation>无 S 表</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecometerWindow.qml" line="959"/>
         <source>SWR ALARM</source>
-        <translation type="vanished">驻波比告警</translation>
+        <translation>驻波比告警</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecometerWindow.qml" line="960"/>
         <source>ALC CLIP</source>
-        <translation type="vanished">ALC 削波</translation>
+        <translation>ALC 削波</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecometerWindow.qml" line="961"/>
         <source>PWR SENSE</source>
-        <translation type="vanished">功率检测</translation>
+        <translation>功率检测</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecometerWindow.qml" line="962"/>
         <source>CAT LINK</source>
-        <translation type="vanished">CAT 链路</translation>
+        <translation>CAT 链路</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecometerWindow.qml" line="1083"/>
+        <source>HOLD</source>
+        <translation>保持</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DecometerWindow.qml" line="1162"/>
         <source>RF VECTOR METER</source>
-        <translation type="vanished">射频矢量测量表</translation>
+        <translation>射频矢量测量表</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecometerWindow.qml" line="171"/>
         <source>NO CAT LINK</source>
-        <translation type="vanished">无 CAT 连接</translation>
+        <translation>无 CAT 连接</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecometerWindow.qml" line="172"/>
         <source>TELEMETRY OFF — ENABLE PWR/SWR</source>
-        <translation type="vanished">遥测已关闭 — 请启用 PWR/驻波比</translation>
+        <translation>遥测已关闭 — 请启用 PWR/驻波比</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecometerWindow.qml" line="173"/>
         <source>RIG REPORTS NO METER</source>
-        <translation type="vanished">电台未提供测量值</translation>
+        <translation>电台未提供测量值</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecometerWindow.qml" line="177"/>
+        <location filename="../qml/decodium/components/DecometerWindow.qml" line="1113"/>
         <source>AMP</source>
-        <translation type="vanished">AMP</translation>
+        <translation>AMP</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecometerWindow.qml" line="1112"/>
         <source>EXC</source>
-        <translation type="vanished">EXC</translation>
+        <translation>EXC</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecometerWindow.qml" line="177"/>
         <source>amplifier</source>
-        <translation type="vanished">功放</translation>
+        <translation>功放</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DecometerWindow.qml" line="179"/>
         <source>AMP SILENT - SHOWING EXCITER</source>
-        <translation type="vanished">功放无响应 — 显示激励级</translation>
+        <translation>功放无响应 — 显示激励级</translation>
     </message>
 </context>
 <context>
@@ -5697,40 +6772,49 @@ around the tones.</source>
 <context>
     <name>DevOverlay</name>
     <message>
+        <location filename="../qml/decodium/components/DevOverlay.qml" line="140"/>
         <source>Decodium DevOverlay</source>
-        <translation type="vanished">Decodium DevOverlay</translation>
+        <translation>Decodium DevOverlay</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DevOverlay.qml" line="197"/>
         <source>Frame (ms):</source>
-        <translation type="vanished">帧 (ms)：</translation>
+        <translation>帧 (ms)：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DevOverlay.qml" line="215"/>
         <source>Decode Hz:</source>
-        <translation type="vanished">解码次数/秒：</translation>
+        <translation>解码次数/秒：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DevOverlay.qml" line="226"/>
         <source>Delegates:</source>
-        <translation type="vanished">委托项：</translation>
+        <translation>委托项：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DevOverlay.qml" line="244"/>
         <source>Uptime:</source>
-        <translation type="vanished">运行时间：</translation>
+        <translation>运行时间：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DevOverlay.qml" line="264"/>
         <source>Frame time 5s</source>
-        <translation type="vanished">帧时间 5 秒</translation>
+        <translation>帧时间 5 秒</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DevOverlay.qml" line="330"/>
         <source>Copy diagnostics</source>
-        <translation type="vanished">复制诊断信息</translation>
+        <translation>复制诊断信息</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DevOverlay.qml" line="347"/>
         <source>Close</source>
-        <translation type="vanished">关闭</translation>
+        <translation>关闭</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DevOverlay.qml" line="359"/>
         <source>Copied to clipboard</source>
-        <translation type="vanished">已复制到剪贴板</translation>
+        <translation>已复制到剪贴板</translation>
     </message>
 </context>
 <context>
@@ -5845,32 +6929,39 @@ Error: %2 - %3</source>
 <context>
     <name>DisplayPanel</name>
     <message>
+        <location filename="../qml/decodium/rotor/DisplayPanel.qml" line="27"/>
         <source>control box missing</source>
-        <translation type="vanished">控制盒缺失</translation>
+        <translation>控制盒缺失</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/DisplayPanel.qml" line="29"/>
         <source>rotating towards %1°</source>
-        <translation type="vanished">正在转向 %1°</translation>
+        <translation>正在转向 %1°</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/DisplayPanel.qml" line="31"/>
         <source>rotating</source>
-        <translation type="vanished">正在旋转</translation>
+        <translation>正在旋转</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/DisplayPanel.qml" line="32"/>
         <source>stopped</source>
-        <translation type="vanished">已停止</translation>
+        <translation>已停止</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/DisplayPanel.qml" line="59"/>
         <source>FREE DIRECTION</source>
-        <translation type="vanished">自由方向</translation>
+        <translation>自由方向</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/DisplayPanel.qml" line="84"/>
         <source>AZIMUTH</source>
-        <translation type="vanished">方位角</translation>
+        <translation>方位角</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/DisplayPanel.qml" line="107"/>
         <source>ELEVATION</source>
-        <translation type="vanished">仰角</translation>
+        <translation>仰角</translation>
     </message>
 </context>
 <context>
@@ -5884,79 +6975,293 @@ Error: %2 - %3</source>
 <context>
     <name>DxClusterPanel</name>
     <message>
+        <location filename="../qml/decodium/components/DxClusterPanel.qml" line="85"/>
         <source>DX Cluster</source>
-        <translation type="vanished">DX集群</translation>
+        <translation>DX集群</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DxClusterPanel.qml" line="149"/>
         <source>Time</source>
-        <translation type="vanished">时间</translation>
+        <translation>时间</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DxClusterPanel.qml" line="150"/>
         <source>DX Call</source>
-        <translation type="vanished">DX 呼号</translation>
+        <translation>DX 呼号</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DxClusterPanel.qml" line="151"/>
         <source>Freq</source>
-        <translation type="vanished">Freq</translation>
+        <translation>Freq</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DxClusterPanel.qml" line="152"/>
         <source>Band</source>
-        <translation type="vanished">波段</translation>
+        <translation>波段</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DxClusterPanel.qml" line="153"/>
         <source>Mode</source>
-        <translation type="vanished">模式</translation>
+        <translation>模式</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DxClusterPanel.qml" line="154"/>
         <source>Spotter</source>
-        <translation type="vanished">点位报告者</translation>
+        <translation>点位报告者</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DxClusterPanel.qml" line="155"/>
         <source>Info</source>
-        <translation type="vanished">信息</translation>
+        <translation>信息</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DxClusterPanel.qml" line="326"/>
         <source>Filter:</source>
-        <translation type="vanished">过滤：</translation>
+        <translation>过滤：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DxClusterPanel.qml" line="357"/>
         <source>Clear</source>
-        <translation type="vanished">清除</translation>
+        <translation>清除</translation>
+    </message>
+</context>
+<context>
+    <name>DxPedFloatWindow</name>
+    <message>
+        <location filename="../qml/decodium/components/DxPedFloatWindow.qml" line="52"/>
+        <source>DX-Pedition panel</source>
+        <translation>DX-Pedition 面板</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedFloatWindow.qml" line="111"/>
+        <source>⇲ DOCK</source>
+        <translation>⇲ 停靠</translation>
+    </message>
+</context>
+<context>
+    <name>DxPedTxPanel</name>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml" line="105"/>
+        <source>Multi-slot OFF - serial MAM, one caller at a time</source>
+        <translation>多时隙关 - 串行 MAM，一次一个呼叫者</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml" line="107"/>
+        <source>Mode %1: multi-slot not available (needs FT8, FT4 or FT2)</source>
+        <translation>模式 %1：多时隙不可用（需要 FT8、FT4 或 FT2）</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml" line="109"/>
+        <source>TX disabled - press ARM or ENABLE TX</source>
+        <translation>TX 已禁用 - 请按 ARM 或启用 TX</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml" line="111"/>
+        <source>MAM or AUTO CQ is required to answer callers</source>
+        <translation>应答呼叫者需要 MAM 或 AUTO CQ</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml" line="113"/>
+        <source>On air - %1 QSO + %2 parallel CQ on %3 slots, %4 queued</source>
+        <translation>发射中 - %1 个 QSO + %2 个并行 CQ（%3 个时隙），队列中 %4 个</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml" line="115"/>
+        <source>On air - %1 of %2 slots busy, %3 queued</source>
+        <translation>发射中 - %2 个时隙中 %1 个繁忙，队列中 %3 个</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml" line="168"/>
+        <source>MULTI-SLOT</source>
+        <translation>多时隙</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml" line="209"/>
+        <source>SLOT</source>
+        <translation>时隙</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml" line="218"/>
+        <source>MAM</source>
+        <translation>MAM</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml" line="223"/>
+        <source>AUTO CQ</source>
+        <translation>AUTO CQ</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml" line="228"/>
+        <source>CQ MULTI</source>
+        <translation>CQ MULTI</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml" line="233"/>
+        <source>ARM</source>
+        <translation>ARM</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml" line="254"/>
+        <source>FT2: multi-slot never validated on air - if QSOs do not close, go back to 1 slot</source>
+        <translation>FT2：多时隙从未在实际电波中验证 - 如果 QSO 无法完成，请返回 1 个时隙</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml" line="317"/>
+        <source>CQ</source>
+        <translation>重庆</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml" line="317"/>
+        <source>free</source>
+        <translation>空闲</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml" line="384"/>
+        <source>LOG</source>
+        <translation>日志</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml" line="408"/>
+        <source>QUEUE %1</source>
+        <translation>队列 %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml" line="446"/>
+        <source>CLEAR QUEUE</source>
+        <translation>清空队列</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml" line="451"/>
+        <source>CLEAR SLOTS</source>
+        <translation>清空时隙</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml" line="457"/>
+        <source>HALT</source>
+        <translation>HALT</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml" line="469"/>
+        <source>TX MACROS ▴</source>
+        <translation>TX 宏 ▴</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml" line="469"/>
+        <source>TX MACROS ▾</source>
+        <translation>TX 宏 ▾</translation>
     </message>
 </context>
 <context>
     <name>DxPeditionWorkspace</name>
     <message>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="720"/>
         <source>UTC · OPER IU8LMC</source>
-        <translation type="vanished">UTC · OPER IU8LMC</translation>
+        <translation>UTC · OPER IU8LMC</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="174"/>
         <source>Full Spectrum · Decode</source>
-        <translation type="vanished">Full Spectrum · 解码</translation>
+        <translation>Full Spectrum · 解码</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="171"/>
+        <source>Cluster</source>
+        <translation>集群</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="171"/>
+        <source>MAM</source>
+        <translation>MAM</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="175"/>
         <source>Signal RX · QSO Lock</source>
-        <translation type="vanished">Signal RX · QSO 锁定</translation>
+        <translation>Signal RX · QSO 锁定</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="176"/>
+        <source>DX-Ped TX · Slot</source>
+        <translation>DX-Ped TX · 时隙</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="177"/>
         <source>Log · QSO Entry</source>
-        <translation type="vanished">Log · QSO 记录</translation>
+        <translation>Log · QSO 记录</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="483"/>
+        <source>Drag onto another panel to swap the two</source>
+        <translation>拖到另一个面板上即可交换两者</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="546"/>
+        <source>Open this panel in a window of its own</source>
+        <translation>在独立窗口中打开此面板</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="568"/>
+        <source>Close this panel - reopen it from PANELS in the top bar</source>
+        <translation>关闭此面板 - 可从顶部栏的“面板”中重新打开</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="631"/>
         <source>DECODIUM 4</source>
-        <translation type="vanished">DECODIUM 4</translation>
+        <translation>DECODIUM 4</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="636"/>
         <source>DX-PEDITION MODE</source>
-        <translation type="vanished">DX-Pedition 模式</translation>
+        <translation>DX-Pedition 模式</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="767"/>
+        <source>%1 closed panel(s). Open this to bring them back.</source>
+        <translation>已关闭 %1 个面板。打开此项即可恢复。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="769"/>
+        <source>Shows where every panel is, and reopens the closed ones.</source>
+        <translation>显示每个面板的位置，并重新打开已关闭的面板。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="1132"/>
+        <source>PANELS</source>
+        <translation>面板</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="1139"/>
+        <source>Click a panel to close or reopen it. A closed panel frees its slot instead of leaving a gap.</source>
+        <translation>点击面板可将其关闭或重新打开。已关闭的面板会让出位置，而不是留下空隙。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="1181"/>
+        <source>closed</source>
+        <translation>已关闭</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="1182"/>
+        <source>window</source>
+        <translation>窗口</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="1182"/>
+        <source>docked</source>
+        <translation>已停靠</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="1216"/>
+        <source>RESTORE DEFAULT LAYOUT</source>
+        <translation>恢复默认布局</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="172"/>
         <source>PSK Reporter</source>
-        <translation type="vanished">PSK Reporter</translation>
+        <translation>PSK Reporter</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="173"/>
         <source>Waterfall</source>
-        <translation type="vanished">瀑布图</translation>
+        <translation>瀑布图</translation>
     </message>
     <message>
         <source>TX Macros</source>
@@ -6269,148 +7574,209 @@ Error: %2 - %3</source>
 <context>
     <name>FT2LinkPanel</name>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6604"/>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="10981"/>
         <source>FILE</source>
-        <translation type="vanished">文件</translation>
+        <translation>文件</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6534"/>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="10911"/>
         <source>FOLDER</source>
-        <translation type="vanished">文件夹</translation>
+        <translation>文件夹</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6604"/>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="10981"/>
         <source>IMG</source>
-        <translation type="vanished">IMG</translation>
+        <translation>IMG</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6602"/>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="10979"/>
         <source>NEW</source>
-        <translation type="vanished">新增</translation>
+        <translation>新增</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6542"/>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="10919"/>
         <source>OPEN</source>
-        <translation type="vanished">打开</translation>
+        <translation>打开</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6684"/>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11061"/>
         <source>READ</source>
-        <translation type="vanished">已读</translation>
+        <translation>已读</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6550"/>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="10927"/>
         <source>READ ALL</source>
-        <translation type="vanished">全部已读</translation>
+        <translation>全部已读</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6684"/>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11061"/>
         <source>UNREAD</source>
-        <translation type="vanished">未读</translation>
+        <translation>未读</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6661"/>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11038"/>
         <source>SAVE</source>
-        <translation type="vanished">保存</translation>
+        <translation>保存</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6672"/>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11049"/>
         <source>SAVE AS</source>
-        <translation type="vanished">另存为</translation>
+        <translation>另存为</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6697"/>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11074"/>
         <source>COPY</source>
-        <translation type="vanished">复制</translation>
+        <translation>复制</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6713"/>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11090"/>
         <source>DEL</source>
-        <translation type="vanished">删除</translation>
+        <translation>删除</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6559"/>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="10936"/>
         <source>CLEAR</source>
-        <translation type="vanished">清除</translation>
+        <translation>清除</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6526"/>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="10903"/>
         <source>AUTO ON</source>
-        <translation type="vanished">自动 开</translation>
+        <translation>自动 开</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6526"/>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="10903"/>
         <source>AUTO OFF</source>
-        <translation type="vanished">自动 关</translation>
+        <translation>自动 关</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6498"/>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="10875"/>
         <source>RECEIVED FILES</source>
-        <translation type="vanished">已接收文件</translation>
+        <translation>已接收文件</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1727"/>
         <source>All files (*)</source>
-        <translation type="vanished">所有文件 (*)</translation>
+        <translation>所有文件 (*)</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1729"/>
         <source>Images (*.png *.jpg *.jpeg *.gif *.bmp)</source>
-        <translation type="vanished">图像 (*.png *.jpg *.jpeg *.gif *.bmp)</translation>
+        <translation>图像 (*.png *.jpg *.jpeg *.gif *.bmp)</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1728"/>
         <source>Text files (*.txt *.md *.log *.csv *.json)</source>
-        <translation type="vanished">文本文件 (*.txt *.md *.log *.csv *.json)</translation>
+        <translation>文本文件 (*.txt *.md *.log *.csv *.json)</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6739"/>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11116"/>
         <source>Folder: %1</source>
-        <translation type="vanished">文件夹: %1</translation>
+        <translation>文件夹: %1</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1759"/>
         <source>Receive folder: %1</source>
-        <translation type="vanished">接收文件夹: %1</translation>
+        <translation>接收文件夹: %1</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1837"/>
         <source>receive folder</source>
-        <translation type="vanished">接收文件夹</translation>
+        <translation>接收文件夹</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1559"/>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1589"/>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6708"/>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11085"/>
         <source>received file</source>
-        <translation type="vanished">已接收文件</translation>
+        <translation>已接收文件</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1811"/>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1841"/>
         <source>unknown error</source>
-        <translation type="vanished">未知错误</translation>
+        <translation>未知错误</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6726"/>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11103"/>
         <source>No received files</source>
-        <translation type="vanished">没有已接收文件</translation>
+        <translation>没有已接收文件</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1608"/>
         <source>No read received files</source>
-        <translation type="vanished">没有已读的接收文件</translation>
+        <translation>没有已读的接收文件</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1583"/>
         <source>No unread received files</source>
-        <translation type="vanished">没有未读的接收文件</translation>
+        <translation>没有未读的接收文件</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6741"/>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11118"/>
         <source>Waiting for files in %1</source>
-        <translation type="vanished">正在等待 %1 中的文件</translation>
+        <translation>正在等待 %1 中的文件</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6537"/>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="10914"/>
         <source>Choose the received files folder</source>
-        <translation type="vanished">选择已接收文件的文件夹</translation>
+        <translation>选择已接收文件的文件夹</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1754"/>
         <source>Select FT2-Link received files folder</source>
-        <translation type="vanished">选择 FT2-Link 已接收文件的文件夹</translation>
+        <translation>选择 FT2-Link 已接收文件的文件夹</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6545"/>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="10922"/>
         <source>Open the received files folder</source>
-        <translation type="vanished">打开已接收文件的文件夹</translation>
+        <translation>打开已接收文件的文件夹</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1770"/>
         <source>Opening received files folder...</source>
-        <translation type="vanished">正在打开已接收文件的文件夹...</translation>
+        <translation>正在打开已接收文件的文件夹...</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1836"/>
         <source>Opened %1</source>
-        <translation type="vanished">已打开 %1</translation>
+        <translation>已打开 %1</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1839"/>
         <source>Open folder failed: %1</source>
-        <translation type="vanished">打开文件夹失败: %1</translation>
+        <translation>打开文件夹失败: %1</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1765"/>
         <source>Open folder is unavailable</source>
-        <translation type="vanished">打开文件夹不可用</translation>
+        <translation>打开文件夹不可用</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1750"/>
         <source>Folder selection is unavailable</source>
-        <translation type="vanished">文件夹选择不可用</translation>
+        <translation>文件夹选择不可用</translation>
     </message>
     <message>
         <source>Cannot create receive directory: %1</source>
@@ -6421,108 +7787,144 @@ Error: %2 - %3</source>
         <translation type="vanished">系统文件管理器无法打开接收文件夹</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6529"/>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="10906"/>
         <source>Automatically save new files in the receive folder</source>
-        <translation type="vanished">自动将新文件保存到接收文件夹</translation>
+        <translation>自动将新文件保存到接收文件夹</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6667"/>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11044"/>
         <source>Save to the configured receive folder</source>
-        <translation type="vanished">保存到已配置的接收文件夹</translation>
+        <translation>保存到已配置的接收文件夹</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6678"/>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11055"/>
         <source>Save with another name or in another folder</source>
-        <translation type="vanished">以其他名称或在其他文件夹中保存</translation>
+        <translation>以其他名称或在其他文件夹中保存</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1725"/>
         <source>Save FT2-Link received file as</source>
-        <translation type="vanished">将 FT2-Link 已接收文件另存为</translation>
+        <translation>将 FT2-Link 已接收文件另存为</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1731"/>
         <source>Save As cancelled</source>
-        <translation type="vanished">已取消另存为</translation>
+        <translation>已取消另存为</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1718"/>
         <source>Save As is unavailable</source>
-        <translation type="vanished">另存为不可用</translation>
+        <translation>另存为不可用</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1669"/>
         <source>Save already in progress</source>
-        <translation type="vanished">保存已在进行中</translation>
+        <translation>保存已在进行中</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1662"/>
         <source>Asynchronous file saving is unavailable</source>
-        <translation type="vanished">异步文件保存不可用</translation>
+        <translation>异步文件保存不可用</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1684"/>
         <source>Unable to queue received file save</source>
-        <translation type="vanished">无法将已接收文件的保存加入队列</translation>
+        <translation>无法将已接收文件的保存加入队列</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1701"/>
         <source>Saving %1...</source>
-        <translation type="vanished">正在保存 %1...</translation>
+        <translation>正在保存 %1...</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1830"/>
         <source>Saved %1</source>
-        <translation type="vanished">已保存 %1</translation>
+        <translation>已保存 %1</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1814"/>
         <source>Save failed: %1</source>
-        <translation type="vanished">保存失败: %1</translation>
+        <translation>保存失败: %1</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1700"/>
         <source>Auto-saving %1...</source>
-        <translation type="vanished">正在自动保存 %1...</translation>
+        <translation>正在自动保存 %1...</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1828"/>
         <source>Auto-saved %1</source>
-        <translation type="vanished">已自动保存 %1</translation>
+        <translation>已自动保存 %1</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1813"/>
         <source>Auto-save failed: %1</source>
-        <translation type="vanished">自动保存失败: %1</translation>
+        <translation>自动保存失败: %1</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6701"/>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11078"/>
         <source>Copy received file content</source>
-        <translation type="vanished">复制已接收文件的内容</translation>
+        <translation>复制已接收文件的内容</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6706"/>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11083"/>
         <source>Copied %1</source>
-        <translation type="vanished">已复制 %1</translation>
+        <translation>已复制 %1</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6689"/>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11066"/>
         <source>Mark received file as read</source>
-        <translation type="vanished">将已接收文件标为已读</translation>
+        <translation>将已接收文件标为已读</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6690"/>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11067"/>
         <source>Mark received file as unread</source>
-        <translation type="vanished">将已接收文件标为未读</translation>
+        <translation>将已接收文件标为未读</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1561"/>
         <source>Marked read %1</source>
-        <translation type="vanished">已将 %1 标为已读</translation>
+        <translation>已将 %1 标为已读</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1562"/>
         <source>Marked unread %1</source>
-        <translation type="vanished">已将 %1 标为未读</translation>
+        <translation>已将 %1 标为未读</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6554"/>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="10931"/>
         <source>Clear unread marker for all received files</source>
-        <translation type="vanished">清除所有已接收文件的未读标记</translation>
+        <translation>清除所有已接收文件的未读标记</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6563"/>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="10940"/>
         <source>Delete received files already marked read</source>
-        <translation type="vanished">删除已标为已读的接收文件</translation>
+        <translation>删除已标为已读的接收文件</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6717"/>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11094"/>
         <source>Delete this received file entry</source>
-        <translation type="vanished">删除此已接收文件条目</translation>
+        <translation>删除此已接收文件条目</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1593"/>
         <source>Deleted %1</source>
-        <translation type="vanished">已删除 %1</translation>
+        <translation>已删除 %1</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1595"/>
         <source>Delete failed: %1</source>
-        <translation type="vanished">删除失败: %1</translation>
+        <translation>删除失败: %1</translation>
     </message>
     <message>
         <source>Received binary file has invalid Base64 data</source>
@@ -6533,398 +7935,495 @@ Error: %2 - %3</source>
         <translation type="vanished">已接收的二进制文件没有数据</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1657"/>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1714"/>
         <source>Received file has no content</source>
-        <translation type="vanished">已接收文件没有内容</translation>
+        <translation>已接收文件没有内容</translation>
     </message>
     <message numerus="yes">
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1538"/>
         <source>%n item</source>
-        <translation type="vanished">
+        <translation>
             <numerusform>%n 项</numerusform>
         </translation>
     </message>
     <message numerus="yes">
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1540"/>
         <source> / %n unread</source>
-        <translation type="vanished">
+        <translation>
             <numerusform> / %n 条未读</numerusform>
         </translation>
     </message>
     <message numerus="yes">
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1545"/>
         <source>%n save pending</source>
-        <translation type="vanished">
+        <translation>
             <numerusform>%n 项保存待处理</numerusform>
         </translation>
     </message>
     <message numerus="yes">
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1607"/>
         <source>Deleted %n read received file</source>
-        <translation type="vanished">
+        <translation>
             <numerusform>已删除 %n 个已读的接收文件</numerusform>
         </translation>
     </message>
     <message numerus="yes">
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="1582"/>
         <source>Marked read %n received file</source>
-        <translation type="vanished">
+        <translation>
             <numerusform>已将 %n 个接收文件标为已读</numerusform>
         </translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="5421"/>
         <source>FT2-LINK</source>
-        <translation type="vanished">FT2-LINK</translation>
+        <translation>FT2-LINK</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="5612"/>
         <source>CQ only</source>
-        <translation type="vanished">仅显示CQ</translation>
+        <translation>仅显示CQ</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="5651"/>
         <source>AUTO CQ</source>
-        <translation type="vanished">AUTO CQ</translation>
+        <translation>AUTO CQ</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6005"/>
         <source>LOOP ACK</source>
-        <translation type="vanished">LOOP ACK</translation>
+        <translation>LOOP ACK</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6094"/>
         <source>No sessions</source>
-        <translation type="vanished">没有会话</translation>
+        <translation>没有会话</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6194"/>
         <source>DROP DATA</source>
-        <translation type="vanished">DROP DATA</translation>
+        <translation>DROP DATA</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6203"/>
         <source>DROP ACK</source>
-        <translation type="vanished">DROP ACK</translation>
+        <translation>DROP ACK</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6797"/>
         <source>No tags</source>
-        <translation type="vanished">没有标签</translation>
+        <translation>没有标签</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6847"/>
         <source>SET CF</source>
-        <translation type="vanished">SET CF</translation>
+        <translation>SET CF</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6856"/>
         <source>CF TAG</source>
-        <translation type="vanished">CF TAG</translation>
+        <translation>CF TAG</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="6894"/>
         <source>Message</source>
-        <translation type="vanished">信息</translation>
+        <translation>信息</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="7015"/>
         <source>key=value; key=value</source>
-        <translation type="vanished">key=value; key=value</translation>
+        <translation>key=value; key=value</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="7232"/>
         <source>BBS group. Empty means ALL.</source>
-        <translation type="vanished">BBS 组。留空表示全部。</translation>
+        <translation>BBS 组。留空表示全部。</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="7269"/>
         <source>Bulletin title</source>
-        <translation type="vanished">公告标题</translation>
+        <translation>公告标题</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="7276"/>
         <source>Short BBS subject/title.</source>
-        <translation type="vanished">BBS 的简短主题或标题。</translation>
+        <translation>BBS 的简短主题或标题。</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="7311"/>
         <source>BBS message body</source>
-        <translation type="vanished">BBS 消息正文</translation>
+        <translation>BBS 消息正文</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="7319"/>
         <source>Text to store and send as the BBS bulletin body.</source>
-        <translation type="vanished">作为 BBS 公告正文保存并发送的文本。</translation>
+        <translation>作为 BBS 公告正文保存并发送的文本。</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="7368"/>
         <source>server-file.txt</source>
-        <translation type="vanished">server-file.txt</translation>
+        <translation>server-file.txt</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="7387"/>
         <source>BBS server file body</source>
-        <translation type="vanished">BBS 服务器文件内容</translation>
+        <translation>BBS 服务器文件内容</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="7456"/>
         <source>remote-file.txt</source>
-        <translation type="vanished">remote-file.txt</translation>
+        <translation>remote-file.txt</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="7595"/>
         <source>No BBS server files</source>
-        <translation type="vanished">BBS 服务器上没有文件</translation>
+        <translation>BBS 服务器上没有文件</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="7640"/>
         <source>SAVE GROUP</source>
-        <translation type="vanished">保存组</translation>
+        <translation>保存组</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="7668"/>
         <source>BBS BULLETINS</source>
-        <translation type="vanished">BBS 公告</translation>
+        <translation>BBS 公告</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="7705"/>
         <source>MARK ALL READ</source>
-        <translation type="vanished">全部标为已读</translation>
+        <translation>全部标为已读</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="7886"/>
         <source>Broadcast message</source>
-        <translation type="vanished">广播消息</translation>
+        <translation>广播消息</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="7928"/>
         <source>Alert tags: WX, POTA, NET</source>
-        <translation type="vanished">提醒标签：WX、POTA、NET</translation>
+        <translation>提醒标签：WX、POTA、NET</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="7980"/>
         <source>PATH CALL</source>
-        <translation type="vanished">PATH CALL</translation>
+        <translation>PATH CALL</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="8108"/>
         <source>Digipeater payload</source>
-        <translation type="vanished">数字中继载荷</translation>
+        <translation>数字中继载荷</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="8149"/>
         <source>DIGIPEATER</source>
-        <translation type="vanished">数字中继</translation>
+        <translation>数字中继</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="8177"/>
         <source>ALERT CENTER</source>
-        <translation type="vanished">提醒中心</translation>
+        <translation>提醒中心</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="8206"/>
         <source>CLEAR ARCH</source>
-        <translation type="vanished">清空存档</translation>
+        <translation>清空存档</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="8370"/>
         <source>Subject</source>
-        <translation type="vanished">主题</translation>
+        <translation>主题</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="8381"/>
         <source>Mail body</source>
-        <translation type="vanished">邮件正文</translation>
+        <translation>邮件正文</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="8547"/>
         <source>USE PATH</source>
-        <translation type="vanished">USE PATH</translation>
+        <translation>USE PATH</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="8557"/>
         <source>CALL RLY</source>
-        <translation type="vanished">CALL RLY</translation>
+        <translation>CALL RLY</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="8594"/>
         <source>smtp.host</source>
-        <translation type="vanished">smtp.host</translation>
+        <translation>smtp.host</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="8637"/>
         <source>SMTP user</source>
-        <translation type="vanished">SMTP 用户</translation>
+        <translation>SMTP 用户</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="8655"/>
         <source>From email</source>
-        <translation type="vanished">发件人地址</translation>
+        <translation>发件人地址</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="8667"/>
         <source>SMTP password</source>
-        <translation type="vanished">SMTP 密码</translation>
+        <translation>SMTP 密码</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="8904"/>
         <source>No mail</source>
-        <translation type="vanished">没有邮件</translation>
+        <translation>没有邮件</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="9072"/>
         <source>Away message</source>
-        <translation type="vanished">离开留言</translation>
+        <translation>离开留言</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="9093"/>
         <source>Welcome message</source>
-        <translation type="vanished">欢迎语</translation>
+        <translation>欢迎语</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="9104"/>
         <source>AUTO REPLY</source>
-        <translation type="vanished">AUTO REPLY</translation>
+        <translation>AUTO REPLY</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="9127"/>
         <source>AUTO AWAY</source>
-        <translation type="vanished">AUTO AWAY</translation>
+        <translation>AUTO AWAY</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="9170"/>
         <source>CALL ID</source>
-        <translation type="vanished">CALL ID</translation>
+        <translation>CALL ID</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="9195"/>
         <source>AUTO DISC</source>
-        <translation type="vanished">AUTO DISC</translation>
+        <translation>AUTO DISC</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="9221"/>
         <source>PING RX</source>
-        <translation type="vanished">PING RX</translation>
+        <translation>PING RX</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="9299"/>
         <source>LH PEEK</source>
-        <translation type="vanished">LH PEEK</translation>
+        <translation>LH PEEK</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="9308"/>
         <source>SNR TX</source>
-        <translation type="vanished">SNR TX</translation>
+        <translation>SNR TX</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="9317"/>
         <source>VSNR OK</source>
-        <translation type="vanished">VSNR OK</translation>
+        <translation>VSNR OK</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="9326"/>
         <source>LC PEEK</source>
-        <translation type="vanished">LC PEEK</translation>
+        <translation>LC PEEK</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="9335"/>
         <source>VM PEEK</source>
-        <translation type="vanished">VM PEEK</translation>
+        <translation>VM PEEK</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="9344"/>
         <source>VM PARK</source>
-        <translation type="vanished">VM PARK</translation>
+        <translation>VM PARK</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="9353"/>
         <source>INFO REQ</source>
-        <translation type="vanished">INFO REQ</translation>
+        <translation>INFO REQ</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="9585"/>
         <source>Comment</source>
-        <translation type="vanished">备注</translation>
+        <translation>备注</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="9717"/>
         <source>No contacts</source>
-        <translation type="vanished">没有联系人</translation>
+        <translation>没有联系人</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="9877"/>
         <source>Shared cluster JSON path</source>
-        <translation type="vanished">共享集群 JSON 路径</translation>
+        <translation>共享集群 JSON 路径</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="10019"/>
         <source>Paste cluster JSON here, or press EXPORT</source>
-        <translation type="vanished">在此粘贴集群 JSON，或按 EXPORT</translation>
+        <translation>在此粘贴集群 JSON，或按 EXPORT</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="10145"/>
         <source>No cluster last-heard records</source>
-        <translation type="vanished">没有集群的最近收听记录</translation>
+        <translation>没有集群的最近收听记录</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="10289"/>
         <source>not tracked</source>
-        <translation type="vanished">未跟踪</translation>
+        <translation>未跟踪</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="10406"/>
         <source>No path reports</source>
-        <translation type="vanished">没有路径报告</translation>
+        <translation>没有路径报告</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="10572"/>
         <source>Select an export</source>
-        <translation type="vanished">选择一个导出</translation>
+        <translation>选择一个导出</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="10712"/>
         <source>Run audit</source>
-        <translation type="vanished">运行审计</translation>
+        <translation>运行审计</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11157"/>
         <source>description</source>
-        <translation type="vanished">描述</translation>
+        <translation>描述</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11169"/>
         <source>template text with &lt;MYCALL&gt;, &lt;CALL&gt;, &lt;QTH&gt;...</source>
-        <translation type="vanished">template text with &lt;MYCALL&gt;, &lt;CALL&gt;, &lt;QTH&gt;...</translation>
+        <translation>template text with &lt;MYCALL&gt;, &lt;CALL&gt;, &lt;QTH&gt;...</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11276"/>
         <source>No custom presets</source>
-        <translation type="vanished">没有自定义预设</translation>
+        <translation>没有自定义预设</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11308"/>
         <source>county/state</source>
-        <translation type="vanished">县/州</translation>
+        <translation>县/州</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11335"/>
         <source>weather line optional</source>
-        <translation type="vanished">天气行可选</translation>
+        <translation>天气行可选</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11363"/>
         <source>Wednesday check-in: MAIL sets address, subject and body; CHAT inserts only the body.</source>
-        <translation type="vanished">周三签到：MAIL 会设置地址、主题和正文；CHAT 只插入正文。</translation>
+        <translation>周三签到：MAIL 会设置地址、主题和正文；CHAT 只插入正文。</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11395"/>
         <source>14105000|20m|Main, 7105000|40m|Main</source>
-        <translation type="vanished">14105000|20m|Main, 7105000|40m|Main</translation>
+        <translation>14105000|20m|Main, 7105000|40m|Main</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11433"/>
         <source>0000-2359|CALLING|14105000|20m main|CQ</source>
-        <translation type="vanished">0000-2359|CALLING|14105000|20m main|CQ</translation>
+        <translation>0000-2359|CALLING|14105000|20m main|CQ</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11521"/>
         <source>14101250-14108750|20m, 7101250-7108750|40m</source>
-        <translation type="vanished">14101250-14108750|20m, 7101250-7108750|40m</translation>
+        <translation>14101250-14108750|20m, 7101250-7108750|40m</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11550"/>
         <source>FREQ stores calling-frequency presets, UTC schedule windows and allowed QSY ranges. Schedule actions CALLING/CQ/BEACON/EMCOMM/QUIET protect the active frequency; DATA marks a data window. CAT auto-QSY is not performed.</source>
-        <translation type="vanished">FREQ 保存呼叫频率预设、UTC 时段窗口和允许的 QSY 范围。CALLING/CQ/BEACON/EMCOMM/QUIET 动作保护当前频率；DATA 标记数据窗口。不执行经 CAT 的自动 QSY。</translation>
+        <translation>FREQ 保存呼叫频率预设、UTC 时段窗口和允许的 QSY 范围。CALLING/CQ/BEACON/EMCOMM/QUIET 动作保护当前频率；DATA 标记数据窗口。不执行经 CAT 的自动 QSY。</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11694"/>
         <source>CALL1, CALL2, Z6/TEST</source>
-        <translation type="vanished">CALL1, CALL2, Z6/TEST</translation>
+        <translation>CALL1, CALL2, Z6/TEST</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11729"/>
         <source>Add callsign</source>
-        <translation type="vanished">添加呼号</translation>
+        <translation>添加呼号</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11750"/>
         <source>Blocked calls cannot start a session, are hidden from last-heard, and their beacon, CQ, ping and broadcast traffic is ignored locally.</source>
-        <translation type="vanished">被屏蔽的呼号无法发起会话，不出现在最近收听列表中，其信标、CQ、ping 和广播流量在本地被忽略。</translation>
+        <translation>被屏蔽的呼号无法发起会话，不出现在最近收听列表中，其信标、CQ、ping 和广播流量在本地被忽略。</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11819"/>
         <source>No blocked calls</source>
-        <translation type="vanished">没有被屏蔽的呼号</translation>
+        <translation>没有被屏蔽的呼号</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11840"/>
         <source>SATELLITE HALF-DUPLEX</source>
-        <translation type="vanished">卫星半双工</translation>
+        <translation>卫星半双工</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11848"/>
         <source>Enable independent RX/TX VFOs</source>
-        <translation type="vanished">启用独立的收发 VFO</translation>
+        <translation>启用独立的收发 VFO</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11863"/>
         <source>RX MHz</source>
-        <translation type="vanished">RX MHz</translation>
+        <translation>RX MHz</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11875"/>
         <source>downlink dial MHz</source>
-        <translation type="vanished">下行频率 (MHz)</translation>
+        <translation>下行频率 (MHz)</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11903"/>
         <source>TX MHz</source>
-        <translation type="vanished">TX MHz</translation>
+        <translation>TX MHz</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11915"/>
         <source>uplink dial MHz</source>
-        <translation type="vanished">上行频率 (MHz)</translation>
+        <translation>上行频率 (MHz)</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11929"/>
         <source>SETTLE ms</source>
-        <translation type="vanished">SETTLE ms</translation>
+        <translation>SETTLE ms</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="11957"/>
         <source>READ RX/TX FROM RIG</source>
-        <translation type="vanished">从电台读取 RX/TX</translation>
+        <translation>从电台读取 RX/TX</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="12020"/>
         <source>Use the normal FT2-Link ARM control for every RF transmission. This mode is half-duplex: receive audio pauses on TX, PTT is released before the RX VFO is restored, and a manual stop follows the same safe return path.</source>
-        <translation type="vanished">每次射频发射都使用 FT2-Link 常规的 ARM 控制。此模式为半双工：发射时接收音频暂停，在恢复接收 VFO 之前释放 PTT，手动停止也遵循同样的安全返回路径。</translation>
+        <translation>每次射频发射都使用 FT2-Link 常规的 ARM 控制。此模式为半双工：发射时接收音频暂停，在恢复接收 VFO 之前释放 PTT，手动停止也遵循同样的安全返回路径。</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="12041"/>
         <source>QO-100 / cross-band setup</source>
-        <translation type="vanished">QO-100 / cross-band setup</translation>
+        <translation>QO-100 / cross-band setup</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="12050"/>
         <source>Enter the actual CAT dial frequencies used by your station or transverter. No fixed QO-100 defaults are applied: radio IF plans and transverter offsets differ.</source>
-        <translation type="vanished">请输入你的电台或变频器实际使用的 CAT 频率。不会套用固定的 QO-100 预设值：中频方案和变频器偏移各不相同。</translation>
+        <translation>请输入你的电台或变频器实际使用的 CAT 频率。不会套用固定的 QO-100 预设值：中频方案和变频器偏移各不相同。</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="12059"/>
         <source>The normal FT audio-offset split is deliberately bypassed for this mode, so a cross-band TX cannot reuse or move the FT2-Link chat/session view.</source>
-        <translation type="vanished">此模式会有意绕过 FT 常规的音频偏移分频，因此跨波段发射无法复用或移动 FT2-Link 的聊天／会话视图。</translation>
+        <translation>此模式会有意绕过 FT 常规的音频偏移分频，因此跨波段发射无法复用或移动 FT2-Link 的聊天／会话视图。</translation>
     </message>
     <message>
+        <location filename="../qml/panels/FT2LinkPanel.qml" line="12070"/>
         <source>CAT diagnostics are recorded with the [FT2SAT] tag. Start with low power and verify the rig VFOs before on-air use.</source>
-        <translation type="vanished">CAT 诊断以 [FT2SAT] 标记记录。请先用小功率，并在上线前核对电台的 VFO。</translation>
+        <translation>CAT 诊断以 [FT2SAT] 标记记录。请先用小功率，并在上线前核对电台的 VFO。</translation>
     </message>
 </context>
 <context>
@@ -7024,94 +8523,113 @@ Error: %2</source>
 <context>
     <name>FilterPanel</name>
     <message>
+        <location filename="../qml/decodium/rtty/FilterPanel.qml" line="48"/>
         <source>FILTERS</source>
-        <translation type="vanished">滤波器</translation>
+        <translation>滤波器</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/FilterPanel.qml" line="64"/>
         <source>Bandpass around the two tones: throws away
 everything outside before the detector.</source>
-        <translation type="vanished">围绕两个音调的带通：在检波之前
+        <translation>围绕两个音调的带通：在检波之前
 丢掉外面的一切。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/FilterPanel.qml" line="76"/>
         <source>Removes one frequency. Ctrl+click the waterfall
 to drop it on the carrier that is in the way.</source>
-        <translation type="vanished">去掉一个频率。Ctrl+点击瀑布图，
+        <translation>去掉一个频率。Ctrl+点击瀑布图，
 把它放到碍事的载波上。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/FilterPanel.qml" line="88"/>
         <source>Adaptive canceller: removes steady carriers by
 itself. On weak signals it can eat the RTTY as
 well — try it and listen.</source>
-        <translation type="vanished">自适应对消：自动去掉稳定的载波。
+        <translation>自适应对消：自动去掉稳定的载波。
 信号弱时也可能把 RTTY 一起吃掉 —
 试试并仔细听。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/FilterPanel.qml" line="95"/>
         <source>BPF width</source>
-        <translation type="vanished">BPF 带宽</translation>
+        <translation>BPF 带宽</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/FilterPanel.qml" line="115"/>
         <source>FRAMING</source>
-        <translation type="vanished">帧格式</translation>
+        <translation>帧格式</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/FilterPanel.qml" line="123"/>
         <source>Stop</source>
-        <translation type="vanished">停止位</translation>
+        <translation>停止位</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/FilterPanel.qml" line="150"/>
         <source>Bits</source>
-        <translation type="vanished">数据位</translation>
+        <translation>数据位</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/FilterPanel.qml" line="179"/>
         <source>Par.</source>
-        <translation type="vanished">校验</translation>
+        <translation>校验</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/FilterPanel.qml" line="185"/>
         <source>none</source>
-        <translation type="vanished">无</translation>
+        <translation>无</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/FilterPanel.qml" line="186"/>
         <source>even</source>
-        <translation type="vanished">偶</translation>
+        <translation>偶</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/FilterPanel.qml" line="187"/>
         <source>odd</source>
-        <translation type="vanished">奇</translation>
+        <translation>奇</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/FilterPanel.qml" line="214"/>
         <source>Figures set: US has BELL and apostrophe where
 ITA2 swaps the two.</source>
-        <translation type="vanished">数字表：US 的 BELL 和撇号位置，
+        <translation>数字表：US 的 BELL 和撇号位置，
 在 ITA2 中互换。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/FilterPanel.qml" line="226"/>
         <source>Prints characters whose stop bit read wrong too:
 a few more characters on distorted signals, some
 lines of rubbish in exchange.</source>
-        <translation type="vanished">也打印停止位读错的字符：在失真信号上
+        <translation>也打印停止位读错的字符：在失真信号上
 多认出几个字符，代价是几行乱码。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/FilterPanel.qml" line="233"/>
         <source>TRANSMIT</source>
-        <translation type="vanished">发射</translation>
+        <translation>发射</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/FilterPanel.qml" line="241"/>
         <source>Fill</source>
-        <translation type="vanished">填充</translation>
+        <translation>填充</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/FilterPanel.qml" line="247"/>
         <source>off</source>
-        <translation type="vanished">关闭</translation>
+        <translation>关闭</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/FilterPanel.qml" line="260"/>
         <source>What to send between characters while you
 type live.</source>
-        <translation type="vanished">实时打字时，字符之间发送什么。</translation>
+        <translation>实时打字时，字符之间发送什么。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/FilterPanel.qml" line="267"/>
         <source>Character wait</source>
-        <translation type="vanished">字符间隔</translation>
+        <translation>字符间隔</translation>
     </message>
 </context>
 <context>
@@ -7389,32 +8907,39 @@ type live.</source>
 <context>
     <name>FullSpectrumPanel</name>
     <message>
+        <location filename="../qml/decodium/components/FullSpectrumPanel.qml" line="468"/>
         <source>No decodes</source>
-        <translation type="vanished">无解码</translation>
+        <translation>无解码</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/FullSpectrumPanel.qml" line="284"/>
         <source>UTC</source>
-        <translation type="vanished">UTC</translation>
+        <translation>UTC</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/FullSpectrumPanel.qml" line="285"/>
         <source>dB</source>
-        <translation type="vanished">dB</translation>
+        <translation>dB</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/FullSpectrumPanel.qml" line="287"/>
         <source>DT</source>
-        <translation type="vanished">DT</translation>
+        <translation>DT</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/FullSpectrumPanel.qml" line="289"/>
         <source>FREQ</source>
-        <translation type="vanished">频率</translation>
+        <translation>频率</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/FullSpectrumPanel.qml" line="291"/>
         <source>MESSAGE</source>
-        <translation type="vanished">消息</translation>
+        <translation>消息</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/FullSpectrumPanel.qml" line="292"/>
         <source>DXCC</source>
-        <translation type="vanished">DXCC</translation>
+        <translation>DXCC</translation>
     </message>
 </context>
 <context>
@@ -7536,17 +9061,17 @@ type live.</source>
         <translation>Hamlib 初始化错误</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="724"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="737"/>
         <source>Hamlib settings file error: %1 at character offset %2</source>
         <translation>Hamlib 设置文件错误: %1 字符偏移量 %2</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="730"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="743"/>
         <source>Hamlib settings file error: top level must be a JSON object</source>
         <translation>Hamlib 设置文件错误: 顶层必须是 JSON 对象</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="742"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="755"/>
         <source>Hamlib settings file error: config must be a JSON object</source>
         <translation>Hamlib 设置文件错误: 配置必须是JSON对象</translation>
     </message>
@@ -7561,222 +9086,241 @@ type live.</source>
         <translation>Hamlib 错误: %1 当 %2</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="766"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="779"/>
         <source>opening connection to rig</source>
         <translation>打开连接无线电设备</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="774"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="787"/>
         <source>Rig not ready — caps null after open (no response from radio?)</source>
         <translation>电台未就绪 — 打开后 caps 为 null（电台无响应？）</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="936"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1011"/>
         <source>getting current frequency</source>
         <translation>获取当前频率</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="940"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1015"/>
         <source>getting current mode</source>
         <translation>获取当前模式</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="969"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="989"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1044"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1064"/>
         <source>exchanging VFOs</source>
         <translation>在 VFOs 之间切换</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="977"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1771"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1052"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1878"/>
         <source>getting other VFO frequency</source>
         <translation>获取其他 VFO 频率</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="981"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1056"/>
         <source>getting other VFO mode</source>
         <translation>获取其他 VFO 模式</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1266"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1351"/>
         <source>setting TX VFO mode</source>
         <translation>正在设置 TX VFO 模式</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1284"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1369"/>
         <source>setting TX/split frequency</source>
         <translation>正在设置 TX/分频频率</translation>
     </message>
     <message>
         <location filename="../Transceiver/HamlibTransceiver.cpp" line="365"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="994"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1069"/>
         <source>setting current VFO</source>
         <translation>设置当前 VFO</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1003"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1078"/>
         <source>getting frequency</source>
         <translation>获取频率</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1007"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1082"/>
         <source>getting mode</source>
         <translation>获取模式</translation>
     </message>
     <message>
         <location filename="../Transceiver/HamlibTransceiver.cpp" line="353"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1024"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1681"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1099"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1788"/>
         <source>getting current VFO</source>
         <translation>获取当前 VFO</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1081"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1089"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1103"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1745"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="977"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1156"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1164"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1178"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1852"/>
         <source>getting current VFO frequency</source>
         <translation>获取当前 VFO 频率</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1087"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1102"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1109"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1216"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1250"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1334"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1162"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1177"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1184"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1301"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1335"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1419"/>
         <source>setting frequency</source>
         <translation>设置频率</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1240"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1341"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1424"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1437"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="985"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1325"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1426"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1509"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1522"/>
         <source>getting current VFO mode</source>
         <translation>获取当前 VFO 模式</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1246"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1260"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1347"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1402"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1430"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1443"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1331"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1345"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1432"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1487"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1515"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1528"/>
         <source>setting current VFO mode</source>
         <translation>设置当前 VFO 模式</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1321"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1390"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1406"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1475"/>
         <source>setting/unsetting split mode</source>
         <translation>设置/取消 设置异频模式</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1332"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1372"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1417"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1457"/>
         <source>setting split mode</source>
         <translation>设置异频模式</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1360"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1445"/>
         <source>setting split TX frequency and mode</source>
         <translation>设置异频发射频率和模式</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1365"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1450"/>
         <source>setting split TX frequency</source>
         <translation>设置异频发射频率</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1448"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1533"/>
         <source>getting split TX VFO mode</source>
         <translation>获得异频发射 VFO 模式</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1455"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1540"/>
         <source>setting split TX VFO mode</source>
         <translation>设置异频发射 VFO 模式</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1581"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1666"/>
         <source> (write preflight timeout)</source>
         <translation> (写入预检超时)</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1619"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1704"/>
         <source> (write tolerated)</source>
         <translation> (写入已容许)</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1746"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1853"/>
         <source>getting RX VFO frequency</source>
         <translation>正在获取 RX VFO 频率</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1813"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1920"/>
         <source>getting PTT state</source>
         <translation>获取PTT 状态</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="2363"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="2492"/>
         <source>setting PTT on</source>
         <translation>设置PTT 开启</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="2449"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="2578"/>
         <source>The radio CAT CW keyer is unavailable</source>
         <translation>电台的 CAT CW 键控器不可用</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="2455"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="2584"/>
         <source>FT-991A CW text must contain 1-49 characters without CAT delimiters</source>
         <translation>FT-991A 的 CW 文本必须为 1-49 个字符，且不含 CAT 分隔符</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="2458"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="2587"/>
         <source>CW text is empty</source>
         <translation>CW 文本为空</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="2464"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="2593"/>
         <source>Setting CW speed failed: %1 (%2)</source>
         <translation>设置 CW 速度失败：%1 (%2)</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="2470"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="2599"/>
         <source>Sending CW failed: %1 (%2)</source>
         <translation>发送 CW 失败：%1 (%2)</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="2524"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="2653"/>
         <source>setting PTT off</source>
         <translation>设置PTT 关闭</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="2533"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="2552"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="2565"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="2662"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="2681"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="2699"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="2717"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="2734"/>
         <source>Radio disconnected</source>
         <translation>电台已断开</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="2534"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="2663"/>
         <source>Cannot start ATU tune while transmitting</source>
         <translation>发射期间无法启动 ATU 调谐</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="2536"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="2665"/>
         <source>This radio does not expose an ATU tuner control through Hamlib</source>
         <translation>该电台未通过 Hamlib 提供 ATU 天线调谐器控制</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="2553"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="2682"/>
+        <source>Cannot disable the ATU while transmitting</source>
+        <translation>发射期间无法禁用 ATU</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="2684"/>
+        <source>This radio does not expose ATU enable/disable through Hamlib</source>
+        <translation>此电台未通过 Hamlib 提供 ATU 启用/禁用功能</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="2701"/>
+        <source>This radio does not expose ATU state through Hamlib</source>
+        <translation>此电台未通过 Hamlib 提供 ATU 状态</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="2718"/>
         <source>Cannot power on while transmitting</source>
         <translation>发射期间无法开机</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="2566"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="2735"/>
         <source>Cannot power off while transmitting</source>
         <translation>发射期间无法关机</translation>
     </message>
@@ -7795,23 +9339,32 @@ type live.</source>
 <context>
     <name>HeaderBar</name>
     <message>
+        <location filename="../qml/decodium/rtty/HeaderBar.qml" line="41"/>
         <source>RTTY</source>
-        <translation type="vanished">RTTY</translation>
+        <translation>RTTY</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/HeaderBar.qml" line="69"/>
+        <source>Audio only — no CAT</source>
+        <translation>仅音频 — 无 CAT</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/rtty/HeaderBar.qml" line="146"/>
         <source>Setup</source>
-        <translation type="vanished">设置</translation>
+        <translation>设置</translation>
     </message>
 </context>
 <context>
     <name>HistoryStrip</name>
     <message>
+        <location filename="../qml/decodium/rotor/HistoryStrip.qml" line="7"/>
         <source>POSITION TREND</source>
-        <translation type="vanished">位置趋势</translation>
+        <translation>位置趋势</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/HistoryStrip.qml" line="81"/>
         <source>waiting for samples…</source>
-        <translation type="vanished">等待采样…</translation>
+        <translation>等待采样…</translation>
     </message>
 </context>
 <context>
@@ -7846,118 +9399,146 @@ type live.</source>
 <context>
     <name>InfoDialog</name>
     <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="713"/>
         <source>Open Settings</source>
-        <translation type="vanished">打开设置</translation>
+        <translation>打开设置</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="714"/>
         <source>Open Log</source>
-        <translation type="vanished">打开日志</translation>
+        <translation>打开日志</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="715"/>
         <source>Open Macros</source>
-        <translation type="vanished">打开宏</translation>
+        <translation>打开宏</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="717"/>
         <source>Reset windows Layout</source>
-        <translation type="vanished">重置窗口布局</translation>
+        <translation>重置窗口布局</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="718"/>
         <source>Compact Full Spectrum</source>
-        <translation type="vanished">紧凑 Full Spectrum</translation>
+        <translation>紧凑 Full Spectrum</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="83"/>
         <source>DECODIUM INFO</source>
-        <translation type="vanished">DECODIUM 信息</translation>
+        <translation>DECODIUM 信息</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="218"/>
         <source>4.0 Core Gallager</source>
-        <translation type="vanished">4.0 Core Gallager</translation>
+        <translation>4.0 Core Gallager</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="227"/>
         <source>Advanced Digital Mode Decoder for Amateur Radio
 FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</source>
-        <translation type="vanished">面向业余无线电的高级数字模式解码器
+        <translation>面向业余无线电的高级数字模式解码器
 FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="260"/>
         <source>Decodium by IU8LMC</source>
-        <translation type="vanished">Decodium by IU8LMC</translation>
+        <translation>Decodium by IU8LMC</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="267"/>
         <source>Qt6 Modern UI Port by IU8LMC</source>
-        <translation type="vanished">Qt6 现代界面移植：IU8LMC</translation>
+        <translation>Qt6 现代界面移植：IU8LMC</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="274"/>
         <source>Developed by Salvatore Raccampo 9H1SR</source>
-        <translation type="vanished">由 Salvatore Raccampo 9H1SR 开发</translation>
+        <translation>由 Salvatore Raccampo 9H1SR 开发</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="281"/>
         <source>WSJT-X Algorithms by K1JT (Joe Taylor)</source>
-        <translation type="vanished">WSJT-X 算法：K1JT (Joe Taylor)</translation>
+        <translation>WSJT-X 算法：K1JT (Joe Taylor)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="290"/>
         <source>Copyright 2024-2026 - Open Source GPL</source>
-        <translation type="vanished">Copyright 2024-2026 - 开源 GPL</translation>
+        <translation>Copyright 2024-2026 - 开源 GPL</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="314"/>
         <source>DECODIUM HISTORY</source>
-        <translation type="vanished">DECODIUM 历程</translation>
+        <translation>DECODIUM 历程</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="410"/>
         <source>CONTACTS &amp; FEEDBACK</source>
-        <translation type="vanished">联系与反馈</translation>
+        <translation>联系与反馈</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="432"/>
         <source>Developer: IU8LMC</source>
-        <translation type="vanished">Developer: IU8LMC</translation>
+        <translation>Developer: IU8LMC</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="447"/>
         <source>iu8lmc@gmail.com</source>
-        <translation type="vanished">iu8lmc@gmail.com</translation>
+        <translation>iu8lmc@gmail.com</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="465"/>
         <source>Developer: 9H1SR</source>
-        <translation type="vanished">Developer: 9H1SR</translation>
+        <translation>Developer: 9H1SR</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="480"/>
         <source>9h1sr@gmail.com</source>
-        <translation type="vanished">9h1sr@gmail.com</translation>
+        <translation>9h1sr@gmail.com</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="517"/>
         <source>SEND FEEDBACK</source>
-        <translation type="vanished">发送反馈</translation>
+        <translation>发送反馈</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="528"/>
         <source>Subject</source>
-        <translation type="vanished">主题</translation>
+        <translation>主题</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="555"/>
         <source>Message, suggestion, or bug report</source>
-        <translation type="vanished">留言、建议或缺陷报告</translation>
+        <translation>留言、建议或缺陷报告</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="581"/>
         <source>Send Feedback</source>
-        <translation type="vanished">发送</translation>
+        <translation>发送</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="628"/>
         <source>QUICK GUIDE</source>
-        <translation type="vanished">快速指南</translation>
+        <translation>快速指南</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="652"/>
         <source>QUICK START</source>
-        <translation type="vanished">快速上手</translation>
+        <translation>快速上手</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="695"/>
         <source>KEYBOARD SHORTCUTS</source>
-        <translation type="vanished">键盘快捷键</translation>
+        <translation>键盘快捷键</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="770"/>
         <source>OPERATING TIPS</source>
-        <translation type="vanished">操作提示</translation>
+        <translation>操作提示</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="811"/>
         <source>USEFUL LINKS</source>
-        <translation type="vanished">实用链接</translation>
+        <translation>实用链接</translation>
     </message>
 </context>
 <context>
@@ -8023,781 +9604,980 @@ FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
 <context>
     <name>JttyWindow</name>
     <message>
+        <location filename="../qml/decodium/components/JttyWindow.qml" line="38"/>
         <source>JTTY - keyboard mode</source>
-        <translation type="vanished">JTTY - 键盘模式</translation>
+        <translation>JTTY - 键盘模式</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/JttyWindow.qml" line="214"/>
         <source>TX</source>
-        <translation type="vanished">TX</translation>
+        <translation>TX</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/JttyWindow.qml" line="214"/>
         <source>RX</source>
-        <translation type="vanished">RX</translation>
+        <translation>RX</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/JttyWindow.qml" line="214"/>
         <source>JTTY OFF</source>
-        <translation type="vanished">JTTY 关闭</translation>
+        <translation>JTTY 关闭</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/JttyWindow.qml" line="220"/>
         <source>RX %1 Hz</source>
-        <translation type="vanished">RX %1 Hz</translation>
+        <translation>RX %1 Hz</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/JttyWindow.qml" line="221"/>
         <source>TX %1 Hz</source>
-        <translation type="vanished">TX %1 Hz</translation>
+        <translation>TX %1 Hz</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/JttyWindow.qml" line="223"/>
         <source>TX=RX</source>
-        <translation type="vanished">TX=RX</translation>
+        <translation>TX=RX</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/JttyWindow.qml" line="226"/>
         <source>FTol</source>
-        <translation type="vanished">FTol</translation>
+        <translation>FTol</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/JttyWindow.qml" line="234"/>
         <source>DX</source>
-        <translation type="vanished">DX</translation>
+        <translation>DX</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/JttyWindow.qml" line="246"/>
         <source>lower case</source>
-        <translation type="vanished">小写</translation>
+        <translation>小写</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/JttyWindow.qml" line="247"/>
         <source>Clear</source>
-        <translation type="vanished">清除</translation>
+        <translation>清除</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/JttyWindow.qml" line="263"/>
         <source>QSO FREQUENCY  (RX %1 ± %2 Hz)</source>
-        <translation type="vanished">QSO 频率  (RX %1 ± %2 Hz)</translation>
+        <translation>QSO 频率  (RX %1 ± %2 Hz)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/JttyWindow.qml" line="271"/>
         <source>ALL FREQUENCIES  (click a line: RX there and pick the call)</source>
-        <translation type="vanished">所有频率  (点击一行: RX 移到该处并取呼号)</translation>
+        <translation>所有频率  (点击一行: RX 移到该处并取呼号)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/JttyWindow.qml" line="347"/>
         <source>Click to send, right click to edit</source>
-        <translation type="vanished">点击发送，右键编辑</translation>
+        <translation>点击发送，右键编辑</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/JttyWindow.qml" line="354"/>
         <source>Contest</source>
-        <translation type="vanished">竞赛</translation>
+        <translation>竞赛</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/JttyWindow.qml" line="357"/>
         <source>None</source>
-        <translation type="vanished">无</translation>
+        <translation>无</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/JttyWindow.qml" line="357"/>
         <source>Field Day</source>
-        <translation type="vanished">Field Day</translation>
+        <translation>Field Day</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/JttyWindow.qml" line="357"/>
         <source>RTTY Roundup</source>
-        <translation type="vanished">RTTY Roundup</translation>
+        <translation>RTTY Roundup</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/JttyWindow.qml" line="361"/>
         <source>Exchange</source>
-        <translation type="vanished">交换</translation>
+        <translation>交换</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/JttyWindow.qml" line="369"/>
         <source>Serial</source>
-        <translation type="vanished">序号</translation>
+        <translation>序号</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/JttyWindow.qml" line="381"/>
         <source>log on &quot;TU&quot;</source>
-        <translation type="vanished">&quot;TU&quot; 时记录</translation>
+        <translation>&quot;TU&quot; 时记录</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/JttyWindow.qml" line="383"/>
         <source>Log QSO</source>
-        <translation type="vanished">记录 QSO</translation>
+        <translation>记录 QSO</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/JttyWindow.qml" line="423"/>
         <source>Type a message and press Enter (Esc stops the transmission)</source>
-        <translation type="vanished">输入消息并按回车 (Esc 停止发射)</translation>
+        <translation>输入消息并按回车 (Esc 停止发射)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/JttyWindow.qml" line="430"/>
         <source>Send</source>
-        <translation type="vanished">发送</translation>
+        <translation>发送</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/JttyWindow.qml" line="431"/>
         <source>Stop TX</source>
-        <translation type="vanished">停止 TX</translation>
+        <translation>停止 TX</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/JttyWindow.qml" line="444"/>
         <source>Sending: %1</source>
-        <translation type="vanished">发送中: %1</translation>
+        <translation>发送中: %1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/JttyWindow.qml" line="445"/>
         <source>Select JTTY in the mode selector to receive and transmit.</source>
-        <translation type="vanished">在模式选择中选择 JTTY 以接收和发射。</translation>
+        <translation>在模式选择中选择 JTTY 以接收和发射。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/JttyWindow.qml" line="466"/>
         <source>F%1 template</source>
-        <translation type="vanished">F%1 模板</translation>
+        <translation>F%1 模板</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/JttyWindow.qml" line="471"/>
         <source>%M my call, %H and %Q the DX call, %E exchange, %G grid.
 The default templates are sent as compact native frames.</source>
-        <translation type="vanished">%M 我的呼号，%H 和 %Q 为 DX 呼号，%E 交换，%G 网格。
+        <translation>%M 我的呼号，%H 和 %Q 为 DX 呼号，%E 交换，%G 网格。
 默认模板以紧凑的原生帧发送。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/JttyWindow.qml" line="484"/>
         <source>Save</source>
-        <translation type="vanished">保存</translation>
+        <translation>保存</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/JttyWindow.qml" line="487"/>
         <source>Defaults (all)</source>
-        <translation type="vanished">默认 (全部)</translation>
+        <translation>默认 (全部)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/JttyWindow.qml" line="488"/>
         <source>Cancel</source>
-        <translation type="vanished">取消</translation>
+        <translation>取消</translation>
     </message>
 </context>
 <context>
     <name>LiveMapPanel</name>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="907"/>
         <source>Zoom out</source>
-        <translation type="vanished">缩小</translation>
+        <translation>缩小</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="937"/>
         <source>Zoom in</source>
-        <translation type="vanished">放大</translation>
+        <translation>放大</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="970"/>
         <source>Reset view (auto-fit)</source>
-        <translation type="vanished">重置视图（自动适应）</translation>
+        <translation>重置视图（自动适应）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1012"/>
         <source>Toggle day/night greyline overlay</source>
-        <translation type="vanished">切换昼/夜灰线叠加层</translation>
+        <translation>切换昼/夜灰线叠加层</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1064"/>
         <source>Dock</source>
-        <translation type="vanished">停靠</translation>
+        <translation>停靠</translation>
     </message>
     <message>
         <source>Detach</source>
         <translation type="vanished">分离</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1079"/>
         <source>Dock Live Map</source>
-        <translation type="vanished">停靠 Live Map</translation>
+        <translation>停靠 Live Map</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1079"/>
         <source>Detach Live Map</source>
-        <translation type="vanished">分离 Live Map</translation>
+        <translation>分离 Live Map</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1758"/>
         <source>  last %1 s ago</source>
-        <translation type="vanished">  %1 秒前</translation>
+        <translation>  %1 秒前</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2826"/>
         <source> spots</source>
-        <translation type="vanished"> 点报</translation>
+        <translation> 点报</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2237"/>
         <source>%1  %2</source>
-        <translation type="vanished">%1  %2</translation>
+        <translation>%1  %2</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1930"/>
         <source>%1  %2  %3 dB  %4  |  %5</source>
-        <translation type="vanished">%1  %2  %3 dB  %4  |  %5</translation>
+        <translation>%1  %2  %3 dB  %4  |  %5</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="5420"/>
         <source>%1  %2 / %3</source>
-        <translation type="vanished">%1  %2 / %3</translation>
+        <translation>%1  %2 / %3</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2039"/>
         <source>%1 %2  %3  %4  %5</source>
-        <translation type="vanished">%1 %2  %3  %4  %5</translation>
+        <translation>%1 %2  %3  %4  %5</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="5387"/>
         <source>%1 / %2 drives the Award and Wanted roster filters</source>
-        <translation type="vanished">%1 / %2 控制列表的奖状与待通联筛选</translation>
+        <translation>%1 / %2 控制列表的奖状与待通联筛选</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1829"/>
         <source>%1 QSO  %2 confirmed  %3 live  %4 PSK</source>
-        <translation type="vanished">%1 QSO  %2 已确认  %3 实时  %4 PSK</translation>
+        <translation>%1 QSO  %2 已确认  %3 实时  %4 PSK</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4767"/>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4798"/>
         <source>%1 QSO · %2 QSL</source>
-        <translation type="vanished">%1 QSO · %2 QSL</translation>
+        <translation>%1 QSO · %2 QSL</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1748"/>
         <source>%1 live  %2 PSK  %3</source>
-        <translation type="vanished">%1 实时  %2 PSK  %3</translation>
+        <translation>%1 实时  %2 PSK  %3</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4079"/>
         <source>%1 stations · %2 wanted · %3 new · %4 unconfirmed</source>
-        <translation type="vanished">%1 个电台 · %2 待通联 · %3 新增 · %4 未确认</translation>
+        <translation>%1 个电台 · %2 待通联 · %3 新增 · %4 未确认</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1741"/>
         <source>%1 worked  %2 confirmed</source>
-        <translation type="vanished">%1 已通联  %2 已确认</translation>
+        <translation>%1 已通联  %2 已确认</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1170"/>
         <source>%1 worked / %2 confirmed</source>
-        <translation type="vanished">%1 已通联 / %2 已确认</translation>
+        <translation>%1 已通联 / %2 已确认</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3277"/>
         <source>14 MHz</source>
-        <translation type="vanished">14 MHz</translation>
+        <translation>14 MHz</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3322"/>
         <source>5 MHz</source>
-        <translation type="vanished">5 MHz</translation>
+        <translation>5 MHz</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3320"/>
         <source>&lt;1 MHz</source>
-        <translation type="vanished">&lt;1 MHz</translation>
+        <translation>&lt;1 MHz</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3275"/>
         <source>&lt;5 MHz</source>
-        <translation type="vanished">&lt;5 MHz</translation>
+        <translation>&lt;5 MHz</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3324"/>
         <source>&gt;14 MHz</source>
-        <translation type="vanished">&gt;14 MHz</translation>
+        <translation>&gt;14 MHz</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3279"/>
         <source>&gt;28 MHz</source>
-        <translation type="vanished">&gt;28 MHz</translation>
+        <translation>&gt;28 MHz</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2877"/>
         <source>4-char grids</source>
-        <translation type="vanished">4 位网格</translation>
+        <translation>4 位网格</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2877"/>
         <source>6-char grids</source>
-        <translation type="vanished">6 位网格</translation>
+        <translation>6 位网格</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4675"/>
         <source>ADIF  %1</source>
-        <translation type="vanished">ADIF  %1</translation>
+        <translation>ADIF  %1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4732"/>
         <source>ADIF span  %1 — %2</source>
-        <translation type="vanished">ADIF 时间范围  %1 — %2</translation>
+        <translation>ADIF 时间范围  %1 — %2</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2194"/>
         <source>ALERTS</source>
-        <translation type="vanished">警报</translation>
+        <translation>警报</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2193"/>
         <source>ALERTS %1</source>
-        <translation type="vanished">警报 %1</translation>
+        <translation>警报 %1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4665"/>
         <source>ALL TIME</source>
-        <translation type="vanished">全部时间</translation>
+        <translation>全部时间</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3773"/>
         <source>AWARD</source>
-        <translation type="vanished">奖状</translation>
+        <translation>奖状</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2186"/>
         <source>AWARDS</source>
-        <translation type="vanished">奖状</translation>
+        <translation>奖状</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3144"/>
         <source>Active  %1</source>
-        <translation type="vanished">活动  %1</translation>
+        <translation>活动  %1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2399"/>
         <source>BASE MAP</source>
-        <translation type="vanished">底图</translation>
+        <translation>底图</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4321"/>
         <source>Band scope, optional</source>
-        <translation type="vanished">波段范围（可选）</translation>
+        <translation>波段范围（可选）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4328"/>
         <source>Mode scope, optional</source>
-        <translation type="vanished">模式范围（可选）</translation>
+        <translation>模式范围（可选）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2551"/>
         <source>Base: %1</source>
-        <translation type="vanished">底图: %1</translation>
+        <translation>底图: %1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2548"/>
         <source>Base: &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;</source>
-        <translation type="vanished">底图: &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;</translation>
+        <translation>底图: &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1521"/>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1972"/>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2074"/>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4598"/>
         <source>CALL</source>
-        <translation type="vanished">CALL</translation>
+        <translation>CALL</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1261"/>
         <source>COND</source>
-        <translation type="vanished">状况</translation>
+        <translation>状况</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1461"/>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2066"/>
         <source>CONFIRMED</source>
-        <translation type="vanished">已确认</translation>
+        <translation>已确认</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4696"/>
         <source>Confirmed</source>
-        <translation type="vanished">已确认</translation>
+        <translation>已确认</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3139"/>
         <source>Confirmed  %1</source>
-        <translation type="vanished">已确认  %1</translation>
+        <translation>已确认  %1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3693"/>
         <source>CQ activity</source>
-        <translation type="vanished">CQ 活动</translation>
+        <translation>CQ 活动</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3702"/>
         <source>Call pattern, e.g. 9H*</source>
-        <translation type="vanished">呼号模式，例如 9H*</translation>
+        <translation>呼号模式，例如 9H*</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3728"/>
         <source>Call roster text-filter mode</source>
-        <translation type="vanished">呼号列表文本筛选方式</translation>
+        <translation>呼号列表文本筛选方式</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3732"/>
         <source>Call, grid, DXCC or message</source>
-        <translation type="vanished">呼号、网格、DXCC 或消息</translation>
+        <translation>呼号、网格、DXCC 或消息</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4697"/>
         <source>Calls</source>
-        <translation type="vanished">呼号</translation>
+        <translation>呼号</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4579"/>
         <source>DX</source>
-        <translation type="vanished">DX</translation>
+        <translation>DX</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2658"/>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4698"/>
         <source>DXCC</source>
-        <translation type="vanished">DXCC</translation>
+        <translation>DXCC</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2737"/>
         <source>PSK</source>
-        <translation type="vanished">PSK</translation>
+        <translation>PSK</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4695"/>
         <source>QSO</source>
-        <translation type="vanished">QSO</translation>
+        <translation>QSO</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3124"/>
         <source>QSO  %1</source>
-        <translation type="vanished">QSO  %1</translation>
+        <translation>QSO  %1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1655"/>
         <source>USGS</source>
-        <translation type="vanished">USGS</translation>
+        <translation>USGS</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3720"/>
         <source>Regex</source>
-        <translation type="vanished">正则</translation>
+        <translation>正则</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3189"/>
         <source>Center map on the Moon subpoint</source>
-        <translation type="vanished">将地图居中到月下点</translation>
+        <translation>将地图居中到月下点</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1853"/>
         <source>Center this grid</source>
-        <translation type="vanished">将此网格居中</translation>
+        <translation>将此网格居中</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4000"/>
         <source>Choose the information shown on each roster row</source>
-        <translation type="vanished">选择列表每行显示的信息</translation>
+        <translation>选择列表每行显示的信息</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4397"/>
         <source>Clear all</source>
-        <translation type="vanished">全部清除</translation>
+        <translation>全部清除</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4404"/>
         <source>Clear all watched calls and all call or DXCC exclusions</source>
-        <translation type="vanished">清除所有关注的呼号以及所有呼号或 DXCC 排除项</translation>
+        <translation>清除所有关注的呼号以及所有呼号或 DXCC 排除项</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3982"/>
         <source>Clear live station history</source>
-        <translation type="vanished">清除实时电台历史</translation>
+        <translation>清除实时电台历史</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1511"/>
         <source>Click CALL to start a QSO or ROTATE to aim the antenna.</source>
-        <translation type="vanished">点击 CALL 开始通联，或点击 ROTATE 转动天线。</translation>
+        <translation>点击 CALL 开始通联，或点击 ROTATE 转动天线。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1706"/>
         <source>Click for event details</source>
-        <translation type="vanished">点击查看事件详情</translation>
+        <translation>点击查看事件详情</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2148"/>
         <source>Close details</source>
-        <translation type="vanished">关闭详情</translation>
+        <translation>关闭详情</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1861"/>
         <source>Close grid details</source>
-        <translation type="vanished">关闭网格详情</translation>
+        <translation>关闭网格详情</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3996"/>
         <source>Columns</source>
-        <translation type="vanished">列</translation>
+        <translation>列</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1767"/>
         <source>Combined</source>
-        <translation type="vanished">合并</translation>
+        <translation>合并</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4031"/>
         <source>Compare worked and confirmed status globally, by band or by band and mode</source>
-        <translation type="vanished">在全局、按波段或按波段与模式比较已通联与已确认状态</translation>
+        <translation>在全局、按波段或按波段与模式比较已通联与已确认状态</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3115"/>
         <source>Confirmed = paper QSL, LoTW or eQSL received (ADIF status Y)</source>
-        <translation type="vanished">已确认 = 已收到纸质 QSL、LoTW 或 eQSL（ADIF 状态 Y）</translation>
+        <translation>已确认 = 已收到纸质 QSL、LoTW 或 eQSL（ADIF 状态 Y）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="391"/>
         <source>Confirmed grids contain an imported ADIF QSO with QSL_RCVD=Y, LOTW_QSL_RCVD=Y or EQSL_QSL_RCVD=Y.</source>
-        <translation type="vanished">已确认网格包含带有 QSL_RCVD=Y、LOTW_QSL_RCVD=Y 或 EQSL_QSL_RCVD=Y 的已导入 ADIF QSO。</translation>
+        <translation>已确认网格包含带有 QSL_RCVD=Y、LOTW_QSL_RCVD=Y 或 EQSL_QSL_RCVD=Y 的已导入 ADIF QSO。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2820"/>
         <source>Connect the PSK Reporter MQTT feed</source>
-        <translation type="vanished">连接 PSK Reporter 的 MQTT 数据源</translation>
+        <translation>连接 PSK Reporter 的 MQTT 数据源</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2887"/>
         <source>Coverage grid precision</source>
-        <translation type="vanished">覆盖网格精度</translation>
+        <translation>覆盖网格精度</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4009"/>
         <source>Create wanted, ignored or watched rules with optional band and mode scopes</source>
-        <translation type="vanished">创建待通联、忽略或关注规则，波段与模式范围可选</translation>
+        <translation>创建待通联、忽略或关注规则，波段与模式范围可选</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1184"/>
         <source>Cycle Live, Logbook and combined map views</source>
-        <translation type="vanished">循环切换实时、日志和合并地图视图</translation>
+        <translation>循环切换实时、日志和合并地图视图</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1272"/>
         <source>DETAILS</source>
-        <translation type="vanished">详情</translation>
+        <translation>详情</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1271"/>
         <source>HIDE DETAILS</source>
-        <translation type="vanished">隐藏详情</translation>
+        <translation>隐藏详情</translation>
     </message>
     <message>
         <source>Decodium Atlas is local. NASA GIBS and MapTiler use the network when Offline mode is disabled.</source>
         <translation type="vanished">Decodium Atlas 为本地数据。关闭离线模式时，NASA GIBS 与 MapTiler 会使用网络。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3052"/>
         <source>Draw active and wanted grids as compact map pins</source>
-        <translation type="vanished">将活动与待通联网格绘制为紧凑图钉</translation>
+        <translation>将活动与待通联网格绘制为紧凑图钉</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3598"/>
         <source>EXTERNAL DATA</source>
-        <translation type="vanished">外部数据</translation>
+        <translation>外部数据</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1686"/>
         <source>Earthquake</source>
-        <translation type="vanished">地震</translation>
+        <translation>地震</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3720"/>
         <source>Exclude</source>
-        <translation type="vanished">排除</translation>
+        <translation>排除</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4653"/>
         <source>FILTERED · %1 · %2 of %3 QSO</source>
-        <translation type="vanished">已筛选 · %1 · %3 个 QSO 中的 %2 个</translation>
+        <translation>已筛选 · %1 · %3 个 QSO 中的 %2 个</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3742"/>
         <source>Filtering runs in the map database worker</source>
-        <translation type="vanished">筛选在地图数据库工作线程中执行</translation>
+        <translation>筛选在地图数据库工作线程中执行</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1818"/>
         <source>GRID %1</source>
-        <translation type="vanished">网格 %1</translation>
+        <translation>网格 %1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4699"/>
         <source>Grids</source>
-        <translation type="vanished">网格</translation>
+        <translation>网格</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1604"/>
         <source>Geographic area</source>
-        <translation type="vanished">地理区域</translation>
+        <translation>地理区域</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="418"/>
         <source>Global earthquakes of magnitude 2.5 or greater reported by USGS during the last day.</source>
-        <translation type="vanished">USGS 在过去一天报告的全球 2.5 级及以上地震。</translation>
+        <translation>USGS 在过去一天报告的全球 2.5 级及以上地震。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3363"/>
         <source>Good</source>
-        <translation type="vanished">良好</translation>
+        <translation>良好</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3361"/>
         <source>Poor</source>
-        <translation type="vanished">较差</translation>
+        <translation>较差</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1918"/>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2027"/>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4514"/>
         <source>Unknown</source>
-        <translation type="vanished">未知</translation>
+        <translation>未知</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1877"/>
         <source>HISTORY</source>
-        <translation type="vanished">历史</translation>
+        <translation>历史</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1876"/>
         <source>HISTORY %1</source>
-        <translation type="vanished">历史 %1</translation>
+        <translation>历史 %1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2864"/>
         <source>Heat %1  Timeline %2  Paths %3</source>
-        <translation type="vanished">热力图 %1  时间轴 %2  路径 %3</translation>
+        <translation>热力图 %1  时间轴 %2  路径 %3</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1766"/>
         <source>Hovered half: %1</source>
-        <translation type="vanished">光标所在半区: %1</translation>
+        <translation>光标所在半区: %1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3802"/>
         <source>Hunt entities not yet worked or not yet confirmed</source>
-        <translation type="vanished">搜寻尚未通联或尚未确认的实体</translation>
+        <translation>搜寻尚未通联或尚未确认的实体</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4586"/>
         <source>Ignore every station from %1</source>
-        <translation type="vanished">忽略来自 %1 的所有电台</translation>
+        <translation>忽略来自 %1 的所有电台</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4576"/>
         <source>Ignore this station until roster preferences are reset</source>
-        <translation type="vanished">忽略此电台，直到重置列表首选项</translation>
+        <translation>忽略此电台，直到重置列表首选项</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4054"/>
         <source>Keep each station active in the roster for this many minutes</source>
-        <translation type="vanished">每个电台在列表中保持活动的分钟数</translation>
+        <translation>每个电台在列表中保持活动的分钟数</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4567"/>
         <source>Keep this station at the top of the roster</source>
-        <translation type="vanished">将此电台置于列表顶部</translation>
+        <translation>将此电台置于列表顶部</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2217"/>
         <source>LAYERS</source>
-        <translation type="vanished">图层</translation>
+        <translation>图层</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1871"/>
         <source>LIVE</source>
-        <translation type="vanished">实时</translation>
+        <translation>实时</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1870"/>
         <source>LIVE %1</source>
-        <translation type="vanished">实时 %1</translation>
+        <translation>实时 %1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1181"/>
         <source>Live</source>
-        <translation type="vanished">实时</translation>
+        <translation>实时</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3129"/>
         <source>Live  %1</source>
-        <translation type="vanished">实时  %1</translation>
+        <translation>实时  %1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3184"/>
         <source>LOCATE</source>
-        <translation type="vanished">定位</translation>
+        <translation>定位</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2168"/>
         <source>LOGBOOK</source>
-        <translation type="vanished">日志</translation>
+        <translation>日志</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4652"/>
         <source>LOGBOOK · ALL TIME · %1 QSO</source>
-        <translation type="vanished">日志 · 全部时间 · %1 QSO</translation>
+        <translation>日志 · 全部时间 · %1 QSO</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3748"/>
         <source>LOOKUP</source>
-        <translation type="vanished">查询</translation>
+        <translation>查询</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3988"/>
         <source>Lists</source>
-        <translation type="vanished">列表</translation>
+        <translation>列表</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3986"/>
         <source>Lists %1</source>
-        <translation type="vanished">列表 %1</translation>
+        <translation>列表 %1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2892"/>
         <source>Live 5 min</source>
-        <translation type="vanished">实时 5 分钟</translation>
+        <translation>实时 5 分钟</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2893"/>
         <source>Live 15 min</source>
-        <translation type="vanished">实时 15 分钟</translation>
+        <translation>实时 15 分钟</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2894"/>
         <source>Live 30 min</source>
-        <translation type="vanished">实时 30 分钟</translation>
+        <translation>实时 30 分钟</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2895"/>
         <source>Live 60 min</source>
-        <translation type="vanished">实时 60 分钟</translation>
+        <translation>实时 60 分钟</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2786"/>
         <source>Live MQTT</source>
-        <translation type="vanished">实时 MQTT</translation>
+        <translation>实时 MQTT</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4700"/>
         <source>Live spots</source>
-        <translation type="vanished">实时点报</translation>
+        <translation>实时点报</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="396"/>
         <source>Live Parks on the Air activator spots. Disabling this layer immediately removes all POTA markers from the map.</source>
-        <translation type="vanished">Parks on the Air 激活者的实时点报。关闭该图层会立即从地图移除所有 POTA 标记。</translation>
+        <translation>Parks on the Air 激活者的实时点报。关闭该图层会立即从地图移除所有 POTA 标记。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3391"/>
         <source>Live and logbook visibility</source>
-        <translation type="vanished">实时与日志的可见性</translation>
+        <translation>实时与日志的可见性</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2672"/>
         <source>Loading PSK...</source>
-        <translation type="vanished">正在加载 PSK...</translation>
+        <translation>正在加载 PSK...</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2535"/>
         <source>Loading...</source>
-        <translation type="vanished">正在加载...</translation>
+        <translation>正在加载...</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2156"/>
         <source>MAP</source>
-        <translation type="vanished">地图</translation>
+        <translation>地图</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3368"/>
         <source>MAP OPERATIONS</source>
-        <translation type="vanished">地图操作</translation>
+        <translation>地图操作</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="220"/>
         <source>MOON</source>
-        <translation type="vanished">月球</translation>
+        <translation>月球</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1064"/>
         <source>POP</source>
-        <translation type="vanished">POP</translation>
+        <translation>POP</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3232"/>
         <source>MUF and foF2 use MHz. Es is a probability index, not a frequency.</source>
-        <translation type="vanished">MUF 与 foF2 以 MHz 表示。Es 是概率指数，不是频率。</translation>
+        <translation>MUF 与 foF2 以 MHz 表示。Es 是概率指数，不是频率。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2128"/>
         <source>Map Intelligence</source>
-        <translation type="vanished">地图智能</translation>
+        <translation>地图智能</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1413"/>
         <source>Map item</source>
-        <translation type="vanished">地图项</translation>
+        <translation>地图项</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1226"/>
         <source>Map preset</source>
-        <translation type="vanished">地图预设</translation>
+        <translation>地图预设</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1207"/>
         <source>Map projection</source>
-        <translation type="vanished">地图投影</translation>
+        <translation>地图投影</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3408"/>
         <source>Projection</source>
-        <translation type="vanished">投影</translation>
+        <translation>投影</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2511"/>
         <source>MapTiler API key</source>
-        <translation type="vanished">MapTiler API 密钥</translation>
+        <translation>MapTiler API 密钥</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="5545"/>
         <source>Mark read</source>
-        <translation type="vanished">标为已读</translation>
+        <translation>标为已读</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3149"/>
         <source>Missing  %1</source>
-        <translation type="vanished">缺少  %1</translation>
+        <translation>缺少  %1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3165"/>
         <source>Moon  Az %1°  El %2°  ·  Subpoint %3 %4</source>
-        <translation type="vanished">月球  方位 %1°  仰角 %2°  ·  月下点 %3 %4</translation>
+        <translation>月球  方位 %1°  仰角 %2°  ·  月下点 %3 %4</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3174"/>
         <source>Moon data unavailable</source>
-        <translation type="vanished">月球数据不可用</translation>
+        <translation>月球数据不可用</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3202"/>
         <source>Propagation data unavailable</source>
-        <translation type="vanished">传播数据不可用</translation>
+        <translation>传播数据不可用</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="406"/>
         <source>Moon visibility hemisphere, sublunar point and path from your station. The marker appears as soon as the ephemeris has been calculated.</source>
-        <translation type="vanished">月球可见半球、月下点以及从本站出发的路径。星历计算完成后标记即出现。</translation>
+        <translation>月球可见半球、月下点以及从本站出发的路径。星历计算完成后标记即出现。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3677"/>
         <source>New grid</source>
-        <translation type="vanished">新网格</translation>
+        <translation>新网格</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4073"/>
         <source>Reverse sort</source>
-        <translation type="vanished">反向排序</translation>
+        <translation>反向排序</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2088"/>
         <source>No QSO history in this grid</source>
-        <translation type="vanished">此网格没有 QSO 历史</translation>
+        <translation>此网格没有 QSO 历史</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4676"/>
         <source>No active ADIF logbook</source>
-        <translation type="vanished">没有启用的 ADIF 日志</translation>
+        <translation>没有启用的 ADIF 日志</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3719"/>
         <source>No filter</source>
-        <translation type="vanished">无筛选</translation>
+        <translation>无筛选</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1988"/>
         <source>No recent traffic in this grid</source>
-        <translation type="vanished">此网格近期没有通信</translation>
+        <translation>此网格近期没有通信</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4463"/>
         <source>No watched or ignored entries</source>
-        <translation type="vanished">没有关注或忽略的条目</translation>
+        <translation>没有关注或忽略的条目</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4266"/>
         <source>OPERATIONAL RULES</source>
-        <translation type="vanished">操作规则</translation>
+        <translation>操作规则</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="402"/>
         <source>Official IOTA Directory groups. Catalog positions are shown on the map; worked and confirmed status is applied only when the imported ADIF QSO contains an IOTA field.</source>
-        <translation type="vanished">IOTA 目录的官方分组。目录位置显示在地图上；仅当导入的 ADIF QSO 含有 IOTA 字段时才应用已通联与已确认状态。</translation>
+        <translation>IOTA 目录的官方分组。目录位置显示在地图上；仅当导入的 ADIF QSO 含有 IOTA 字段时才应用已通联与已确认状态。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2424"/>
         <source>Offline</source>
-        <translation type="vanished">离线</translation>
+        <translation>离线</translation>
     </message>
     <message>
         <source>Offline mode uses the local Decodium Atlas and stops online base maps, PSK MQTT and external map feeds. ADIF, local cache and radio activity remain available.</source>
         <translation type="vanished">离线模式使用本地 Decodium Atlas，并停止在线底图、PSK MQTT 和外部地图数据源。ADIF、本地缓存与无线电活动仍可使用。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3719"/>
         <source>Only</source>
-        <translation type="vanished">仅</translation>
+        <translation>仅</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1969"/>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4595"/>
         <source>Open callsign lookup</source>
-        <translation type="vanished">打开呼号查询</translation>
+        <translation>打开呼号查询</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1253"/>
         <source>Open detailed statistics</source>
-        <translation type="vanished">打开详细统计</translation>
+        <translation>打开详细统计</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="420"/>
         <source>Open global wildfire events published by NASA EONET.</source>
-        <translation type="vanished">打开 NASA EONET 发布的全球野火事件。</translation>
+        <translation>打开 NASA EONET 发布的全球野火事件。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1263"/>
         <source>Open radio and propagation conditions</source>
-        <translation type="vanished">打开无线电与传播状况</translation>
+        <translation>打开无线电与传播状况</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1243"/>
         <source>Open the independent call roster</source>
-        <translation type="vanished">打开独立的呼号列表</translation>
+        <translation>打开独立的呼号列表</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1433"/>
         <source>Operational marker</source>
-        <translation type="vanished">操作标记</translation>
+        <translation>操作标记</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2755"/>
         <source>Overlay PSK receivers with local activity or replace local activity</source>
-        <translation type="vanished">将 PSK 接收台叠加在本地活动上，或替换本地活动</translation>
+        <translation>将 PSK 接收台叠加在本地活动上，或替换本地活动</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3225"/>
         <source>PROPAGATION SCALE</source>
-        <translation type="vanished">传播标度</translation>
+        <translation>传播标度</translation>
     </message>
     <message>
         <source>PSK Reporter: %1 receivers found</source>
@@ -8808,44 +10588,55 @@ The default templates are sent as compact native frames.</source>
         <translation type="vanished">PSK Reporter: 未加载最近一小时的接收台</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2770"/>
         <source>PSK grid opacity</source>
-        <translation type="vanished">PSK 网格不透明度</translation>
+        <translation>PSK 网格不透明度</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2845"/>
         <source>PSK/spot history age</source>
-        <translation type="vanished">PSK/点报历史时长</translation>
+        <translation>PSK/点报历史时长</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2601"/>
         <source>Period</source>
-        <translation type="vanished">周期</translation>
+        <translation>周期</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4291"/>
         <source>Value</source>
-        <translation type="vanished">数值</translation>
+        <translation>数值</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3198"/>
         <source>Propagation  SFI %1  K %2  MUF %3</source>
-        <translation type="vanished">传播  SFI %1  K %2  MUF %3</translation>
+        <translation>传播  SFI %1  K %2  MUF %3</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3212"/>
         <source>Propagation controls MUF, foF2, Es and Aurora</source>
-        <translation type="vanished">传播控制包括 MUF、foF2、Es 与极光</translation>
+        <translation>传播控制包括 MUF、foF2、Es 与极光</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3766"/>
         <source>Provider used by lookup actions in grid popups and the roster</source>
-        <translation type="vanished">网格弹窗与列表中查询所用的服务方</translation>
+        <translation>网格弹窗与列表中查询所用的服务方</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3043"/>
         <source>Push-pin live grids</source>
-        <translation type="vanished">以图钉显示实时网格</translation>
+        <translation>以图钉显示实时网格</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1241"/>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2162"/>
         <source>ROSTER</source>
-        <translation type="vanished">列表</translation>
+        <translation>列表</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1548"/>
         <source>ROTATE</source>
-        <translation type="vanished">旋转</translation>
+        <translation>旋转</translation>
     </message>
     <message>
         <source>Receivers that reported hearing your callsign to PSK Reporter during the last hour. Decodium PSK upload does not need to be enabled.</source>
@@ -8856,592 +10647,747 @@ The default templates are sent as compact native frames.</source>
         <translation type="vanished">获取过去一小时内收到你呼号的接收台。PSK 上传与此无关。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2673"/>
         <source>Refresh PSK</source>
-        <translation type="vanished">刷新 PSK</translation>
+        <translation>刷新 PSK</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3612"/>
         <source>Refresh enabled external layers</source>
-        <translation type="vanished">刷新已启用的外部图层</translation>
+        <translation>刷新已启用的外部图层</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4365"/>
         <source>Remove rule</source>
-        <translation type="vanished">移除规则</translation>
+        <translation>移除规则</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4455"/>
         <source>Remove this entry</source>
-        <translation type="vanished">移除此条目</translation>
+        <translation>移除此条目</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4669"/>
         <source>Remove the temporary map time filter</source>
-        <translation type="vanished">移除地图的临时时间筛选</translation>
+        <translation>移除地图的临时时间筛选</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3993"/>
         <source>Review watched calls and ignored calls or DXCC entities</source>
-        <translation type="vanished">查看关注的呼号以及忽略的呼号或 DXCC 实体</translation>
+        <translation>查看关注的呼号以及忽略的呼号或 DXCC 实体</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4005"/>
         <source>Rules</source>
-        <translation type="vanished">规则</translation>
+        <translation>规则</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4004"/>
         <source>Rules %1</source>
-        <translation type="vanished">规则 %1</translation>
+        <translation>规则 %1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3430"/>
         <source>SCREENSHOT</source>
-        <translation type="vanished">截图</translation>
+        <translation>截图</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1231"/>
         <source>SHOT</source>
-        <translation type="vanished">截图</translation>
+        <translation>截图</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1251"/>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2174"/>
         <source>STATS</source>
-        <translation type="vanished">统计</translation>
+        <translation>统计</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1233"/>
         <source>Save a screenshot of the map</source>
-        <translation type="vanished">保存地图截图</translation>
+        <translation>保存地图截图</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="5458"/>
         <source>Select %1 as the active roster award</source>
-        <translation type="vanished">选择 %1 作为列表的当前奖状</translation>
+        <translation>选择 %1 作为列表的当前奖状</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="5390"/>
         <source>Select an award to make its missing entities operational targets</source>
-        <translation type="vanished">选择一个奖状，将其缺少的实体设为操作目标</translation>
+        <translation>选择一个奖状，将其缺少的实体设为操作目标</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3788"/>
         <source>Select the award whose missing entities become wanted stations</source>
-        <translation type="vanished">选择其缺少实体将成为待通联电台的奖状</translation>
+        <translation>选择其缺少实体将成为待通联电台的奖状</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="5308"/>
         <source>Use this award to identify wanted stations in the roster</source>
-        <translation type="vanished">用此奖状在列表中识别待通联电台</translation>
+        <translation>用此奖状在列表中识别待通联电台</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2988"/>
         <source>Show QSO/QSL history and current activity in separate halves of the same grid</source>
-        <translation type="vanished">在同一网格的两半分别显示 QSO/QSL 历史与当前活动</translation>
+        <translation>在同一网格的两半分别显示 QSO/QSL 历史与当前活动</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2979"/>
         <source>Split historical and live grid status</source>
-        <translation type="vanished">分开显示网格的历史与实时状态</translation>
+        <translation>分开显示网格的历史与实时状态</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3065"/>
         <source>Show UTC-offset meridians on the map</source>
-        <translation type="vanished">在地图上显示 UTC 时差经线</translation>
+        <translation>在地图上显示 UTC 时差经线</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3056"/>
         <source>UTC time zones</source>
-        <translation type="vanished">UTC 时区</translation>
+        <translation>UTC 时区</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3967"/>
         <source>Show all, new, unconfirmed, wanted or watched stations</source>
-        <translation type="vanished">显示全部、新增、未确认、待通联或关注的电台</translation>
+        <translation>显示全部、新增、未确认、待通联或关注的电台</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3975"/>
         <source>Show only active CQ calls in the roster</source>
-        <translation type="vanished">列表中仅显示活动的 CQ 呼叫</translation>
+        <translation>列表中仅显示活动的 CQ 呼叫</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2856"/>
         <source>Source correlation filter</source>
-        <translation type="vanished">来源关联筛选</translation>
+        <translation>来源关联筛选</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3641"/>
         <source>Source: &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;</source>
-        <translation type="vanished">来源: &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;</translation>
+        <translation>来源: &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1978"/>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4604"/>
         <source>Start QSO with this station</source>
-        <translation type="vanished">与此电台开始通联</translation>
+        <translation>与此电台开始通联</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1941"/>
         <source>Station locator</source>
-        <translation type="vanished">电台位置</translation>
+        <translation>电台位置</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4566"/>
         <source>Stop watching this station</source>
-        <translation type="vanished">停止关注此电台</translation>
+        <translation>停止关注此电台</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1961"/>
         <source>Watch this station</source>
-        <translation type="vanished">关注此电台</translation>
+        <translation>关注此电台</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2805"/>
         <source>Subscribe to the PSK Reporter MQTT stream for this station</source>
-        <translation type="vanished">订阅此电台的 PSK Reporter MQTT 数据流</translation>
+        <translation>订阅此电台的 PSK Reporter MQTT 数据流</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2804"/>
         <source>The subscription is retained but paused while Offline mode is enabled</source>
-        <translation type="vanished">启用离线模式期间订阅会保留但暂停</translation>
+        <translation>启用离线模式期间订阅会保留但暂停</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4750"/>
         <source>TOP BANDS</source>
-        <translation type="vanished">主要波段</translation>
+        <translation>主要波段</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4781"/>
         <source>TOP MODES</source>
-        <translation type="vanished">主要模式</translation>
+        <translation>主要模式</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4744"/>
         <source>The ADIF logbook is loaded, but no QSO matches the current map filters.</source>
-        <translation type="vanished">已加载 ADIF 日志，但没有 QSO 符合当前地图筛选条件。</translation>
+        <translation>已加载 ADIF 日志，但没有 QSO 符合当前地图筛选条件。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2914"/>
         <source>Time before live grid activity fades out</source>
-        <translation type="vanished">实时网格活动淡出前的时长</translation>
+        <translation>实时网格活动淡出前的时长</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1649"/>
         <source>Tsunami flag reported</source>
-        <translation type="vanished">已报告海啸标志</translation>
+        <translation>已报告海啸标志</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2681"/>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2819"/>
         <source>Unavailable while Offline mode is enabled</source>
-        <translation type="vanished">启用离线模式期间不可用</translation>
+        <translation>启用离线模式期间不可用</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="400"/>
         <source>United States county boundaries from the U.S. Census TIGER service. Zoom in after it loads to inspect individual counties.</source>
-        <translation type="vanished">来自美国人口普查局 TIGER 服务的美国县界。加载后放大即可查看各个县。</translation>
+        <translation>来自美国人口普查局 TIGER 服务的美国县界。加载后放大即可查看各个县。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="398"/>
         <source>United States state boundaries from the U.S. Census TIGER service. The map focuses on the United States when enabled.</source>
-        <translation type="vanished">来自美国人口普查局 TIGER 服务的美国州界。启用后地图将聚焦美国。</translation>
+        <translation>来自美国人口普查局 TIGER 服务的美国州界。启用后地图将聚焦美国。</translation>
     </message>
     <message>
         <source>Use the local atlas and stop online base maps, PSK MQTT and external overlays. Local logbook and radio data remain available.</source>
         <translation type="vanished">使用本地地图集，并停止在线底图、PSK MQTT 与外部图层。本地日志与无线电数据仍可使用。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4104"/>
         <source>VISIBLE ROSTER COLUMNS</source>
-        <translation type="vanished">列表可见列</translation>
+        <translation>列表可见列</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4391"/>
         <source>WATCHED / IGNORED LISTS</source>
-        <translation type="vanished">关注 / 忽略列表</translation>
+        <translation>关注 / 忽略列表</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1460"/>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2066"/>
         <source>WORKED</source>
-        <translation type="vanished">已通联</translation>
+        <translation>已通联</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3134"/>
         <source>Worked  %1</source>
-        <translation type="vanished">已通联  %1</translation>
+        <translation>已通联  %1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="5438"/>
         <source>Worked %1 · Confirmed %2 · Remaining %3</source>
-        <translation type="vanished">已通联 %1 · 已确认 %2 · 剩余 %3</translation>
+        <translation>已通联 %1 · 已确认 %2 · 剩余 %3</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="404"/>
         <source>WPX prefixes derived from your imported ADIF log.</source>
-        <translation type="vanished">根据你导入的 ADIF 日志得出的 WPX 前缀。</translation>
+        <translation>根据你导入的 ADIF 日志得出的 WPX 前缀。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3710"/>
         <source>Wildcard pattern matched against callsigns and messages</source>
-        <translation type="vanished">用于匹配呼号与消息的通配符模式</translation>
+        <translation>用于匹配呼号与消息的通配符模式</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="512"/>
         <source>n/a</source>
-        <translation type="vanished">无</translation>
+        <translation>无</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="380"/>
         <source>not updated</source>
-        <translation type="vanished">未更新</translation>
+        <translation>未更新</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3630"/>
         <source>unavailable</source>
-        <translation type="vanished">不可用</translation>
+        <translation>不可用</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4964"/>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="5246"/>
         <source>%1 / 100</source>
-        <translation type="vanished">%1 / 100</translation>
+        <translation>%1 / 100</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4973"/>
         <source>%1 bands / %2h</source>
-        <translation type="vanished">%1 个波段 / %2 小时</translation>
+        <translation>%1 个波段 / %2 小时</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2180"/>
         <source>ACTIVITY</source>
-        <translation type="vanished">活动</translation>
+        <translation>活动</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4873"/>
         <source>BAND ACTIVITY</source>
-        <translation type="vanished">波段活动</translation>
+        <translation>波段活动</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="5198"/>
         <source>BAND RANKING</source>
-        <translation type="vanished">波段排名</translation>
+        <translation>波段排名</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="5239"/>
         <source>BEST</source>
-        <translation type="vanished">最佳</translation>
+        <translation>最佳</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4944"/>
         <source>BEST BAND</source>
-        <translation type="vanished">最佳波段</translation>
+        <translation>最佳波段</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4922"/>
         <source>Analyse the last %1 hours</source>
-        <translation type="vanished">分析最近 %1 小时</translation>
+        <translation>分析最近 %1 小时</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4991"/>
         <source>LOCAL RX</source>
-        <translation type="vanished">本地 RX</translation>
+        <translation>本地 RX</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4996"/>
         <source>LOCAL TX</source>
-        <translation type="vanished">本地 TX</translation>
+        <translation>本地 TX</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="5174"/>
         <source>Local RX</source>
-        <translation type="vanished">本地 RX</translation>
+        <translation>本地 RX</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="5175"/>
         <source>Local TX</source>
-        <translation type="vanished">本地 TX</translation>
+        <translation>本地 TX</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="5001"/>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="5176"/>
         <source>PSK RX</source>
-        <translation type="vanished">PSK RX</translation>
+        <translation>PSK RX</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="5006"/>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="5177"/>
         <source>PSK TX</source>
-        <translation type="vanished">PSK TX</translation>
+        <translation>PSK TX</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="5255"/>
         <source>Local %1 RX / %2 TX   PSK %3 RX / %4 TX   %5 calls   %6 dB</source>
-        <translation type="vanished">本地 %1 RX / %2 TX   PSK %3 RX / %4 TX   %5 个呼号   %6 dB</translation>
+        <translation>本地 %1 RX / %2 TX   PSK %3 RX / %4 TX   %5 个呼号   %6 dB</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4951"/>
         <source>No activity</source>
-        <translation type="vanished">无活动</translation>
+        <translation>无活动</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="5163"/>
         <source>No band activity in this window</source>
-        <translation type="vanished">此时间窗内没有波段活动</translation>
+        <translation>此时间窗内没有波段活动</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="5139"/>
         <source>now</source>
-        <translation type="vanished">现在</translation>
+        <translation>现在</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4843"/>
         <source>%1 QSO · %2 QSL · %3%</source>
-        <translation type="vanished">%1 QSO · %2 QSL · %3%</translation>
+        <translation>%1 QSO · %2 QSL · %3%</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2944"/>
         <source>%1 · %2 / %3 / %4</source>
-        <translation type="vanished">%1 · %2 / %3 / %4</translation>
+        <translation>%1 · %2 / %3 / %4</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="5495"/>
         <source>%1 · %2 · %3</source>
-        <translation type="vanished">%1 · %2 · %3</translation>
+        <translation>%1 · %2 · %3</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3854"/>
         <source>OQRS</source>
-        <translation type="vanished">OQRS</translation>
+        <translation>OQRS</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="5615"/>
         <source>JSON files (*.json)</source>
-        <translation type="vanished">JSON 文件 (*.json)</translation>
+        <translation>JSON 文件 (*.json)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="5615"/>
         <source>Decodium map configuration (*.json)</source>
-        <translation type="vanished">Decodium 地图配置 (*.json)</translation>
+        <translation>Decodium 地图配置 (*.json)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="5504"/>
         <source>%1 / %2 — open roster and map</source>
-        <translation type="vanished">%1 / %2 — 打开列表与地图</translation>
+        <translation>%1 / %2 — 打开列表与地图</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4823"/>
         <source>%1 classified · %2 unknown</source>
-        <translation type="vanished">%1 已分类 · %2 未知</translation>
+        <translation>%1 已分类 · %2 未知</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1049"/>
         <source>Auto-fit active QSO</source>
-        <translation type="vanished">自动适配当前 QSO</translation>
+        <translation>自动适配当前 QSO</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="5338"/>
         <source>Award endorsement band</source>
-        <translation type="vanished">奖状认证波段</translation>
+        <translation>奖状认证波段</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2270"/>
         <source>Color</source>
-        <translation type="vanished">颜色</translation>
+        <translation>颜色</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2293"/>
         <source>Opacity</source>
-        <translation type="vanished">不透明度</translation>
+        <translation>不透明度</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2322"/>
         <source>Width</source>
-        <translation type="vanished">宽度</translation>
+        <translation>宽度</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2351"/>
         <source>Labels</source>
-        <translation type="vanished">标签</translation>
+        <translation>标签</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="5352"/>
         <source>Confirmation source used for the confirmed score</source>
-        <translation type="vanished">用于已确认计分的确认来源</translation>
+        <translation>用于已确认计分的确认来源</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3822"/>
         <source>Current band/mode use the selected map band and mode; Digital modes includes FT, JT, Q and other digital modes</source>
-        <translation type="vanished">“当前波段/模式”使用地图上选定的波段与模式；“数字模式”包含 FT、JT、Q 等数字模式</translation>
+        <translation>“当前波段/模式”使用地图上选定的波段与模式；“数字模式”包含 FT、JT、Q 等数字模式</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3902"/>
         <source>Max DT</source>
-        <translation type="vanished">Max DT</translation>
+        <translation>Max DT</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3879"/>
         <source>Min SNR</source>
-        <translation type="vanished">Min SNR</translation>
+        <translation>Min SNR</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3933"/>
         <source>LoTW age</source>
-        <translation type="vanished">LoTW 时长</translation>
+        <translation>LoTW 时长</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2974"/>
         <source>Decay lifetime for this source</source>
-        <translation type="vanished">此来源的衰减时长</translation>
+        <translation>此来源的衰减时长</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4223"/>
         <source>EXCEPTIONS</source>
-        <translation type="vanished">例外</translation>
+        <translation>例外</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2382"/>
         <source>Export map config</source>
-        <translation type="vanished">导出地图配置</translation>
+        <translation>导出地图配置</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2390"/>
         <source>Import map config</source>
-        <translation type="vanished">导入地图配置</translation>
+        <translation>导入地图配置</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="5613"/>
         <source>Import Decodium map configuration</source>
-        <translation type="vanished">导入 Decodium 地图配置</translation>
+        <translation>导入 Decodium 地图配置</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2394"/>
         <source>Import the complete map configuration bundle</source>
-        <translation type="vanished">导入完整的地图配置包</translation>
+        <translation>导入完整的地图配置包</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2386"/>
         <source>Export presets, roster preferences/rules, layer styles, temporal decay and map viewport</source>
-        <translation type="vanished">导出预设、列表首选项与规则、图层样式、时间衰减与地图视野</translation>
+        <translation>导出预设、列表首选项与规则、图层样式、时间衰减与地图视野</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="5368"/>
         <source>From YYYY-MM-DD</source>
-        <translation type="vanished">起 YYYY-MM-DD</translation>
+        <translation>起 YYYY-MM-DD</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="5376"/>
         <source>To YYYY-MM-DD</source>
-        <translation type="vanished">至 YYYY-MM-DD</translation>
+        <translation>至 YYYY-MM-DD</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1773"/>
         <source>Historical hover: %1 · Live hover: %2</source>
-        <translation type="vanished">历史悬停: %1 · 实时悬停: %2</translation>
+        <translation>历史悬停: %1 · 实时悬停: %2</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3845"/>
         <source>Keep stations with a LoTW confirmation within the configured age</source>
-        <translation type="vanished">保留在设定时长内有 LoTW 确认的电台</translation>
+        <translation>保留在设定时长内有 LoTW 确认的电台</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2251"/>
         <source>LAYER STYLE</source>
-        <translation type="vanished">图层样式</translation>
+        <translation>图层样式</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3833"/>
         <source>Limit the roster to your DXCC or to other DXCCs</source>
-        <translation type="vanished">将列表限定为本站 DXCC 或其他 DXCC</translation>
+        <translation>将列表限定为本站 DXCC 或其他 DXCC</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="5465"/>
         <source>MISSING LIVE ENTITIES (%1)</source>
-        <translation type="vanished">缺少的实时实体 (%1)</translation>
+        <translation>缺少的实时实体 (%1)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4012"/>
         <source>Matrix</source>
-        <translation type="vanished">矩阵</translation>
+        <translation>矩阵</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4155"/>
         <source>NEW / WANTED MATRIX</source>
-        <translation type="vanished">新增 / 待通联矩阵</translation>
+        <translation>新增 / 待通联矩阵</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="5360"/>
         <source>Operator callsign</source>
-        <translation type="vanished">操作员呼号</translation>
+        <translation>操作员呼号</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4815"/>
         <source>PROPAGATION TYPES</source>
-        <translation type="vanished">传播类型</translation>
+        <translation>传播类型</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2630"/>
         <source>Propagation</source>
-        <translation type="vanished">传播</translation>
+        <translation>传播</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1775"/>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1777"/>
         <source>—</source>
-        <translation type="vanished">—</translation>
+        <translation>—</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3868"/>
         <source>RR73=CQ</source>
-        <translation type="vanished">RR73=CQ</translation>
+        <translation>RR73=CQ</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3808"/>
         <source>SCOPE</source>
-        <translation type="vanished">范围</translation>
+        <translation>范围</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4198"/>
         <source>WANTED</source>
-        <translation type="vanished">待通联</translation>
+        <translation>待通联</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3860"/>
         <source>Spotted me</source>
-        <translation type="vanished">收到过我</translation>
+        <translation>收到过我</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="970"/>
         <source>Restore previous view</source>
-        <translation type="vanished">恢复上一个视图</translation>
+        <translation>恢复上一个视图</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1048"/>
         <source>Restore previous map view</source>
-        <translation type="vanished">恢复上一个地图视图</translation>
+        <translation>恢复上一个地图视图</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4016"/>
         <source>Select NEW categories and inspect wanted or exception matrices</source>
-        <translation type="vanished">选择“新增”类别并查看待通联或例外矩阵</translation>
+        <translation>选择“新增”类别并查看待通联或例外矩阵</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2264"/>
         <source>Select the layer whose appearance is being edited</source>
-        <translation type="vanished">选择正在编辑外观的图层</translation>
+        <translation>选择正在编辑外观的图层</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2919"/>
         <source>TEMPORAL LEGEND / SOURCE DECAY</source>
-        <translation type="vanished">时间图例 / 来源衰减</translation>
+        <translation>时间图例 / 来源衰减</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3873"/>
         <source>Treat messages containing RR73 as CQ when CQ-only is enabled</source>
-        <translation type="vanished">启用“仅 CQ”时，将含 RR73 的消息视为 CQ</translation>
+        <translation>启用“仅 CQ”时，将含 RR73 的消息视为 CQ</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3865"/>
         <source>Use only PSK Reporter spots heard by your callsign</source>
-        <translation type="vanished">仅使用你的呼号收到的 PSK Reporter 点报</translation>
+        <translation>仅使用你的呼号收到的 PSK Reporter 点报</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4188"/>
         <source>Use this entity in NEW and UNCONFIRMED calculations</source>
-        <translation type="vanished">在“新增”与“未确认”统计中使用该实体</translation>
+        <translation>在“新增”与“未确认”统计中使用该实体</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3923"/>
         <source>provider filters are OR</source>
-        <translation type="vanished">服务方筛选为“或”关系</translation>
+        <translation>服务方筛选为“或”关系</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1775"/>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1777"/>
         <source>ready</source>
-        <translation type="vanished">就绪</translation>
+        <translation>就绪</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4161"/>
         <source>wanted %1 · exceptions %2</source>
-        <translation type="vanished">待通联 %1 · 例外 %2</translation>
+        <translation>待通联 %1 · 例外 %2</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1480"/>
         <source>%1 km</source>
-        <translation type="vanished">%1 km</translation>
+        <translation>%1 km</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2993"/>
         <source>AZ</source>
-        <translation type="vanished">AZ</translation>
+        <translation>AZ</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1478"/>
         <source>AZ %1°</source>
-        <translation type="vanished">AZ %1°</translation>
+        <translation>AZ %1°</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1476"/>
         <source>EL %1°</source>
-        <translation type="vanished">EL %1°</translation>
+        <translation>EL %1°</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3566"/>
         <source>FB AZ %1° / EL %2°</source>
-        <translation type="vanished">FB AZ %1° / EL %2°</translation>
+        <translation>FB AZ %1° / EL %2°</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3534"/>
         <source>max EL</source>
-        <translation type="vanished">max EL</translation>
+        <translation>max EL</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3520"/>
         <source>min EL</source>
-        <translation type="vanished">min EL</translation>
+        <translation>min EL</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3036"/>
         <source>ms</source>
-        <translation type="vanished">ms</translation>
+        <translation>ms</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2526"/>
         <source>[%1] </source>
-        <translation type="vanished">[%1] </translation>
+        <translation>[%1] </translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1460"/>
         <source>NEW</source>
-        <translation type="vanished">新增</translation>
+        <translation>新增</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1461"/>
         <source>UNCONFIRMED</source>
-        <translation type="vanished">未确认</translation>
+        <translation>未确认</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1459"/>
         <source>VALID</source>
-        <translation type="vanished">有效</translation>
+        <translation>有效</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1458"/>
         <source>EXPIRED</source>
-        <translation type="vanished">已过期</translation>
+        <translation>已过期</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1481"/>
         <source>VISIBLE</source>
-        <translation type="vanished">可见</translation>
+        <translation>可见</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1481"/>
         <source>BELOW HORIZON</source>
-        <translation type="vanished">地平线以下</translation>
+        <translation>地平线以下</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1561"/>
         <source>TRACK</source>
-        <translation type="vanished">跟踪</translation>
+        <translation>跟踪</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3550"/>
         <source>STOP</source>
-        <translation type="vanished">STOP</translation>
+        <translation>STOP</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3556"/>
         <source>PARK</source>
-        <translation type="vanished">归位</translation>
+        <translation>归位</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3453"/>
         <source>Rotator</source>
-        <translation type="vanished">旋转器</translation>
+        <translation>旋转器</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3536"/>
         <source>Park on stop</source>
-        <translation type="vanished">停止时归位</translation>
+        <translation>停止时归位</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3498"/>
         <source>Safety</source>
-        <translation type="vanished">安全</translation>
+        <translation>安全</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3020"/>
         <source>range</source>
-        <translation type="vanished">距离</translation>
+        <translation>距离</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3571"/>
         <source> · tracking</source>
-        <translation type="vanished"> · 跟踪</translation>
+        <translation> · 跟踪</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3021"/>
         <source>refresh</source>
-        <translation type="vanished">刷新</translation>
+        <translation>刷新</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2468"/>
         <source>Clear cache</source>
-        <translation type="vanished">清空缓存</translation>
+        <translation>清空缓存</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2440"/>
         <source>STYLE</source>
-        <translation type="vanished">样式</translation>
+        <translation>样式</translation>
     </message>
     <message>
         <source>Cache obsoleta · aggiornamento in corso</source>
@@ -9456,68 +11402,82 @@ The default templates are sent as compact native frames.</source>
         <translation type="vanished">反馈不可用</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1496"/>
         <source>Spot scaduto</source>
-        <translation type="vanished">点报已过期</translation>
+        <translation>点报已过期</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1498"/>
         <source>Spot valido ancora %1 s</source>
-        <translation type="vanished">点报还有 %1 秒有效</translation>
+        <translation>点报还有 %1 秒有效</translation>
     </message>
     <message>
         <source>Validità non dichiarata dal provider</source>
         <translation type="vanished">服务方未声明有效期</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="5625"/>
         <source>Image files (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</source>
-        <translation type="vanished">图像文件 (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</translation>
+        <translation>图像文件 (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="5624"/>
         <source>World raster (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</source>
-        <translation type="vanished">世界栅格 (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</translation>
+        <translation>世界栅格 (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2479"/>
         <source>Import offline raster</source>
-        <translation type="vanished">导入离线栅格</translation>
+        <translation>导入离线栅格</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="5621"/>
         <source>Import offline world raster</source>
-        <translation type="vanished">导入离线世界栅格</translation>
+        <translation>导入离线世界栅格</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2483"/>
         <source>Import a legally obtained equirectangular world raster, such as a Natural Earth export. Decodium stores a private local copy and does not download tiles.</source>
-        <translation type="vanished">导入合法获得的等距圆柱投影世界栅格，例如 Natural Earth 的导出。Decodium 只保存本地私有副本，不下载瓦片。</translation>
+        <translation>导入合法获得的等距圆柱投影世界栅格，例如 Natural Earth 的导出。Decodium 只保存本地私有副本，不下载瓦片。</translation>
     </message>
     <message>
         <source>Atlas locale, OpenStreetMap/OpenTopoMap, GEBCO bathymetry, NASA GIBS e MapTiler. Se un provider fallisce viene provato il fallback configurato.</source>
         <translation type="vanished">本地地图集、OpenStreetMap/OpenTopoMap、GEBCO 水深、NASA GIBS 与 MapTiler。若某个服务方失败，将尝试已配置的回退。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="416"/>
         <source>Auroral propagation forecast. The temporal legend shows source age and validity.</source>
-        <translation type="vanished">极光传播预报。时间图例显示来源的时长与有效期。</translation>
+        <translation>极光传播预报。时间图例显示来源的时长与有效期。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="410"/>
         <source>F2 critical-frequency forecast used to estimate ionospheric support for HF paths.</source>
-        <translation type="vanished">F2 临界频率预报，用于估计短波路径的电离层支持。</translation>
+        <translation>F2 临界频率预报，用于估计短波路径的电离层支持。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="408"/>
         <source>Maximum Usable Frequency forecast. The temporal legend reports acquisition time, validity and visual decay.</source>
-        <translation type="vanished">最高可用频率预报。时间图例显示获取时间、有效期与视觉衰减。</translation>
+        <translation>最高可用频率预报。时间图例显示获取时间、有效期与视觉衰减。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="412"/>
         <source>NVIS forecast derived from the current foF2 map; it is kept as a separate operational layer.</source>
-        <translation type="vanished">由当前 foF2 图推导的 NVIS 预报，作为独立的操作图层保留。</translation>
+        <translation>由当前 foF2 图推导的 NVIS 预报，作为独立的操作图层保留。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="414"/>
         <source>Sporadic-E probability forecast. Cached data fades after its validity window and remains labelled stale.</source>
-        <translation type="vanished">偶发 E 层概率预报。缓存数据在有效期后淡出，并持续标记为过期。</translation>
+        <translation>偶发 E 层概率预报。缓存数据在有效期后淡出，并持续标记为过期。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="422"/>
         <source>Offline mode pauses cloud/network services, keeps ADIF, logbook, cache and radio activity available, and can use an imported user-provided world raster.</source>
-        <translation type="vanished">离线模式会暂停云端与网络服务，保留 ADIF、日志、缓存与无线电活动可用，并可使用用户导入的世界栅格。</translation>
+        <translation>离线模式会暂停云端与网络服务，保留 ADIF、日志、缓存与无线电活动可用，并可使用用户导入的世界栅格。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2433"/>
         <source>Pause cloud/network services, keep local ADIF, logbook, cache and radio activity available, and use the local atlas or imported raster pack.</source>
-        <translation type="vanished">暂停云端与网络服务，保留本地 ADIF、日志、缓存与无线电活动可用，并使用本地地图集或导入的栅格包。</translation>
+        <translation>暂停云端与网络服务，保留本地 ADIF、日志、缓存与无线电活动可用，并使用本地地图集或导入的栅格包。</translation>
     </message>
     <message>
         <source>PSK Reporter: no receivers loaded for the last %1 minutes</source>
@@ -9532,270 +11492,342 @@ The default templates are sent as compact native frames.</source>
         <translation type="vanished">获取过去 %1 分钟内收到你呼号的接收台。PSK 上传与此无关。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2700"/>
         <source>5 min</source>
-        <translation type="vanished">5 分钟</translation>
+        <translation>5 分钟</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2701"/>
         <source>10 min</source>
-        <translation type="vanished">10 分钟</translation>
+        <translation>10 分钟</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2702"/>
         <source>15 min</source>
-        <translation type="vanished">15 分钟</translation>
+        <translation>15 分钟</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2703"/>
         <source>20 min</source>
-        <translation type="vanished">20 分钟</translation>
+        <translation>20 分钟</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2704"/>
         <source>25 min</source>
-        <translation type="vanished">25 分钟</translation>
+        <translation>25 分钟</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2705"/>
         <source>30 min</source>
-        <translation type="vanished">30 分钟</translation>
+        <translation>30 分钟</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2706"/>
         <source>35 min</source>
-        <translation type="vanished">35 分钟</translation>
+        <translation>35 分钟</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2707"/>
         <source>40 min</source>
-        <translation type="vanished">40 分钟</translation>
+        <translation>40 分钟</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2708"/>
         <source>45 min</source>
-        <translation type="vanished">45 分钟</translation>
+        <translation>45 分钟</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2709"/>
         <source>50 min</source>
-        <translation type="vanished">50 分钟</translation>
+        <translation>50 分钟</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2710"/>
         <source>55 min</source>
-        <translation type="vanished">55 分钟</translation>
+        <translation>55 分钟</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2711"/>
         <source>60 min</source>
-        <translation type="vanished">60 分钟</translation>
+        <translation>60 分钟</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2693"/>
         <source>PSK spots</source>
-        <translation type="vanished">PSK 点报</translation>
+        <translation>PSK 点报</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2683"/>
         <source>Enable the PSK layer to retrieve PSK Reporter spots</source>
-        <translation type="vanished">启用 PSK 图层以获取 PSK Reporter 点报</translation>
+        <translation>启用 PSK 图层以获取 PSK Reporter 点报</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2729"/>
         <source>Look-back and expiry period for PSK Reporter spots displayed on the Live Map</source>
-        <translation type="vanished">在 Live Map 上显示的 PSK Reporter 点报的回溯与过期时长</translation>
+        <translation>在 Live Map 上显示的 PSK Reporter 点报的回溯与过期时长</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3106"/>
         <source>PSK Reporter Live Map window: %1 minutes</source>
-        <translation type="vanished">PSK Reporter 的 Live Map 时间窗: %1 分钟</translation>
+        <translation>PSK Reporter 的 Live Map 时间窗: %1 分钟</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3105"/>
         <source>PSK Reporter: refreshing Live Map spots…</source>
-        <translation type="vanished">PSK Reporter: 正在刷新 Live Map 点报…</translation>
+        <translation>PSK Reporter: 正在刷新 Live Map 点报…</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2684"/>
         <source>Refresh PSK Reporter spots for the Live Map. PSK upload is independent.</source>
-        <translation type="vanished">为 Live Map 刷新 PSK Reporter 点报。PSK 上传与此无关。</translation>
+        <translation>为 Live Map 刷新 PSK Reporter 点报。PSK 上传与此无关。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="393"/>
         <source>PSK Reporter reception reports for your callsign during the last %1 minutes. Decodium PSK upload does not need to be enabled.</source>
-        <translation type="vanished">过去 %1 分钟内 PSK Reporter 对你呼号的接收报告。无需启用 Decodium 的 PSK 上传。</translation>
+        <translation>过去 %1 分钟内 PSK Reporter 对你呼号的接收报告。无需启用 Decodium 的 PSK 上传。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="573"/>
         <source>Unspecified</source>
-        <translation type="vanished">未指定</translation>
+        <translation>未指定</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1529"/>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1543"/>
         <source>This map marker has no callsign.</source>
-        <translation type="vanished">此地图标记没有呼号。</translation>
+        <translation>此地图标记没有呼号。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1557"/>
         <source>Enable a rotator to aim the antenna.</source>
-        <translation type="vanished">启用旋转器以指向天线。</translation>
+        <translation>启用旋转器以指向天线。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1570"/>
         <source>Enable a rotator to track this satellite.</source>
-        <translation type="vanished">启用旋转器以跟踪该卫星。</translation>
+        <translation>启用旋转器以跟踪该卫星。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2486"/>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3978"/>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="5553"/>
         <source>Clear</source>
-        <translation type="vanished">清除</translation>
+        <translation>清除</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2535"/>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3606"/>
         <source>Refresh</source>
-        <translation type="vanished">刷新</translation>
+        <translation>刷新</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2573"/>
         <source>Band</source>
-        <translation type="vanished">波段</translation>
+        <translation>波段</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2585"/>
         <source>Mode</source>
-        <translation type="vanished">模式</translation>
+        <translation>模式</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2613"/>
         <source>Source</source>
-        <translation type="vanished">来源</translation>
+        <translation>来源</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2646"/>
         <source>Continent</source>
-        <translation type="vanished">大洲</translation>
+        <translation>大洲</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2664"/>
         <source>CQ only</source>
-        <translation type="vanished">仅显示CQ</translation>
+        <translation>仅显示CQ</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2810"/>
         <source>Connected</source>
-        <translation type="vanished">已连接</translation>
+        <translation>已连接</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2810"/>
         <source>Connect</source>
-        <translation type="vanished">连接</translation>
+        <translation>连接</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3644"/>
         <source>Source: %1</source>
-        <translation type="vanished">来源：%1</translation>
+        <translation>来源：%1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3685"/>
         <source>New DXCC</source>
-        <translation type="vanished">新DXCC</translation>
+        <translation>新DXCC</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3840"/>
         <source>LoTW</source>
-        <translation type="vanished">洛特</translation>
+        <translation>洛特</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3848"/>
         <source>eQSL</source>
-        <translation type="vanished">质量等级</translation>
+        <translation>质量等级</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3970"/>
         <source>CQ</source>
-        <translation type="vanished">重庆</translation>
+        <translation>重庆</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4272"/>
         <source>Hide</source>
-        <translation type="vanished">隐藏</translation>
+        <translation>隐藏</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="4302"/>
         <source>Add</source>
-        <translation type="vanished">增加</translation>
+        <translation>增加</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="867"/>
         <source>Live Map</source>
-        <translation type="vanished">实时地图</translation>
+        <translation>实时地图</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2280"/>
         <source>#RRGGBB</source>
-        <translation type="vanished">#RRGGBB</translation>
+        <translation>#RRGGBB</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3292"/>
         <source>foF2</source>
-        <translation type="vanished">foF2</translation>
+        <translation>foF2</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3337"/>
         <source>Es</source>
-        <translation type="vanished">Es</translation>
+        <translation>Es</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="597"/>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1936"/>
         <source>Corroborated</source>
-        <translation type="vanished">已确认</translation>
+        <translation>已确认</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2056"/>
         <source>Matched VUCC grid: %1 · Primary: %2</source>
-        <translation type="vanished">匹配的 VUCC 网格：%1 · 主要：%2</translation>
+        <translation>匹配的 VUCC 网格：%1 · 主要：%2</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2054"/>
         <source>VUCC grids: %1</source>
-        <translation type="vanished">VUCC 网格：%1</translation>
+        <translation>VUCC 网格：%1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="1499"/>
         <source>Validity not declared by the provider</source>
-        <translation type="vanished">服务方未声明有效期</translation>
+        <translation>服务方未声明有效期</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2420"/>
         <source>Local atlas, OpenStreetMap/OpenTopoMap, GEBCO bathymetry, NASA GIBS and MapTiler. If a provider fails, the configured fallback is tried.</source>
-        <translation type="vanished">本地地图集、OpenStreetMap/OpenTopoMap、GEBCO 水深数据、NASA GIBS 和 MapTiler。若某个服务方失败，将尝试已配置的回退。</translation>
+        <translation>本地地图集、OpenStreetMap/OpenTopoMap、GEBCO 水深数据、NASA GIBS 和 MapTiler。若某个服务方失败，将尝试已配置的回退。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2459"/>
         <source>Fallback in use: %1</source>
-        <translation type="vanished">回退生效：%1</translation>
+        <translation>回退生效：%1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="2461"/>
         <source>Stale cache · updating</source>
-        <translation type="vanished">缓存已过期 · 正在更新</translation>
+        <translation>缓存已过期 · 正在更新</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="3569"/>
         <source>No feedback available</source>
-        <translation type="vanished">没有可用的反馈</translation>
+        <translation>没有可用的反馈</translation>
     </message>
 </context>
 <context>
     <name>LocatorBar</name>
     <message>
+        <location filename="../qml/decodium/rotor/LocatorBar.qml" line="26"/>
         <source>Locator, e.g. FN31pr</source>
-        <translation type="vanished">定位符，例如 FN31pr</translation>
+        <translation>定位符，例如 FN31pr</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/LocatorBar.qml" line="35"/>
         <source>SHORT</source>
-        <translation type="vanished">短径</translation>
+        <translation>短径</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/LocatorBar.qml" line="44"/>
         <source>LONG</source>
-        <translation type="vanished">长径</translation>
+        <translation>长径</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/LocatorBar.qml" line="52"/>
         <source>short %1° · long %2° · %3 km</source>
-        <translation type="vanished">短径 %1° · 长径 %2° · %3 km</translation>
+        <translation>短径 %1° · 长径 %2° · %3 km</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/LocatorBar.qml" line="56"/>
         <source>Reference QTH: %1</source>
-        <translation type="vanished">参考QTH：%1</translation>
+        <translation>参考QTH：%1</translation>
     </message>
 </context>
 <context>
     <name>LogDialog</name>
     <message>
+        <location filename="../qml/decodium/rtty/LogDialog.qml" line="54"/>
         <source>LOG</source>
-        <translation type="vanished">日志</translation>
+        <translation>日志</translation>
     </message>
-    <message>
+    <message numerus="yes">
+        <location filename="../qml/decodium/rtty/LogDialog.qml" line="58"/>
         <source>%n contact(s)</source>
-        <translation type="vanished">%n 次通联</translation>
+        <translation>
+            <numerusform>%n 次通联</numerusform>
+        </translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/LogDialog.qml" line="96"/>
         <source>RST SENT</source>
-        <translation type="vanished">发出 RST</translation>
+        <translation>发出 RST</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/LogDialog.qml" line="103"/>
         <source>RST RCVD</source>
-        <translation type="vanished">收到 RST</translation>
+        <translation>收到 RST</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/LogDialog.qml" line="107"/>
         <source>NAME</source>
-        <translation type="vanished">姓名</translation>
+        <translation>姓名</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/LogDialog.qml" line="112"/>
         <source>Log it</source>
-        <translation type="vanished">记录</translation>
+        <translation>记录</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/LogDialog.qml" line="158"/>
         <source>Worked before: %1 — last on %2</source>
-        <translation type="vanished">已通联过：%1 — 最近一次 %2</translation>
+        <translation>已通联过：%1 — 最近一次 %2</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/LogDialog.qml" line="239"/>
         <source>Export ADIF</source>
-        <translation type="vanished">导出 ADIF</translation>
+        <translation>导出 ADIF</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/LogDialog.qml" line="245"/>
         <source>Close</source>
-        <translation type="vanished">关闭</translation>
+        <translation>关闭</translation>
     </message>
 </context>
 <context>
@@ -10157,718 +12189,996 @@ The default templates are sent as compact native frames.</source>
 <context>
     <name>LogQsoPanel</name>
     <message>
+        <location filename="../qml/decodium/components/LogQsoPanel.qml" line="133"/>
         <source>NEXT TX</source>
-        <translation type="vanished">下一次发射</translation>
+        <translation>下一次发射</translation>
     </message>
 </context>
 <context>
     <name>LogWindow</name>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="256"/>
         <source>Importa file ADIF</source>
-        <translation type="vanished">导入 ADIF 文件</translation>
+        <translation>导入 ADIF 文件</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="258"/>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="271"/>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="313"/>
         <source>ADIF files (*.adi *.adif)</source>
-        <translation type="vanished">ADIF 文件 (*.adi *.adif)</translation>
+        <translation>ADIF 文件 (*.adi *.adif)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="258"/>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="271"/>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="313"/>
         <source>All files (*)</source>
-        <translation type="vanished">所有文件 (*)</translation>
+        <translation>所有文件 (*)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="269"/>
         <source>Carica logbook ADIF</source>
-        <translation type="vanished">加载 ADIF 日志</translation>
+        <translation>加载 ADIF 日志</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="311"/>
         <source>Esporta file ADIF</source>
-        <translation type="vanished">导出 ADIF 文件</translation>
+        <translation>导出 ADIF 文件</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="411"/>
         <source>e.g. 9H1SR or AMICO</source>
-        <translation type="vanished">例如 9H1SR 或 AMICO</translation>
+        <translation>例如 9H1SR 或 AMICO</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="439"/>
         <source>Delete logbook</source>
-        <translation type="vanished">删除日志簿</translation>
+        <translation>删除日志簿</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="450"/>
         <source>You are about to delete the selected logbook.</source>
-        <translation type="vanished">您即将删除所选的日志簿。</translation>
+        <translation>您即将删除所选的日志簿。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="468"/>
         <source>Also delete the ADIF file from disk</source>
-        <translation type="vanished">同时从磁盘删除 ADIF 文件</translation>
+        <translation>同时从磁盘删除 ADIF 文件</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="473"/>
         <source>Destructive operation: the .adi file will be deleted. If this is the last logbook, Decodium will create a new empty logbook.</source>
-        <translation type="vanished">破坏性操作：将删除 .adi 文件。如果这是最后一个日志簿，Decodium 将创建一个新的空日志簿。</translation>
+        <translation>破坏性操作：将删除 .adi 文件。如果这是最后一个日志簿，Decodium 将创建一个新的空日志簿。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="474"/>
         <source>The .adi file will remain on disk; only the association with Decodium will be removed.</source>
-        <translation type="vanished">.adi 文件将保留在磁盘上；仅移除与 Decodium 的关联。</translation>
+        <translation>.adi 文件将保留在磁盘上；仅移除与 Decodium 的关联。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="495"/>
         <source>Confirm deletion</source>
-        <translation type="vanished">确认删除</translation>
+        <translation>确认删除</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="504"/>
         <source>Delete the QSO with %1?</source>
-        <translation type="vanished">删除与 %1 的 QSO？</translation>
+        <translation>删除与 %1 的 QSO？</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="811"/>
         <source>Search callsign, locator...</source>
-        <translation type="vanished">搜索呼号、locator...</translation>
+        <translation>搜索呼号、locator...</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="1025"/>
+        <source>Select/deselect for export</source>
+        <translation>选择/取消选择以导出</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="1080"/>
+        <source>Select QSO for ADIF export</source>
+        <translation>选择 QSO 以导出 ADIF</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="1278"/>
         <source>✓ Save</source>
-        <translation type="vanished">✓ 保存</translation>
+        <translation>✓ 保存</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="1307"/>
         <source>✕ Delete</source>
-        <translation type="vanished">✕ 删除</translation>
+        <translation>✕ 删除</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="1327"/>
         <source>Cancel</source>
-        <translation type="vanished">取消</translation>
+        <translation>取消</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="1034"/>
         <source>Copy Callsign</source>
-        <translation type="vanished">复制呼号</translation>
+        <translation>复制呼号</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="101"/>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="1029"/>
+        <source>Export selected QSOs (%1)</source>
+        <translation>导出所选 QSO（%1）</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="106"/>
+        <source>Export entire logbook</source>
+        <translation>导出整个日志</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="110"/>
+        <source>Clear export selection</source>
+        <translation>清除导出选择</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="396"/>
         <source>Nuovo logbook</source>
-        <translation type="vanished">新建日志</translation>
+        <translation>新建日志</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="405"/>
         <source>Nome operatore / callsign</source>
-        <translation type="vanished">操作员姓名／呼号</translation>
+        <translation>操作员姓名／呼号</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="418"/>
         <source>Backup log attuale</source>
-        <translation type="vanished">备份当前日志</translation>
+        <translation>备份当前日志</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="596"/>
         <source>QSO Log</source>
-        <translation type="vanished">QSO 日志</translation>
+        <translation>QSO 日志</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="632"/>
         <source>−</source>
-        <translation type="vanished">−</translation>
+        <translation>−</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="649"/>
         <source>Minimize</source>
-        <translation type="vanished">最小化</translation>
+        <translation>最小化</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="660"/>
         <source>✕</source>
-        <translation type="vanished">✕</translation>
+        <translation>✕</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="670"/>
         <source>Close</source>
-        <translation type="vanished">关闭</translation>
+        <translation>关闭</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="757"/>
         <source>New</source>
-        <translation type="vanished">新建</translation>
+        <translation>新建</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="759"/>
         <source>Create a separate logbook</source>
-        <translation type="vanished">创建独立日志</translation>
+        <translation>创建独立日志</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="766"/>
         <source>Load</source>
-        <translation type="vanished">加载</translation>
+        <translation>加载</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="768"/>
         <source>Load/use an existing ADIF as a logbook</source>
-        <translation type="vanished">载入并使用现有 ADIF 作为日志</translation>
+        <translation>载入并使用现有 ADIF 作为日志</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="775"/>
         <source>Bkp</source>
-        <translation type="vanished">Bkp</translation>
+        <translation>Bkp</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="777"/>
         <source>Back up the active logbook</source>
-        <translation type="vanished">备份当前使用的日志</translation>
+        <translation>备份当前使用的日志</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="785"/>
         <source>Del</source>
-        <translation type="vanished">删除</translation>
+        <translation>删除</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="794"/>
         <source>Delete selected logbook</source>
-        <translation type="vanished">删除选中的日志</translation>
+        <translation>删除选中的日志</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="807"/>
         <source>🔍</source>
-        <translation type="vanished">🔍</translation>
+        <translation>🔍</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="854"/>
         <source>Clear</source>
-        <translation type="vanished">清除</translation>
+        <translation>清除</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="869"/>
         <source>Remove search, band, and mode filters</source>
-        <translation type="vanished">清除搜索、波段和模式筛选</translation>
+        <translation>清除搜索、波段和模式筛选</translation>
     </message>
     <message>
         <source>Importa ADIF</source>
         <translation type="vanished">导入 ADIF</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="890"/>
         <source>Import ADIF file</source>
-        <translation type="vanished">导入 ADIF 文件</translation>
+        <translation>导入 ADIF 文件</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="900"/>
         <source>Esporta ADIF</source>
-        <translation type="vanished">导出 ADIF</translation>
+        <translation>导出 ADIF</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="905"/>
         <source>Export ADIF</source>
-        <translation type="vanished">导出 ADIF</translation>
+        <translation>导出 ADIF</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="914"/>
         <source>↻</source>
-        <translation type="vanished">↻</translation>
+        <translation>↻</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="919"/>
         <source>Refresh</source>
-        <translation type="vanished">刷新</translation>
+        <translation>刷新</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="938"/>
         <source>Date/Time</source>
-        <translation type="vanished">日期/时间</translation>
+        <translation>日期/时间</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="945"/>
         <source>Dist</source>
-        <translation type="vanished">Dist</translation>
+        <translation>Dist</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="1098"/>
         <source>No QSOs found</source>
-        <translation type="vanished">未找到 QSO</translation>
+        <translation>未找到 QSO</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="1377"/>
         <source>MAX DIST</source>
-        <translation type="vanished">最远距离</translation>
+        <translation>最远距离</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="883"/>
         <source>Import ADIF</source>
-        <translation type="vanished">导入 ADIF</translation>
+        <translation>导入 ADIF</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="191"/>
         <source>ADIF import completed</source>
-        <translation type="vanished">ADIF 导入完成</translation>
+        <translation>ADIF 导入完成</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="191"/>
         <source>ADIF import failed</source>
-        <translation type="vanished">ADIF 导入失败</translation>
+        <translation>ADIF 导入失败</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="696"/>
         <source>Importing ADIF...</source>
-        <translation type="vanished">正在导入 ADIF…</translation>
+        <translation>正在导入 ADIF…</translation>
     </message>
 </context>
 <context>
     <name>LogWindowContent</name>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="172"/>
         <source>Importa file ADIF</source>
-        <translation type="vanished">导入 ADIF 文件</translation>
+        <translation>导入 ADIF 文件</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="174"/>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="193"/>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="205"/>
         <source>ADIF files (*.adi *.adif)</source>
-        <translation type="vanished">ADIF 文件 (*.adi *.adif)</translation>
+        <translation>ADIF 文件 (*.adi *.adif)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="174"/>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="193"/>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="205"/>
         <source>All files (*)</source>
-        <translation type="vanished">所有文件 (*)</translation>
+        <translation>所有文件 (*)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="191"/>
         <source>Esporta file ADIF</source>
-        <translation type="vanished">导出 ADIF 文件</translation>
+        <translation>导出 ADIF 文件</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="203"/>
         <source>Carica logbook ADIF</source>
-        <translation type="vanished">加载 ADIF 日志</translation>
+        <translation>加载 ADIF 日志</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="297"/>
         <source>e.g. 9H1SR or AMICO</source>
-        <translation type="vanished">例如 9H1SR 或 AMICO</translation>
+        <translation>例如 9H1SR 或 AMICO</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="325"/>
         <source>Delete logbook</source>
-        <translation type="vanished">删除日志簿</translation>
+        <translation>删除日志簿</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="336"/>
         <source>You are about to delete the selected logbook.</source>
-        <translation type="vanished">您即将删除所选的日志簿。</translation>
+        <translation>您即将删除所选的日志簿。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="354"/>
         <source>Also delete the ADIF file from disk</source>
-        <translation type="vanished">同时从磁盘删除 ADIF 文件</translation>
+        <translation>同时从磁盘删除 ADIF 文件</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="359"/>
         <source>Destructive operation: the .adi file will be deleted. If this is the last logbook, Decodium will create a new empty logbook.</source>
-        <translation type="vanished">破坏性操作：将删除 .adi 文件。如果这是最后一个日志簿，Decodium 将创建一个新的空日志簿。</translation>
+        <translation>破坏性操作：将删除 .adi 文件。如果这是最后一个日志簿，Decodium 将创建一个新的空日志簿。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="360"/>
         <source>The .adi file will remain on disk; only the association with Decodium will be removed.</source>
-        <translation type="vanished">.adi 文件将保留在磁盘上；仅移除与 Decodium 的关联。</translation>
+        <translation>.adi 文件将保留在磁盘上；仅移除与 Decodium 的关联。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="381"/>
         <source>Confirm deletion</source>
-        <translation type="vanished">确认删除</translation>
+        <translation>确认删除</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="390"/>
         <source>Delete the QSO with %1?</source>
-        <translation type="vanished">删除与 %1 的 QSO？</translation>
+        <translation>删除与 %1 的 QSO？</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="544"/>
         <source>Search...</source>
-        <translation type="vanished">搜索...</translation>
+        <translation>搜索...</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="949"/>
         <source>✓ Save</source>
-        <translation type="vanished">✓ 保存</translation>
+        <translation>✓ 保存</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="974"/>
         <source>✕ Delete</source>
-        <translation type="vanished">✕ 删除</translation>
+        <translation>✕ 删除</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="993"/>
         <source>Cancel</source>
-        <translation type="vanished">取消</translation>
+        <translation>取消</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="282"/>
         <source>Nuovo logbook</source>
-        <translation type="vanished">新建日志</translation>
+        <translation>新建日志</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="44"/>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="726"/>
+        <source>Export selected QSOs (%1)</source>
+        <translation>导出所选 QSO（%1）</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="49"/>
+        <source>Export entire logbook</source>
+        <translation>导出整个日志</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="53"/>
+        <source>Clear export selection</source>
+        <translation>清除导出选择</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="291"/>
         <source>Nome operatore / callsign</source>
-        <translation type="vanished">操作员姓名／呼号</translation>
+        <translation>操作员姓名／呼号</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="304"/>
         <source>Backup log attuale</source>
-        <translation type="vanished">备份当前日志</translation>
+        <translation>备份当前日志</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="492"/>
         <source>New</source>
-        <translation type="vanished">新建</translation>
+        <translation>新建</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="494"/>
         <source>Create a separate logbook</source>
-        <translation type="vanished">创建独立日志</translation>
+        <translation>创建独立日志</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="501"/>
         <source>Load</source>
-        <translation type="vanished">加载</translation>
+        <translation>加载</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="503"/>
         <source>Load/use an existing ADIF</source>
-        <translation type="vanished">载入并使用现有 ADIF</translation>
+        <translation>载入并使用现有 ADIF</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="510"/>
         <source>Bkp</source>
-        <translation type="vanished">Bkp</translation>
+        <translation>Bkp</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="512"/>
         <source>Back up the active logbook</source>
-        <translation type="vanished">备份当前使用的日志</translation>
+        <translation>备份当前使用的日志</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="520"/>
         <source>Del</source>
-        <translation type="vanished">删除</translation>
+        <translation>删除</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="529"/>
         <source>Delete selected logbook</source>
-        <translation type="vanished">删除选中的日志</translation>
+        <translation>删除选中的日志</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="541"/>
         <source>🔍</source>
-        <translation type="vanished">🔍</translation>
+        <translation>🔍</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="583"/>
         <source>×</source>
-        <translation type="vanished">×</translation>
+        <translation>×</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="598"/>
         <source>Remove filters</source>
-        <translation type="vanished">清除筛选</translation>
+        <translation>清除筛选</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="610"/>
         <source>⬇</source>
-        <translation type="vanished">⬇</translation>
+        <translation>⬇</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="619"/>
         <source>Import ADIF</source>
-        <translation type="vanished">导入 ADIF</translation>
+        <translation>导入 ADIF</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="627"/>
         <source>⬆</source>
-        <translation type="vanished">⬆</translation>
+        <translation>⬆</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="629"/>
         <source>Export ADIF</source>
-        <translation type="vanished">导出 ADIF</translation>
+        <translation>导出 ADIF</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="637"/>
         <source>↻</source>
-        <translation type="vanished">↻</translation>
+        <translation>↻</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="639"/>
         <source>Refresh</source>
-        <translation type="vanished">刷新</translation>
+        <translation>刷新</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="652"/>
         <source>Date/Time</source>
-        <translation type="vanished">日期/时间</translation>
+        <translation>日期/时间</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="657"/>
         <source>Rpt</source>
-        <translation type="vanished">报告</translation>
+        <translation>报告</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="722"/>
+        <source>Select/deselect for export</source>
+        <translation>选择/取消选择以导出</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="731"/>
         <source>Copy Callsign</source>
-        <translation type="vanished">复制呼号</translation>
+        <translation>复制呼号</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="774"/>
+        <source>Select QSO for ADIF export</source>
+        <translation>选择 QSO 以导出 ADIF</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="882"/>
         <source>Sent</source>
-        <translation type="vanished">发出</translation>
+        <translation>发出</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="899"/>
         <source>Rcvd</source>
-        <translation type="vanished">接收</translation>
+        <translation>接收</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="107"/>
         <source>ADIF import completed</source>
-        <translation type="vanished">ADIF 导入完成</translation>
+        <translation>ADIF 导入完成</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="107"/>
         <source>ADIF import failed</source>
-        <translation type="vanished">ADIF 导入失败</translation>
+        <translation>ADIF 导入失败</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="427"/>
         <source>Importing ADIF...</source>
-        <translation type="vanished">正在导入 ADIF…</translation>
+        <translation>正在导入 ADIF…</translation>
     </message>
 </context>
 <context>
     <name>MacroDialog</name>
     <message>
+        <location filename="../qml/decodium/components/MacroDialog.qml" line="151"/>
         <source>⌨️ TX Macro Configuration</source>
-        <translation type="vanished">⌨️ TX 宏配置</translation>
+        <translation>⌨️ TX 宏配置</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MacroDialog.qml" line="13"/>
         <source>Macro Settings</source>
-        <translation type="vanished">宏设置</translation>
+        <translation>宏设置</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MacroDialog.qml" line="191"/>
         <source>Minimize</source>
-        <translation type="vanished">最小化</translation>
+        <translation>最小化</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MacroDialog.qml" line="244"/>
         <source>Contest Mode</source>
-        <translation type="vanished">竞赛模式</translation>
+        <translation>竞赛模式</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MacroDialog.qml" line="254"/>
         <source>Contest:</source>
-        <translation type="vanished">竞赛:</translation>
+        <translation>竞赛:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MacroDialog.qml" line="294"/>
         <source>Serial #:</source>
-        <translation type="vanished">序号：</translation>
+        <translation>序号：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MacroDialog.qml" line="334"/>
         <source>Exchange:</source>
-        <translation type="vanished">交换信息：</translation>
+        <translation>交换信息：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MacroDialog.qml" line="378"/>
         <source>TX Macro Templates</source>
-        <translation type="vanished">TX 宏模板</translation>
+        <translation>TX 宏模板</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MacroDialog.qml" line="387"/>
         <source>Reset to Default</source>
-        <translation type="vanished">恢复默认</translation>
+        <translation>恢复默认</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MacroDialog.qml" line="411"/>
         <source>Codes: %M=MyCall  %T=TheirCall  %R=Report  %N=Serial#  %G4=Grid4  %G6=Grid6  %E=Exchange</source>
-        <translation type="vanished">Codes: %M=MyCall  %T=TheirCall  %R=Report  %N=Serial#  %G4=Grid4  %G6=Grid6  %E=Exchange</translation>
+        <translation>Codes: %M=MyCall  %T=TheirCall  %R=Report  %N=Serial#  %G4=Grid4  %G6=Grid6  %E=Exchange</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MacroDialog.qml" line="481"/>
         <source>Preview</source>
-        <translation type="vanished">预览</translation>
+        <translation>预览</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MacroDialog.qml" line="526"/>
         <source>Click &apos;Preview&apos; to see expanded macro</source>
-        <translation type="vanished">点击「预览」查看展开后的宏</translation>
+        <translation>点击「预览」查看展开后的宏</translation>
     </message>
 </context>
 <context>
     <name>MacroDialogContent</name>
     <message>
+        <location filename="../qml/decodium/components/MacroDialogContent.qml" line="35"/>
         <source>Contest Mode</source>
-        <translation type="vanished">竞赛模式</translation>
+        <translation>竞赛模式</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MacroDialogContent.qml" line="41"/>
         <source>Enable Contest Mode</source>
-        <translation type="vanished">启用比赛模式</translation>
+        <translation>启用比赛模式</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MacroDialogContent.qml" line="45"/>
         <source>Exchange:</source>
-        <translation type="vanished">交换信息：</translation>
+        <translation>交换信息：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MacroDialogContent.qml" line="49"/>
         <source>e.g., 599 001</source>
-        <translation type="vanished">例：599 001</translation>
+        <translation>例：599 001</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MacroDialogContent.qml" line="74"/>
         <source>TX Macros</source>
-        <translation type="vanished">TX 宏</translation>
+        <translation>TX 宏</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MacroDialogContent.qml" line="122"/>
         <source>Available Variables:</source>
-        <translation type="vanished">可用变量：</translation>
+        <translation>可用变量：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MacroDialogContent.qml" line="124"/>
         <source>%CALL - Their callsign | %MYCALL - Your callsign | %GRID - Their grid</source>
-        <translation type="vanished">%CALL - Their callsign | %MYCALL - Your callsign | %GRID - Their grid</translation>
+        <translation>%CALL - Their callsign | %MYCALL - Your callsign | %GRID - Their grid</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MacroDialogContent.qml" line="128"/>
         <source>%RST - Signal report | %EXCH - Contest exchange | %73 - 73 message</source>
-        <translation type="vanished">%RST - Signal report | %EXCH - Contest exchange | %73 - 73 message</translation>
+        <translation>%RST - Signal report | %EXCH - Contest exchange | %73 - 73 message</translation>
     </message>
 </context>
 <context>
     <name>Main</name>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="11491"/>
         <source>Slow-PC mode</source>
-        <translation type="vanished">低速电脑模式</translation>
+        <translation>低速电脑模式</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="11507"/>
         <source>If Decodium feels slow or the graphics freeze on this computer, you can turn on Slow-PC mode: it switches to OpenGL graphics (stable on older video cards), lightens CPU usage, and hides the heavy Live Map.
 
 Turn it on now? You can change this anytime in Settings.</source>
-        <translation type="vanished">如果 Decodium 在这台电脑上运行缓慢或图形卡顿，您可以开启低速电脑模式：它会切换到 OpenGL 图形（在旧显卡上更稳定），降低 CPU 占用，并隐藏占用资源的实时地图。
+        <translation>如果 Decodium 在这台电脑上运行缓慢或图形卡顿，您可以开启低速电脑模式：它会切换到 OpenGL 图形（在旧显卡上更稳定），降低 CPU 占用，并隐藏占用资源的实时地图。
 
 现在开启吗？您可以随时在设置中更改。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="9434"/>
         <source>Clear Full Spectrum</source>
-        <translation type="vanished">清除全频谱</translation>
+        <translation>清除全频谱</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13071"/>
         <source>About Decodium</source>
-        <translation type="vanished">关于 Decodium</translation>
+        <translation>关于 Decodium</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13088"/>
         <source>Useful Links...</source>
-        <translation type="vanished">有用链接...</translation>
+        <translation>有用链接...</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13112"/>
+        <location filename="../qml/decodium/Main.qml" line="14036"/>
         <source>Keyboard Shortcuts</source>
-        <translation type="vanished">键盘快捷键</translation>
+        <translation>键盘快捷键</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13128"/>
         <source>SWL Mode (RX Only)</source>
-        <translation type="vanished">SWL 模式（仅 RX）</translation>
+        <translation>SWL 模式（仅 RX）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13144"/>
         <source>Multi-Answer Mode</source>
-        <translation type="vanished">多应答模式</translation>
+        <translation>多应答模式</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13176"/>
         <source>MAM Window...</source>
-        <translation type="vanished">MAM 窗口...</translation>
+        <translation>MAM 窗口...</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13216"/>
+        <location filename="../qml/decodium/Main.qml" line="13881"/>
         <source>TX Watchdog</source>
-        <translation type="vanished">TX 看门狗</translation>
+        <translation>TX 看门狗</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13232"/>
+        <location filename="../qml/decodium/Main.qml" line="13958"/>
         <source>Contest Mode</source>
-        <translation type="vanished">竞赛模式</translation>
+        <translation>竞赛模式</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13992"/>
         <source>Rule: 1 point per worked station</source>
-        <translation type="vanished">规则：每联通一个台站得1分</translation>
+        <translation>规则：每联通一个台站得1分</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13272"/>
         <source>CQ Only</source>
-        <translation type="vanished">仅 CQ</translation>
+        <translation>仅 CQ</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="1735"/>
         <source>Full screen</source>
-        <translation type="vanished">全屏</translation>
+        <translation>全屏</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="3134"/>
         <source>Decodium is up to date (%1).</source>
-        <translation type="vanished">Decodium 已是最新版本 (%1)。</translation>
+        <translation>Decodium 已是最新版本 (%1)。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="6687"/>
         <source>Search city...</source>
-        <translation type="vanished">搜索城市...</translation>
+        <translation>搜索城市...</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="10806"/>
         <source>Detach</source>
-        <translation type="vanished">分离</translation>
+        <translation>分离</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="10818"/>
         <source>Detach the DX Cluster to a window</source>
-        <translation type="vanished">将 DX Cluster 分离到窗口</translation>
+        <translation>将 DX Cluster 分离到窗口</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="11457"/>
         <source>Bring all floating windows back into the main window
 and re-center Decodium on the primary monitor?
 
 The saved coordinates will be cleared.</source>
-        <translation type="vanished">将所有浮动窗口带回主窗口
+        <translation>将所有浮动窗口带回主窗口
 并在主显示器上重新居中 Decodium？
 
 保存的坐标将被清除。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="11582"/>
         <source>The legacy radio backend reported a problem.</source>
-        <translation type="vanished">旧版电台后端报告了一个问题。</translation>
+        <translation>旧版电台后端报告了一个问题。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="11602"/>
+        <location filename="../qml/decodium/Main.qml" line="12435"/>
         <source>Hide details</source>
-        <translation type="vanished">隐藏详情</translation>
+        <translation>隐藏详情</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="11602"/>
+        <location filename="../qml/decodium/Main.qml" line="12435"/>
         <source>Show details</source>
-        <translation type="vanished">显示详情</translation>
+        <translation>显示详情</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13192"/>
         <source>Open ALL.TXT folder</source>
-        <translation type="vanished">打开 ALL.TXT 文件夹</translation>
+        <translation>打开 ALL.TXT 文件夹</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13288"/>
         <source>My Call Only</source>
-        <translation type="vanished">仅我的呼号</translation>
+        <translation>仅我的呼号</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13312"/>
         <source>Deep Search</source>
-        <translation type="vanished">深度搜索</translation>
+        <translation>深度搜索</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13344"/>
         <source>Avg Decode</source>
-        <translation type="vanished">平均解码</translation>
+        <translation>平均解码</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13378"/>
         <source>VHF/UHF Features</source>
-        <translation type="vanished">VHF/UHF 功能</translation>
+        <translation>VHF/UHF 功能</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13402"/>
         <source>Record RX</source>
-        <translation type="vanished">录制 RX</translation>
+        <translation>录制 RX</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13418"/>
         <source>Record TX</source>
-        <translation type="vanished">录制 TX</translation>
+        <translation>录制 TX</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13488"/>
         <source>Report a problem...</source>
-        <translation type="vanished">报告问题...</translation>
+        <translation>报告问题...</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13504"/>
         <source>Checking...</source>
-        <translation type="vanished">正在检查...</translation>
+        <translation>正在检查...</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13504"/>
         <source>Check for updates...</source>
-        <translation type="vanished">检查更新...</translation>
+        <translation>检查更新...</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13547"/>
         <source>Show clock</source>
-        <translation type="vanished">显示时钟</translation>
+        <translation>显示时钟</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="14060"/>
         <source>F9: toggle RX-only 1st/2nd</source>
-        <translation type="vanished">F9：切换 RX-only 第1/第2</translation>
+        <translation>F9：切换 RX-only 第1/第2</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="14061"/>
         <source>Escape: Halt (immediate TX stop)</source>
-        <translation type="vanished">Escape：Halt（立即停止 TX）</translation>
+        <translation>Escape：Halt（立即停止 TX）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="14071"/>
         <source>Ctrl+A: toggle Auto Sequence</source>
-        <translation type="vanished">Ctrl+A：切换自动序列</translation>
+        <translation>Ctrl+A：切换自动序列</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="14073"/>
         <source>Ctrl+Z: toggle ZAP mode</source>
-        <translation type="vanished">Ctrl+Z：切换 ZAP 模式</translation>
+        <translation>Ctrl+Z：切换 ZAP 模式</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="14083"/>
         <source>Alt+L: log the current QSO</source>
-        <translation type="vanished">Alt+L：记录当前 QSO</translation>
+        <translation>Alt+L：记录当前 QSO</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="14084"/>
         <source>Alt+M: clear the decode list (Monitor)</source>
-        <translation type="vanished">Alt+M：清除解码列表 (Monitor)</translation>
+        <translation>Alt+M：清除解码列表 (Monitor)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="14085"/>
         <source>Alt+S: stop TX</source>
-        <translation type="vanished">Alt+S：停止 TX</translation>
+        <translation>Alt+S：停止 TX</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="15039"/>
         <source>⌨️ TX Macro Configuration</source>
-        <translation type="vanished">⌨️ TX 宏配置</translation>
+        <translation>⌨️ TX 宏配置</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="9399"/>
+        <location filename="../qml/decodium/Main.qml" line="15461"/>
         <source>decodes</source>
-        <translation type="vanished">解码</translation>
+        <translation>解码</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="16234"/>
         <source>msgs</source>
-        <translation type="vanished">消息</translation>
+        <translation>消息</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="9418"/>
+        <location filename="../qml/decodium/Main.qml" line="15475"/>
+        <location filename="../qml/decodium/Main.qml" line="16249"/>
         <source>Clear</source>
-        <translation type="vanished">清除</translation>
+        <translation>清除</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="45"/>
+        <source>Power off radio?</source>
+        <translation>关闭电台电源？</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="50"/>
+        <source>Switch off the radio connected through Hamlib CAT?</source>
+        <translation>关闭通过 Hamlib CAT 连接的电台电源？</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="61"/>
+        <source>%1 command sent</source>
+        <translation>已发送 %1 命令</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="62"/>
+        <source>Radio command failed</source>
+        <translation>电台命令失败</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="103"/>
+        <source>Start the radio ATU</source>
+        <translation>启动电台 ATU</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="104"/>
+        <source>Disable the radio ATU</source>
+        <translation>禁用电台 ATU</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="105"/>
+        <source>Power on a supported radio through direct CAT. Its CAT port must be available after mains power is restored.</source>
+        <translation>通过直接 CAT 为受支持的电台开机。市电恢复后，其 CAT 端口必须可用。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="106"/>
+        <source>Power off the radio</source>
+        <translation>关闭电台电源</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="3282"/>
         <source>Open WAV file for decoding</source>
-        <translation type="vanished">打开 WAV 文件进行解码</translation>
+        <translation>打开 WAV 文件进行解码</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="3284"/>
         <source>File WAV (*.wav)</source>
-        <translation type="vanished">WAV 文件 (*.wav)</translation>
+        <translation>WAV 文件 (*.wav)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="3284"/>
         <source>All files (*)</source>
-        <translation type="vanished">所有文件 (*)</translation>
+        <translation>所有文件 (*)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="3292"/>
         <source>Select folder with WAV files</source>
-        <translation type="vanished">选择含 WAV 文件的文件夹</translation>
+        <translation>选择含 WAV 文件的文件夹</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="4733"/>
         <source>Valid range: 100-5000 Hz</source>
-        <translation type="vanished">有效范围：100-5000 Hz</translation>
+        <translation>有效范围：100-5000 Hz</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="4816"/>
         <source>Dock the Waterfall here</source>
-        <translation type="vanished">在此停靠瀑布图</translation>
+        <translation>在此停靠瀑布图</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="5337"/>
         <source>Click: sync NTP now to align DT (FT8/FT4)</source>
-        <translation type="vanished">点击：立即同步 NTP 以对齐 DT (FT8/FT4)</translation>
+        <translation>点击：立即同步 NTP 以对齐 DT (FT8/FT4)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="5431"/>
         <source>Auto RX level active</source>
-        <translation type="vanished">自动 RX 电平已启用</translation>
+        <translation>自动 RX 电平已启用</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="5432"/>
         <source>Auto RX level disabled</source>
-        <translation type="vanished">自动 RX 电平已禁用</translation>
+        <translation>自动 RX 电平已禁用</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="5586"/>
         <source>Gallager — deep dig for weak signals.
 Enables a second decoding pass (LDPC subpass
 parallelized across cores, named after R. Gallager, father of LDPC)
 that recovers near-noise stations missed by the normal decode.
 Requires a multi-core CPU: on old PCs it may burden the audio
 → in that case leave it off.</source>
-        <translation type="vanished">Gallager — 深入挖掘弱信号。
+        <translation>Gallager — 深入挖掘弱信号。
 启用第二次解码（跨核心并行的 LDPC 子过程，
 以 LDPC 之父 R. Gallager 命名），
 恢复正常解码遗漏的接近噪声的电台。
@@ -10876,632 +13186,875 @@ Requires a multi-core CPU: on old PCs it may burden the audio
 → 那种情况下请保持关闭。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="5625"/>
+        <source>Fast LDPC — vectorized FT2 decoder (NEON on Apple Silicon/ARM64, AVX2 on x86).
+Decodes the same words far quicker than the original decoder,
+freeing CPU for the rest of the cycle. Falls back to the original
+decoder automatically when the required SIMD backend is unavailable.
+Turn it off if you see decodes that look wrong.</source>
+        <translation>Fast LDPC — 向量化 FT2 解码器（Apple Silicon/ARM64 上为 NEON，x86 上为 AVX2）。
+解码相同的字词比原始解码器快得多，
+为周期的其余部分腾出 CPU。当所需的 SIMD 后端不可用时
+会自动回退到原始解码器。
+如果发现解码结果看起来不对，请将其关闭。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="5987"/>
         <source>Click: open a WAV file
 Right-click: decode a folder</source>
-        <translation type="vanished">点击：打开 WAV 文件
+        <translation>点击：打开 WAV 文件
 右键点击：解码文件夹</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="6087"/>
         <source>Reset layout (Ctrl+Shift+L)</source>
-        <translation type="vanished">重置布局 (Ctrl+Shift+L)</translation>
+        <translation>重置布局 (Ctrl+Shift+L)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="6120"/>
+        <source>Switch to the DX-Pedition workspace (3-column tactical layout)</source>
+        <translation>切换到 DX-Pedition 工作区（3 栏战术布局）</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="6138"/>
+        <source>DX-Ped</source>
+        <translation>DX-Ped</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="6155"/>
         <source>Decode history (Ctrl+Shift+H)</source>
-        <translation type="vanished">解码历史 (Ctrl+Shift+H)</translation>
+        <translation>解码历史 (Ctrl+Shift+H)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="6249"/>
         <source>Weak-signal / DX</source>
-        <translation type="vanished">弱信号 / DX</translation>
+        <translation>弱信号 / DX</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="6249"/>
         <source>Contest</source>
-        <translation type="vanished">竞赛</translation>
+        <translation>竞赛</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="6249"/>
         <source>CPU-limited</source>
-        <translation type="vanished">CPU 受限</translation>
+        <translation>CPU 受限</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="6249"/>
         <source>Balanced</source>
-        <translation type="vanished">均衡</translation>
+        <translation>均衡</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="6250"/>
         <source>Profiles...</source>
-        <translation type="vanished">配置文件…</translation>
+        <translation>配置文件…</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="6255"/>
         <source>Ready profiles - apply FT2/decode toggles as a group. Details in Setup -&gt; TX.</source>
-        <translation type="vanished">现成配置文件 — 将 FT2/解码开关作为一组应用。详见 Setup -&gt; TX。</translation>
+        <translation>现成配置文件 — 将 FT2/解码开关作为一组应用。详见 Setup -&gt; TX。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="6496"/>
         <source>Drag to reposition the clock</source>
-        <translation type="vanished">拖动以重新放置时钟</translation>
+        <translation>拖动以重新放置时钟</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="6795"/>
         <source>Type a city name</source>
-        <translation type="vanished">输入城市名称</translation>
+        <translation>输入城市名称</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="6795"/>
         <source>No matching city</source>
-        <translation type="vanished">无匹配城市</translation>
+        <translation>无匹配城市</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="6830"/>
         <source>Analog clock</source>
-        <translation type="vanished">模拟时钟</translation>
+        <translation>模拟时钟</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="6834"/>
         <source>Digital clock</source>
-        <translation type="vanished">数字时钟</translation>
+        <translation>数字时钟</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="6838"/>
         <source>City labels</source>
-        <translation type="vanished">城市标签</translation>
+        <translation>城市标签</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="6845"/>
         <source>Hide clock</source>
-        <translation type="vanished">隐藏时钟</translation>
+        <translation>隐藏时钟</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="6893"/>
         <source>Restore Waterfall</source>
-        <translation type="vanished">恢复 Waterfall</translation>
+        <translation>恢复 Waterfall</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="6945"/>
         <source>Restore QSO Log</source>
-        <translation type="vanished">恢复 QSO Log</translation>
+        <translation>恢复 QSO Log</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="6997"/>
         <source>Restore astronomical data</source>
-        <translation type="vanished">恢复天文数据</translation>
+        <translation>恢复天文数据</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="7054"/>
         <source>Restore Live Map</source>
-        <translation type="vanished">恢复 Live Map</translation>
+        <translation>恢复 Live Map</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="7195"/>
         <source>DX Cluster
 Left-click: open and connect
 Right-click: disconnect</source>
-        <translation type="vanished">DX Cluster
+        <translation>DX Cluster
 左键点击：打开并连接
 右键点击：断开</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="7272"/>
         <source>Disable filter bypass</source>
-        <translation type="vanished">禁用筛选旁路</translation>
+        <translation>禁用筛选旁路</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="7273"/>
         <source>Bypass CQ/My Call and setup filters</source>
-        <translation type="vanished">旁路 CQ/My Call 与 setup 筛选</translation>
+        <translation>旁路 CQ/My Call 与 setup 筛选</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="7320"/>
         <source>Restore Macro configuration</source>
-        <translation type="vanished">恢复 Macro 配置</translation>
+        <translation>恢复 Macro 配置</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="7372"/>
         <source>Restore Rig Control</source>
-        <translation type="vanished">恢复 Rig Control</translation>
+        <translation>恢复 Rig Control</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="7425"/>
         <source>Restore Full Spectrum</source>
-        <translation type="vanished">恢复 Full Spectrum</translation>
+        <translation>恢复 Full Spectrum</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="7477"/>
         <source>Restore Period 2</source>
-        <translation type="vanished">恢复 Period 2</translation>
+        <translation>恢复 Period 2</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="7528"/>
         <source>Restore Signal RX</source>
-        <translation type="vanished">恢复 Signal RX</translation>
+        <translation>恢复 Signal RX</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="7580"/>
         <source>Restore TX panel</source>
-        <translation type="vanished">恢复 TX 面板</translation>
+        <translation>恢复 TX 面板</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="7883"/>
         <source>Clock</source>
-        <translation type="vanished">时钟</translation>
+        <translation>时钟</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="8108"/>
         <source>Dock Waterfall</source>
-        <translation type="vanished">停靠瀑布图</translation>
+        <translation>停靠瀑布图</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="8108"/>
         <source>Waterfall detached</source>
-        <translation type="vanished">瀑布图已分离</translation>
+        <translation>瀑布图已分离</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="8116"/>
         <source>Use Dock to re-attach it</source>
-        <translation type="vanished">使用“停靠”重新附加</translation>
+        <translation>使用“停靠”重新附加</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="9263"/>
+        <location filename="../qml/decodium/Main.qml" line="10160"/>
+        <location filename="../qml/decodium/Main.qml" line="11183"/>
         <source>Drag the window here</source>
-        <translation type="vanished">将窗口拖到此处</translation>
+        <translation>将窗口拖到此处</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="9471"/>
+        <location filename="../qml/decodium/Main.qml" line="10310"/>
+        <location filename="../qml/decodium/Main.qml" line="15519"/>
+        <location filename="../qml/decodium/Main.qml" line="16293"/>
         <source>Return to normal row height</source>
-        <translation type="vanished">恢复正常行高</translation>
+        <translation>恢复正常行高</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="9472"/>
+        <location filename="../qml/decodium/Main.qml" line="10311"/>
+        <location filename="../qml/decodium/Main.qml" line="15520"/>
+        <location filename="../qml/decodium/Main.qml" line="16294"/>
         <source>Compact rows (2x visible decodes)</source>
-        <translation type="vanished">紧凑行（可见解码数翻倍）</translation>
+        <translation>紧凑行（可见解码数翻倍）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="9502"/>
         <source>Detach Full Spectrum</source>
-        <translation type="vanished">分离 Full Spectrum</translation>
+        <translation>分离 Full Spectrum</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="9520"/>
+        <location filename="../qml/decodium/Main.qml" line="15581"/>
         <source>◀  Move left</source>
-        <translation type="vanished">◀  左移</translation>
+        <translation>◀  左移</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="9521"/>
+        <location filename="../qml/decodium/Main.qml" line="15582"/>
         <source>Move right  ▶</source>
-        <translation type="vanished">右移  ▶</translation>
+        <translation>右移  ▶</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="9522"/>
+        <location filename="../qml/decodium/Main.qml" line="15583"/>
         <source>Hide this column</source>
-        <translation type="vanished">隐藏此列</translation>
+        <translation>隐藏此列</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="9528"/>
+        <location filename="../qml/decodium/Main.qml" line="15589"/>
         <source>✓  Message</source>
-        <translation type="vanished">✓  消息</translation>
+        <translation>✓  消息</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="9533"/>
+        <location filename="../qml/decodium/Main.qml" line="15594"/>
         <source>Newest on top</source>
-        <translation type="vanished">最新在顶部</translation>
+        <translation>最新在顶部</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="9535"/>
+        <location filename="../qml/decodium/Main.qml" line="15596"/>
         <source>Reset columns</source>
-        <translation type="vanished">重置列</translation>
+        <translation>重置列</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="10090"/>
         <source>Go to the latest decode</source>
-        <translation type="vanished">跳转到最新解码</translation>
+        <translation>跳转到最新解码</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="10276"/>
         <source>Clear Signal RX</source>
-        <translation type="vanished">清除 Signal RX</translation>
+        <translation>清除 Signal RX</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="10341"/>
         <source>Detach Signal RX</source>
-        <translation type="vanished">分离 Signal RX</translation>
+        <translation>分离 Signal RX</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="12914"/>
+        <source>SSTV - image radio... (BETA)</source>
+        <translation>SSTV - 图像电台...（测试版）</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="12937"/>
+        <source>Open the RTTY window...</source>
+        <translation>打开 RTTY 窗口...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="12973"/>
+        <source>DecoPort - radio on the network...</source>
+        <translation>DecoPort - 网络上的电台...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="13054"/>
+        <source>Decodium RX - terminal receiver...</source>
+        <translation>Decodium RX - 终端接收机...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="13328"/>
+        <source>FT8 AP</source>
+        <translation>FT8 AP</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="17430"/>
         <source>Insert into layout:</source>
-        <translation type="vanished">插入到布局：</translation>
+        <translation>插入到布局：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="17437"/>
         <source>◧ next to Full Spectrum</source>
-        <translation type="vanished">◧ 在 Full Spectrum 旁</translation>
+        <translation>◧ 在 Full Spectrum 旁</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="17438"/>
         <source>◧ next to Signal RX</source>
-        <translation type="vanished">◧ 在 Signal RX 旁</translation>
+        <translation>◧ 在 Signal RX 旁</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="11080"/>
         <source>Drag to swap the column</source>
-        <translation type="vanished">拖动以交换列</translation>
+        <translation>拖动以交换列</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="11294"/>
         <source>Detach TX panel</source>
-        <translation type="vanished">分离 TX 面板</translation>
+        <translation>分离 TX 面板</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="11441"/>
         <source>Reset Layout</source>
-        <translation type="vanished">重置布局</translation>
+        <translation>重置布局</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="11813"/>
         <source>Notifica</source>
-        <translation type="vanished">通知</translation>
+        <translation>通知</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13256"/>
         <source>Bypass Filters</source>
-        <translation type="vanished">旁路筛选器</translation>
+        <translation>旁路筛选器</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13519"/>
         <source>Esporta Cabrillo...</source>
-        <translation type="vanished">导出 Cabrillo…</translation>
+        <translation>导出 Cabrillo…</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13743"/>
         <source>Waterfall / Panadapter</source>
-        <translation type="vanished">Waterfall / Panadapter</translation>
+        <translation>Waterfall / Panadapter</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13788"/>
         <source>DecoSyncTime Monitor</source>
-        <translation type="vanished">DecoSyncTime 监视器</translation>
+        <translation>DecoSyncTime 监视器</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="14366"/>
+        <location filename="../qml/decodium/Main.qml" line="15545"/>
+        <location filename="../qml/decodium/Main.qml" line="16307"/>
+        <location filename="../qml/decodium/Main.qml" line="16320"/>
+        <location filename="../qml/decodium/Main.qml" line="16894"/>
         <source>Dock</source>
-        <translation type="vanished">停靠</translation>
+        <translation>停靠</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="16903"/>
         <source>Dock TX panel</source>
-        <translation type="vanished">停靠 TX 面板</translation>
+        <translation>停靠 TX 面板</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13361"/>
         <source>Hide ASYNC icon</source>
-        <translation type="vanished">隐藏 ASYNC 图标</translation>
+        <translation>隐藏 ASYNC 图标</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13362"/>
         <source>Show ASYNC icon</source>
-        <translation type="vanished">显示 ASYNC 图标</translation>
+        <translation>显示 ASYNC 图标</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13442"/>
         <source>Alert on CQ</source>
-        <translation type="vanished">CQ 提醒</translation>
+        <translation>CQ 提醒</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13463"/>
         <source>Color Highlighting...</source>
-        <translation type="vanished">颜色高亮...</translation>
+        <translation>颜色高亮...</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13475"/>
         <source>QSY...</source>
-        <translation type="vanished">QSY...</translation>
+        <translation>QSY...</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13531"/>
         <source>cty.dat downloading...</source>
-        <translation type="vanished">正在下载 cty.dat...</translation>
+        <translation>正在下载 cty.dat...</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13531"/>
         <source>Update cty.dat</source>
-        <translation type="vanished">更新 cty.dat</translation>
+        <translation>更新 cty.dat</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13562"/>
         <source>Show DX Cluster</source>
-        <translation type="vanished">显示 DX Cluster</translation>
+        <translation>显示 DX Cluster</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13577"/>
         <source>Show PSK Reporter</source>
-        <translation type="vanished">显示 PSK Reporter</translation>
+        <translation>显示 PSK Reporter</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13715"/>
         <source>Time Sync Panel</source>
-        <translation type="vanished">时间同步面板</translation>
+        <translation>时间同步面板</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13729"/>
         <source>Active Stations</source>
-        <translation type="vanished">活跃电台</translation>
+        <translation>活跃电台</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13758"/>
         <source>Live Map</source>
-        <translation type="vanished">实时地图</translation>
+        <translation>实时地图</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13773"/>
         <source>Astro / EME</source>
-        <translation type="vanished">Astro / EME</translation>
+        <translation>Astro / EME</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13802"/>
         <source>DX Cluster Panel</source>
-        <translation type="vanished">DX Cluster 面板</translation>
+        <translation>DX Cluster 面板</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13816"/>
         <source>Alert on My Call</source>
-        <translation type="vanished">我的呼号提醒</translation>
+        <translation>我的呼号提醒</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="4607"/>
         <source>Active on bands during the last %1 minutes:</source>
-        <translation type="vanished">最近 %1 分钟内活跃的波段:</translation>
+        <translation>最近 %1 分钟内活跃的波段:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="14731"/>
         <source>Astronomical Data - Decodium</source>
-        <translation type="vanished">天文数据 - Decodium</translation>
+        <translation>天文数据 - Decodium</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="14825"/>
         <source>Satellite tracking - Decodium</source>
-        <translation type="vanished">卫星跟踪 - Decodium</translation>
+        <translation>卫星跟踪 - Decodium</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="7787"/>
         <source>Switch to the dark theme</source>
-        <translation type="vanished">切换到深色主题</translation>
+        <translation>切换到深色主题</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="7788"/>
         <source>Switch to the light theme</source>
-        <translation type="vanished">切换到浅色主题</translation>
+        <translation>切换到浅色主题</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="17584"/>
         <source>Decodium found a radio connected to this computer. Applying the proposal sets the CAT port, the model and the audio devices, so you can start without hunting for the right COM port.</source>
-        <translation type="vanished">Decodium 检测到连接到本机的电台。应用该建议会设置 CAT 端口、机型和音频设备，无需再去寻找正确的 COM 端口。</translation>
+        <translation>Decodium 检测到连接到本机的电台。应用该建议会设置 CAT 端口、机型和音频设备，无需再去寻找正确的 COM 端口。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="1736"/>
         <source>F11 / Esc</source>
-        <translation type="vanished">F11 / Esc</translation>
+        <translation>F11 / Esc</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="4307"/>
         <source>FT2-Link access</source>
-        <translation type="vanished">FT2-Link 访问</translation>
+        <translation>FT2-Link 访问</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="4315"/>
         <source>Enter password to unlock this mode.</source>
-        <translation type="vanished">输入密码以解锁此模式。</translation>
+        <translation>输入密码以解锁此模式。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="4324"/>
         <source>Password</source>
-        <translation type="vanished">密码</translation>
+        <translation>密码</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="4360"/>
         <source>Unlock</source>
-        <translation type="vanished">解锁</translation>
+        <translation>解锁</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="4466"/>
         <source>Based on WSJT-X by K1JT et al.</source>
-        <translation type="vanished">基于 K1JT 等人的 WSJT-X。</translation>
+        <translation>基于 K1JT 等人的 WSJT-X。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="4473"/>
         <source>QML Interface by IU8LMC</source>
-        <translation type="vanished">QML 界面：IU8LMC</translation>
+        <translation>QML 界面：IU8LMC</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="4665"/>
         <source>No recent activity found
 (last 15 minutes)</source>
-        <translation type="vanished">最近没有活动
+        <translation>最近没有活动
 （最近 15 分钟）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="4902"/>
         <source>Menu</source>
-        <translation type="vanished">菜单</translation>
+        <translation>菜单</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="5941"/>
         <source>Setup</source>
-        <translation type="vanished">设置</translation>
+        <translation>设置</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="6102"/>
         <source>Layout</source>
-        <translation type="vanished">布局</translation>
+        <translation>布局</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="6172"/>
         <source>History</source>
-        <translation type="vanished">历史</translation>
+        <translation>历史</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="7171"/>
         <source>Auto Spot</source>
-        <translation type="vanished">自动上报</translation>
+        <translation>自动上报</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="7248"/>
         <source>Bypass</source>
-        <translation type="vanished">旁路</translation>
+        <translation>旁路</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="7255"/>
         <source>Filters</source>
-        <translation type="vanished">过滤</translation>
+        <translation>过滤</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="7607"/>
         <source>PSK Reporter</source>
-        <translation type="vanished">PSK Reporter</translation>
+        <translation>PSK Reporter</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="7818"/>
         <source>Reset</source>
-        <translation type="vanished">重置</translation>
+        <translation>重置</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="8284"/>
         <source>Detach Waterfall</source>
-        <translation type="vanished">分离瀑布图</translation>
+        <translation>分离瀑布图</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="9111"/>
         <source>FT2-Link popped out</source>
-        <translation type="vanished">FT2-Link 已分离</translation>
+        <translation>FT2-Link 已分离</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="10042"/>
         <source>No decodes</source>
-        <translation type="vanished">无解码</translation>
+        <translation>无解码</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="11649"/>
         <source>Configure radio</source>
-        <translation type="vanished">配置电台</translation>
+        <translation>配置电台</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="11658"/>
         <source>Retry</source>
-        <translation type="vanished">重试</translation>
+        <translation>重试</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="12412"/>
         <source>Decodium reported a non-blocking problem.</source>
-        <translation type="vanished">Decodium 报告了一个不影响运行的问题。</translation>
+        <translation>Decodium 报告了一个不影响运行的问题。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13835"/>
         <source>Export Cabrillo</source>
-        <translation type="vanished">导出 Cabrillo</translation>
+        <translation>导出 Cabrillo</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13847"/>
         <source>Output file path:</source>
-        <translation type="vanished">输出文件路径：</translation>
+        <translation>输出文件路径：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13864"/>
         <source>Export</source>
-        <translation type="vanished">导出</translation>
+        <translation>导出</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13899"/>
         <source>Watchdog Mode</source>
-        <translation type="vanished">看门狗模式</translation>
+        <translation>看门狗模式</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13909"/>
         <source>Off</source>
-        <translation type="vanished">取消</translation>
+        <translation>取消</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13915"/>
         <source>Time</source>
-        <translation type="vanished">时间</translation>
+        <translation>时间</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13921"/>
         <source>Count</source>
-        <translation type="vanished">次数</translation>
+        <translation>次数</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13930"/>
         <source>Time (min):</source>
-        <translation type="vanished">时间（分）：</translation>
+        <translation>时间（分）：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13941"/>
         <source>Max TX:</source>
-        <translation type="vanished">最大发射次数：</translation>
+        <translation>最大发射次数：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13976"/>
         <source>Contest Type</source>
-        <translation type="vanished">比赛类型</translation>
+        <translation>比赛类型</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="14001"/>
         <source>Exchange</source>
-        <translation type="vanished">交换信息</translation>
+        <translation>交换信息</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="14012"/>
         <source>Example: 599 001</source>
-        <translation type="vanished">例：599 001</translation>
+        <translation>例：599 001</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="14019"/>
         <source>Serial Number:</source>
-        <translation type="vanished">序号：</translation>
+        <translation>序号：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="14054"/>
         <source>TRANSMISSION</source>
-        <translation type="vanished">发射</translation>
+        <translation>发射</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="14059"/>
         <source>F1 - F7: Select TX1 - TX7</source>
-        <translation type="vanished">F1 - F7：选择 TX1 - TX7</translation>
+        <translation>F1 - F7：选择 TX1 - TX7</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="14066"/>
         <source>CONTROLS (Ctrl+)</source>
-        <translation type="vanished">控制 (Ctrl+)</translation>
+        <translation>控制 (Ctrl+)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="14072"/>
         <source>Ctrl+G: Generate all TX messages</source>
-        <translation type="vanished">Ctrl+G：生成所有发射消息</translation>
+        <translation>Ctrl+G：生成所有发射消息</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="14078"/>
         <source>ACTIONS (Alt+)</source>
-        <translation type="vanished">动作 (Alt+)</translation>
+        <translation>动作 (Alt+)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="14108"/>
         <source>Waterfall - Decodium</source>
-        <translation type="vanished">瀑布图 - Decodium</translation>
+        <translation>瀑布图 - Decodium</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="14286"/>
         <source>Zoom:</source>
-        <translation type="vanished">缩放：</translation>
+        <translation>缩放：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="14413"/>
         <source>Minimize</source>
-        <translation type="vanished">最小化</translation>
+        <translation>最小化</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="14511"/>
         <source>QSO Log - Decodium</source>
-        <translation type="vanished">QSO 日志 - Decodium</translation>
+        <translation>QSO 日志 - Decodium</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="14639"/>
         <source>📋 QSO Log</source>
-        <translation type="vanished">📋 QSO 日志</translation>
+        <translation>📋 QSO 日志</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="14910"/>
         <source>Macro - Decodium</source>
-        <translation type="vanished">宏 - Decodium</translation>
+        <translation>宏 - Decodium</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="15122"/>
         <source>Rig Control - Decodium</source>
-        <translation type="vanished">电台控制 - Decodium</translation>
+        <translation>电台控制 - Decodium</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="15176"/>
         <source>📻 Rig Control (CAT)</source>
-        <translation type="vanished">📻 电台控制 (CAT)</translation>
+        <translation>📻 电台控制 (CAT)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="15227"/>
         <source>Live Map - Decodium</source>
-        <translation type="vanished">实时地图 - Decodium</translation>
+        <translation>实时地图 - Decodium</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="15305"/>
         <source>Full Spectrum - Decodium</source>
-        <translation type="vanished">全频谱 - Decodium</translation>
+        <translation>全频谱 - Decodium</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="16073"/>
         <source>Period 2 - Decodium</source>
-        <translation type="vanished">周期 2 - Decodium</translation>
+        <translation>周期 2 - Decodium</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="16108"/>
         <source>Signal RX - Decodium</source>
-        <translation type="vanished">接收信号 - Decodium</translation>
+        <translation>接收信号 - Decodium</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="16629"/>
         <source>TX Panel - Decodium</source>
-        <translation type="vanished">发射面板 - Decodium</translation>
+        <translation>发射面板 - Decodium</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="16956"/>
         <source>FT2-Link - Decodium</source>
-        <translation type="vanished">FT2-Link - Decodium</translation>
+        <translation>FT2-Link - Decodium</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="17365"/>
         <source>DX Cluster - Decodium</source>
-        <translation type="vanished">DX Cluster - Decodium</translation>
+        <translation>DX Cluster - Decodium</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="3989"/>
+        <location filename="../qml/decodium/Main.qml" line="9524"/>
+        <location filename="../qml/decodium/Main.qml" line="15585"/>
         <source>UTC</source>
-        <translation type="vanished">UTC</translation>
+        <translation>UTC</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="3990"/>
+        <location filename="../qml/decodium/Main.qml" line="9525"/>
+        <location filename="../qml/decodium/Main.qml" line="15586"/>
         <source>dB</source>
-        <translation type="vanished">dB</translation>
+        <translation>dB</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="3991"/>
+        <location filename="../qml/decodium/Main.qml" line="9526"/>
+        <location filename="../qml/decodium/Main.qml" line="15587"/>
         <source>DT</source>
-        <translation type="vanished">DT</translation>
+        <translation>DT</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="3992"/>
+        <location filename="../qml/decodium/Main.qml" line="9527"/>
+        <location filename="../qml/decodium/Main.qml" line="10365"/>
+        <location filename="../qml/decodium/Main.qml" line="15588"/>
+        <location filename="../qml/decodium/Main.qml" line="16364"/>
         <source>Freq</source>
-        <translation type="vanished">频率</translation>
+        <translation>频率</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="3993"/>
         <source>Drift</source>
-        <translation type="vanished">漂移</translation>
+        <translation>漂移</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="3994"/>
+        <location filename="../qml/decodium/Main.qml" line="10367"/>
+        <location filename="../qml/decodium/Main.qml" line="16366"/>
         <source>Message</source>
-        <translation type="vanished">消息</translation>
+        <translation>消息</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="3995"/>
+        <location filename="../qml/decodium/Main.qml" line="9529"/>
+        <location filename="../qml/decodium/Main.qml" line="10368"/>
+        <location filename="../qml/decodium/Main.qml" line="15590"/>
+        <location filename="../qml/decodium/Main.qml" line="16367"/>
         <source>Dist</source>
-        <translation type="vanished">距离</translation>
+        <translation>距离</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="3996"/>
+        <location filename="../qml/decodium/Main.qml" line="9530"/>
+        <location filename="../qml/decodium/Main.qml" line="15591"/>
         <source>DXCC</source>
-        <translation type="vanished">DXCC</translation>
+        <translation>DXCC</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="3997"/>
+        <location filename="../qml/decodium/Main.qml" line="9531"/>
+        <location filename="../qml/decodium/Main.qml" line="10369"/>
+        <location filename="../qml/decodium/Main.qml" line="15592"/>
+        <location filename="../qml/decodium/Main.qml" line="16368"/>
         <source>Az</source>
-        <translation type="vanished">Az</translation>
+        <translation>Az</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13160"/>
         <source>RF Meter...</source>
-        <translation type="vanished">射频测量表...</translation>
+        <translation>射频测量表...</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="17173"/>
         <source>Active Stations - Decodium</source>
-        <translation type="vanished">活跃电台 - Decodium</translation>
+        <translation>活跃电台 - Decodium</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="12544"/>
         <source>Multi-Answer Mode - Decodium</source>
-        <translation type="vanished">多应答模式 - Decodium</translation>
+        <translation>多应答模式 - Decodium</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="11948"/>
         <source>Settings - Decodium</source>
-        <translation type="vanished">设置 - Decodium</translation>
+        <translation>设置 - Decodium</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="12665"/>
         <source>DECØMETER - RF Meter - Decodium</source>
-        <translation type="vanished">DECØMETER - 射频测量表 - Decodium</translation>
+        <translation>DECØMETER - 射频测量表 - Decodium</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="12954"/>
         <source>Open the JTTY window...</source>
-        <translation type="vanished">打开 JTTY 窗口...</translation>
+        <translation>打开 JTTY 窗口...</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="12991"/>
         <source>Decolink - remote radio through the server...</source>
-        <translation type="vanished">Decolink - 通过服务器使用远程电台...</translation>
+        <translation>Decolink - 通过服务器使用远程电台...</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13013"/>
         <source>CW - decoder, keyer and macros...</source>
-        <translation type="vanished">CW - 解码器、键控器和宏...</translation>
+        <translation>CW - 解码器、键控器和宏...</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13031"/>
         <source>Rotator - antenna control...</source>
-        <translation type="vanished">旋转器 - 天线控制...</translation>
+        <translation>旋转器 - 天线控制...</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="13008"/>
         <source>SSB - PC microphone and radio controls...</source>
-        <translation type="vanished">SSB - PC 麦克风和电台控制...</translation>
+        <translation>SSB - PC 麦克风和电台控制...</translation>
     </message>
 </context>
 <context>
@@ -16492,39 +19045,47 @@ UDP 服务器 %2:%3</translation>
 <context>
     <name>MamPanel</name>
     <message>
+        <location filename="../qml/decodium/components/MamPanel.qml" line="416"/>
         <source>QSO attivi (multi-stream): </source>
-        <translation type="vanished">活动 QSO（multi-stream）：</translation>
+        <translation>活动 QSO（multi-stream）：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MamPanel.qml" line="428"/>
         <source>Double-click a station to add it to the list.</source>
-        <translation type="vanished">双击电台将其添加到列表。</translation>
+        <translation>双击电台将其添加到列表。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MamPanel.qml" line="488"/>
         <source>No active stream</source>
-        <translation type="vanished">没有活动的流</translation>
+        <translation>没有活动的流</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MamPanel.qml" line="395"/>
         <source>No active caller</source>
-        <translation type="vanished">没有活跃的呼叫方</translation>
+        <translation>没有活跃的呼叫方</translation>
     </message>
 </context>
 <context>
     <name>MamWindow</name>
     <message>
+        <location filename="../qml/decodium/components/MamWindow.qml" line="556"/>
         <source>QSO attivi (multi-stream): </source>
-        <translation type="vanished">活动 QSO（multi-stream）：</translation>
+        <translation>活动 QSO（multi-stream）：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MamWindow.qml" line="615"/>
         <source>No active stream</source>
-        <translation type="vanished">没有活动的流</translation>
+        <translation>没有活动的流</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MamWindow.qml" line="11"/>
         <source>Multi-Answer Mode</source>
-        <translation type="vanished">多应答模式</translation>
+        <translation>多应答模式</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MamWindow.qml" line="535"/>
         <source>No active caller</source>
-        <translation type="vanished">没有活跃的呼叫方</translation>
+        <translation>没有活跃的呼叫方</translation>
     </message>
 </context>
 <context>
@@ -16553,69 +19114,126 @@ UDP 服务器 %2:%3</translation>
 <context>
     <name>MapLogbookPanel</name>
     <message>
+        <location filename="../qml/decodium/components/MapLogbookPanel.qml" line="120"/>
         <source>%1 matching QSO</source>
-        <translation type="vanished">%1 个匹配的 QSO</translation>
+        <translation>%1 个匹配的 QSO</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapLogbookPanel.qml" line="133"/>
         <source>ADIF</source>
-        <translation type="vanished">ADIF</translation>
+        <translation>ADIF</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapLogbookPanel.qml" line="125"/>
         <source>CSV</source>
-        <translation type="vanished">CSV</translation>
+        <translation>CSV</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapLogbookPanel.qml" line="50"/>
+        <source>Refresh</source>
+        <translation>刷新</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/MapLogbookPanel.qml" line="71"/>
         <source>Band filter</source>
-        <translation type="vanished">波段筛选</translation>
+        <translation>波段筛选</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapLogbookPanel.qml" line="81"/>
         <source>Mode filter</source>
-        <translation type="vanished">模式筛选</translation>
+        <translation>模式筛选</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapLogbookPanel.qml" line="44"/>
         <source>Call, grid, DXCC, state, POTA, IOTA or WPX</source>
-        <translation type="vanished">呼号、网格、DXCC、州、POTA、IOTA 或 WPX</translation>
+        <translation>呼号、网格、DXCC、州、POTA、IOTA 或 WPX</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapLogbookPanel.qml" line="91"/>
+        <source>Period</source>
+        <translation>周期</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/MapLogbookPanel.qml" line="150"/>
+        <source>QSO</source>
+        <translation>QSO</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/MapLogbookPanel.qml" line="151"/>
         <source>QSL</source>
-        <translation type="vanished">QSL</translation>
+        <translation>QSL</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapLogbookPanel.qml" line="152"/>
+        <source>DXCC</source>
+        <translation>DXCC</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/MapLogbookPanel.qml" line="153"/>
+        <source>Grids</source>
+        <translation>网格</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/MapLogbookPanel.qml" line="154"/>
+        <source>Calls</source>
+        <translation>呼号</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/MapLogbookPanel.qml" line="197"/>
         <source>DATE</source>
-        <translation type="vanished">日期</translation>
+        <translation>日期</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapLogbookPanel.qml" line="130"/>
+        <location filename="../qml/decodium/components/MapLogbookPanel.qml" line="138"/>
         <source>Export the current filtered logbook to Documents/Decodium</source>
-        <translation type="vanished">将当前筛选后的日志导出到 文档/Decodium</translation>
+        <translation>将当前筛选后的日志导出到 文档/Decodium</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapLogbookPanel.qml" line="198"/>
+        <source>CALL</source>
+        <translation>CALL</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/MapLogbookPanel.qml" line="199"/>
         <source>GRID</source>
-        <translation type="vanished">网格</translation>
+        <translation>网格</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapLogbookPanel.qml" line="200"/>
+        <source>BAND</source>
+        <translation>乐队</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/MapLogbookPanel.qml" line="201"/>
         <source>MODE</source>
-        <translation type="vanished">模式</translation>
+        <translation>模式</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapLogbookPanel.qml" line="111"/>
         <source>Newest first</source>
-        <translation type="vanished">最新在前</translation>
+        <translation>最新在前</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapLogbookPanel.qml" line="291"/>
         <source>No QSO matches the current filters</source>
-        <translation type="vanished">没有 QSO 符合当前筛选条件</translation>
+        <translation>没有 QSO 符合当前筛选条件</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapLogbookPanel.qml" line="202"/>
         <source>REFERENCE / DXCC</source>
-        <translation type="vanished">参考 / DXCC</translation>
+        <translation>参考 / DXCC</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapLogbookPanel.qml" line="102"/>
         <source>Sort field</source>
-        <translation type="vanished">排序字段</translation>
+        <translation>排序字段</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapLogbookPanel.qml" line="255"/>
         <source>Primary: %1
 VUCC: %2</source>
-        <translation type="vanished">主要：%1
+        <translation>主要：%1
 VUCC：%2</translation>
     </message>
 </context>
@@ -16626,84 +19244,110 @@ VUCC：%2</translation>
         <translation type="vanished">%1  %2  %3 dB  %4</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapOperationsWindows.qml" line="333"/>
         <source>%1 items  ·  %2</source>
-        <translation type="vanished">%1 项  ·  %2</translation>
+        <translation>%1 项  ·  %2</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapOperationsWindows.qml" line="188"/>
         <source>EXTERNAL MAP CONDITIONS</source>
-        <translation type="vanished">外部地图状况</translation>
+        <translation>外部地图状况</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapOperationsWindows.qml" line="71"/>
         <source>Filter call, grid or DXCC</source>
-        <translation type="vanished">按呼号、网格或 DXCC 筛选</translation>
+        <translation>按呼号、网格或 DXCC 筛选</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapOperationsWindows.qml" line="64"/>
         <source>LIVE CALL ROSTER</source>
-        <translation type="vanished">实时呼号列表</translation>
+        <translation>实时呼号列表</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapOperationsWindows.qml" line="57"/>
         <source>Map Roster - Decodium</source>
-        <translation type="vanished">地图列表 - Decodium</translation>
+        <translation>地图列表 - Decodium</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapOperationsWindows.qml" line="122"/>
+        <source>%1  %2  %3 dB  %4  %5</source>
+        <translation>%1  %2  %3 dB  %4  %5</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/MapOperationsWindows.qml" line="155"/>
         <source>Map Statistics - Decodium</source>
-        <translation type="vanished">地图统计 - Decodium</translation>
+        <translation>地图统计 - Decodium</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapOperationsWindows.qml" line="178"/>
         <source>Radio Conditions - Decodium</source>
-        <translation type="vanished">无线电状况 - Decodium</translation>
+        <translation>无线电状况 - Decodium</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapOperationsWindows.qml" line="215"/>
         <source>Moon: Az %1°  El %2°  Distance %3 km</source>
-        <translation type="vanished">月球: 方位 %1°  仰角 %2°  距离 %3 km</translation>
+        <translation>月球: 方位 %1°  仰角 %2°  距离 %3 km</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapOperationsWindows.qml" line="226"/>
         <source>Sublunar point %1°, %2°  Illumination %3%</source>
-        <translation type="vanished">月下点 %1°, %2°  照度 %3%</translation>
+        <translation>月下点 %1°, %2°  照度 %3%</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapOperationsWindows.qml" line="346"/>
         <source>  · valid to %1</source>
-        <translation type="vanished">  · 有效至 %1</translation>
+        <translation>  · 有效至 %1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapOperationsWindows.qml" line="288"/>
         <source>valid to %1</source>
-        <translation type="vanished">有效至 %1</translation>
+        <translation>有效至 %1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapOperationsWindows.qml" line="289"/>
         <source>validity unavailable</source>
-        <translation type="vanished">有效期不可用</translation>
+        <translation>有效期不可用</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapOperationsWindows.qml" line="36"/>
         <source>%1h old</source>
-        <translation type="vanished">%1 小时前</translation>
+        <translation>%1 小时前</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapOperationsWindows.qml" line="35"/>
         <source>%1m old</source>
-        <translation type="vanished">%1 分钟前</translation>
+        <translation>%1 分钟前</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapOperationsWindows.qml" line="33"/>
         <source>%1s old</source>
-        <translation type="vanished">%1 秒前</translation>
+        <translation>%1 秒前</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapOperationsWindows.qml" line="31"/>
         <source>no sample</source>
-        <translation type="vanished">无采样</translation>
+        <translation>无采样</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapOperationsWindows.qml" line="249"/>
         <source>PROPAGATION FORECAST · age / validity / decay</source>
-        <translation type="vanished">传播预报 · 时长 / 有效期 / 衰减</translation>
+        <translation>传播预报 · 时长 / 有效期 / 衰减</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapOperationsWindows.qml" line="136"/>
         <source>CALL</source>
-        <translation type="vanished">CALL</translation>
+        <translation>CALL</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapOperationsWindows.qml" line="194"/>
+        <location filename="../qml/decodium/components/MapOperationsWindows.qml" line="360"/>
         <source>Refresh</source>
-        <translation type="vanished">刷新</translation>
+        <translation>刷新</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapOperationsWindows.qml" line="219"/>
         <source>Moon data unavailable</source>
-        <translation type="vanished">月球数据不可用</translation>
+        <translation>月球数据不可用</translation>
     </message>
 </context>
 <context>
@@ -16733,84 +19377,138 @@ VUCC：%2</translation>
         <translation type="vanished">当前日志筛选条件下没有统计数据</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapStatisticsPanel.qml" line="94"/>
         <source>%1 QSO</source>
-        <translation type="vanished">%1 QSO</translation>
+        <translation>%1 QSO</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapStatisticsPanel.qml" line="346"/>
         <source>%1 QSO · %2 QSL · %3 DXCC</source>
-        <translation type="vanished">%1 QSO · %2 QSL · %3 DXCC</translation>
+        <translation>%1 QSO · %2 QSL · %3 DXCC</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapStatisticsPanel.qml" line="220"/>
         <source>QSL %1 (%2)</source>
-        <translation type="vanished">QSL %1 (%2)</translation>
+        <translation>QSL %1 (%2)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapStatisticsPanel.qml" line="60"/>
         <source>JSON</source>
-        <translation type="vanished">JSON</translation>
+        <translation>JSON</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapStatisticsPanel.qml" line="66"/>
+        <source>CSV</source>
+        <translation>CSV</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/MapStatisticsPanel.qml" line="136"/>
+        <source>QSO</source>
+        <translation>QSO</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/MapStatisticsPanel.qml" line="137"/>
+        <source>Confirmed</source>
+        <translation>已确认</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/MapStatisticsPanel.qml" line="138"/>
+        <source>Calls</source>
+        <translation>呼号</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/MapStatisticsPanel.qml" line="139"/>
+        <source>DXCC</source>
+        <translation>DXCC</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/MapStatisticsPanel.qml" line="140"/>
+        <source>Grids</source>
+        <translation>网格</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/MapStatisticsPanel.qml" line="265"/>
         <source>%1 QSO · %2 QSL
 Calls %3/%4 · DXCC %5/%6</source>
-        <translation type="vanished">%1 QSO · %2 QSL
+        <translation>%1 QSO · %2 QSL
 呼号 %3/%4 · DXCC %5/%6</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapStatisticsPanel.qml" line="112"/>
         <source>%1 · worked %2 · confirmed %3</source>
-        <translation type="vanished">%1 · 已通联 %2 · 已确认 %3</translation>
+        <translation>%1 · 已通联 %2 · 已确认 %3</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapStatisticsPanel.qml" line="231"/>
         <source>AWARD PROGRESSION · CUMULATIVE</source>
-        <translation type="vanished">奖状进度 · 累计</translation>
+        <translation>奖状进度 · 累计</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapStatisticsPanel.qml" line="76"/>
         <source>Award focus</source>
-        <translation type="vanished">关注的奖状</translation>
+        <translation>关注的奖状</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapStatisticsPanel.qml" line="277"/>
         <source>Grid %1/%2 · WPX %3/%4</source>
-        <translation type="vanished">Grid %1/%2 · WPX %3/%4</translation>
+        <translation>Grid %1/%2 · WPX %3/%4</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapStatisticsPanel.qml" line="318"/>
+        <source>%1 QSO · %2 QSL</source>
+        <translation>%1 QSO · %2 QSL</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/MapStatisticsPanel.qml" line="375"/>
         <source>DRILL-DOWN · %1</source>
-        <translation type="vanished">下钻 · %1</translation>
+        <translation>下钻 · %1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapStatisticsPanel.qml" line="312"/>
         <source>Open QSO drill-down</source>
-        <translation type="vanished">打开 QSO 下钻</translation>
+        <translation>打开 QSO 下钻</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapStatisticsPanel.qml" line="54"/>
         <source>LOGBOOK STATISTICS</source>
-        <translation type="vanished">日志统计</translation>
+        <translation>日志统计</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapStatisticsPanel.qml" line="239"/>
         <source>No dated QSO available for historical progression</source>
-        <translation type="vanished">没有带日期的 QSO 可用于历史进度</translation>
+        <translation>没有带日期的 QSO 可用于历史进度</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapStatisticsPanel.qml" line="182"/>
         <source>PERIOD COMPARISON</source>
-        <translation type="vanished">周期对比</translation>
+        <translation>周期对比</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapStatisticsPanel.qml" line="328"/>
         <source>PROFILES / CALLSIGNS</source>
-        <translation type="vanished">配置 / 呼号</translation>
+        <translation>配置 / 呼号</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapStatisticsPanel.qml" line="122"/>
         <source>target %1</source>
-        <translation type="vanished">目标 %1</translation>
+        <translation>目标 %1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapStatisticsPanel.qml" line="354"/>
         <source>QSOs</source>
-        <translation type="vanished">QSO</translation>
+        <translation>QSO</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapStatisticsPanel.qml" line="209"/>
         <source>QSO %1 → %2 (%3)
 DXCC %4 · Grid %5 · WPX %6</source>
-        <translation type="vanished">QSO %1 → %2 (%3)
+        <translation>QSO %1 → %2 (%3)
 DXCC %4 · Grid %5 · WPX %6</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/MapStatisticsPanel.qml" line="290"/>
         <source>TOP BANDS · MODES · DXCC · WPX · GRIDS</source>
-        <translation type="vanished">主要波段 · 模式 · DXCC · WPX · 网格</translation>
+        <translation>主要波段 · 模式 · DXCC · WPX · 网格</translation>
     </message>
 </context>
 <context>
@@ -16830,28 +19528,34 @@ DXCC %4 · Grid %5 · WPX %6</translation>
 <context>
     <name>MessageAvgPanel</name>
     <message>
+        <location filename="../qml/panels/MessageAvgPanel.qml" line="43"/>
         <source>MESSAGE AVERAGING</source>
-        <translation type="vanished">消息平均</translation>
+        <translation>消息平均</translation>
     </message>
     <message>
+        <location filename="../qml/panels/MessageAvgPanel.qml" line="64"/>
         <source>Clear</source>
-        <translation type="vanished">清除</translation>
+        <translation>清除</translation>
     </message>
     <message>
+        <location filename="../qml/panels/MessageAvgPanel.qml" line="85"/>
         <source>Freq</source>
-        <translation type="vanished">Freq</translation>
+        <translation>Freq</translation>
     </message>
     <message>
+        <location filename="../qml/panels/MessageAvgPanel.qml" line="86"/>
         <source>Avg</source>
-        <translation type="vanished">Avg</translation>
+        <translation>Avg</translation>
     </message>
     <message>
+        <location filename="../qml/panels/MessageAvgPanel.qml" line="87"/>
         <source>Message</source>
-        <translation type="vanished">信息</translation>
+        <translation>信息</translation>
     </message>
     <message>
+        <location filename="../qml/panels/MessageAvgPanel.qml" line="163"/>
         <source>No averaged results yet</source>
-        <translation type="vanished">尚无平均结果</translation>
+        <translation>尚无平均结果</translation>
     </message>
 </context>
 <context>
@@ -16982,74 +19686,113 @@ DXCC %4 · Grid %5 · WPX %6</translation>
 <context>
     <name>NetworkPanel</name>
     <message>
+        <location filename="../qml/decodium/rotor/NetworkPanel.qml" line="7"/>
         <source>NETWORK LINKS</source>
-        <translation type="vanished">网络链接</translation>
+        <translation>网络链接</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/NetworkPanel.qml" line="15"/>
         <source>Addresses to use on the phone and station software:</source>
-        <translation type="vanished">手机和电台软件使用的地址：</translation>
+        <translation>手机和电台软件使用的地址：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/NetworkPanel.qml" line="55"/>
         <source>Token-protected access: clients must present it.</source>
-        <translation type="vanished">令牌保护访问：客户端必须出示令牌。</translation>
+        <translation>令牌保护访问：客户端必须出示令牌。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/NetworkPanel.qml" line="56"/>
         <source>Open access on the local network. For use away from home go through a VPN; do not open ports on the router.</source>
-        <translation type="vanished">本地网络开放访问。在外使用请通过VPN；不要在路由器上开放端口。</translation>
+        <translation>本地网络开放访问。在外使用请通过VPN；不要在路由器上开放端口。</translation>
+    </message>
+</context>
+<context>
+    <name>OmniRigTransceiver</name>
+    <message>
+        <location filename="../Transceiver/OmniRigTransceiver.cpp" line="55"/>
+        <source>OmniRig: unrecognized mode</source>
+        <translation>OmniRig：无法识别的模式</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/OmniRigTransceiver.cpp" line="168"/>
+        <source>Failed to start OmniRig COM server</source>
+        <translation>无法启动 OmniRig COM 服务器</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/OmniRigTransceiver.cpp" line="387"/>
+        <source>OmniRig COM/OLE error: %1 at %2: %3 (%4)</source>
+        <translation>OmniRig COM/OLE 错误：%1，位于 %2：%3（%4）</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/OmniRigTransceiver.cpp" line="767"/>
+        <source>OmniRig: don&apos;t know how to set rig frequency</source>
+        <translation>OmniRig：不知道如何设置电台频率</translation>
     </message>
 </context>
 <context>
     <name>PSKReporterPanel</name>
     <message>
+        <location filename="../qml/decodium/components/PSKReporterPanel.qml" line="134"/>
         <source>updating…</source>
-        <translation type="vanished">更新中…</translation>
+        <translation>更新中…</translation>
     </message>
 </context>
 <context>
     <name>PointingPanel</name>
     <message>
+        <location filename="../qml/decodium/rotor/PointingPanel.qml" line="19"/>
         <source>Azimuth °</source>
-        <translation type="vanished">方位角 °</translation>
+        <translation>方位角 °</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/PointingPanel.qml" line="29"/>
         <source>Elevation °</source>
-        <translation type="vanished">仰角 °</translation>
+        <translation>仰角 °</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/PointingPanel.qml" line="36"/>
         <source>AIM</source>
-        <translation type="vanished">对准</translation>
+        <translation>对准</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/PointingPanel.qml" line="49"/>
         <source>N</source>
-        <translation type="vanished">北</translation>
+        <translation>北</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/PointingPanel.qml" line="49"/>
         <source>NE</source>
-        <translation type="vanished">东北</translation>
+        <translation>东北</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/PointingPanel.qml" line="50"/>
         <source>E</source>
-        <translation type="vanished">东</translation>
+        <translation>东</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/PointingPanel.qml" line="50"/>
         <source>SE</source>
-        <translation type="vanished">东南</translation>
+        <translation>东南</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/PointingPanel.qml" line="51"/>
         <source>S</source>
-        <translation type="vanished">南</translation>
+        <translation>南</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/PointingPanel.qml" line="51"/>
         <source>SW</source>
-        <translation type="vanished">西南</translation>
+        <translation>西南</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/PointingPanel.qml" line="52"/>
         <source>W</source>
-        <translation type="vanished">西</translation>
+        <translation>西</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/PointingPanel.qml" line="52"/>
         <source>NW</source>
-        <translation type="vanished">西北</translation>
+        <translation>西北</translation>
     </message>
 </context>
 <context>
@@ -17063,28 +19806,82 @@ DXCC %4 · Grid %5 · WPX %6</translation>
 <context>
     <name>PresetPanel</name>
     <message>
+        <location filename="../qml/decodium/rotor/PresetPanel.qml" line="8"/>
         <source>MEMORIES</source>
-        <translation type="vanished">存储</translation>
+        <translation>存储</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/PresetPanel.qml" line="63"/>
         <source>%1° / %2°</source>
-        <translation type="vanished">%1° / %2°</translation>
+        <translation>%1° / %2°</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/PresetPanel.qml" line="73"/>
         <source>GO</source>
-        <translation type="vanished">执行</translation>
+        <translation>执行</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/PresetPanel.qml" line="92"/>
         <source>No memories: name the current heading and save it.</source>
-        <translation type="vanished">没有存储：为当前方向命名并保存。</translation>
+        <translation>没有存储：为当前方向命名并保存。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/PresetPanel.qml" line="106"/>
         <source>Memory name</source>
-        <translation type="vanished">存储名称</translation>
+        <translation>存储名称</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/PresetPanel.qml" line="112"/>
         <source>SAVE HERE</source>
-        <translation type="vanished">保存于此</translation>
+        <translation>保存于此</translation>
+    </message>
+</context>
+<context>
+    <name>Q65DopplerPanel</name>
+    <message>
+        <location filename="../qml/decodium/components/Q65DopplerPanel.qml" line="27"/>
+        <source>Q65 — EME Doppler tracking</source>
+        <translation>Q65 — EME 多普勒跟踪</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Q65DopplerPanel.qml" line="36"/>
+        <source>Constant frequency on Moon (CFOM)</source>
+        <translation>月球上的恒定频率（CFOM）</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Q65DopplerPanel.qml" line="37"/>
+        <source>Full Doppler to DX Grid</source>
+        <translation>全多普勒到 DX 网格</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Q65DopplerPanel.qml" line="37"/>
+        <source>Own Echo (RX only)</source>
+        <translation>自身回波（仅 RX）</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Q65DopplerPanel.qml" line="44"/>
+        <source>My grid: %1</source>
+        <translation>我的网格：%1</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Q65DopplerPanel.qml" line="50"/>
+        <source>DX locator (6 characters)</source>
+        <translation>DX 网格定位（6 个字符）</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Q65DopplerPanel.qml" line="58"/>
+        <source>Enable Doppler tracking</source>
+        <translation>启用多普勒跟踪</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Q65DopplerPanel.qml" line="73"/>
+        <source>RX correction: %1 Hz   TX correction: %2 Hz</source>
+        <translation>RX 校正：%1 Hz   TX 校正：%2 Hz</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Q65DopplerPanel.qml" line="81"/>
+        <source>Hamlib + Rig/Fake It split required. TX correction is held during transmission. Tracking starts OFF each session; coordinate the method with the other station.</source>
+        <translation>需要 Hamlib + Rig/Fake It 分频。发射期间保持 TX 校正。每次会话跟踪都从关闭开始；请与对方电台协调所用方法。</translation>
     </message>
 </context>
 <context>
@@ -17248,26 +20045,26 @@ DXCC %4 · Grid %5 · WPX %6</translation>
         <translation>集群没有返回数据</translation>
     </message>
     <message>
+        <location filename="../Network/Cloudlog.cpp" line="75"/>
+        <location filename="../src/services/DecodiumPropagationManager.cpp" line="218"/>
         <location filename="../widgets/DXClusterWindow.cpp" line="465"/>
         <location filename="../widgets/IonosphericForecastWindow.cpp" line="42"/>
-        <location filename="../src/services/DecodiumPropagationManager.cpp" line="218"/>
-        <location filename="../Network/Cloudlog.cpp" line="75"/>
         <source>empty reply</source>
         <translation>空回复</translation>
     </message>
     <message>
+        <location filename="../Network/Cloudlog.cpp" line="82"/>
+        <location filename="../src/services/DecodiumPropagationManager.cpp" line="224"/>
         <location filename="../widgets/DXClusterWindow.cpp" line="472"/>
         <location filename="../widgets/IonosphericForecastWindow.cpp" line="49"/>
-        <location filename="../src/services/DecodiumPropagationManager.cpp" line="224"/>
-        <location filename="../Network/Cloudlog.cpp" line="82"/>
         <source>reply too large</source>
         <translation>回复太大</translation>
     </message>
     <message>
+        <location filename="../Network/Cloudlog.cpp" line="89"/>
+        <location filename="../src/services/DecodiumPropagationManager.cpp" line="230"/>
         <location filename="../widgets/DXClusterWindow.cpp" line="479"/>
         <location filename="../widgets/IonosphericForecastWindow.cpp" line="56"/>
-        <location filename="../src/services/DecodiumPropagationManager.cpp" line="230"/>
-        <location filename="../Network/Cloudlog.cpp" line="89"/>
         <source>reply exceeds limit</source>
         <translation>回复超出限制</translation>
     </message>
@@ -17395,8 +20192,8 @@ DXCC %4 · Grid %5 · WPX %6</translation>
         <translation>Cloudlog URL 为空</translation>
     </message>
     <message>
-        <location filename="../Network/DecodiumCloudlogLite.cpp" line="42"/>
         <location filename="../Network/Cloudlog.cpp" line="62"/>
+        <location filename="../Network/DecodiumCloudlogLite.cpp" line="42"/>
         <source>Cloudlog URL is invalid: %1</source>
         <translation>Cloudlog URL 无效：%1</translation>
     </message>
@@ -17537,74 +20334,74 @@ Downloaded file exceeds limit of %1 MiB:
         <translation>UDP 套接字错误</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="32596"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="32645"/>
         <source>Invalid frequency</source>
         <translation>无效频率</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="32598"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="32647"/>
         <source>Invalid date/time. Use ISO format or yyyy-MM-dd HH:mm.</source>
         <translation>无效的日期/时间。请使用 ISO 格式或 yyyy-MM-dd HH:mm。</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="32600"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="32649"/>
         <source>Invalid frequency row</source>
         <translation>无效的频率行</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="32659"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="32708"/>
         <source>Failed to parse JSON frequencies file: %1</source>
         <translation>解析 JSON 频率文件失败：%1</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="32667"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="32716"/>
         <source>No frequencies were found</source>
         <translation>未找到任何频率</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="32673"/>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="32775"/>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="32802"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="32722"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="32824"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="32851"/>
         <source>Frequency file contains too many rows (%1, limit %2)</source>
         <translation>频率文件包含的行过多 (%1，上限 %2)</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="32714"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="32763"/>
         <source>Frequency file does not exist</source>
         <translation>频率文件不存在</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="32720"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="32769"/>
         <source>Frequency file is too large (%1 bytes, limit %2 bytes)</source>
         <translation>频率文件过大 (%1 字节，上限 %2 字节)</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="32730"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="32779"/>
         <source>Cannot open frequency file: %1</source>
         <translation>无法打开频率文件：%1</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="32740"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="32789"/>
         <source>No valid working frequencies found</source>
         <translation>未找到有效的工作频率</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="32754"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="32803"/>
         <source>Not a valid frequencies file: incorrect file magic</source>
         <translation>不是有效的频率文件：文件 magic 不正确</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="32761"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="32810"/>
         <source>Not a valid frequencies file: version is too new</source>
         <translation>不是有效的频率文件：版本过新</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="32769"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="32818"/>
         <source>Not a valid frequencies file: cannot read row count</source>
         <translation>不是有效的频率文件：无法读取行数</translation>
     </message>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="32796"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="32845"/>
         <source>Not a valid frequencies file: contents corrupt</source>
         <translation>不是有效的频率文件：内容已损坏</translation>
     </message>
@@ -17780,16 +20577,23 @@ Downloaded file exceeds limit of %1 MiB:
         <source>None</source>
         <translation>无</translation>
     </message>
+    <message>
+        <location filename="../UDPExamples/MessageAggregator.cpp" line="100"/>
+        <source>Unexpected error</source>
+        <translation>意外错误</translation>
+    </message>
 </context>
 <context>
     <name>QSYDialog</name>
     <message>
+        <location filename="../qml/dialogs/QSYDialog.qml" line="78"/>
         <source>SUGGESTED FREQUENCIES</source>
-        <translation type="vanished">建议频率</translation>
+        <translation>建议频率</translation>
     </message>
     <message>
+        <location filename="../qml/dialogs/QSYDialog.qml" line="168"/>
         <source>Close</source>
-        <translation type="vanished">关闭</translation>
+        <translation>关闭</translation>
     </message>
 </context>
 <context>
@@ -18225,77 +21029,106 @@ will not be shown!</source>
     </message>
 </context>
 <context>
+    <name>QsoLog</name>
+    <message>
+        <location filename="../src/rtty/app/QsoLog.cpp" line="76"/>
+        <source>A callsign is the least a contact needs to be logged</source>
+        <translation>呼号是一次通联被记录所需的最低要求</translation>
+    </message>
+    <message>
+        <location filename="../src/rtty/app/QsoLog.cpp" line="273"/>
+        <source>Cannot write the log in %1</source>
+        <translation>无法将日志写入 %1</translation>
+    </message>
+</context>
+<context>
     <name>QsyQuickPickerDialog</name>
     <message>
+        <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="18"/>
         <source>QSY Quick Picker</source>
-        <translation type="vanished">QSY Quick Picker</translation>
+        <translation>QSY Quick Picker</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="82"/>
         <source>QSY to Working Frequencies preset</source>
-        <translation type="vanished">QSY 到工作频率预设</translation>
+        <translation>QSY 到工作频率预设</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="89"/>
         <source>%1 presets · %2 visible</source>
-        <translation type="vanished">%1 个预设 · %2 个可见</translation>
+        <translation>%1 个预设 · %2 个可见</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="102"/>
         <source>Preferred only</source>
-        <translation type="vanished">仅 Preferred</translation>
+        <translation>仅 Preferred</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="108"/>
         <source>Modo:</source>
-        <translation type="vanished">模式：</translation>
+        <translation>模式：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="116"/>
         <source>Band:</source>
-        <translation type="vanished">波段：</translation>
+        <translation>波段：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="213"/>
         <source>Click a preset to QSY · F2 to reopen</source>
-        <translation type="vanished">点击预设进行 QSY · F2 重新打开</translation>
+        <translation>点击预设进行 QSY · F2 重新打开</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="220"/>
         <source>Close</source>
-        <translation type="vanished">关闭</translation>
+        <translation>关闭</translation>
     </message>
 </context>
 <context>
     <name>QueuePanel</name>
     <message>
+        <location filename="../qml/decodium/components/QueuePanel.qml" line="182"/>
         <source>Grid</source>
-        <translation type="vanished">网格</translation>
+        <translation>网格</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/QueuePanel.qml" line="183"/>
         <source>Freq</source>
-        <translation type="vanished">Freq</translation>
+        <translation>Freq</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/QueuePanel.qml" line="275"/>
         <source>Queue empty
 Double-click decode to add</source>
-        <translation type="vanished">队列为空
+        <translation>队列为空
 双击解码即可加入</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/QueuePanel.qml" line="287"/>
         <source>Clear Queue</source>
-        <translation type="vanished">清空队列</translation>
+        <translation>清空队列</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/QueuePanel.qml" line="327"/>
         <source>Status</source>
-        <translation type="vanished">状态</translation>
+        <translation>状态</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/QueuePanel.qml" line="418"/>
         <source>No active QSOs
 Add from queue</source>
-        <translation type="vanished">没有进行中的 QSO
+        <translation>没有进行中的 QSO
 可从队列添加</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/QueuePanel.qml" line="432"/>
         <source>Max:</source>
-        <translation type="vanished">最大：</translation>
+        <translation>最大：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/QueuePanel.qml" line="452"/>
         <source>Clear</source>
-        <translation type="vanished">清除</translation>
+        <translation>清除</translation>
     </message>
 </context>
 <context>
@@ -18342,36 +21175,56 @@ Add from queue</source>
     </message>
 </context>
 <context>
+    <name>RadioHub</name>
+    <message>
+        <location filename="../src/rtty/link/RadioHub.cpp" line="13"/>
+        <source>Disconnected</source>
+        <translation>已断开连接</translation>
+    </message>
+    <message>
+        <location filename="../src/rtty/link/RadioHub.cpp" line="163"/>
+        <source>Transmit is unavailable on this connection</source>
+        <translation>此连接上无法发射</translation>
+    </message>
+</context>
+<context>
     <name>ReceivePanel</name>
     <message>
+        <location filename="../qml/decodium/rtty/ReceivePanel.qml" line="61"/>
         <source>RECEIVE</source>
-        <translation type="vanished">接收</translation>
+        <translation>接收</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/ReceivePanel.qml" line="90"/>
         <source>Call</source>
-        <translation type="vanished">Call</translation>
+        <translation>Call</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/ReceivePanel.qml" line="99"/>
         <source>Highlights callsigns. Click one to put it
 in the HIS CALL field.</source>
-        <translation type="vanished">高亮呼号。点击一个即可填入
+        <translation>高亮呼号。点击一个即可填入
 HIS CALL 栏。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/ReceivePanel.qml" line="104"/>
         <source>Follow</source>
-        <translation type="vanished">跟随</translation>
+        <translation>跟随</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/ReceivePanel.qml" line="118"/>
         <source>Copy</source>
-        <translation type="vanished">复制</translation>
+        <translation>复制</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/ReceivePanel.qml" line="130"/>
         <source>Clear</source>
-        <translation type="vanished">清除</translation>
+        <translation>清除</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/ReceivePanel.qml" line="291"/>
         <source>jump to end ↓</source>
-        <translation type="vanished">跳到末尾 ↓</translation>
+        <translation>跳到末尾 ↓</translation>
     </message>
 </context>
 <context>
@@ -18469,269 +21322,389 @@ Error(%2): %3</source>
 <context>
     <name>RigControlDialog</name>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="12"/>
         <source>CAT — Transceiver Settings</source>
-        <translation type="vanished">CAT — 收发信机设置</translation>
+        <translation>CAT — 收发信机设置</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="93"/>
         <source>CAT — Transceiver Control</source>
-        <translation type="vanished">CAT — 收发信机控制</translation>
+        <translation>CAT — 收发信机控制</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="121"/>
         <source>Not connected</source>
-        <translation type="vanished">未连接</translation>
+        <translation>未连接</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="160"/>
         <source>CAT active</source>
-        <translation type="vanished">CAT 已激活</translation>
+        <translation>CAT 已激活</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="160"/>
         <source>CAT not connected</source>
-        <translation type="vanished">CAT 未连接</translation>
+        <translation>CAT 未连接</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="224"/>
         <source>The backend can only be changed when the radio is disconnected.</source>
-        <translation type="vanished">只有在电台断开连接时才能更改后端。</translation>
+        <translation>只有在电台断开连接时才能更改后端。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="246"/>
         <source>
 Tip: close OmniRig from the Windows tray icon, then press Connect again.</source>
-        <translation type="vanished">
+        <translation>
 提示：从 Windows 托盘图标关闭 OmniRig，然后再次按“连接”。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="308"/>
         <source>Rig name…</source>
-        <translation type="vanished">电台名称…</translation>
+        <translation>电台名称…</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="316"/>
         <source>Choose…</source>
-        <translation type="vanished">选择…</translation>
+        <translation>选择…</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="326"/>
         <source>Select Transceiver</source>
-        <translation type="vanished">选择收发信机</translation>
+        <translation>选择收发信机</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="335"/>
         <source>⚙  Choose Transceiver (%1 available)</source>
-        <translation type="vanished">⚙  选择收发信机（%1 个可用）</translation>
+        <translation>⚙  选择收发信机（%1 个可用）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="344"/>
         <source>Filter by name (e.g. Icom, Yaesu, FT-991…)</source>
-        <translation type="vanished">按名称筛选（例如 Icom、Yaesu、FT-991…）</translation>
+        <translation>按名称筛选（例如 Icom、Yaesu、FT-991…）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="379"/>
         <source>Cancel</source>
-        <translation type="vanished">取消</translation>
+        <translation>取消</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="583"/>
         <source>Connect on startup</source>
-        <translation type="vanished">启动时连接</translation>
+        <translation>启动时连接</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="589"/>
         <source>Start monitor</source>
-        <translation type="vanished">启动监视器</translation>
+        <translation>启动监视器</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="754"/>
         <source>▶  Connect</source>
-        <translation type="vanished">▶  连接</translation>
+        <translation>▶  连接</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="787"/>
         <source>■  Disconnect</source>
-        <translation type="vanished">■  断开</translation>
+        <translation>■  断开</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="805"/>
         <source>Close</source>
-        <translation type="vanished">关闭</translation>
+        <translation>关闭</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="736"/>
         <source>…(%1 more lines)</source>
-        <translation type="vanished">…(另有 %1 行)</translation>
+        <translation>…(另有 %1 行)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="267"/>
         <source>Advanced</source>
-        <translation type="vanished">高级</translation>
+        <translation>高级</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="402"/>
         <source>Control:</source>
-        <translation type="vanished">控制:</translation>
+        <translation>控制:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="388"/>
         <source>Management:</source>
-        <translation type="vanished">管理:</translation>
+        <translation>管理:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="416"/>
         <source>Ownership:</source>
-        <translation type="vanished">独占控制:</translation>
+        <translation>独占控制:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="421"/>
         <source>Request control automatically</source>
-        <translation type="vanished">自动请求控制权</translation>
+        <translation>自动请求控制权</translation>
     </message>
 </context>
 <context>
     <name>RigControlDialogContent</name>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="172"/>
         <source>Search radio...</source>
-        <translation type="vanished">搜索电台...</translation>
+        <translation>搜索电台...</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="74"/>
         <source>Auto-detect</source>
-        <translation type="vanished">自动检测</translation>
+        <translation>自动检测</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="79"/>
         <source>Detect my radio</source>
-        <translation type="vanished">检测我的电台</translation>
+        <translation>检测我的电台</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="82"/>
         <source>Reads what the system already knows: it opens no port and sends no command</source>
-        <translation type="vanished">只读取系统已知的信息：不打开任何端口，也不发送任何指令</translation>
+        <translation>只读取系统已知的信息：不打开任何端口，也不发送任何指令</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="101"/>
         <source>Radio</source>
-        <translation type="vanished">电台</translation>
+        <translation>电台</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="224"/>
         <source>Network host</source>
-        <translation type="vanished">网络主机</translation>
+        <translation>网络主机</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="247"/>
         <source>Serial port</source>
-        <translation type="vanished">串口</translation>
+        <translation>串口</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="273"/>
         <source>Refresh ports</source>
-        <translation type="vanished">刷新端口</translation>
+        <translation>刷新端口</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="278"/>
         <source>Baud rate</source>
-        <translation type="vanished">波特率</translation>
+        <translation>波特率</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="302"/>
         <source>PTT method</source>
-        <translation type="vanished">PTT 方式</translation>
+        <translation>PTT 方式</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="325"/>
         <source>Auto-connect on startup</source>
-        <translation type="vanished">启动时自动连接</translation>
+        <translation>启动时自动连接</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="340"/>
         <source>Auto-start audio</source>
-        <translation type="vanished">自动启动音频</translation>
+        <translation>自动启动音频</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="364"/>
         <source>TS-590S USB: Menu 60 COM = USB, Menu 62 BAUD = 115200 (default)</source>
-        <translation type="vanished">TS-590S USB: Menu 60 COM = USB, Menu 62 BAUD = 115200 (default)</translation>
+        <translation>TS-590S USB: Menu 60 COM = USB, Menu 62 BAUD = 115200 (default)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="380"/>
         <source>Save</source>
-        <translation type="vanished">保存</translation>
+        <translation>保存</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="390"/>
         <source>Connect</source>
-        <translation type="vanished">连接</translation>
+        <translation>连接</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="406"/>
         <source>Disconnect</source>
-        <translation type="vanished">断开连接</translation>
+        <translation>断开连接</translation>
     </message>
 </context>
 <context>
     <name>RigDetectResults</name>
     <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="96"/>
         <source>Detected radios</source>
-        <translation type="vanished">检测到的电台</translation>
+        <translation>检测到的电台</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="117"/>
         <source>Nothing has been changed yet. Check the proposal, then apply it.</source>
-        <translation type="vanished">尚未做出任何更改。请检查建议后再应用。</translation>
+        <translation>尚未做出任何更改。请检查建议后再应用。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="118"/>
         <source>No serial device found. Is the radio on and the USB cable connected?</source>
-        <translation type="vanished">未找到串口设备。电台是否已开机、USB 线是否已连接？</translation>
+        <translation>未找到串口设备。电台是否已开机、USB 线是否已连接？</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="159"/>
         <source>confidence %1%</source>
-        <translation type="vanished">可信度 %1%</translation>
+        <translation>可信度 %1%</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="171"/>
         <source>CAT port: %1</source>
-        <translation type="vanished">CAT 端口：%1</translation>
+        <translation>CAT 端口：%1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="173"/>
         <source> — %1 baud</source>
-        <translation type="vanished"> — %1 波特</translation>
+        <translation> — %1 波特</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="176"/>
         <source> (other ports of the same device: %1)</source>
-        <translation type="vanished">（同一设备的其他端口：%1）</translation>
+        <translation>（同一设备的其他端口：%1）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="187"/>
         <source>Audio: in %1 / out %2</source>
-        <translation type="vanished">音频：输入 %1 / 输出 %2</translation>
+        <translation>音频：输入 %1 / 输出 %2</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="188"/>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="189"/>
         <source>not found</source>
-        <translation type="vanished">未找到</translation>
+        <translation>未找到</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="204"/>
         <source>Apply</source>
-        <translation type="vanished">应用</translation>
+        <translation>应用</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="234"/>
         <source>Also set the radio&apos;s audio devices</source>
-        <translation type="vanished">同时设置电台的音频设备</translation>
+        <translation>同时设置电台的音频设备</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="261"/>
         <source>Close</source>
-        <translation type="vanished">关闭</translation>
+        <translation>关闭</translation>
     </message>
 </context>
 <context>
     <name>RotorSwitch</name>
     <message>
+        <location filename="../qml/decodium/rotor/RotorSwitch.qml" line="7"/>
         <source>on</source>
-        <translation type="vanished">开</translation>
+        <translation>开</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/RotorSwitch.qml" line="8"/>
         <source>off</source>
-        <translation type="vanished">关</translation>
+        <translation>关</translation>
     </message>
 </context>
 <context>
     <name>RotorWindow</name>
     <message>
+        <location filename="../qml/decodium/components/RotorWindow.qml" line="23"/>
         <source>Rotator - PRO.SIS.TEL control</source>
-        <translation type="vanished">旋转器 - PRO.SIS.TEL 控制</translation>
+        <translation>旋转器 - PRO.SIS.TEL 控制</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RotorWindow.qml" line="49"/>
         <source>CONTROL</source>
-        <translation type="vanished">控制</translation>
+        <translation>控制</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RotorWindow.qml" line="49"/>
         <source>DIAGNOSTICS</source>
-        <translation type="vanished">诊断</translation>
+        <translation>诊断</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RotorWindow.qml" line="49"/>
         <source>SETTINGS</source>
-        <translation type="vanished">设置</translation>
+        <translation>设置</translation>
+    </message>
+</context>
+<context>
+    <name>RttyEngine</name>
+    <message>
+        <location filename="../src/rtty/app/RttyEngine.cpp" line="59"/>
+        <source>Transmit ran for three minutes — stopped</source>
+        <translation>发射持续了三分钟 — 已停止</translation>
+    </message>
+    <message>
+        <location filename="../src/rtty/app/RttyEngine.cpp" line="98"/>
+        <source>Trying the opposite polarity (%1)</source>
+        <translation>正在尝试相反的极性（%1）</translation>
+    </message>
+    <message>
+        <location filename="../src/rtty/app/RttyEngine.cpp" line="99"/>
+        <source>reversed</source>
+        <translation>反向</translation>
+    </message>
+    <message>
+        <location filename="../src/rtty/app/RttyEngine.cpp" line="99"/>
+        <source>direct</source>
+        <translation>正向</translation>
+    </message>
+    <message>
+        <location filename="../src/rtty/app/RttyEngine.cpp" line="100"/>
+        <source>Signal at %1 Hz: moving there</source>
+        <translation>%1 Hz 处有信号：正在移动到该处</translation>
+    </message>
+    <message>
+        <location filename="../src/rtty/app/RttyEngine.cpp" line="265"/>
+        <source>No recognisable RTTY signal in the band</source>
+        <translation>频段中没有可识别的 RTTY 信号</translation>
+    </message>
+    <message>
+        <location filename="../src/rtty/app/RttyEngine.cpp" line="271"/>
+        <source>Centred on %1 Hz (%2 dB above the floor)</source>
+        <translation>已居中于 %1 Hz（高于底噪 %2 dB）</translation>
+    </message>
+    <message>
+        <location filename="../src/rtty/app/RttyEngine.cpp" line="678"/>
+        <source>The radio is in %1 (native FSK). Decodium transmits RTTY as audio/AFSK. Press &apos;Set radio&apos; in the DECODER panel to select DATA-U/DIGU before transmitting.</source>
+        <translation>电台处于 %1 模式（原生 FSK）。Decodium 以音频/AFSK 方式发射 RTTY。发射前请在 DECODER 面板中点击“设置电台”以选择 DATA-U/DIGU。</translation>
+    </message>
+    <message>
+        <location filename="../src/rtty/app/RttyEngine.cpp" line="690"/>
+        <source>The radio is in %1: on voice modes the USB audio does not modulate. Press &apos;Set radio&apos; in the DECODER panel.</source>
+        <translation>电台处于 %1 模式：在语音模式下 USB 音频不会调制。请在 DECODER 面板中点击“设置电台”。</translation>
+    </message>
+    <message>
+        <location filename="../src/rtty/app/RttyEngine.cpp" line="797"/>
+        <source>RTTY audio transmission stopped: output unavailable or transmitter busy.</source>
+        <translation>RTTY 音频发射已停止：输出不可用或发射机繁忙。</translation>
     </message>
 </context>
 <context>
     <name>RttyMain</name>
     <message>
+        <location filename="../qml/decodium/rtty/RttyMain.qml" line="22"/>
         <source>RTTY</source>
-        <translation type="vanished">RTTY</translation>
+        <translation>RTTY</translation>
     </message>
     <message>
         <source>nessuna radio</source>
         <translation type="vanished">无电台</translation>
     </message>
     <message>
-        <source>DECODER</source>
-        <translation type="vanished">解码器</translation>
+        <location filename="../qml/decodium/rtty/RttyMain.qml" line="22"/>
+        <source>Audio only — no CAT</source>
+        <translation>仅音频 — 无 CAT</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/RttyMain.qml" line="208"/>
+        <source>DECODER</source>
+        <translation>解码器</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/rtty/RttyMain.qml" line="208"/>
         <source>FILTERS</source>
-        <translation type="vanished">滤波器</translation>
+        <translation>滤波器</translation>
     </message>
 </context>
 <context>
@@ -18786,233 +21759,318 @@ Tip: close OmniRig from the Windows tray icon, then press Connect again.</source
 <context>
     <name>SatelliteMap</name>
     <message>
+        <location filename="../qml/decodium/rotor/SatelliteMap.qml" line="323"/>
         <source>DECODIUM %1</source>
-        <translation type="vanished">DECODIUM %1</translation>
+        <translation>DECODIUM %1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/SatelliteMap.qml" line="324"/>
         <source>LISTENING OFF</source>
-        <translation type="vanished">监听关闭</translation>
+        <translation>监听关闭</translation>
     </message>
     <message numerus="yes">
+        <location filename="../qml/decodium/rotor/SatelliteMap.qml" line="330"/>
         <source>%n station(s)</source>
-        <translation type="vanished">
+        <translation>
             <numerusform>%n 个电台</numerusform>
         </translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/SatelliteMap.qml" line="441"/>
         <source>%1 · %2° · %3 km</source>
-        <translation type="vanished">%1 · %2° · %3 km</translation>
+        <translation>%1 · %2° · %3 km</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/SatelliteMap.qml" line="476"/>
         <source>AIM</source>
-        <translation type="vanished">对准</translation>
+        <translation>对准</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/SatelliteMap.qml" line="484"/>
         <source>MEMORY</source>
-        <translation type="vanished">存储</translation>
+        <translation>存储</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/SatelliteMap.qml" line="505"/>
         <source>© OpenStreetMap contributors</source>
-        <translation type="vanished">© OpenStreetMap contributors</translation>
+        <translation>© OpenStreetMap contributors</translation>
     </message>
 </context>
 <context>
     <name>SatelliteWindow</name>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="628"/>
         <source>AZ %1° / EL %2°</source>
-        <translation type="vanished">AZ %1° / EL %2°</translation>
+        <translation>AZ %1° / EL %2°</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="697"/>
         <source>AZ %1°→%2°</source>
-        <translation type="vanished">AZ %1°→%2°</translation>
+        <translation>AZ %1°→%2°</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="696"/>
         <source>LOS %1</source>
-        <translation type="vanished">LOS %1</translation>
+        <translation>LOS %1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="695"/>
         <source>max %1°</source>
-        <translation type="vanished">max %1°</translation>
+        <translation>max %1°</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="371"/>
         <source>Track</source>
-        <translation type="vanished">跟踪</translation>
+        <translation>跟踪</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="645"/>
         <source>Rotor PARK</source>
-        <translation type="vanished">旋转器归位</translation>
+        <translation>旋转器归位</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="640"/>
         <source>Rotor STOP</source>
-        <translation type="vanished">停止旋转器</translation>
+        <translation>停止旋转器</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="382"/>
         <source>Rotator enabled</source>
-        <translation type="vanished">已启用旋转器</translation>
+        <translation>已启用旋转器</translation>
     </message>
     <message>
         <source>Rotator host</source>
         <translation type="vanished">旋转器主机</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="625"/>
         <source>Rotor feedback</source>
-        <translation type="vanished">旋转器反馈</translation>
+        <translation>旋转器反馈</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="376"/>
         <source>Auto rotator</source>
-        <translation type="vanished">自动旋转器</translation>
+        <translation>自动旋转器</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="388"/>
         <source>Auto Doppler</source>
-        <translation type="vanished">自动多普勒</translation>
+        <translation>自动多普勒</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="617"/>
         <source>Doppler</source>
-        <translation type="vanished">多普勒</translation>
+        <translation>多普勒</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="609"/>
         <source>Azimuth</source>
-        <translation type="vanished">方位角</translation>
+        <translation>方位角</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="611"/>
         <source>Elevation</source>
-        <translation type="vanished">仰角</translation>
+        <translation>仰角</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="613"/>
         <source>Range</source>
-        <translation type="vanished">距离</translation>
+        <translation>距离</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="615"/>
         <source>Visibility</source>
-        <translation type="vanished">可见性</translation>
+        <translation>可见性</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="616"/>
+        <source>VISIBLE</source>
+        <translation>可见</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="616"/>
+        <source>BELOW HORIZON</source>
+        <translation>地平线以下</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="621"/>
         <source>Observer</source>
-        <translation type="vanished">观测点</translation>
+        <translation>观测点</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="425"/>
         <source>Protocol</source>
-        <translation type="vanished">协议</translation>
+        <translation>协议</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="619"/>
         <source>Tracked frequency</source>
-        <translation type="vanished">跟踪的频率</translation>
+        <translation>跟踪的频率</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="623"/>
         <source>TLE age</source>
-        <translation type="vanished">TLE 时长</translation>
+        <translation>TLE 时长</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="356"/>
         <source>Refresh TLE</source>
-        <translation type="vanished">刷新 TLE</translation>
+        <translation>刷新 TLE</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="667"/>
         <source>Predict 24 h</source>
-        <translation type="vanished">预测 24 小时</translation>
+        <translation>预测 24 小时</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="661"/>
         <source>Upcoming passes</source>
-        <translation type="vanished">即将到来的过境</translation>
+        <translation>即将到来的过境</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="661"/>
         <source>Calculating passes…</source>
-        <translation type="vanished">正在计算过境…</translation>
+        <translation>正在计算过境…</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="703"/>
         <source>Calculation running in background…</source>
-        <translation type="vanished">正在后台计算…</translation>
+        <translation>正在后台计算…</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="703"/>
         <source>No pass in the selected interval</source>
-        <translation type="vanished">所选时间段内没有过境</translation>
+        <translation>所选时间段内没有过境</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="397"/>
         <source>Satellite service unavailable</source>
-        <translation type="vanished">卫星服务不可用</translation>
+        <translation>卫星服务不可用</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="284"/>
         <source>🛰 Satellite tracking</source>
-        <translation type="vanished">🛰 卫星跟踪</translation>
+        <translation>🛰 卫星跟踪</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="356"/>
         <source>Updating…</source>
-        <translation type="vanished">正在更新…</translation>
+        <translation>正在更新…</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="631"/>
         <source>Unavailable</source>
-        <translation type="vanished">不可用</translation>
+        <translation>不可用</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="587"/>
         <source>AZ ±10° • EL ±5°</source>
-        <translation type="vanished">AZ ±10° • EL ±5°</translation>
+        <translation>AZ ±10° • EL ±5°</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="11"/>
+        <source>Satellite tracking</source>
+        <translation>卫星跟踪</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="301"/>
+        <source>Close</source>
+        <translation>关闭</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="371"/>
+        <source>Stop</source>
+        <translation>停止</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="434"/>
         <source>Host</source>
-        <translation type="vanished">主机</translation>
+        <translation>主机</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="440"/>
         <source>IP or hostname</source>
-        <translation type="vanished">IP 或主机名</translation>
+        <translation>IP 或主机名</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="448"/>
         <source>Command port</source>
-        <translation type="vanished">命令端口</translation>
+        <translation>命令端口</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="448"/>
         <source>%1 command port</source>
-        <translation type="vanished">%1 命令端口</translation>
+        <translation>%1 命令端口</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="493"/>
+        <source>unavailable</source>
+        <translation>不可用</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="509"/>
         <source>Manual movement</source>
-        <translation type="vanished">手动移动</translation>
+        <translation>手动移动</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="538"/>
         <source>Move azimuth +10°</source>
-        <translation type="vanished">方位角 +10°</translation>
+        <translation>方位角 +10°</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="520"/>
         <source>Move azimuth −10°</source>
-        <translation type="vanished">方位角 −10°</translation>
+        <translation>方位角 −10°</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="556"/>
         <source>Move elevation +5°</source>
-        <translation type="vanished">仰角 +5°</translation>
+        <translation>仰角 +5°</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="574"/>
         <source>Move elevation −5°</source>
-        <translation type="vanished">仰角 −5°</translation>
+        <translation>仰角 −5°</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="499"/>
         <source>Rotator service unavailable</source>
-        <translation type="vanished">旋转器服务不可用</translation>
+        <translation>旋转器服务不可用</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="588"/>
         <source>Enable ‘Rotator enabled’ to send commands</source>
-        <translation type="vanished">启用“已启用旋转器”以发送命令</translation>
+        <translation>启用“已启用旋转器”以发送命令</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="407"/>
         <source>Satellite tracking active • enable ‘Rotator enabled’ to send commands</source>
-        <translation type="vanished">卫星跟踪已启用 • 启用“已启用旋转器”以发送命令</translation>
+        <translation>卫星跟踪已启用 • 启用“已启用旋转器”以发送命令</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="410"/>
         <source>Satellite tracking active • rotator commands are sent asynchronously</source>
-        <translation type="vanished">卫星跟踪已启用 • 旋转器命令以异步方式发送</translation>
+        <translation>卫星跟踪已启用 • 旋转器命令以异步方式发送</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="409"/>
         <source>Satellite tracking active • waiting for the satellite above the horizon</source>
-        <translation type="vanished">卫星跟踪已启用 • 正在等待卫星升出地平线</translation>
+        <translation>卫星跟踪已启用 • 正在等待卫星升出地平线</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="497"/>
         <source>TCP rotctld: %1:%2 • commands + feedback on same port</source>
-        <translation type="vanished">TCP rotctld: %1:%2 • 命令与反馈使用同一端口</translation>
+        <translation>TCP rotctld: %1:%2 • 命令与反馈使用同一端口</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="491"/>
         <source>UDP command port: %1 • feedback port: %2</source>
-        <translation type="vanished">UDP 命令端口: %1 • 反馈端口: %2</translation>
+        <translation>UDP 命令端口: %1 • 反馈端口: %2</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SatelliteWindow.qml" line="495"/>
         <source>UDP command port: %1 • feedback unavailable</source>
-        <translation type="vanished">UDP 命令端口: %1 • 反馈不可用</translation>
+        <translation>UDP 命令端口: %1 • 反馈不可用</translation>
     </message>
 </context>
 <context>
@@ -19070,40 +22128,49 @@ Tip: close OmniRig from the Windows tray icon, then press Connect again.</source
         <translation type="vanished">本地数据库</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="146"/>
         <source>FCC ULS</source>
-        <translation type="vanished">FCC ULS</translation>
+        <translation>FCC ULS</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="148"/>
         <source>LoTW - User activity</source>
-        <translation type="vanished">LoTW - 用户活动</translation>
+        <translation>LoTW - 用户活动</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="150"/>
         <source>LoTW - Confirmations received</source>
-        <translation type="vanished">LoTW - 已收到的确认</translation>
+        <translation>LoTW - 已收到的确认</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="152"/>
         <source>eQSL AG</source>
-        <translation type="vanished">eQSL AG</translation>
+        <translation>eQSL AG</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="154"/>
         <source>eQSL InBox - Confirmations received</source>
-        <translation type="vanished">eQSL InBox - 已收到的确认</translation>
+        <translation>eQSL InBox - 已收到的确认</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="156"/>
         <source>QRZ.com - Confirmations received</source>
-        <translation type="vanished">QRZ.com - 已收到的确认</translation>
+        <translation>QRZ.com - 已收到的确认</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="158"/>
         <source>Club Log OQRS</source>
-        <translation type="vanished">Club Log OQRS</translation>
+        <translation>Club Log OQRS</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="161"/>
         <source>DXCC cty.dat</source>
-        <translation type="vanished">DXCC cty.dat</translation>
+        <translation>DXCC cty.dat</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="163"/>
         <source>CALL3.TXT</source>
-        <translation type="vanished">CALL3.TXT</translation>
+        <translation>CALL3.TXT</translation>
     </message>
     <message>
         <source>No records</source>
@@ -19142,12 +22209,14 @@ Tip: close OmniRig from the Windows tray icon, then press Connect again.</source
         <translation type="vanished">导入</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="190"/>
         <source>Clear global lookup cache</source>
-        <translation type="vanished">清除全局查询缓存</translation>
+        <translation>清除全局查询缓存</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="196"/>
         <source>All locally stored callsign lookup results for every provider will be deleted. The FCC, LoTW, eQSL and Club Log databases will not be deleted. Continue?</source>
-        <translation type="vanished">将删除所有提供商的本地呼号查询结果。不会删除 FCC、LoTW、eQSL 和 Club Log 数据库。继续吗？</translation>
+        <translation>将删除所有提供商的本地呼号查询结果。不会删除 FCC、LoTW、eQSL 和 Club Log 数据库。继续吗？</translation>
     </message>
     <message>
         <source>Slow-PC mode:</source>
@@ -19170,220 +22239,320 @@ When OFF (upstream 1.0.438 behaviour): the TX Watchdog takes priority and ignore
 关闭时（upstream 1.0.438 行为）：TX Watchdog 优先并忽略呼叫方重试上限，直到其自身超时，因此呼叫可在整个 watchdog 持续时间内重复（默认 6 分钟）。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="40"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1666"/>
         <source>Settings</source>
-        <translation type="vanished">设置</translation>
+        <translation>设置</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="553"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="577"/>
+        <source>Enter a valid offset, for example -2556 MHz</source>
+        <translation>请输入有效的偏移量，例如 -2556 MHz</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="561"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="586"/>
+        <source>Offset saved and verified</source>
+        <translation>偏移量已保存并验证</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="562"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="587"/>
+        <source>Offset was not saved; check the value and settings-file permissions</source>
+        <translation>偏移量未保存；请检查数值和设置文件的权限</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="672"/>
         <source>Select AzEl directory</source>
-        <translation type="vanished">选择 AzEl 目录</translation>
+        <translation>选择 AzEl 目录</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="672"/>
         <source>Select save directory</source>
-        <translation type="vanished">选择保存目录</translation>
+        <translation>选择保存目录</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="684"/>
         <source>Merge Working Frequencies</source>
-        <translation type="vanished">合并 Working Frequencies</translation>
+        <translation>合并 Working Frequencies</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="684"/>
         <source>Load Working Frequencies</source>
-        <translation type="vanished">加载 Working Frequencies</translation>
+        <translation>加载 Working Frequencies</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="686"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="696"/>
         <source>Frequency files (*.qrg *.qrg.json)</source>
-        <translation type="vanished">频率文件 (*.qrg *.qrg.json)</translation>
+        <translation>频率文件 (*.qrg *.qrg.json)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="686"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="696"/>
         <source>All files (*)</source>
-        <translation type="vanished">所有文件 (*)</translation>
+        <translation>所有文件 (*)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="694"/>
         <source>Save Working Frequencies</source>
-        <translation type="vanished">保存 Working Frequencies</translation>
+        <translation>保存 Working Frequencies</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="886"/>
         <source>Auto</source>
-        <translation type="vanished">自动</translation>
+        <translation>自动</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1382"/>
         <source>Transmitted Message</source>
-        <translation type="vanished">已发送的消息</translation>
+        <translation>已发送的消息</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1383"/>
         <source>My Callsign</source>
-        <translation type="vanished">我的 Callsign</translation>
+        <translation>我的 Callsign</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1384"/>
         <source>New DXCC on Band</source>
-        <translation type="vanished">波段上的新 DXCC</translation>
+        <translation>波段上的新 DXCC</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1385"/>
         <source>New DXCC</source>
-        <translation type="vanished">新 DXCC</translation>
+        <translation>新 DXCC</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1386"/>
         <source>New Continent on Band</source>
-        <translation type="vanished">波段上的新大洲</translation>
+        <translation>波段上的新大洲</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1387"/>
         <source>New Continent</source>
-        <translation type="vanished">新大洲</translation>
+        <translation>新大洲</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1388"/>
         <source>New CQ Zone on Band</source>
-        <translation type="vanished">波段上的新 CQ Zone</translation>
+        <translation>波段上的新 CQ Zone</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1389"/>
         <source>New CQ Zone</source>
-        <translation type="vanished">新 CQ Zone</translation>
+        <translation>新 CQ Zone</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1390"/>
         <source>New ITU Zone on Band</source>
-        <translation type="vanished">波段上的新 ITU Zone</translation>
+        <translation>波段上的新 ITU Zone</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1391"/>
         <source>New ITU Zone</source>
-        <translation type="vanished">新 ITU Zone</translation>
+        <translation>新 ITU Zone</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1392"/>
         <source>New Grid on Band</source>
-        <translation type="vanished">波段上的新 grid</translation>
+        <translation>波段上的新 grid</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1393"/>
         <source>New Grid</source>
-        <translation type="vanished">新 grid</translation>
+        <translation>新 grid</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1394"/>
         <source>New Callsign on Band</source>
-        <translation type="vanished">波段上的新 callsign</translation>
+        <translation>波段上的新 callsign</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1395"/>
         <source>New Callsign</source>
-        <translation type="vanished">新 callsign</translation>
+        <translation>新 callsign</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1396"/>
         <source>LoTW marker</source>
-        <translation type="vanished">LoTW 标记</translation>
+        <translation>LoTW 标记</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1397"/>
         <source>CQ in Message</source>
-        <translation type="vanished">消息中含 CQ</translation>
+        <translation>消息中含 CQ</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1398"/>
         <source>DX Entity</source>
-        <translation type="vanished">DX 实体</translation>
+        <translation>DX 实体</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1399"/>
         <source>73 / RR73</source>
-        <translation type="vanished">73 / RR73</translation>
+        <translation>73 / RR73</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1400"/>
         <source>B4 (Worked)</source>
-        <translation type="vanished">B4（已通联）</translation>
+        <translation>B4（已通联）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1401"/>
         <source>Normal decodes</source>
-        <translation type="vanished">普通解码</translation>
+        <translation>普通解码</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1685"/>
+        <source>A−</source>
+        <translation>A−</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1703"/>
+        <source>Setup text size: %1%. Decrease. This affects Setup only.</source>
+        <translation>设置文字大小：%1%。缩小。仅影响设置界面。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1719"/>
+        <source>A+</source>
+        <translation>A+</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1737"/>
+        <source>Setup text size: %1%. Increase. This affects Setup only.</source>
+        <translation>设置文字大小：%1%。放大。仅影响设置界面。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1771"/>
+        <source>Setup text size: %1%. Reset to 100%. This affects Setup only.</source>
+        <translation>设置文字大小：%1%。重置为 100%。仅影响设置界面。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1799"/>
         <source>Changes are applied immediately where supported.</source>
-        <translation type="vanished">支持的更改会立即应用。</translation>
+        <translation>支持的更改会立即应用。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1815"/>
         <source>Close</source>
-        <translation type="vanished">关闭</translation>
+        <translation>关闭</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1903"/>
         <source>Station</source>
-        <translation type="vanished">电台</translation>
+        <translation>电台</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1903"/>
         <source>Radio</source>
-        <translation type="vanished">无线电</translation>
+        <translation>无线电</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1903"/>
         <source>Audio</source>
-        <translation type="vanished">音频</translation>
+        <translation>音频</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1903"/>
         <source>TX</source>
-        <translation type="vanished">TX</translation>
+        <translation>TX</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1903"/>
         <source>Display</source>
-        <translation type="vanished">显示</translation>
+        <translation>显示</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1903"/>
         <source>Decode</source>
-        <translation type="vanished">解码</translation>
+        <translation>解码</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1903"/>
         <source>Reporting</source>
-        <translation type="vanished">报告</translation>
+        <translation>报告</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1903"/>
         <source>Colors</source>
-        <translation type="vanished">颜色</translation>
+        <translation>颜色</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1903"/>
         <source>Advanced</source>
-        <translation type="vanished">高级</translation>
+        <translation>高级</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1903"/>
         <source>Alerts</source>
-        <translation type="vanished">警报</translation>
+        <translation>警报</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1903"/>
         <source>Filters</source>
-        <translation type="vanished">过滤器</translation>
+        <translation>过滤器</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1426"/>
         <source>Choose Decoded Font</source>
-        <translation type="vanished">选择解码字体</translation>
+        <translation>选择解码字体</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1426"/>
         <source>Choose Font</source>
-        <translation type="vanished">选择字体</translation>
+        <translation>选择字体</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1434"/>
         <source>Search:</source>
-        <translation type="vanished">搜索：</translation>
+        <translation>搜索：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1444"/>
         <source>filter by name</source>
-        <translation type="vanished">按名称筛选</translation>
+        <translation>按名称筛选</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1460"/>
         <source>Monospaced fonts:</source>
-        <translation type="vanished">等宽字体：</translation>
+        <translation>等宽字体：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1460"/>
         <source>Fonts:</source>
-        <translation type="vanished">字体：</translation>
+        <translation>字体：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1508"/>
         <source>Selected:</source>
-        <translation type="vanished">已选择：</translation>
+        <translation>已选择：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1518"/>
         <source>Size:</source>
-        <translation type="vanished">大小：</translation>
+        <translation>大小：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1583"/>
         <source>Cancel</source>
-        <translation type="vanished">取消</translation>
+        <translation>取消</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1588"/>
         <source>Apply</source>
-        <translation type="vanished">应用</translation>
+        <translation>应用</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1903"/>
         <source>Frequencies</source>
-        <translation type="vanished">频率</translation>
+        <translation>频率</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1903"/>
         <source>UI Buttons</source>
-        <translation type="vanished">UI 按钮</translation>
+        <translation>UI 按钮</translation>
     </message>
     <message>
         <source>Search radio, model or brand...</source>
@@ -21002,12 +24171,14 @@ If unsure, use High.</source>
         <translation type="vanished">蓝色呼号：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1542"/>
         <source>Bold</source>
-        <translation type="vanished">大胆</translation>
+        <translation>大胆</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1056"/>
         <source>Both</source>
-        <translation type="vanished">双声道</translation>
+        <translation>双声道</translation>
     </message>
     <message>
         <source>CAT CONTROL</source>
@@ -21170,8 +24341,10 @@ If unsure, use High.</source>
         <translation type="vanished">深度搜索：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="803"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1044"/>
         <source>Default</source>
-        <translation type="vanished">默认值</translation>
+        <translation>默认值</translation>
     </message>
     <message>
         <source>Degrade S/N:</source>
@@ -21334,8 +24507,9 @@ If unsure, use High.</source>
         <translation type="vanished">频率和时序</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1024"/>
         <source>Fake It</source>
-        <translation type="vanished">软件虚拟</translation>
+        <translation>软件虚拟</translation>
     </message>
     <message>
         <source>Fast</source>
@@ -21374,8 +24548,9 @@ If unsure, use High.</source>
         <translation type="vanished">Fox 模式：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1060"/>
         <source>Front/Mic</source>
-        <translation type="vanished">前置/麦克风</translation>
+        <translation>前置/麦克风</translation>
     </message>
     <message>
         <source>Full</source>
@@ -21414,8 +24589,9 @@ If unsure, use High.</source>
         <translation type="vanished">握手：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="809"/>
         <source>Hardware</source>
-        <translation type="vanished">硬件</translation>
+        <translation>硬件</translation>
     </message>
     <message>
         <source>High DPI:</source>
@@ -21466,8 +24642,9 @@ If unsure, use High.</source>
         <translation type="vanished">使用的接口：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1549"/>
         <source>Italic</source>
-        <translation type="vanished">斜体</translation>
+        <translation>斜体</translation>
     </message>
     <message>
         <source>JT65 VHF/UHF</source>
@@ -21494,8 +24671,9 @@ If unsure, use High.</source>
         <translation type="vanished">将服务器留空以自动使用 pool.ntp.org、Apple、Cloudflare 和 Google。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1052"/>
         <source>Left</source>
-        <translation type="vanished">左边</translation>
+        <translation>左边</translation>
     </message>
     <message>
         <source>Listen Port:</source>
@@ -21550,8 +24728,9 @@ If unsure, use High.</source>
         <translation type="vanished">显示器关闭：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1050"/>
         <source>Mono</source>
-        <translation type="vanished">单声道</translation>
+        <translation>单声道</translation>
     </message>
     <message>
         <source>Multicast TTL:</source>
@@ -21630,8 +24809,11 @@ If unsure, use High.</source>
         <translation type="vanished">Non-QSL&apos;d：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="805"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1025"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1042"/>
         <source>None</source>
-        <translation type="vanished">无</translation>
+        <translation>无</translation>
     </message>
     <message>
         <source>Normal</source>
@@ -21642,8 +24824,9 @@ If unsure, use High.</source>
         <translation type="vanished">通知请求：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1839"/>
         <source>OK</source>
-        <translation type="vanished">确定</translation>
+        <translation>确定</translation>
     </message>
     <message>
         <source>OPERATING MODE</source>
@@ -21670,12 +24853,14 @@ If unsure, use High.</source>
         <translation type="vanished">OTP 网址:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1048"/>
         <source>Off</source>
-        <translation type="vanished">取消</translation>
+        <translation>取消</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1046"/>
         <source>On</source>
-        <translation type="vanished">开</translation>
+        <translation>开</translation>
     </message>
     <message>
         <source>Op Call:</source>
@@ -21790,8 +24975,9 @@ If unsure, use High.</source>
         <translation type="vanished">RX&gt;QSO 之后的 TX：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1058"/>
         <source>Rear/Data</source>
-        <translation type="vanished">后置/数据</translation>
+        <translation>后置/数据</translation>
     </message>
     <message>
         <source>Record RX:</source>
@@ -21806,16 +24992,18 @@ If unsure, use High.</source>
         <translation type="vanished">LAN/WAN 需要</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1753"/>
         <source>Reset</source>
-        <translation type="vanished">重置</translation>
+        <translation>重置</translation>
     </message>
     <message>
         <source>Restore Win:</source>
         <translation type="vanished">恢复胜利：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1022"/>
         <source>Rig</source>
-        <translation type="vanished">无线电设备</translation>
+        <translation>无线电设备</translation>
     </message>
     <message>
         <source>Rig Info:</source>
@@ -21826,8 +25014,9 @@ If unsure, use High.</source>
         <translation type="vanished">无线电设备:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1054"/>
         <source>Right</source>
-        <translation type="vanished">右边</translation>
+        <translation>右边</translation>
     </message>
     <message>
         <source>SERIAL PARAMETERS</source>
@@ -22366,1048 +25555,1431 @@ If unsure, use High.</source>
         <translation type="vanished">只读取系统已知的信息：不打开任何端口，也不发送任何指令</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1903"/>
         <source>Callsign</source>
-        <translation type="vanished">呼号</translation>
+        <translation>呼号</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1568"/>
         <source>173045  -21  0.1  1045  CQ LB9ZG JP20</source>
-        <translation type="vanished">173045  -21  0.1  1045  CQ LB9ZG JP20</translation>
+        <translation>173045  -21  0.1  1045  CQ LB9ZG JP20</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1779"/>
         <source>✕</source>
-        <translation type="vanished">✕</translation>
+        <translation>✕</translation>
     </message>
 </context>
 <context>
     <name>SettingsPage</name>
     <message>
+        <location filename="../qml/decodium/rotor/SettingsPage.qml" line="35"/>
         <source>CONTROL BOX CONNECTION</source>
-        <translation type="vanished">控制盒连接</translation>
+        <translation>控制盒连接</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/SettingsPage.qml" line="44"/>
         <source>Rotator</source>
-        <translation type="vanished">旋转器</translation>
+        <translation>旋转器</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/SettingsPage.qml" line="51"/>
         <source>on</source>
-        <translation type="vanished">开</translation>
+        <translation>开</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/SettingsPage.qml" line="52"/>
+        <location filename="../qml/decodium/rotor/SettingsPage.qml" line="138"/>
         <source>off</source>
-        <translation type="vanished">关</translation>
+        <translation>关</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/SettingsPage.qml" line="57"/>
         <source>Simulator</source>
-        <translation type="vanished">模拟器</translation>
+        <translation>模拟器</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/SettingsPage.qml" line="64"/>
         <source>simulated rotator</source>
-        <translation type="vanished">模拟旋转器</translation>
+        <translation>模拟旋转器</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/SettingsPage.qml" line="65"/>
         <source>real control box</source>
-        <translation type="vanished">真实控制盒</translation>
+        <translation>真实控制盒</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/SettingsPage.qml" line="70"/>
         <source>Serial port</source>
-        <translation type="vanished">串口</translation>
+        <translation>串口</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/SettingsPage.qml" line="86"/>
         <source>choose…</source>
-        <translation type="vanished">选择…</translation>
+        <translation>选择…</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/SettingsPage.qml" line="97"/>
         <source>Model</source>
-        <translation type="vanished">型号</translation>
+        <translation>型号</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/SettingsPage.qml" line="118"/>
         <source>Speed</source>
-        <translation type="vanished">速度</translation>
+        <translation>速度</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/SettingsPage.qml" line="124"/>
         <source>%1 baud, 8N1</source>
-        <translation type="vanished">%1 波特, 8N1</translation>
+        <translation>%1 波特, 8N1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/SettingsPage.qml" line="131"/>
         <source>Status</source>
-        <translation type="vanished">状态</translation>
+        <translation>状态</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/SettingsPage.qml" line="139"/>
         <source>connected</source>
-        <translation type="vanished">已连接</translation>
+        <translation>已连接</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/SettingsPage.qml" line="140"/>
         <source>missing</source>
-        <translation type="vanished">缺失</translation>
+        <translation>缺失</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/SettingsPage.qml" line="154"/>
         <source>Network access</source>
-        <translation type="vanished">网络访问</translation>
+        <translation>网络访问</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/SettingsPage.qml" line="161"/>
         <source>phone, web and station software</source>
-        <translation type="vanished">手机、网页和电台软件</translation>
+        <translation>手机、网页和电台软件</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/SettingsPage.qml" line="162"/>
         <source>closed</source>
-        <translation type="vanished">已关闭</translation>
+        <translation>已关闭</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/SettingsPage.qml" line="167"/>
         <source>Token</source>
-        <translation type="vanished">令牌</translation>
+        <translation>令牌</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/SettingsPage.qml" line="175"/>
         <source>empty = open access</source>
-        <translation type="vanished">空 = 开放访问</translation>
+        <translation>空 = 开放访问</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/SettingsPage.qml" line="187"/>
         <source>Port, model and network apply immediately. The rotator stays off until you turn it on.</source>
-        <translation type="vanished">端口、型号和网络立即生效。旋转器保持关闭，直到你将其打开。</translation>
+        <translation>端口、型号和网络立即生效。旋转器保持关闭，直到你将其打开。</translation>
     </message>
 </context>
 <context>
     <name>SettingsPanel</name>
     <message>
+        <location filename="../qml/decodium/rotor/SettingsPanel.qml" line="8"/>
         <source>STATION AND SAFETY</source>
-        <translation type="vanished">电台与安全</translation>
+        <translation>电台与安全</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/SettingsPanel.qml" line="17"/>
         <source>Callsign</source>
-        <translation type="vanished">呼号</translation>
+        <translation>呼号</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/SettingsPanel.qml" line="31"/>
         <source>QTH locator</source>
-        <translation type="vanished">QTH定位符</translation>
+        <translation>QTH定位符</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/SettingsPanel.qml" line="45"/>
         <source>Beamwidth: %1°</source>
-        <translation type="vanished">波束宽度：%1°</translation>
+        <translation>波束宽度：%1°</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/SettingsPanel.qml" line="89"/>
         <source>Azimuth limits</source>
-        <translation type="vanished">方位角限制</translation>
+        <translation>方位角限制</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/SettingsPanel.qml" line="119"/>
         <source>Park position</source>
-        <translation type="vanished">驻留位置</translation>
+        <translation>驻留位置</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/SettingsPanel.qml" line="132"/>
         <source>Stop if the link drops</source>
-        <translation type="vanished">链路中断时停止</translation>
+        <translation>链路中断时停止</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/SettingsPanel.qml" line="168"/>
+        <location filename="../qml/decodium/rotor/SettingsPanel.qml" line="189"/>
         <source>on</source>
-        <translation type="vanished">开</translation>
+        <translation>开</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/SettingsPanel.qml" line="168"/>
+        <location filename="../qml/decodium/rotor/SettingsPanel.qml" line="189"/>
         <source>off</source>
-        <translation type="vanished">关</translation>
+        <translation>关</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/SettingsPanel.qml" line="177"/>
         <source>Stations heard by Decodium</source>
-        <translation type="vanished">Decodium听到的电台</translation>
+        <translation>Decodium听到的电台</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/SettingsPanel.qml" line="205"/>
         <source>Callsign and locator are those set in Decodium. Changes are saved immediately.</source>
-        <translation type="vanished">呼号和定位符为Decodium中设置的值。更改会立即保存。</translation>
+        <translation>呼号和定位符为Decodium中设置的值。更改会立即保存。</translation>
     </message>
 </context>
 <context>
     <name>SettingsTab0</name>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab0.qml" line="67"/>
         <source>STATION DETAILS</source>
-        <translation type="vanished">电台详情</translation>
+        <translation>电台详情</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab0.qml" line="71"/>
         <source>My Call:</source>
-        <translation type="vanished">我的呼号：</translation>
+        <translation>我的呼号：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab0.qml" line="80"/>
         <source>The active callsign transmitted by Decodium and written as STATION_CALLSIGN in ADIF.</source>
-        <translation type="vanished">Decodium 发射并写入 ADIF 中 STATION_CALLSIGN 的当前呼号。</translation>
+        <translation>Decodium 发射并写入 ADIF 中 STATION_CALLSIGN 的当前呼号。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab0.qml" line="92"/>
         <source>My Grid:</source>
-        <translation type="vanished">我的网格：</translation>
+        <translation>我的网格：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab0.qml" line="104"/>
         <source>Auto Grid:</source>
-        <translation type="vanished">自动网格：</translation>
+        <translation>自动网格：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab0.qml" line="111"/>
         <source>IARU Region:</source>
-        <translation type="vanished">IARU 区域:</translation>
+        <translation>IARU 区域:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab0.qml" line="122"/>
         <source>Type 2 Msg Gen:</source>
-        <translation type="vanished">类型 2 消息生成：</translation>
+        <translation>类型 2 消息生成：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab0.qml" line="124"/>
         <source>Full</source>
-        <translation type="vanished">满</translation>
+        <translation>满</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab0.qml" line="124"/>
         <source>Type 1 prefix</source>
-        <translation type="vanished">类型 1 前缀</translation>
+        <translation>类型 1 前缀</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab0.qml" line="124"/>
         <source>Type 2 prefix</source>
-        <translation type="vanished">类型 2 前缀</translation>
+        <translation>类型 2 前缀</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab0.qml" line="133"/>
         <source>Op Call:</source>
-        <translation type="vanished">操作员呼号：</translation>
+        <translation>操作员呼号：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab0.qml" line="142"/>
         <source>Optional legacy operator-callsign setting. It never replaces My Call for transmission or STATION_CALLSIGN in ADIF.</source>
-        <translation type="vanished">可选的旧式操作员呼号设置。它绝不会替代发射用的 My Call 或 ADIF 中的 STATION_CALLSIGN。</translation>
+        <translation>可选的旧式操作员呼号设置。它绝不会替代发射用的 My Call 或 ADIF 中的 STATION_CALLSIGN。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab0.qml" line="148"/>
         <source>Optional operator callsign</source>
-        <translation type="vanished">操作员呼号（可选）</translation>
+        <translation>操作员呼号（可选）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab0.qml" line="154"/>
         <source>STATION INFO</source>
-        <translation type="vanished">电台信息</translation>
+        <translation>电台信息</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab0.qml" line="158"/>
         <source>Station label:</source>
-        <translation type="vanished">电台标签:</translation>
+        <translation>电台标签:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab0.qml" line="167"/>
         <source>Optional descriptive label for this station or operating setup. It is not a callsign or a radio model.</source>
-        <translation type="vanished">此电台或操作配置的可选描述标签。它不是呼号，也不是设备型号。</translation>
+        <translation>此电台或操作配置的可选描述标签。它不是呼号，也不是设备型号。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab0.qml" line="173"/>
         <source>Optional - e.g. Home station</source>
-        <translation type="vanished">可选 - 例如 家庭电台</translation>
+        <translation>可选 - 例如 家庭电台</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab0.qml" line="180"/>
         <source>QTH:</source>
-        <translation type="vanished">QTH：</translation>
+        <translation>QTH：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab0.qml" line="193"/>
         <source>Rig / radio:</source>
-        <translation type="vanished">电台 / 设备:</translation>
+        <translation>电台 / 设备:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab0.qml" line="202"/>
         <source>Optional transceiver or radio description, for example Icom IC-7100. If left empty, Decodium uses the CAT rig name when available for PSK Reporter metadata.</source>
-        <translation type="vanished">可选的收发信机或设备描述，例如 Icom IC-7100。留空时，Decodium 会在可用时使用 CAT 的设备名作为 PSK Reporter 的元数据。</translation>
+        <translation>可选的收发信机或设备描述，例如 Icom IC-7100。留空时，Decodium 会在可用时使用 CAT 的设备名作为 PSK Reporter 的元数据。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab0.qml" line="208"/>
         <source>Optional - e.g. Icom IC-7100</source>
-        <translation type="vanished">可选 - 例如 Icom IC-7100</translation>
+        <translation>可选 - 例如 Icom IC-7100</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab0.qml" line="215"/>
         <source>Antenna:</source>
-        <translation type="vanished">天线：</translation>
+        <translation>天线：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab0.qml" line="227"/>
         <source>Power (W):</source>
-        <translation type="vanished">功率（瓦）：</translation>
+        <translation>功率（瓦）：</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab0.qml" line="241"/>
+        <source>STATION + WEATHER TELEMETRY</source>
+        <translation>电台 + 天气遥测</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab0.qml" line="244"/>
+        <source>Sends one extra FT8/FT4 message right after a QSO is logged, with your radio, antenna, power, locator and current weather packed into a compact code (no free text, no callsign field in this message type). Off by default.</source>
+        <translation>在 QSO 记录后立即额外发送一条 FT8/FT4 消息，将您的电台、天线、功率、网格定位和当前天气打包成紧凑代码（无自由文本，此消息类型中没有呼号字段）。默认关闭。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab0.qml" line="249"/>
+        <source>Radio model:</source>
+        <translation>电台型号：</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab0.qml" line="259"/>
+        <source>Antenna type:</source>
+        <translation>天线类型：</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab0.qml" line="270"/>
+        <source>Auto weather:</source>
+        <translation>自动天气：</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab0.qml" line="292"/>
+        <source>After each QSO:</source>
+        <translation>每次 QSO 后：</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab0.qml" line="297"/>
+        <source>Send station + weather info</source>
+        <translation>发送电台 + 天气信息</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab0.qml" line="299"/>
+        <source>On receive:</source>
+        <translation>接收时：</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab0.qml" line="304"/>
+        <source>Show popup with correspondent&apos;s info</source>
+        <translation>显示包含对方信息的弹出窗口</translation>
     </message>
 </context>
 <context>
     <name>SettingsTab1</name>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="162"/>
         <source>BACKEND CAT</source>
-        <translation type="vanished">后端 ZXProtect00000ZX</translation>
+        <translation>后端 ZXProtect00000ZX</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="165"/>
         <source>Backend:</source>
-        <translation type="vanished">后端：</translation>
+        <translation>后端：</translation>
     </message>
     <message>
         <source>Native (15 radios)</source>
         <translation type="vanished">本机（15 个无线电）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="169"/>
         <source>Hamlib (300+ radios)</source>
-        <translation type="vanished">Hamlib（300+ 无线电）</translation>
+        <translation>Hamlib（300+ 无线电）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="190"/>
         <source>Profile:</source>
-        <translation type="vanished">配置文件:</translation>
+        <translation>配置文件:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="214"/>
         <source>No profile</source>
-        <translation type="vanished">无配置文件</translation>
+        <translation>无配置文件</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="234"/>
         <source>Profile name</source>
-        <translation type="vanished">配置文件名称</translation>
+        <translation>配置文件名称</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="244"/>
         <source>Load</source>
-        <translation type="vanished">加载</translation>
+        <translation>加载</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="255"/>
         <source>Save</source>
-        <translation type="vanished">保存</translation>
+        <translation>保存</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="266"/>
         <source>New</source>
-        <translation type="vanished">新建</translation>
+        <translation>新建</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="276"/>
         <source>Delete</source>
-        <translation type="vanished">删除</translation>
+        <translation>删除</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="305"/>
         <source>Tip: close OmniRig from the Windows tray icon, then press Connect again.</source>
-        <translation type="vanished">提示：从 Windows 托盘图标关闭 OmniRig，然后再次按“连接”。</translation>
+        <translation>提示：从 Windows 托盘图标关闭 OmniRig，然后再次按“连接”。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="311"/>
         <source>Status:</source>
-        <translation type="vanished">状态：</translation>
+        <translation>状态：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="315"/>
         <source>Connected</source>
-        <translation type="vanished">已连接</translation>
+        <translation>已连接</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="315"/>
         <source>Disconnected</source>
-        <translation type="vanished">已断开连接</translation>
+        <translation>已断开连接</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="321"/>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1726"/>
         <source>Disconnect</source>
-        <translation type="vanished">断开连接</translation>
+        <translation>断开连接</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="321"/>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1718"/>
         <source>Connect</source>
-        <translation type="vanished">连接</translation>
+        <translation>连接</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="338"/>
         <source>CAT CONTROL</source>
-        <translation type="vanished">CAT控制</translation>
+        <translation>CAT控制</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="344"/>
         <source>Auto-detect:</source>
-        <translation type="vanished">自动检测：</translation>
+        <translation>自动检测：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="351"/>
         <source>Detect my radio</source>
-        <translation type="vanished">检测我的电台</translation>
+        <translation>检测我的电台</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="354"/>
         <source>Reads what the system already knows: it opens no port and sends no command</source>
-        <translation type="vanished">只读取系统已知的信息：不打开任何端口，也不发送任何指令</translation>
+        <translation>只读取系统已知的信息：不打开任何端口，也不发送任何指令</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="375"/>
         <source>Rig:</source>
-        <translation type="vanished">无线电设备:</translation>
+        <translation>无线电设备:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="476"/>
         <source>Search radio, model or brand...</source>
-        <translation type="vanished">搜索无线电、型号或品牌...</translation>
+        <translation>搜索无线电、型号或品牌...</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="529"/>
         <source>Management:</source>
-        <translation type="vanished">管理:</translation>
+        <translation>管理:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="549"/>
         <source>Control:</source>
-        <translation type="vanished">控制:</translation>
+        <translation>控制:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="569"/>
         <source>Radio group:</source>
-        <translation type="vanished">电台组:</translation>
+        <translation>电台组:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="584"/>
         <source>Automatic discovery</source>
-        <translation type="vanished">自动发现</translation>
+        <translation>自动发现</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="595"/>
         <source>Radio:</source>
-        <translation type="vanished">电台:</translation>
+        <translation>电台:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="610"/>
         <source>First available radio</source>
-        <translation type="vanished">第一个可用的电台</translation>
+        <translation>第一个可用的电台</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="621"/>
         <source>Ownership:</source>
-        <translation type="vanished">独占控制:</translation>
+        <translation>独占控制:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="629"/>
         <source>Request control automatically</source>
-        <translation type="vanished">自动请求控制权</translation>
+        <translation>自动请求控制权</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="646"/>
         <source>Serial Port:</source>
-        <translation type="vanished">串行端口:</translation>
+        <translation>串行端口:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="715"/>
         <source>Refresh serial ports</source>
-        <translation type="vanished">刷新串口</translation>
+        <translation>刷新串口</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="720"/>
         <source>Baud Rate:</source>
-        <translation type="vanished">波特率:</translation>
+        <translation>波特率:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="754"/>
         <source>CI-V Addr:</source>
-        <translation type="vanished">CI-V 地址：</translation>
+        <translation>CI-V 地址：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="812"/>
         <source>Host:Port:</source>
-        <translation type="vanished">主机：端口：</translation>
+        <translation>主机：端口：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="838"/>
         <source>HRD Radio:</source>
-        <translation type="vanished">HRD 电台：</translation>
+        <translation>HRD 电台：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="847"/>
         <source>Strict match (abort if configured radio is not current in HRD)</source>
-        <translation type="vanished">严格匹配（若所配置的电台不是 HRD 当前电台则中止）</translation>
+        <translation>严格匹配（若所配置的电台不是 HRD 当前电台则中止）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="867"/>
         <source>TCI Host:Port:</source>
-        <translation type="vanished">TCI 主机：端口：</translation>
+        <translation>TCI 主机：端口：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="893"/>
         <source>TCI Audio:</source>
-        <translation type="vanished">TCI 音频：</translation>
+        <translation>TCI 音频：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="901"/>
         <source>RX/TX via TCI</source>
-        <translation type="vanished">RX/TX 通过 TCI</translation>
+        <translation>RX/TX 通过 TCI</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="955"/>
         <source>PTT Method:</source>
-        <translation type="vanished">PTT 方法：</translation>
+        <translation>PTT 方法：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1002"/>
         <source>PTT Port:</source>
-        <translation type="vanished">PTT 端口：</translation>
+        <translation>PTT 端口：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1036"/>
         <source>Poll Interval (s):</source>
-        <translation type="vanished">轮询间隔：</translation>
+        <translation>轮询间隔：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1052"/>
         <source>CAT keep-alive:</source>
-        <translation type="vanished">CAT 保活：</translation>
+        <translation>CAT 保活：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1060"/>
         <source>Light polling for interface activity LEDs</source>
-        <translation type="vanished">用于接口活动 LED 的轻量轮询</translation>
+        <translation>用于接口活动 LED 的轻量轮询</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1081"/>
         <source>SERIAL PARAMETERS</source>
-        <translation type="vanished">串口参数</translation>
+        <translation>串口参数</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1096"/>
         <source>Data Bits:</source>
-        <translation type="vanished">数据位：</translation>
+        <translation>数据位：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1116"/>
         <source>Stop Bits:</source>
-        <translation type="vanished">停止位：</translation>
+        <translation>停止位：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1135"/>
         <source>Handshake:</source>
-        <translation type="vanished">握手：</translation>
+        <translation>握手：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1160"/>
         <source>Force DTR:</source>
-        <translation type="vanished">强制 DTR：</translation>
+        <translation>强制 DTR：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1182"/>
         <source>Force RTS:</source>
-        <translation type="vanished">强制 RTS：</translation>
+        <translation>强制 RTS：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1204"/>
         <source>SPLIT OPERATION</source>
-        <translation type="vanished">分体操作</translation>
+        <translation>分体操作</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1207"/>
         <source>Split:</source>
-        <translation type="vanished">拆分：</translation>
+        <translation>拆分：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1231"/>
         <source>Mode:</source>
-        <translation type="vanished">模式：</translation>
+        <translation>模式：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1244"/>
         <source>TX Audio Src:</source>
-        <translation type="vanished">TX 音频源：</translation>
+        <translation>TX 音频源：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1257"/>
         <source>TX Audio:</source>
-        <translation type="vanished">TX 音频：</translation>
+        <translation>TX 音频：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1260"/>
         <source>TCI Audio</source>
-        <translation type="vanished">TCI音频</translation>
+        <translation>TCI音频</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1346"/>
+        <source>SHARED SPOTS</source>
+        <translation>共享 SPOT</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1349"/>
+        <source>Share spots:</source>
+        <translation>共享 SPOT：</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1357"/>
+        <source>Spot port:</source>
+        <translation>SPOT 端口：</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1382"/>
+        <source>Spot sharing not started: %1</source>
+        <translation>SPOT 共享未启动：%1</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1383"/>
+        <source>Spots stay on this computer. Share them to read the cluster from a phone on the same WiFi.</source>
+        <translation>SPOT 保留在这台计算机上。共享后可从同一 WiFi 下的手机读取集群。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1385"/>
+        <source>Listening on port %1 · connected clients: %2</source>
+        <translation>正在端口 %1 上监听 · 已连接客户端：%2</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1387"/>
+        <source>needs the DX Cluster connected</source>
+        <translation>需要已连接 DX Cluster</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1564"/>
+        <source>Search</source>
+        <translation>搜索</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1587"/>
+        <source>searching...</source>
+        <translation>搜索中...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1601"/>
+        <source>found %1 on %2</source>
+        <translation>在 %2 上找到 %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1604"/>
+        <source>no amplifier answered</source>
+        <translation>没有放大器应答</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1669"/>
         <source>DIAGNOSTICS</source>
-        <translation type="vanished">诊断</translation>
+        <translation>诊断</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1672"/>
         <source>Check SWR:</source>
-        <translation type="vanished">检查 SWR：</translation>
+        <translation>检查 SWR：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1688"/>
         <source>PWR and SWR:</source>
-        <translation type="vanished">PWR 和 SWR：</translation>
+        <translation>PWR 和 SWR：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1699"/>
         <source>SWR max:</source>
-        <translation type="vanished">SWR 上限：</translation>
+        <translation>SWR 上限：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1718"/>
         <source>Connecting...</source>
-        <translation type="vanished">正在连接…</translation>
+        <translation>正在连接…</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1732"/>
         <source>Hamlib:</source>
-        <translation type="vanished">Hamlib：</translation>
+        <translation>Hamlib：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1746"/>
         <source>Open Hamlib update</source>
-        <translation type="vanished">打开Hamlib更新</translation>
+        <translation>打开Hamlib更新</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1757"/>
         <source>Windows: DLL updated from the Hamlib site. macOS/Linux: official documentation and releases.</source>
-        <translation type="vanished">Windows：从 Hamlib 站点更新 DLL。 macOS/Linux：官方文档和版本。</translation>
+        <translation>Windows：从 Hamlib 站点更新 DLL。 macOS/Linux：官方文档和版本。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1766"/>
         <source>ALC AUTO CALIBRATION</source>
-        <translation type="vanished">ALC 自动校准</translation>
+        <translation>ALC 自动校准</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1781"/>
         <source>ALC target:</source>
-        <translation type="vanished">ALC 目标：</translation>
+        <translation>ALC 目标：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1787"/>
         <source>ALC scale 0-100. FT8/data: typically 15-25. Values &gt;60 risk overdriving the PA.</source>
-        <translation type="vanished">ALC 范围 0-100。FT8/数据：通常为 15-25。值 &gt;60 有过激励 PA 的风险。</translation>
+        <translation>ALC 范围 0-100。FT8/数据：通常为 15-25。值 &gt;60 有过激励 PA 的风险。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1837"/>
         <source>Transmits a tune carrier and auto-adjusts the TX audio level until the radio&apos;s ALC reaches the target. One-shot. Requires Hamlib CAT connected.</source>
-        <translation type="vanished">发送一个 tune 载波并自动调节 TX 音频电平，直到电台的 ALC 达到目标。一次性操作。需要 Hamlib CAT 已连接。</translation>
+        <translation>发送一个 tune 载波并自动调节 TX 音频电平，直到电台的 ALC 达到目标。一次性操作。需要 Hamlib CAT 已连接。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1841"/>
         <source>Cancel calibration</source>
-        <translation type="vanished">取消校准</translation>
+        <translation>取消校准</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1842"/>
         <source>Calibrate ALC (transmits a carrier)</source>
-        <translation type="vanished">校准 ALC（发送一个载波）</translation>
+        <translation>校准 ALC（发送一个载波）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="882"/>
         <source>localhost:50001</source>
-        <translation type="vanished">localhost:50001</translation>
+        <translation>localhost:50001</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="923"/>
         <source>TCI RX gain:</source>
-        <translation type="vanished">TCI 接收增益：</translation>
+        <translation>TCI 接收增益：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="776"/>
         <source>Enter the radio CI-V address in hexadecimal, from 0x00 to 0xFF. The address is saved with the CAT settings.</source>
-        <translation type="vanished">请以十六进制输入电台的 CI-V 地址，范围 0x00 到 0xFF。该地址随 CAT 设置一起保存。</translation>
+        <translation>请以十六进制输入电台的 CI-V 地址，范围 0x00 到 0xFF。该地址随 CAT 设置一起保存。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1275"/>
         <source>SHARED CAT</source>
-        <translation type="vanished">共享 CAT</translation>
+        <translation>共享 CAT</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1278"/>
         <source>Share CAT:</source>
-        <translation type="vanished">共享 CAT：</translation>
+        <translation>共享 CAT：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1286"/>
         <source>Shared port:</source>
-        <translation type="vanished">共享端口：</translation>
+        <translation>共享端口：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1297"/>
         <source>Allow control:</source>
-        <translation type="vanished">允许控制：</translation>
+        <translation>允许控制：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1308"/>
         <source>Allow transmit:</source>
-        <translation type="vanished">允许发射：</translation>
+        <translation>允许发射：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1336"/>
         <source>Listening on 127.0.0.1:%1 · connected programs: %2</source>
-        <translation type="vanished">正在监听 127.0.0.1:%1 · 已连接程序：%2</translation>
+        <translation>正在监听 127.0.0.1:%1 · 已连接程序：%2</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1334"/>
         <source>Not shared: other programs cannot use the radio while Decodium holds the serial port.</source>
-        <translation type="vanished">未共享：当 Decodium 占用串口时，其他程序无法使用电台。</translation>
+        <translation>未共享：当 Decodium 占用串口时，其他程序无法使用电台。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1338"/>
         <source>in other programs choose &quot;Hamlib NET rigctl&quot;</source>
-        <translation type="vanished">在其他程序中选择「Hamlib NET rigctl」</translation>
+        <translation>在其他程序中选择「Hamlib NET rigctl」</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1333"/>
         <source>Sharing not started: %1</source>
-        <translation type="vanished">共享未启动：%1</translation>
+        <translation>共享未启动：%1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1537"/>
         <source>AMPLIFIER</source>
-        <translation type="vanished">功放</translation>
+        <translation>功放</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1540"/>
         <source>Read amplifier:</source>
-        <translation type="vanished">读取功放：</translation>
+        <translation>读取功放：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1548"/>
         <source>Amplifier port:</source>
-        <translation type="vanished">功放端口：</translation>
+        <translation>功放端口：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1619"/>
         <source>Listen only:</source>
-        <translation type="vanished">仅监听：</translation>
+        <translation>仅监听：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1628"/>
         <source>Speed:</source>
-        <translation type="vanished">速率：</translation>
+        <translation>速率：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1651"/>
         <source>Reading: %1 W, SWR %2</source>
-        <translation type="vanished">读取中：%1 W，驻波比 %2</translation>
+        <translation>读取中：%1 W，驻波比 %2</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1663"/>
         <source>Port not open: %1</source>
-        <translation type="vanished">端口未打开：%1</translation>
+        <translation>端口未打开：%1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1665"/>
         <source>Port open, but no valid frame yet.</source>
-        <translation type="vanished">端口已打开，但尚未收到有效帧。</translation>
+        <translation>端口已打开，但尚未收到有效帧。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1649"/>
         <source>The DECOMETER shows the exciter&apos;s power. Reading the amplifier requires its serial port, or a mirrored virtual port if its own software must stay open.</source>
-        <translation type="vanished">DECØMETER 显示激励级的功率。读取功放需要占用其串口；若功放自带软件必须保持打开，则需要一个镜像的虚拟串口。</translation>
+        <translation>DECØMETER 显示激励级的功率。读取功放需要占用其串口；若功放自带软件必须保持打开，则需要一个镜像的虚拟串口。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1397"/>
         <source>Use a shared CAT:</source>
-        <translation type="vanished">使用共享 CAT：</translation>
+        <translation>使用共享 CAT：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1421"/>
         <source>Connect to it</source>
-        <translation type="vanished">连接</translation>
+        <translation>连接</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1455"/>
         <source>For a second instance of Decodium on the same radio: start it with --rig-name and connect it here. The serial port stays with the first one, which shares it.</source>
-        <translation type="vanished">在同一台电台上运行第二个 Decodium 实例：用 --rig-name 启动它并在此连接。串口仍由第一个实例持有并共享。</translation>
+        <translation>在同一台电台上运行第二个 Decodium 实例：用 --rig-name 启动它并在此连接。串口仍由第一个实例持有并共享。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1660"/>
         <source>No port set: type the amplifier&apos;s serial port, or the mirrored virtual port if its own software has to stay open.</source>
-        <translation type="vanished">未指定端口：请填写功放的串口，若其自带软件必须保持打开，则填写镜像的虚拟串口。</translation>
+        <translation>未指定端口：请填写功放的串口，若其自带软件必须保持打开，则填写镜像的虚拟串口。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1662"/>
         <source>Port %1 is held by another program - usually the amplifier&apos;s own software. Windows gives a serial port to one program at a time, reading included: close that program, or mirror the port and point Decodium at the copy.</source>
-        <translation type="vanished">端口 %1 已被其他程序占用——通常是功放自带的软件。Windows 一次只把串口交给一个程序，读取也不例外：关闭该程序，或镜像该端口并让 Decodium 指向副本。</translation>
+        <translation>端口 %1 已被其他程序占用——通常是功放自带的软件。Windows 一次只把串口交给一个程序，读取也不例外：关闭该程序，或镜像该端口并让 Decodium 指向副本。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1463"/>
         <source>Second instance:</source>
-        <translation type="vanished">第二个实例：</translation>
+        <translation>第二个实例：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1472"/>
         <source>name, e.g. RX2</source>
-        <translation type="vanished">名称，例如 RX2</translation>
+        <translation>名称，例如 RX2</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1477"/>
         <source>On shared CAT:</source>
-        <translation type="vanished">使用共享 CAT：</translation>
+        <translation>使用共享 CAT：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1496"/>
         <source>Open a second Decodium</source>
-        <translation type="vanished">打开第二个 Decodium</translation>
+        <translation>打开第二个 Decodium</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1529"/>
         <source>Second instance started. Choose its own audio device and, if it has a receiver of its own, its own radio: that is what lets you listen on two bands at once.</source>
-        <translation type="vanished">第二个实例已启动。请在那边选择它自己的音频设备；若另有接收机，也指定它自己的电台：这样就能同时收听两个波段。</translation>
+        <translation>第二个实例已启动。请在那边选择它自己的音频设备；若另有接收机，也指定它自己的电台：这样就能同时收听两个波段。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="1530"/>
         <source>A second Decodium with its own settings profile. It does not take the serial port - this one keeps it and shares it.</source>
-        <translation type="vanished">拥有独立设置配置的第二个 Decodium。它不会占用串口：串口仍由本实例持有并共享。</translation>
+        <translation>拥有独立设置配置的第二个 Decodium。它不会占用串口：串口仍由本实例持有并共享。</translation>
     </message>
 </context>
 <context>
     <name>SettingsTab10</name>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab10.qml" line="67"/>
         <source>AUDIO ALERTS</source>
-        <translation type="vanished">音频 ALERTS</translation>
+        <translation>音频 ALERTS</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab10.qml" line="70"/>
+        <source>Wanted callsign alert:</source>
+        <translation>被查找呼号提醒：</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab10.qml" line="77"/>
+        <source>Calls (comma/space separated, * wildcard):</source>
+        <translation>呼号（用逗号/空格分隔，* 为通配符）：</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab10.qml" line="85"/>
         <source>Alerts Enabled:</source>
-        <translation type="vanished">警报已启用：</translation>
+        <translation>警报已启用：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab10.qml" line="93"/>
         <source>Test</source>
-        <translation type="vanished">测试</translation>
+        <translation>测试</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab10.qml" line="115"/>
         <source>CQ in Msg:</source>
-        <translation type="vanished">消息中的 CQ：</translation>
+        <translation>消息中的 CQ：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab10.qml" line="122"/>
         <source>My Call:</source>
-        <translation type="vanished">我的呼号：</translation>
+        <translation>我的呼号：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab10.qml" line="130"/>
         <source>New DXCC:</source>
-        <translation type="vanished">新 DXCC：</translation>
+        <translation>新 DXCC：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab10.qml" line="137"/>
         <source>New DXCC Band:</source>
-        <translation type="vanished">新 DXCC 表带：</translation>
+        <translation>新 DXCC 表带：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab10.qml" line="145"/>
         <source>New Grid:</source>
-        <translation type="vanished">新网格：</translation>
+        <translation>新网格：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab10.qml" line="152"/>
         <source>New Grid Band:</source>
-        <translation type="vanished">新波段网格：</translation>
+        <translation>新波段网格：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab10.qml" line="160"/>
         <source>New Continent:</source>
-        <translation type="vanished">新大陆：</translation>
+        <translation>新大陆：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab10.qml" line="167"/>
         <source>New Cont Band:</source>
-        <translation type="vanished">新连续带：</translation>
+        <translation>新连续带：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab10.qml" line="175"/>
         <source>New CQ Zone:</source>
-        <translation type="vanished">新 CQ 区域：</translation>
+        <translation>新 CQ 区域：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab10.qml" line="182"/>
         <source>CQ Zone Band:</source>
-        <translation type="vanished">CQ 防区频段：</translation>
+        <translation>CQ 防区频段：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab10.qml" line="190"/>
         <source>New ITU Zone:</source>
-        <translation type="vanished">国际电联新区：</translation>
+        <translation>国际电联新区：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab10.qml" line="197"/>
         <source>ITU Zone Band:</source>
-        <translation type="vanished">国际电联区域频段：</translation>
+        <translation>国际电联区域频段：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab10.qml" line="205"/>
         <source>DX Call/Grid:</source>
-        <translation type="vanished">DX呼号/网格：</translation>
+        <translation>DX呼号/网格：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab10.qml" line="212"/>
         <source>QSY Message:</source>
-        <translation type="vanished">QSY 消息：</translation>
+        <translation>QSY 消息：</translation>
     </message>
 </context>
 <context>
     <name>SettingsTab11</name>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="67"/>
         <source>BLACKLIST</source>
-        <translation type="vanished">黑名单</translation>
+        <translation>黑名单</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="70"/>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="126"/>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="181"/>
         <source>Enabled:</source>
-        <translation type="vanished">已启用：</translation>
+        <translation>已启用：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="80"/>
         <source>Blacklist 1:</source>
-        <translation type="vanished">黑名单1：</translation>
+        <translation>黑名单1：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="83"/>
         <source>Blacklist 2:</source>
-        <translation type="vanished">黑名单2：</translation>
+        <translation>黑名单2：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="87"/>
         <source>Blacklist 3:</source>
-        <translation type="vanished">黑名单3：</translation>
+        <translation>黑名单3：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="90"/>
         <source>Blacklist 4:</source>
-        <translation type="vanished">黑名单4：</translation>
+        <translation>黑名单4：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="94"/>
         <source>Blacklist 5:</source>
-        <translation type="vanished">黑名单5：</translation>
+        <translation>黑名单5：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="97"/>
         <source>Blacklist 6:</source>
-        <translation type="vanished">黑名单6：</translation>
+        <translation>黑名单6：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="101"/>
         <source>Blacklist 7:</source>
-        <translation type="vanished">黑名单7：</translation>
+        <translation>黑名单7：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="104"/>
         <source>Blacklist 8:</source>
-        <translation type="vanished">黑名单8：</translation>
+        <translation>黑名单8：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="108"/>
         <source>Blacklist 9:</source>
-        <translation type="vanished">黑名单9：</translation>
+        <translation>黑名单9：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="111"/>
         <source>Blacklist 10:</source>
-        <translation type="vanished">黑名单10：</translation>
+        <translation>黑名单10：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="115"/>
         <source>Blacklist 11:</source>
-        <translation type="vanished">黑名单11：</translation>
+        <translation>黑名单11：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="118"/>
         <source>Blacklist 12:</source>
-        <translation type="vanished">黑名单12：</translation>
+        <translation>黑名单12：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="123"/>
         <source>WHITELIST</source>
-        <translation type="vanished">白名单</translation>
+        <translation>白名单</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="135"/>
         <source>Whitelist 1:</source>
-        <translation type="vanished">白名单1：</translation>
+        <translation>白名单1：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="138"/>
         <source>Whitelist 2:</source>
-        <translation type="vanished">白名单2：</translation>
+        <translation>白名单2：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="142"/>
         <source>Whitelist 3:</source>
-        <translation type="vanished">白名单3：</translation>
+        <translation>白名单3：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="145"/>
         <source>Whitelist 4:</source>
-        <translation type="vanished">白名单4：</translation>
+        <translation>白名单4：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="149"/>
         <source>Whitelist 5:</source>
-        <translation type="vanished">白名单5：</translation>
+        <translation>白名单5：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="152"/>
         <source>Whitelist 6:</source>
-        <translation type="vanished">白名单6：</translation>
+        <translation>白名单6：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="156"/>
         <source>Whitelist 7:</source>
-        <translation type="vanished">白名单7：</translation>
+        <translation>白名单7：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="159"/>
         <source>Whitelist 8:</source>
-        <translation type="vanished">白名单8：</translation>
+        <translation>白名单8：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="163"/>
         <source>Whitelist 9:</source>
-        <translation type="vanished">白名单9：</translation>
+        <translation>白名单9：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="166"/>
         <source>Whitelist 10:</source>
-        <translation type="vanished">白名单10：</translation>
+        <translation>白名单10：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="170"/>
         <source>Whitelist 11:</source>
-        <translation type="vanished">白名单11：</translation>
+        <translation>白名单11：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="173"/>
         <source>Whitelist 12:</source>
-        <translation type="vanished">白名单12：</translation>
+        <translation>白名单12：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="178"/>
         <source>ALWAYS PASS</source>
-        <translation type="vanished">总是通过</translation>
+        <translation>总是通过</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="190"/>
         <source>Always Pass 1:</source>
-        <translation type="vanished">始终通过 1：</translation>
+        <translation>始终通过 1：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="193"/>
         <source>Always Pass 2:</source>
-        <translation type="vanished">始终通过 2：</translation>
+        <translation>始终通过 2：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="197"/>
         <source>Always Pass 3:</source>
-        <translation type="vanished">始终通过 3：</translation>
+        <translation>始终通过 3：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="200"/>
         <source>Always Pass 4:</source>
-        <translation type="vanished">始终通过 4：</translation>
+        <translation>始终通过 4：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="204"/>
         <source>Always Pass 5:</source>
-        <translation type="vanished">始终通过 5：</translation>
+        <translation>始终通过 5：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="207"/>
         <source>Always Pass 6:</source>
-        <translation type="vanished">始终通过 6：</translation>
+        <translation>始终通过 6：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="211"/>
         <source>Always Pass 7:</source>
-        <translation type="vanished">始终通过 7：</translation>
+        <translation>始终通过 7：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="214"/>
         <source>Always Pass 8:</source>
-        <translation type="vanished">始终通过 8：</translation>
+        <translation>始终通过 8：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="218"/>
         <source>Always Pass 9:</source>
-        <translation type="vanished">始终通过 9：</translation>
+        <translation>始终通过 9：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="221"/>
         <source>Always Pass 10:</source>
-        <translation type="vanished">始终通过 10：</translation>
+        <translation>始终通过 10：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="225"/>
         <source>Always Pass 11:</source>
-        <translation type="vanished">始终通过 11：</translation>
+        <translation>始终通过 11：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="228"/>
         <source>Always Pass 12:</source>
-        <translation type="vanished">始终通过 12：</translation>
+        <translation>始终通过 12：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="233"/>
         <source>EXCLUDE TERRITORY</source>
-        <translation type="vanished">排除地区</translation>
+        <translation>排除地区</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="236"/>
         <source>Europe:</source>
-        <translation type="vanished">欧洲：</translation>
+        <translation>欧洲：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="244"/>
         <source>Africa:</source>
-        <translation type="vanished">非洲：</translation>
+        <translation>非洲：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="253"/>
         <source>Oceania:</source>
-        <translation type="vanished">大洋洲：</translation>
+        <translation>大洋洲：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="261"/>
         <source>Asia:</source>
-        <translation type="vanished">亚洲：</translation>
+        <translation>亚洲：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="270"/>
         <source>North America:</source>
-        <translation type="vanished">北美洲：</translation>
+        <translation>北美洲：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="278"/>
         <source>South America:</source>
-        <translation type="vanished">南美洲：</translation>
+        <translation>南美洲：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="288"/>
         <source>FILTER OPTIONS</source>
-        <translation type="vanished">过滤器选项</translation>
+        <translation>过滤器选项</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="291"/>
         <source>Worked on Band:</source>
-        <translation type="vanished">本波段已通联:</translation>
+        <translation>本波段已通联:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="291"/>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="303"/>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="315"/>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="329"/>
+        <source>Hide</source>
+        <translation>隐藏</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="300"/>
         <source>Hide stations already worked on the current band.</source>
-        <translation type="vanished">隐藏当前波段已通联的电台。</translation>
+        <translation>隐藏当前波段已通联的电台。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="303"/>
         <source>Worked Today:</source>
-        <translation type="vanished">今日已通联:</translation>
+        <translation>今日已通联:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="312"/>
         <source>Hide stations already logged today in UTC.</source>
-        <translation type="vanished">隐藏今天 UTC 已记录的电台。</translation>
+        <translation>隐藏今天 UTC 已记录的电台。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="315"/>
         <source>Worked Yesterday Too:</source>
-        <translation type="vanished">昨日也已通联:</translation>
+        <translation>昨日也已通联:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="326"/>
         <source>Widen Worked Today to cover today and yesterday in UTC.</source>
-        <translation type="vanished">将“今日已通联”扩展为 UTC 的今天和昨天。</translation>
+        <translation>将“今日已通联”扩展为 UTC 的今天和昨天。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="329"/>
         <source>Worked Ever:</source>
-        <translation type="vanished">曾经通联:</translation>
+        <translation>曾经通联:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="338"/>
         <source>Hide every station already present in the log, on any band and any date.</source>
-        <translation type="vanished">隐藏日志中已有的所有电台，不限波段和日期。</translation>
+        <translation>隐藏日志中已有的所有电台，不限波段和日期。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="341"/>
         <source>Wait &amp; Pounce:</source>
-        <translation type="vanished">等待并猛扑：</translation>
+        <translation>等待并猛扑：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="353"/>
         <source>Wait &amp; Pounce listens for filtered CQ decodes, but it only starts a reply when TX/CQ is already armed by the operator.</source>
-        <translation type="vanished">Wait &amp;amp; Pounce 监听已筛选的 CQ 解码，但仅当操作员已 arm TX/CQ 时才开始回复。</translation>
+        <translation>Wait &amp;amp; Pounce 监听已筛选的 CQ 解码，但仅当操作员已 arm TX/CQ 时才开始回复。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="355"/>
         <source>W&amp;P Filters Only:</source>
-        <translation type="vanished">仅 W&amp;P 筛选：</translation>
+        <translation>仅 W&amp;P 筛选：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab11.qml" line="363"/>
         <source>Calling Only:</source>
-        <translation type="vanished">仅呼叫电台：</translation>
+        <translation>仅呼叫电台：</translation>
     </message>
 </context>
 <context>
     <name>SettingsTab12</name>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab12.qml" line="68"/>
         <source>Monitor (MON / STOP)</source>
-        <translation type="vanished">Monitor (MON / STOP)</translation>
+        <translation>Monitor (MON / STOP)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab12.qml" line="69"/>
         <source>Setup (⚙)</source>
-        <translation type="vanished">Setup (⚙)</translation>
+        <translation>Setup (⚙)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab12.qml" line="75"/>
         <source>Layout (window reset)</source>
-        <translation type="vanished">Layout（窗口重置）</translation>
+        <translation>Layout（窗口重置）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab12.qml" line="76"/>
         <source>History (decode history)</source>
-        <translation type="vanished">History（解码历史）</translation>
+        <translation>History（解码历史）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab12.qml" line="78"/>
+        <source>DX-Pedition (workspace)</source>
+        <translation>DX-Pedition（工作区）</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab12.qml" line="79"/>
         <source>Async FT2 (A)</source>
-        <translation type="vanished">Async FT2 (A)</translation>
+        <translation>Async FT2 (A)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab12.qml" line="81"/>
         <source>DX Cluster (toolbar)</source>
-        <translation type="vanished">DX Cluster（toolbar）</translation>
+        <translation>DX Cluster（toolbar）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab12.qml" line="82"/>
         <source>World Clock</source>
-        <translation type="vanished">World Clock</translation>
+        <translation>World Clock</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab12.qml" line="86"/>
         <source>Show or hide UI buttons as you prefer. Changes are immediate and saved automatically.</source>
-        <translation type="vanished">按您的喜好显示或隐藏 UI 按钮。更改即时生效并自动保存。</translation>
+        <translation>按您的喜好显示或隐藏 UI 按钮。更改即时生效并自动保存。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab12.qml" line="92"/>
         <source>TOP TOOLBAR</source>
-        <translation type="vanished">顶部 TOOLBAR</translation>
+        <translation>顶部 TOOLBAR</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab12.qml" line="111"/>
         <source>TOOLBAR BUTTON ORDER</source>
-        <translation type="vanished">TOOLBAR 按钮顺序</translation>
+        <translation>TOOLBAR 按钮顺序</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab12.qml" line="115"/>
         <source>Drag the top toolbar buttons (long-press) to reorder them. Use the button below to restore the default order.</source>
-        <translation type="vanished">拖动顶部 toolbar 按钮（长按）以重新排序。使用下方按钮恢复默认顺序。</translation>
+        <translation>拖动顶部 toolbar 按钮（长按）以重新排序。使用下方按钮恢复默认顺序。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab12.qml" line="133"/>
         <source>Restore default button order</source>
-        <translation type="vanished">恢复默认按钮顺序</translation>
+        <translation>恢复默认按钮顺序</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab12.qml" line="166"/>
         <source>Restore default TX panel order</source>
-        <translation type="vanished">恢复默认 TX 面板顺序</translation>
+        <translation>恢复默认 TX 面板顺序</translation>
     </message>
 </context>
 <context>
     <name>SettingsTab13</name>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="65"/>
         <source>CALLSIGN INTELLIGENCE</source>
-        <translation type="vanished">呼号智能</translation>
+        <translation>呼号智能</translation>
     </message>
     <message>
         <source>Lookup locale con fallback DXCC, cache SQLite e provider aggiornabili. Le credenziali eQSL e Club Log sono salvate nel portachiavi tramite il canale secure settings.</source>
         <translation type="vanished">本地查询，带 DXCC 回退、SQLite 缓存和可更新的数据源。eQSL 与 Club Log 的凭据通过安全设置通道保存在密钥链中。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="78"/>
         <source>Apertura automatica all&apos;avvio QSO</source>
-        <translation type="vanished">开始 QSO 时自动打开</translation>
+        <translation>开始 QSO 时自动打开</translation>
     </message>
     <message>
         <source>Apri il pannello lookup</source>
@@ -23422,664 +26994,836 @@ If unsure, use High.</source>
         <translation type="vanished">QSO 结束后关闭面板</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="92"/>
         <source>Arricchimento campi mancanti</source>
-        <translation type="vanished">补全缺失字段</translation>
+        <translation>补全缺失字段</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="97"/>
         <source>Grid, nome e QTH nel prossimo log</source>
-        <translation type="vanished">在下一条日志中包含网格、姓名与 QTH</translation>
+        <translation>在下一条日志中包含网格、姓名与 QTH</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="99"/>
         <source>Durata cache (minuti)</source>
-        <translation type="vanished">缓存时长（分钟）</translation>
+        <translation>缓存时长（分钟）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="107"/>
         <source>eQSL INBOX — CONFERME RICEVUTE</source>
-        <translation type="vanished">eQSL 收件箱 — 已收到的确认</translation>
+        <translation>eQSL 收件箱 — 已收到的确认</translation>
     </message>
     <message>
         <source>Scarica l&apos;InBox/Archivio eQSL in ADIF e sincronizza le conferme nel logbook attivo. Il nome utente predefinito è il callsign della stazione.</source>
         <translation type="vanished">以 ADIF 下载 eQSL 收件箱／存档，并把确认同步到当前日志。默认用户名为电台呼号。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="113"/>
         <source>QRZ.com usa la chiave API già configurata nella sezione QRZ Logbook. Il pulsante Aggiorna scarica solo le conferme; in alternativa puoi importare qui un file ADI esportato da QRZ. Download, paginazione e sincronizzazione del logbook avvengono in background e lo stato resta visibile nella scheda.</source>
-        <translation type="vanished">QRZ.com 使用已在 QRZ Logbook 区设置的 API 密钥。“刷新”按钮只下载确认；也可以在此导入从 QRZ 导出的 ADI 文件。下载、翻页和日志同步在后台进行，状态会一直显示在本页。</translation>
+        <translation>QRZ.com 使用已在 QRZ Logbook 区设置的 API 密钥。“刷新”按钮只下载确认；也可以在此导入从 QRZ 导出的 ADI 文件。下载、翻页和日志同步在后台进行，状态会一直显示在本页。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="121"/>
         <source>Username/callsign eQSL</source>
-        <translation type="vanished">eQSL 用户名／呼号</translation>
+        <translation>eQSL 用户名／呼号</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="125"/>
         <source>Callsign eQSL o nickname account</source>
-        <translation type="vanished">eQSL 呼号或账户昵称</translation>
+        <translation>eQSL 呼号或账户昵称</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="128"/>
         <source>Password eQSL</source>
-        <translation type="vanished">eQSL 密码</translation>
+        <translation>eQSL 密码</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="137"/>
         <source>LoTW — CONFERME RICEVUTE</source>
-        <translation type="vanished">LoTW — 已收到的确认</translation>
+        <translation>LoTW — 已收到的确认</translation>
     </message>
     <message>
         <source>Scarica le QSL LoTW ricevute e sincronizzale nel logbook. La password viene riutilizzata dalla sezione Reporting → LoTW; il login LoTW può essere diverso dal callsign operativo.</source>
         <translation type="vanished">下载已收到的 LoTW QSL 并同步到日志。密码沿用 Reporting → LoTW 区的设置；LoTW 登录名可能与实际使用的呼号不同。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="147"/>
         <source>Username LoTW</source>
-        <translation type="vanished">LoTW 用户名</translation>
+        <translation>LoTW 用户名</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="151"/>
         <source>Callsign o username LoTW</source>
-        <translation type="vanished">LoTW 呼号或用户名</translation>
+        <translation>LoTW 呼号或用户名</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="156"/>
         <source>CLUB LOG OQRS</source>
-        <translation type="vanished">CLUB LOG OQRS</translation>
+        <translation>CLUB LOG OQRS</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="162"/>
         <source>API key</source>
-        <translation type="vanished">API 密钥</translation>
+        <translation>API 密钥</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="169"/>
         <source>Email</source>
-        <translation type="vanished">电子邮件</translation>
+        <translation>电子邮件</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="175"/>
         <source>Application password</source>
-        <translation type="vanished">应用密码</translation>
+        <translation>应用密码</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="187"/>
         <source>Clear global lookup cache</source>
-        <translation type="vanished">清除全局查询缓存</translation>
+        <translation>清除全局查询缓存</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="198"/>
         <source>LOCAL DATABASES</source>
-        <translation type="vanished">本地数据库</translation>
+        <translation>本地数据库</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="200"/>
         <source>SQLite: %1</source>
-        <translation type="vanished">SQLite: %1</translation>
+        <translation>SQLite: %1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="247"/>
         <source>Update</source>
-        <translation type="vanished">更新</translation>
+        <translation>更新</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="270"/>
         <source>Updating...</source>
-        <translation type="vanished">更新中…</translation>
+        <translation>更新中…</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="276"/>
         <source>%1 record</source>
-        <translation type="vanished">%1 条记录</translation>
+        <translation>%1 条记录</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="277"/>
         <source>No records</source>
-        <translation type="vanished">无记录</translation>
+        <translation>无记录</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="285"/>
         <source>Never updated</source>
-        <translation type="vanished">从未更新</translation>
+        <translation>从未更新</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="295"/>
         <source>Last update: %1</source>
-        <translation type="vanished">上次更新：%1</translation>
+        <translation>上次更新：%1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="310"/>
         <source>File: %1</source>
-        <translation type="vanished">文件：%1</translation>
+        <translation>文件：%1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="311"/>
         <source>File not found</source>
-        <translation type="vanished">未找到文件</translation>
+        <translation>未找到文件</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="331"/>
         <source>Optional local file path</source>
-        <translation type="vanished">可选的本地文件路径</translation>
+        <translation>可选的本地文件路径</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="340"/>
         <source>Choose</source>
-        <translation type="vanished">选择</translation>
+        <translation>选择</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="355"/>
         <source>Import callsign database</source>
-        <translation type="vanished">导入呼号数据库</translation>
+        <translation>导入呼号数据库</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="359"/>
         <source>Databases and CSV (*)</source>
-        <translation type="vanished">数据库和 CSV (*)</translation>
+        <translation>数据库和 CSV (*)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="365"/>
         <source>Import</source>
-        <translation type="vanished">导入</translation>
+        <translation>导入</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="272"/>
         <source>%1 confirmations in last sync</source>
-        <translation type="vanished">上次同步收到 %1 条确认</translation>
+        <translation>上次同步收到 %1 条确认</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="274"/>
         <source>No confirmations</source>
-        <translation type="vanished">没有确认</translation>
+        <translation>没有确认</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="330"/>
         <source>Optional ADI file to merge into the logbook</source>
-        <translation type="vanished">可选的 ADI 文件，用于合并到日志</translation>
+        <translation>可选的 ADI 文件，用于合并到日志</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="354"/>
         <source>Import confirmations ADI</source>
-        <translation type="vanished">从 ADI 导入确认</translation>
+        <translation>从 ADI 导入确认</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="358"/>
         <source>ADIF files (*.adi *.adif)</source>
-        <translation type="vanished">ADIF 文件 (*.adi *.adif)</translation>
+        <translation>ADIF 文件 (*.adi *.adif)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="358"/>
         <source>All files (*)</source>
-        <translation type="vanished">所有文件 (*)</translation>
+        <translation>所有文件 (*)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="365"/>
         <source>Import ADI</source>
-        <translation type="vanished">导入 ADI</translation>
+        <translation>导入 ADI</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="383"/>
         <source>Manual recovery only: importing an ADI merges its confirmations into the active logbook, just like Update. It does not advance the online LoTW download cursor.</source>
-        <translation type="vanished">仅用于手动恢复：导入 ADI 会把其中的确认合并到当前日志，与「刷新」相同。它不会推进 LoTW 在线下载的游标。</translation>
+        <translation>仅用于手动恢复：导入 ADI 会把其中的确认合并到当前日志，与「刷新」相同。它不会推进 LoTW 在线下载的游标。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="68"/>
         <source>Local lookup with DXCC fallback, SQLite cache and updatable providers. eQSL and Club Log credentials are stored in the keychain through the secure settings channel.</source>
-        <translation type="vanished">本地查询，带 DXCC 回退、SQLite 缓存和可更新的服务方。eQSL 与 Club Log 的凭据通过 secure settings 通道保存在密钥链中。</translation>
+        <translation>本地查询，带 DXCC 回退、SQLite 缓存和可更新的服务方。eQSL 与 Club Log 的凭据通过 secure settings 通道保存在密钥链中。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="83"/>
         <source>Open the lookup panel</source>
-        <translation type="vanished">打开查询面板</translation>
+        <translation>打开查询面板</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="85"/>
         <source>Close automatically after logging</source>
-        <translation type="vanished">记录日志后自动关闭</translation>
+        <translation>记录日志后自动关闭</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="90"/>
         <source>Close the panel after the QSO</source>
-        <translation type="vanished">QSO 结束后关闭面板</translation>
+        <translation>QSO 结束后关闭面板</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="109"/>
         <source>Download the eQSL InBox/Archive as ADIF and synchronise the confirmations into the active logbook. The default user name is the station callsign.</source>
-        <translation type="vanished">以 ADIF 格式下载 eQSL 的 InBox/存档，并把确认信息同步到当前日志。默认用户名为本站呼号。</translation>
+        <translation>以 ADIF 格式下载 eQSL 的 InBox/存档，并把确认信息同步到当前日志。默认用户名为本站呼号。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab13.qml" line="139"/>
         <source>Download the LoTW QSLs received and synchronise them into the logbook. The password is reused from the Reporting → LoTW section; the LoTW login may differ from the operating callsign.</source>
-        <translation type="vanished">下载收到的 LoTW QSL 并同步到日志。密码沿用 Reporting → LoTW 部分的设置；LoTW 登录名可能与操作呼号不同。</translation>
+        <translation>下载收到的 LoTW QSL 并同步到日志。密码沿用 Reporting → LoTW 部分的设置；LoTW 登录名可能与操作呼号不同。</translation>
     </message>
 </context>
 <context>
     <name>SettingsTab2</name>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="118"/>
         <source>AUDIO DEVICES</source>
-        <translation type="vanished">音频设备</translation>
+        <translation>音频设备</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="129"/>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="234"/>
         <source>↻  Refresh</source>
-        <translation type="vanished">↻  刷新</translation>
+        <translation>↻  刷新</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="144"/>
         <source>Input Device:</source>
-        <translation type="vanished">输入设备：</translation>
+        <translation>输入设备：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="166"/>
         <source>Linux: entries marked &apos;Pulse/PipeWire monitor&apos; capture the audio playing on that PipeWire/PulseAudio sink, useful for WebSDR/KiwiSDR browser audio. Selecting a Pulse/PipeWire source requires pactl and changes the current user&apos;s default capture source.</source>
-        <translation type="vanished">Linux: 标记为 “Pulse/PipeWire monitor” 的条目会采集该 PipeWire/PulseAudio 输出上正在播放的音频，适合浏览器中的 WebSDR/KiwiSDR 音频。选择 Pulse/PipeWire 源需要 pactl，并会更改当前用户的默认采集源。</translation>
+        <translation>Linux: 标记为 “Pulse/PipeWire monitor” 的条目会采集该 PipeWire/PulseAudio 输出上正在播放的音频，适合浏览器中的 WebSDR/KiwiSDR 音频。选择 Pulse/PipeWire 源需要 pactl，并会更改当前用户的默认采集源。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="168"/>
         <source>Input Channel:</source>
-        <translation type="vanished">输入通道：</translation>
+        <translation>输入通道：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="171"/>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="209"/>
         <source>Mono</source>
-        <translation type="vanished">单声道</translation>
+        <translation>单声道</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="171"/>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="209"/>
         <source>Left</source>
-        <translation type="vanished">左边</translation>
+        <translation>左边</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="171"/>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="209"/>
         <source>Right</source>
-        <translation type="vanished">右边</translation>
+        <translation>右边</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="171"/>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="209"/>
         <source>Both</source>
-        <translation type="vanished">双声道</translation>
+        <translation>双声道</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="186"/>
         <source>Output Device:</source>
-        <translation type="vanished">输出设备：</translation>
+        <translation>输出设备：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="206"/>
         <source>Output Channel:</source>
-        <translation type="vanished">输出通道：</translation>
+        <translation>输出通道：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="225"/>
         <source>RTL-SDR RECEIVER</source>
-        <translation type="vanished">RTL-SDR 接收机</translation>
+        <translation>RTL-SDR 接收机</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="245"/>
         <source>Use RTL-SDR:</source>
-        <translation type="vanished">使用 RTL-SDR：</translation>
+        <translation>使用 RTL-SDR：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="257"/>
         <source>Receives directly from an RTL-SDR. This mode is receive-only: Tune and TX are disabled.</source>
-        <translation type="vanished">直接从 RTL-SDR 接收。此模式仅接收：Tune 和 TX 被禁用。</translation>
+        <translation>直接从 RTL-SDR 接收。此模式仅接收：Tune 和 TX 被禁用。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="261"/>
         <source>Experimental function under development</source>
-        <translation type="vanished">正在开发中的实验性功能</translation>
+        <translation>正在开发中的实验性功能</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="262"/>
         <source>No external audio cable is required. RX only.</source>
-        <translation type="vanished">无需外部音频线。仅接收。</translation>
+        <translation>无需外部音频线。仅接收。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="263"/>
         <source>RTL-SDR support is not included in this build.</source>
-        <translation type="vanished">此版本未包含 RTL-SDR 支持。</translation>
+        <translation>此版本未包含 RTL-SDR 支持。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="272"/>
         <source>Receiver:</source>
-        <translation type="vanished">接收机：</translation>
+        <translation>接收机：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="295"/>
         <source>Input mode:</source>
-        <translation type="vanished">输入模式：</translation>
+        <translation>输入模式：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="307"/>
         <source>SDR Radio</source>
-        <translation type="vanished">SDR 电台</translation>
+        <translation>SDR 电台</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="307"/>
         <source>Direct Sampling</source>
-        <translation type="vanished">直接采样</translation>
+        <translation>直接采样</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="334"/>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="337"/>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="342"/>
         <source>Uses the tuner path. RTL-SDR Blog V4 handles its HF upconverter automatically.</source>
-        <translation type="vanished">使用调谐器通路。RTL-SDR Blog V4 会自动处理其 HF 上变频器。</translation>
+        <translation>使用调谐器通路。RTL-SDR Blog V4 会自动处理其 HF 上变频器。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="336"/>
         <source>Uses the RTL2832 direct-sampling Q ADC for HF reception from 500 kHz to 24 MHz.</source>
-        <translation type="vanished">使用 RTL2832 的直接采样 Q 路 ADC 接收 500 kHz 至 24 MHz 的短波。</translation>
+        <translation>使用 RTL2832 的直接采样 Q 路 ADC 接收 500 kHz 至 24 MHz 的短波。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="349"/>
         <source>Demodulator:</source>
-        <translation type="vanished">解调器：</translation>
+        <translation>解调器：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="352"/>
         <source>Weak signal / FT8 audio</source>
-        <translation type="vanished">弱信号 / FT8 音频</translation>
+        <translation>弱信号 / FT8 音频</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="352"/>
         <source>Wide FM broadcast</source>
-        <translation type="vanished">宽带调频（广播）</translation>
+        <translation>宽带调频（广播）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="353"/>
         <source>Narrow FM</source>
-        <translation type="vanished">窄带调频</translation>
+        <translation>窄带调频</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="353"/>
         <source>AM</source>
-        <translation type="vanished">AM</translation>
+        <translation>AM</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="353"/>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="464"/>
         <source>USB</source>
-        <translation type="vanished">USB</translation>
+        <translation>USB</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="354"/>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="464"/>
         <source>LSB</source>
-        <translation type="vanished">LSB</translation>
+        <translation>LSB</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="354"/>
         <source>CW</source>
-        <translation type="vanished">连续波</translation>
+        <translation>连续波</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="379"/>
         <source>Sends decoder PCM only to Decodium&apos;s weak-signal modes; the RF panadapter remains IQ-based.</source>
-        <translation type="vanished">仅将解码器 PCM 送往 Decodium 的弱信号模式；射频全景显示仍基于 IQ。</translation>
+        <translation>仅将解码器 PCM 送往 Decodium 的弱信号模式；射频全景显示仍基于 IQ。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="380"/>
         <source>Demodulates receive audio separately. TX and Tune remain disabled with RTL-SDR.</source>
-        <translation type="vanished">单独解调接收音频。使用 RTL-SDR 时 TX 与 Tune 仍被禁用。</translation>
+        <translation>单独解调接收音频。使用 RTL-SDR 时 TX 与 Tune 仍被禁用。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="382"/>
         <source>Listen to receiver audio:</source>
-        <translation type="vanished">收听接收机音频：</translation>
+        <translation>收听接收机音频：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="394"/>
         <source>Plays demodulated mono audio through the dedicated receiver output below. It is asynchronous and never feeds the FT8 decoder.</source>
-        <translation type="vanished">通过下方指定的专用输出播放解调后的单声道音频。它是异步的，绝不送入 FT8 解码器。</translation>
+        <translation>通过下方指定的专用输出播放解调后的单声道音频。它是异步的，绝不送入 FT8 解码器。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="414"/>
         <source>Follow dial frequency:</source>
-        <translation type="vanished">跟随调谐频率：</translation>
+        <translation>跟随调谐频率：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="428"/>
         <source>Use receiver IF output:</source>
-        <translation type="vanished">使用接收机中频输出：</translation>
+        <translation>使用接收机中频输出：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="441"/>
         <source>Keeps the radio dial frequency for display, logging and decoding while the RTL-SDR is tuned to the receiver&apos;s fixed IF output.</source>
-        <translation type="vanished">保留电台调谐频率用于显示、日志和解码，同时将 RTL-SDR 调谐到接收机的固定中频输出。</translation>
+        <translation>保留电台调谐频率用于显示、日志和解码，同时将 RTL-SDR 调谐到接收机的固定中频输出。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="444"/>
         <source>IF frequency (Hz):</source>
-        <translation type="vanished">中频频率 (Hz)：</translation>
+        <translation>中频频率 (Hz)：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="460"/>
         <source>IF sideband:</source>
-        <translation type="vanished">中频边带：</translation>
+        <translation>中频边带：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="464"/>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="668"/>
         <source>Automatic</source>
-        <translation type="vanished">自动</translation>
+        <translation>自动</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="479"/>
         <source>Automatic uses LSB only with the LSB demodulator; weak-signal modes such as FT8 use USB.</source>
-        <translation type="vanished">自动模式仅在使用 LSB 解调器时选择 LSB；FT8 等弱信号模式使用 USB。</translation>
+        <translation>自动模式仅在使用 LSB 解调器时选择 LSB；FT8 等弱信号模式使用 USB。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="482"/>
         <source>USB shift (Hz):</source>
-        <translation type="vanished">USB 偏移 (Hz)：</translation>
+        <translation>USB 偏移 (Hz)：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="498"/>
         <source>LSB shift (Hz):</source>
-        <translation type="vanished">LSB 偏移 (Hz)：</translation>
+        <translation>LSB 偏移 (Hz)：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="514"/>
         <source>Invert IF spectrum:</source>
-        <translation type="vanished">反转中频频谱：</translation>
+        <translation>反转中频频谱：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="527"/>
         <source>Enable this when signals move in the opposite direction on the panadapter because the receiver&apos;s IF mixer reverses the spectrum.</source>
-        <translation type="vanished">当接收机的中频混频器导致频谱反转、信号在频谱窗中反向移动时启用此项。</translation>
+        <translation>当接收机的中频混频器导致频谱反转、信号在频谱窗中反向移动时启用此项。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="532"/>
         <source>IF mode: Decodium keeps the radio dial frequency on screen and tunes the RTL-SDR to IF plus the selected USB/LSB shift.</source>
-        <translation type="vanished">中频模式：Decodium 在屏幕上保留电台频率，并将 RTL-SDR 调谐到中频加所选 USB/LSB 偏移。</translation>
+        <translation>中频模式：Decodium 在屏幕上保留电台频率，并将 RTL-SDR 调谐到中频加所选 USB/LSB 偏移。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="542"/>
         <source>Receiver speaker output:</source>
-        <translation type="vanished">接收机扬声器输出：</translation>
+        <translation>接收机扬声器输出：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="546"/>
         <source>System default</source>
-        <translation type="vanished">系统默认</translation>
+        <translation>系统默认</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="579"/>
         <source>System default normally selects the computer speakers and is independent from Decodium&apos;s TX audio output.</source>
-        <translation type="vanished">系统默认通常选择计算机扬声器，且与 Decodium 的发射音频输出相互独立。</translation>
+        <translation>系统默认通常选择计算机扬声器，且与 Decodium 的发射音频输出相互独立。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="582"/>
         <source>RF frequency (Hz):</source>
-        <translation type="vanished">射频频率 (Hz)：</translation>
+        <translation>射频频率 (Hz)：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="602"/>
         <source>Sample rate:</source>
-        <translation type="vanished">采样率：</translation>
+        <translation>采样率：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="628"/>
         <source>RF spectrum: centre ±480 kHz or more; receiver audio is Wide FM at 48 kHz.</source>
-        <translation type="vanished">射频频谱：中心 ±480 kHz 或更宽；接收音频为 48 kHz 的宽带调频。</translation>
+        <translation>射频频谱：中心 ±480 kHz 或更宽；接收音频为 48 kHz 的宽带调频。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="629"/>
         <source>RF spectrum is derived from complex IQ, independent from decoder audio.</source>
-        <translation type="vanished">射频频谱由复数 IQ 得出，与解码器音频无关。</translation>
+        <translation>射频频谱由复数 IQ 得出，与解码器音频无关。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="636"/>
         <source>PPM correction:</source>
-        <translation type="vanished">PPM 校正：</translation>
+        <translation>PPM 校正：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="652"/>
         <source>Tuner AGC:</source>
-        <translation type="vanished">调谐器 AGC：</translation>
+        <translation>调谐器 AGC：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="664"/>
         <source>Manual gain (dB):</source>
-        <translation type="vanished">手动增益 (dB)：</translation>
+        <translation>手动增益 (dB)：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="682"/>
         <source>Digital AGC:</source>
-        <translation type="vanished">数字 AGC：</translation>
+        <translation>数字 AGC：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="693"/>
         <source>Usually leave this disabled. It can raise the noise floor on RTL-SDR Blog V4 receivers.</source>
-        <translation type="vanished">通常保持关闭。在 RTL-SDR Blog V4 接收机上它可能抬高本底噪声。</translation>
+        <translation>通常保持关闭。在 RTL-SDR Blog V4 接收机上它可能抬高本底噪声。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="697"/>
         <source>Bias tee:</source>
-        <translation type="vanished">偏置馈电：</translation>
+        <translation>偏置馈电：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="708"/>
         <source>Supplies power to an external active antenna or LNA only when required by that equipment.</source>
-        <translation type="vanished">仅在外部有源天线或 LNA 需要时才为其供电。</translation>
+        <translation>仅在外部有源天线或 LNA 需要时才为其供电。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="710"/>
         <source>Audio gain:</source>
-        <translation type="vanished">音频增益：</translation>
+        <translation>音频增益：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="876"/>
         <source>LEVELS</source>
-        <translation type="vanished">级别</translation>
+        <translation>级别</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="879"/>
         <source>RX Input Level:</source>
-        <translation type="vanished">RX 输入电平：</translation>
+        <translation>RX 输入电平：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="934"/>
         <source>Auto RX level active</source>
-        <translation type="vanished">自动 RX 电平已启用</translation>
+        <translation>自动 RX 电平已启用</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="935"/>
         <source>Auto RX level disabled</source>
-        <translation type="vanished">自动 RX 电平已禁用</translation>
+        <translation>自动 RX 电平已禁用</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="939"/>
         <source>TX Output Level:</source>
-        <translation type="vanished">TX 输出电平：</translation>
+        <translation>TX 输出电平：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="958"/>
         <source>DIRECTORY</source>
-        <translation type="vanished">目录</translation>
+        <translation>目录</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="961"/>
         <source>Save Directory:</source>
-        <translation type="vanished">保存目录：</translation>
+        <translation>保存目录：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="977"/>
         <source>AzEl Directory:</source>
-        <translation type="vanished">AzEl 目录：</translation>
+        <translation>AzEl 目录：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="994"/>
         <source>POWER MEMORY</source>
-        <translation type="vanished">电源记忆</translation>
+        <translation>电源记忆</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="997"/>
         <source>Band TX Memory:</source>
-        <translation type="vanished">手环 TX 内存：</translation>
+        <translation>手环 TX 内存：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="1004"/>
         <source>Band Tune Mem:</source>
-        <translation type="vanished">乐队调音记忆：</translation>
+        <translation>乐队调音记忆：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="727"/>
         <source>SSB voice bandwidth:</source>
-        <translation type="vanished">SSB 话音带宽：</translation>
+        <translation>SSB 话音带宽：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="755"/>
         <source>Post-demodulation audio filter only. It does not change the radio dial or RTL-SDR tuning.</source>
-        <translation type="vanished">仅为解调后的音频滤波。它不会改变电台或 RTL-SDR 的调谐。</translation>
+        <translation>仅为解调后的音频滤波。它不会改变电台或 RTL-SDR 的调谐。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="760"/>
         <source>SSB audio AGC:</source>
-        <translation type="vanished">SSB 音频 AGC：</translation>
+        <translation>SSB 音频 AGC：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="771"/>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="835"/>
         <source>Off</source>
-        <translation type="vanished">取消</translation>
+        <translation>取消</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="771"/>
         <source>Slow</source>
-        <translation type="vanished">慢</translation>
+        <translation>慢</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="771"/>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="835"/>
         <source>Medium</source>
-        <translation type="vanished">中等</translation>
+        <translation>中等</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="788"/>
         <source>Adjusts listening level after SSB demodulation. Off preserves the raw receiver level.</source>
-        <translation type="vanished">调整 SSB 解调后的收听电平。关闭则保留接收机的原始电平。</translation>
+        <translation>调整 SSB 解调后的收听电平。关闭则保留接收机的原始电平。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="793"/>
         <source>SSB notch (Hz):</source>
-        <translation type="vanished">SSB 陷波 (Hz)：</translation>
+        <translation>SSB 陷波 (Hz)：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="804"/>
         <source>0 = Off</source>
-        <translation type="vanished">0 = 关闭</translation>
+        <translation>0 = 关闭</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="819"/>
         <source>Set the audible whistle frequency to remove a persistent carrier. Use 0 to disable.</source>
-        <translation type="vanished">设置可听见的哨声频率以消除持续载波。填 0 表示关闭。</translation>
+        <translation>设置可听见的哨声频率以消除持续载波。填 0 表示关闭。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="824"/>
         <source>SSB noise reduction:</source>
-        <translation type="vanished">SSB 降噪：</translation>
+        <translation>SSB 降噪：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="835"/>
         <source>Light</source>
-        <translation type="vanished">轻</translation>
+        <translation>轻</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="852"/>
         <source>Adaptive speech gate for background noise in pauses. It never affects digital-mode decoder audio.</source>
-        <translation type="vanished">针对停顿中背景噪声的自适应语音门限。它绝不影响数字模式解码器的音频。</translation>
+        <translation>针对停顿中背景噪声的自适应语音门限。它绝不影响数字模式解码器的音频。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab2.qml" line="857"/>
         <source>These controls apply only to RTL-SDR USB/LSB listening after demodulation; they never alter FT8 or the radio tuning reference.</source>
-        <translation type="vanished">这些控件仅作用于解调后的 RTL-SDR USB/LSB 收听；它们绝不改变 FT8 或电台的调谐基准。</translation>
+        <translation>这些控件仅作用于解调后的 RTL-SDR USB/LSB 收听；它们绝不改变 FT8 或电台的调谐基准。</translation>
     </message>
 </context>
 <context>
     <name>SettingsTab3</name>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="67"/>
         <source>FREQUENCY AND TIMING</source>
-        <translation type="vanished">频率和时序</translation>
+        <translation>频率和时序</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="70"/>
         <source>TX Frequency:</source>
-        <translation type="vanished">TX 频率：</translation>
+        <translation>TX 频率：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="83"/>
         <source>TX Slot:</source>
-        <translation type="vanished">TX 插槽：</translation>
+        <translation>TX 插槽：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="86"/>
         <source>Second (:15/:45)</source>
-        <translation type="vanished">第二次（：15/：45）</translation>
+        <translation>第二次（：15/：45）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="86"/>
         <source>First (:00/:30)</source>
-        <translation type="vanished">第一场 (:00/:30)</translation>
+        <translation>第一场 (:00/:30)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="100"/>
         <source>TX Delay (s):</source>
-        <translation type="vanished">TX 延迟（秒）：</translation>
+        <translation>TX 延迟（秒）：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="115"/>
         <source>Allow TX QSY:</source>
-        <translation type="vanished">允许 TX QSY：</translation>
+        <translation>允许 TX QSY：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="126"/>
         <source>READY PROFILES</source>
-        <translation type="vanished">现成配置文件</translation>
+        <translation>现成配置文件</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="138"/>
         <source>Balanced (daily QSO) - default</source>
-        <translation type="vanished">均衡（日常 QSO）- 默认</translation>
+        <translation>均衡（日常 QSO）- 默认</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="139"/>
         <source>Conservative ON · full decode AutoCQ ON · close strong partners ON · adaptive decode ON · AP cache rescue ON · skip end-slot OFF · MAM OFF · partner memory ON · TX2 resend ON · smooth flow ON · caller retries 5.</source>
-        <translation type="vanished">Conservative ON · full decode AutoCQ ON · close strong partners ON · adaptive decode ON · AP cache rescue ON · skip end-slot OFF · MAM OFF · partner memory ON · TX2 resend ON · smooth flow ON · caller retries 5。</translation>
+        <translation>Conservative ON · full decode AutoCQ ON · close strong partners ON · adaptive decode ON · AP cache rescue ON · skip end-slot OFF · MAM OFF · partner memory ON · TX2 resend ON · smooth flow ON · caller retries 5。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="140"/>
         <source>Weak-signal / DX hunting</source>
-        <translation type="vanished">弱信号 / DX 猎手</translation>
+        <translation>弱信号 / DX 猎手</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="141"/>
         <source>Like Balanced, but: caller retries 7 · adaptive decode OFF (maximum sensitivity) · AP cache rescue ON (accepts some false positives) · skip end-slot OFF (do not lose late decodes).</source>
-        <translation type="vanished">与“均衡”相同，但：caller retries 7 · adaptive decode OFF（最高灵敏度）· AP cache rescue ON（接受少量误判）· skip end-slot OFF（不丢失迟到的解码）。</translation>
+        <translation>与“均衡”相同，但：caller retries 7 · adaptive decode OFF（最高灵敏度）· AP cache rescue ON（接受少量误判）· skip end-slot OFF（不丢失迟到的解码）。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="142"/>
         <source>Contest / high density</source>
-        <translation type="vanished">竞赛 / 高密度</translation>
+        <translation>竞赛 / 高密度</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="143"/>
         <source>close strong partners ON · skip end-slot ON (minimum latency) · MAM multi-stream ON (2 streams, experimental) · full decode AutoCQ ON · caller retries 3 · partner memory ON · conservative OFF.</source>
-        <translation type="vanished">close strong partners ON · skip end-slot ON（最小延迟）· MAM multi-stream ON（2 个 stream，实验性）· full decode AutoCQ ON · caller retries 3 · partner memory ON · conservative OFF。</translation>
+        <translation>close strong partners ON · skip end-slot ON（最小延迟）· MAM multi-stream ON（2 个 stream，实验性）· full decode AutoCQ ON · caller retries 3 · partner memory ON · conservative OFF。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="144"/>
         <source>CPU-limited (Decodium Console / mini PC)</source>
-        <translation type="vanished">CPU 受限（Decodium Console / 迷你 PC）</translation>
+        <translation>CPU 受限（Decodium Console / 迷你 PC）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="145"/>
         <source>adaptive decode ON · MAM OFF · full decode AutoCQ OFF · smooth flow ON · rest at defaults. Watchdogs unchanged.</source>
-        <translation type="vanished">adaptive decode ON · MAM OFF · full decode AutoCQ OFF · smooth flow ON · 其余为默认值。Watchdog 不变。</translation>
+        <translation>adaptive decode ON · MAM OFF · full decode AutoCQ OFF · smooth flow ON · 其余为默认值。Watchdog 不变。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="168"/>
         <source>● active</source>
-        <translation type="vanished">● 活动</translation>
+        <translation>● 活动</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="184"/>
         <source>AUTO SEQUENCE</source>
-        <translation type="vanished">自动序列</translation>
+        <translation>自动序列</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="203"/>
         <source>Auto Sequence:</source>
-        <translation type="vanished">自动序列：</translation>
+        <translation>自动序列：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="224"/>
         <source>Send RR73:</source>
-        <translation type="vanished">发送 RR73：</translation>
+        <translation>发送 RR73：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="245"/>
         <source>Quick QSO:</source>
-        <translation type="vanished">快速 QSO：</translation>
+        <translation>快速 QSO：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="268"/>
         <source>Resume QSO on partner reply:</source>
-        <translation type="vanished">伙伴回复时恢复 QSO：</translation>
+        <translation>伙伴回复时恢复 QSO：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="291"/>
         <source>If you Halt during an active QSO and that same station sends a direct reply to your callsign within 2 minutes, Decodium can resume that QSO.
 
 Applies only to FT8/FT4/FT2 and only to the saved QSO state.
 
 Default: OFF (= Halt fully stops the sequence by default).</source>
-        <translation type="vanished">如果您在活动 QSO 期间 Halt，而该电台在 2 分钟内向您的 callsign 发送了直接回复，Decodium 可以恢复该 QSO。
+        <translation>如果您在活动 QSO 期间 Halt，而该电台在 2 分钟内向您的 callsign 发送了直接回复，Decodium 可以恢复该 QSO。
 
 仅适用于 FT8/FT4/FT2，且仅适用于已保存的 QSO 状态。
 
 默认：OFF（= Halt 默认完全停止序列）。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="294"/>
         <source>Disable TX after 73:</source>
-        <translation type="vanished">73后禁用TX：</translation>
+        <translation>73后禁用TX：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="312"/>
         <source>MSK/Q65 TX until 73:</source>
-        <translation type="vanished">MSK/Q65 TX 直到 73：</translation>
+        <translation>MSK/Q65 TX 直到 73：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="330"/>
         <source>FT2 UTILITY</source>
-        <translation type="vanished">FT2 实用工具</translation>
+        <translation>FT2 实用工具</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="335"/>
         <source>FT2: signoff retries (73/RR73):</source>
-        <translation type="vanished">FT2：signoff 重试 (73/RR73)：</translation>
+        <translation>FT2：signoff 重试 (73/RR73)：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="356"/>
         <source>How many times to repeat the final 73/RR73 in FT2 waiting for the partner&apos;s ack before logging and closing.
 
 Default: 4 (~28s).
@@ -24088,7 +27832,7 @@ Lower = closes earlier (less &apos;stuck&apos; on the same station).
 Higher = more patient with weak/QSB partners.
 
 Doesn&apos;t affect FT8/FT4.</source>
-        <translation type="vanished">在 FT2 中记录并关闭前，等待伙伴 ack 时重复最终 73/RR73 的次数。
+        <translation>在 FT2 中记录并关闭前，等待伙伴 ack 时重复最终 73/RR73 的次数。
 
 默认：4（约 28 秒）。
 
@@ -24098,10 +27842,12 @@ Doesn&apos;t affect FT8/FT4.</source>
 不影响 FT8/FT4。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="361"/>
         <source>FT4: signoff retries (73/RR73):</source>
-        <translation type="vanished">FT4：signoff 重试 (73/RR73)：</translation>
+        <translation>FT4：signoff 重试 (73/RR73)：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="382"/>
         <source>How many times to repeat the final 73/RR73 in FT4.
 
 Default: 4 (~30s).
@@ -24109,7 +27855,7 @@ Default: 4 (~30s).
 Increase to 6-8 for weak/QSB partners (replaces the former automatic weak/conservative extras).
 
 Doesn&apos;t affect FT2/FT8.</source>
-        <translation type="vanished">在 FT4 中重复最终 73/RR73 的次数。
+        <translation>在 FT4 中重复最终 73/RR73 的次数。
 
 默认：4（约 30 秒）。
 
@@ -24118,10 +27864,12 @@ Doesn&apos;t affect FT2/FT8.</source>
 不影响 FT2/FT8。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="387"/>
         <source>FT8: signoff retries (73/RR73):</source>
-        <translation type="vanished">FT8：signoff 重试 (73/RR73)：</translation>
+        <translation>FT8：signoff 重试 (73/RR73)：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="408"/>
         <source>How many times to repeat the final 73/RR73 in FT8.
 
 Default: 3 (~45s).
@@ -24129,7 +27877,7 @@ Default: 3 (~45s).
 Increase to 6-8 for weak/QSB partners (replaces the former automatic weak/conservative extras).
 
 Doesn&apos;t affect FT2/FT4.</source>
-        <translation type="vanished">在 FT8 中重复最终 73/RR73 的次数。
+        <translation>在 FT8 中重复最终 73/RR73 的次数。
 
 默认：3（约 45 秒）。
 
@@ -24138,70 +27886,82 @@ Doesn&apos;t affect FT2/FT4.</source>
 不影响 FT2/FT4。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="413"/>
         <source>Weak-partner signoff boost (FT2/4/8):</source>
-        <translation type="vanished">弱台 signoff 增强（FT2/4/8）：</translation>
+        <translation>弱台 signoff 增强（FT2/4/8）：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="432"/>
         <source>When ON, automatically grants extra final 73/RR73 retries when the active partner is weak (SNR at or below the threshold below), giving fragile QSOs more chances to close.
 
 Default OFF = unchanged behavior. Applies to FT2/FT4/FT8, always clamped to max 8 and still bounded by the TX watchdog.</source>
-        <translation type="vanished">启用后，当活动对方较弱（SNR 等于或低于下方阈值）时自动增加最终的 73/RR73 重试，让脆弱的 QSO 有更多机会完成。
+        <translation>启用后，当活动对方较弱（SNR 等于或低于下方阈值）时自动增加最终的 73/RR73 重试，让脆弱的 QSO 有更多机会完成。
 
 默认关闭 = 行为不变。适用于 FT2/FT4/FT8，始终限制为最多 8 次，并仍受 TX watchdog 约束。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="435"/>
         <source>  weak SNR threshold (dB):</source>
-        <translation type="vanished">  弱 SNR 阈值（dB）：</translation>
+        <translation>  弱 SNR 阈值（dB）：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="458"/>
         <source>A partner whose SNR is at or below this value is treated as &apos;weak&apos; and receives the extra signoff retries.
 
 Default: -15 dB.</source>
-        <translation type="vanished">SNR 等于或低于此值的对方将被视为&apos;弱&apos;，并获得额外的 signoff 重试。
+        <translation>SNR 等于或低于此值的对方将被视为&apos;弱&apos;，并获得额外的 signoff 重试。
 
 默认：-15 dB。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="461"/>
         <source>  extra signoff retries:</source>
-        <translation type="vanished">  额外 signoff 重试次数：</translation>
+        <translation>  额外 signoff 重试次数：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="484"/>
         <source>How many extra final 73/RR73 retries to add on top of the per-mode cap for weak partners.
 
 Default: +3 (capped so the total never exceeds 8).</source>
-        <translation type="vanished">对弱台在每模式上限之外再增加多少次最终 73/RR73 重试。
+        <translation>对弱台在每模式上限之外再增加多少次最终 73/RR73 重试。
 
 默认：+3（受限以使总数永不超过 8）。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="489"/>
         <source>Post-log RRR re-engage guard (FT2):</source>
-        <translation type="vanished">记录后 RRR 重新接入保护（FT2）：</translation>
+        <translation>记录后 RRR 重新接入保护（FT2）：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="508"/>
         <source>When ON, after a QSO is logged (&apos;partner left&apos;) stop re-sending RR73 to a partner that keeps calling you with R+report because they did not copy your signoff (the 9H1SR too-many-calls case).
 
 A few courtesy repeats are still allowed (see max), then suppressed within the 30s cooldown. Default OFF. FT2 only.</source>
-        <translation type="vanished">启用后，在 QSO 已记录（&apos;对方离开&apos;）之后，停止向因未收到你的结束信号而继续以 R+报告呼叫你的对方重发 RR73（9H1SR 呼叫过多的情况）。
+        <translation>启用后，在 QSO 已记录（&apos;对方离开&apos;）之后，停止向因未收到你的结束信号而继续以 R+报告呼叫你的对方重发 RR73（9H1SR 呼叫过多的情况）。
 
 仍允许少量礼貌性重复（见上限），之后在 30 秒冷却期内被抑制。默认关闭。仅 FT2。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="511"/>
         <source>  courtesy RRR max:</source>
-        <translation type="vanished">  礼貌性 RRR 上限：</translation>
+        <translation>  礼貌性 RRR 上限：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="534"/>
         <source>How many courtesy RR73 to still send to a just-logged partner before suppressing further re-engagements.
 
 0 = suppress immediately. Default: 1.</source>
-        <translation type="vanished">在抑制后续重新接入之前，还要向刚记录的对方发送多少次礼貌性 RR73。
+        <translation>在抑制后续重新接入之前，还要向刚记录的对方发送多少次礼貌性 RR73。
 
 0 = 立即抑制。默认：1。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="539"/>
         <source>Immediate TX on click (1.0.283 style):</source>
-        <translation type="vanished">点击即时 TX（1.0.283 风格）：</translation>
+        <translation>点击即时 TX（1.0.283 风格）：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="561"/>
         <source>Restores the &apos;TX starts IMMEDIATELY on double-click&apos; behaviour of 1.0.283.
 
 • FT2: relaxes the period-gate (TX1 from click bypasses waiting for the next slot)
@@ -24210,7 +27970,7 @@ A few courtesy repeats are still allowed (see max), then suppressed within the 3
 Default: OFF (= safe upstream behaviour).
 
 Enable if it bothers you to wait 1 cycle after the click.</source>
-        <translation type="vanished">恢复 1.0.283 的“双击后立即开始 TX”行为。
+        <translation>恢复 1.0.283 的“双击后立即开始 TX”行为。
 
 • FT2：放宽周期门控（来自点击的 TX1 跳过等待下一时段）
 • FT8/FT4：将可点击窗口上限提高到 d3CapMs（FT8 约 11 秒，FT4 约 5.6 秒）= 真正的 1.0.283 行为
@@ -24220,26 +27980,30 @@ Enable if it bothers you to wait 1 cycle after the click.</source>
 如果您不愿在点击后等待 1 个周期，请启用。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="566"/>
         <source>Log RR73 even if partner leaves (FT2):</source>
-        <translation type="vanished">即使伙伴离开也记录 RR73 (FT2)：</translation>
+        <translation>即使伙伴离开也记录 RR73 (FT2)：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="588"/>
         <source>FT2 + async AutoCQ: when WE close with RR73 (TX4) after the partner R+report and the partner then disappears, log the QSO anyway (at the signoff cap) instead of leaving it unlogged.
 
 Matches TX5/73 and sync mode behaviour.
 
 Default: OFF.</source>
-        <translation type="vanished">FT2 + async AutoCQ：当我方在伙伴 R+report 后以 RR73 (TX4) 关闭，而伙伴随后消失时，仍然记录该 QSO（在 signoff 上限处），而不是不予记录。
+        <translation>FT2 + async AutoCQ：当我方在伙伴 R+report 后以 RR73 (TX4) 关闭，而伙伴随后消失时，仍然记录该 QSO（在 signoff 上限处），而不是不予记录。
 
 与 TX5/73 及 sync 模式行为一致。
 
 默认：OFF。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="593"/>
         <source>FT8: fast sequences (WSJT-X/JTDX style):</source>
-        <translation type="vanished">FT8：快速序列（WSJT-X/JTDX 风格）：</translation>
+        <translation>FT8：快速序列（WSJT-X/JTDX 风格）：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="615"/>
         <source>Reduces FT8 sequence waits for users who prefer WSJT-X/JTDX-style reactivity.
 
 Two changes:
@@ -24249,7 +28013,7 @@ Two changes:
 SAFETY: under CPU pressure the pre-existing clamp forces grace ≥900ms (safety &gt; reactivity on loaded PCs).
 
 Default: OFF (= conservative upstream behaviour, max decode reliability).</source>
-        <translation type="vanished">为偏好 WSJT-X/JTDX 风格响应性的用户减少 FT8 序列等待。
+        <translation>为偏好 WSJT-X/JTDX 风格响应性的用户减少 FT8 序列等待。
 
 两项更改：
   (1) 边界宽限 1200ms → 400ms = TX 在时段边界后提前约 800ms 开始
@@ -24260,17 +28024,19 @@ Default: OFF (= conservative upstream behaviour, max decode reliability).</sourc
 默认：OFF（= 保守的上游行为，最大解码可靠性）。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="620"/>
         <source>FT2: conservative TX window (no truncated frames):</source>
-        <translation type="vanished">FT2：conservative TX 窗口（无截断帧）：</translation>
+        <translation>FT2：conservative TX 窗口（无截断帧）：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="642"/>
         <source>Controls how late in a slot the async FT2 TX may start.
 
 • ON (default): the TX starts only if the FULL payload (~2520ms) still fits — window ~18% of the slot. If it would arrive late, the TX is deferred to the next slot instead of sending a TRUNCATED frame the partner can&apos;t decode. Calm, Decodium-3.0-style stability.
 • OFF: FIX B (1.0.353) behaviour — window up to ~76% of the slot (only ~700ms of useful payload required). More reactive but can transmit truncated frames on a late reply.
 
 Enable OFF only if you want maximum reactivity and accept occasional non-decodable late TX.</source>
-        <translation type="vanished">控制 async FT2 TX 在一个时段中最晚可在何时开始。
+        <translation>控制 async FT2 TX 在一个时段中最晚可在何时开始。
 
 • ON（默认）：仅当完整负载（约 2520ms）仍可放下时 TX 才开始 — 窗口约为时段的 18%。若会迟到，则将 TX 推迟到下一时段，而不是发送伙伴无法解码的截断帧。平静、Decodium-3.0 风格的稳定性。
 • OFF：FIX B (1.0.353) 行为 — 窗口最多约为时段的 76%（仅需约 700ms 的有用负载）。响应更快，但在迟到回复时可能发送截断帧。
@@ -24278,26 +28044,30 @@ Enable OFF only if you want maximum reactivity and accept occasional non-decodab
 仅当您想要最大响应性并接受偶尔不可解码的迟到 TX 时才启用 OFF。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="647"/>
         <source>FT2: manual one-shot disarm (1.0.300+):</source>
-        <translation type="vanished">FT2：手动 one-shot 撤防（1.0.300+）：</translation>
+        <translation>FT2：手动 one-shot 撤防（1.0.300+）：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="669"/>
         <source>When ON (upstream 1.0.300+ behaviour): after a manual TX1-TX3 in FT2 the TX is disarmed and re-armed ONLY when a partner decode arrives. Avoids TX1 looping forever on double-click, but on WEAK partners that don&apos;t decode in the first RX period the QSO is lost (= &apos;TX1 stops without completing&apos;).
 
 When OFF (default on this fork, pre-1.0.300): TX1 keeps repeating until &apos;Caller Retries&apos; is reached — better for weak-signal QSOs (Pasquale&apos;s case).
 
 Enable only if you double-click stations that consistently reply on the first attempt.</source>
-        <translation type="vanished">当 ON（上游 1.0.300+ 行为）：在 FT2 中手动 TX1-TX3 后，TX 被撤防，仅当伙伴解码到达时才重新待命。避免双击时 TX1 永久循环，但对于在第一个 RX 周期内不解码的弱伙伴，QSO 会丢失（= “TX1 未完成即停止”）。
+        <translation>当 ON（上游 1.0.300+ 行为）：在 FT2 中手动 TX1-TX3 后，TX 被撤防，仅当伙伴解码到达时才重新待命。避免双击时 TX1 永久循环，但对于在第一个 RX 周期内不解码的弱伙伴，QSO 会丢失（= “TX1 未完成即停止”）。
 
 当 OFF（本 fork 默认，1.0.300 之前）：TX1 持续重复，直到达到 “Caller Retries”——更适合弱信号 QSO（Pasquale 的情况）。
 
 仅当您双击的电台总是在第一次尝试时回复时才启用。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="674"/>
         <source>Caller retries (max TX repeats per step):</source>
-        <translation type="vanished">Caller retries（每步最大 TX 重复次数）：</translation>
+        <translation>Caller retries（每步最大 TX 重复次数）：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="699"/>
         <source>Maximum times the same TX step (TX1/TX2/TX3) repeats before halting if the partner doesn&apos;t reply.
 
 Default: 10.
@@ -24309,7 +28079,7 @@ Lower (4-6) = less time wasted on stations that don&apos;t reply.
 Higher (15-20) = patience for weak DX / marginal propagation.
 
 Note: with &apos;FT2 manual one-shot disarm&apos; OFF (default) this is what stops TX1 from looping forever.</source>
-        <translation type="vanished">若伙伴不回复，同一 TX 步骤（TX1/TX2/TX3）在停止前重复的最大次数。
+        <translation>若伙伴不回复，同一 TX 步骤（TX1/TX2/TX3）在停止前重复的最大次数。
 
 默认：10。
 
@@ -24322,49 +28092,58 @@ FT8（时段 15 秒）：10 次重试 ≈ 150 秒。
 注意：在 “FT2 手动 one-shot 撤防” OFF（默认）时，正是它阻止了 TX1 永久循环。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="704"/>
         <source>⚠ TX Watchdog is active and &apos;hard cap&apos; below is OFF: the Caller-retries limit above is IGNORED until the watchdog timeout.</source>
-        <translation type="vanished">⚠ TX Watchdog 已启用且下方的&apos;硬上限&apos;处于关闭状态：上方的呼叫方重试上限在 watchdog 超时前将被忽略。</translation>
+        <translation>⚠ TX Watchdog 已启用且下方的&apos;硬上限&apos;处于关闭状态：上方的呼叫方重试上限在 watchdog 超时前将被忽略。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="714"/>
         <source>Caller retries hard cap (even with watchdog):</source>
-        <translation type="vanished">呼叫方重试硬上限（即使启用 watchdog）：</translation>
+        <translation>呼叫方重试硬上限（即使启用 watchdog）：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="736"/>
         <source>When ON (default), the &apos;Caller retries&apos; cap on TX1/TX2 halts the call even if the TX Watchdog is enabled — the number you set is a real hard limit.
 
 When OFF (upstream 1.0.438 behaviour): the TX Watchdog takes priority and ignores the Caller-retries cap until its own timeout, so a call can repeat for the whole watchdog duration (default 6 min).</source>
-        <translation type="vanished">启用时（默认），TX1/TX2 上的&apos;呼叫方重试&apos;上限即使在 TX Watchdog 已启用时也会停止呼叫 — 你设置的数字是真正的硬性限制。
+        <translation>启用时（默认），TX1/TX2 上的&apos;呼叫方重试&apos;上限即使在 TX Watchdog 已启用时也会停止呼叫 — 你设置的数字是真正的硬性限制。
 
 关闭时（upstream 1.0.438 行为）：TX Watchdog 优先并忽略呼叫方重试上限，直到其自身超时，因此呼叫可在整个 watchdog 持续时间内重复（默认 6 分钟）。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="741"/>
         <source>FT2 state transition census (log only):</source>
-        <translation type="vanished">FT2 状态转换普查（仅记录日志）：</translation>
+        <translation>FT2 状态转换普查（仅记录日志）：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="763"/>
         <source>Diagnostic only (off by default): logs every FT2 QSO state transition (from/to/progress) to the diagnostic log, to empirically map the real sequencer state machine. No behaviour change at all - it only writes log lines. Used to design future deterministic-transition guards safely.</source>
-        <translation type="vanished">仅用于诊断（默认关闭）：将每次 FT2 QSO 状态转换（来源/目标/进度）记录到诊断日志，以便凭经验绘制真实的时序器状态机。完全不改变行为——只写入日志行。用于安全地设计未来的确定性转换保护。</translation>
+        <translation>仅用于诊断（默认关闭）：将每次 FT2 QSO 状态转换（来源/目标/进度）记录到诊断日志，以便凭经验绘制真实的时序器状态机。完全不改变行为——只写入日志行。用于安全地设计未来的确定性转换保护。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="768"/>
         <source>Adaptive async TX timing (experimental):</source>
-        <translation type="vanished">自适应异步 TX 计时（实验性）：</translation>
+        <translation>自适应异步 TX 计时（实验性）：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="790"/>
         <source>Experimental, off by default. Makes the FT2 async-TX timing gates (RMS-quiet, decode-quiet, anti-collision jitter) adapt to channel occupancy: a bit more reactive when the channel is clear, more conservative when it is crowded. With this OFF the timing is byte-identical to the standard behaviour. It never transmits before hearing the partner.</source>
-        <translation type="vanished">实验性，默认关闭。让 FT2 异步 TX 计时门（RMS 静默、解码静默、防冲突抖动）自适应信道占用：信道空闲时反应略快，信道拥挤时更保守。关闭此项时，计时与标准行为逐字节一致。它绝不会在听到对方之前发射。</translation>
+        <translation>实验性，默认关闭。让 FT2 异步 TX 计时门（RMS 静默、解码静默、防冲突抖动）自适应信道占用：信道空闲时反应略快，信道拥挤时更保守。关闭此项时，计时与标准行为逐字节一致。它绝不会在听到对方之前发射。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="798"/>
         <source>Conservative FT2 (weak-signal mode):</source>
-        <translation type="vanished">Conservative FT2（弱信号模式）：</translation>
+        <translation>Conservative FT2（弱信号模式）：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="819"/>
         <source>Anti-QSB tuning:
   • Ghost filter -24 dB instead of -22
   • Retry cap extended SNR-adaptive (+2..+4 extra)
   • Same-step wait relaxed for weak partners
 
 Default: OFF — enable it if you have weak DX partners or marginal propagation.</source>
-        <translation type="vanished">抗 QSB 调优：
+        <translation>抗 QSB 调优：
   • Ghost 筛选 -24 dB 而非 -22
   • 重试上限按 SNR 自适应延长 (+2..+4 额外)
   • 对弱伙伴放宽同一步骤的等待
@@ -24372,42 +28151,66 @@ Default: OFF — enable it if you have weak DX partners or marginal propagation.
 默认：OFF — 若您有弱 DX 伙伴或边缘传播，请启用它。</translation>
     </message>
     <message>
-        <source>FT2: full decode in AutoCQ:</source>
-        <translation type="vanished">FT2：AutoCQ 中 full decode：</translation>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="828"/>
+        <source>FT2: accumulate repeated slots (RX):</source>
+        <translation>FT2：累积重复时隙（RX）：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="849"/>
+        <source>Sums the signal energy of repeated FT2 transmissions from the same station across slots, to decode weaker signals than a single slot allows.
+
+Experimental, never confirmed on real air traffic. Resets to OFF on every restart.
+
+Default: OFF.</source>
+        <translation>将同一电台在多个时隙中重复的 FT2 发射的信号能量相加，以解码比单个时隙所能解码的更弱的信号。
+
+实验性功能，从未在真实电波通信中得到确认。每次重启都会重置为关闭。
+
+默认：关闭。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="858"/>
+        <source>FT2: full decode in AutoCQ:</source>
+        <translation>FT2：AutoCQ 中 full decode：</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="879"/>
         <source>While calling CQ (AutoCQ), keeps the decode depth at full (OSD + 4th subtraction pass + weak-signal averaging) instead of reducing it to 2.
 
 Helps you hear weak responders. Reduces automatically under CPU pressure anyway.
 
 Default: OFF.</source>
-        <translation type="vanished">在呼叫 CQ（AutoCQ）期间，将解码深度保持在 full（OSD + 第 4 次减除遍 + 弱信号平均），而不是降至 2。
+        <translation>在呼叫 CQ（AutoCQ）期间，将解码深度保持在 full（OSD + 第 4 次减除遍 + 弱信号平均），而不是降至 2。
 
 帮助您听到弱应答者。在 CPU 压力下无论如何会自动降低。
 
 默认：OFF。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="884"/>
         <source>FT2: close strong partners earlier:</source>
-        <translation type="vanished">FT2：更早关闭强伙伴：</translation>
+        <translation>FT2：更早关闭强伙伴：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="905"/>
         <source>If a STRONG partner (SNR &gt; 0 dB) doesn&apos;t send the final 73, reduces RR73 repetitions from 8 to 4 (~15s instead of 30s) before logging and returning to CQ.
 
 Weak partners keep the extra anti-QSB repetitions.
 
 Default: OFF.</source>
-        <translation type="vanished">如果强伙伴（SNR &gt; 0 dB）不发送最终 73，则在记录并返回 CQ 之前，将 RR73 重复次数从 8 减至 4（约 15 秒而非 30 秒）。
+        <translation>如果强伙伴（SNR &gt; 0 dB）不发送最终 73，则在记录并返回 CQ 之前，将 RR73 重复次数从 8 减至 4（约 15 秒而非 30 秒）。
 
 弱伙伴保留额外的抗 QSB 重复。
 
 默认：OFF。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="910"/>
         <source>FT2: adaptive decode (CPU saver):</source>
-        <translation type="vanished">FT2：adaptive decode（省 CPU）：</translation>
+        <translation>FT2：adaptive decode（省 CPU）：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="931"/>
         <source>In LISTEN-ONLY mode (not calling CQ nor in a QSO), thins async re-decode from 100ms to ~350ms: doesn&apos;t re-decode 95%-overlapping audio → saves CPU and reduces the peaks that may lower decode depth.
 
 When waiting for a reply (AutoCQ/QSO) it stays at full cadence. Loses no decodes.
@@ -24415,7 +28218,7 @@ When waiting for a reply (AutoCQ/QSO) it stays at full cadence. Loses no decodes
 Useful mainly on modest PCs.
 
 Default: OFF.</source>
-        <translation type="vanished">在仅监听模式（既不呼叫 CQ 也不在 QSO 中）下，将 async 重新解码从 100ms 稀释到约 350ms：不再重新解码 95% 重叠的音频 → 节省 CPU 并减少可能降低解码深度的峰值。
+        <translation>在仅监听模式（既不呼叫 CQ 也不在 QSO 中）下，将 async 重新解码从 100ms 稀释到约 350ms：不再重新解码 95% 重叠的音频 → 节省 CPU 并减少可能降低解码深度的峰值。
 
 在等待回复（AutoCQ/QSO）时保持全速。不丢失任何解码。
 
@@ -24424,42 +28227,48 @@ Default: OFF.</source>
 默认：OFF。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="936"/>
         <source>FT2: narrow reply decode (experimental):</source>
-        <translation type="vanished">FT2：窄带回复解码（实验性）：</translation>
+        <translation>FT2：窄带回复解码（实验性）：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="957"/>
         <source>When WAITING FOR A REPLY (AutoCQ or active QSO), decodes a narrow window around your RX frequency (±150 Hz) instead of the whole band, with a full-band pass every 4th cycle.
 
 The reply is decoded earlier in the slot (less CPU per attempt), so TX can react in the same slot instead of the next one. Band activity is still scanned 1 cycle out of 4.
 
 Default: OFF.</source>
-        <translation type="vanished">在等待回复（AutoCQ 或活动 QSO）时，解码您 RX 频率周围的窄窗口（±150 Hz）而非整个波段，每 4 个周期进行一次全波段遍历。
+        <translation>在等待回复（AutoCQ 或活动 QSO）时，解码您 RX 频率周围的窄窗口（±150 Hz）而非整个波段，每 4 个周期进行一次全波段遍历。
 
 回复在时段内更早被解码（每次尝试占用更少 CPU），因此 TX 可在同一时段而非下一时段做出反应。波段活动仍每 4 个周期扫描 1 次。
 
 默认：OFF。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="962"/>
         <source>FT2: AP cache rescue (experimental):</source>
-        <translation type="vanished">FT2：AP cache rescue（实验性）：</translation>
+        <translation>FT2：AP cache rescue（实验性）：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="983"/>
         <source>Experimental FT2 AP cache: stores callsigns seen in-band as hashes (TTL 30 min) and may rescue borderline FT2 decodes when a decoded callsign is already in the cache.
 
 Safety gate: AP-cache-rescued rows are shown/audited, but they do not drive AutoSeq, AutoCQ, or automatic TX. They are also not used to seed the AP cache again.
 
 Default: OFF.</source>
-        <translation type="vanished">实验性 FT2 AP cache：将在波段内见到的 callsign 以哈希形式存储（TTL 30 分钟），当一个解码出的 callsign 已在缓存中时，可挽救边缘的 FT2 解码。
+        <translation>实验性 FT2 AP cache：将在波段内见到的 callsign 以哈希形式存储（TTL 30 分钟），当一个解码出的 callsign 已在缓存中时，可挽救边缘的 FT2 解码。
 
 安全门控：经 AP-cache 挽救的行会被显示/审计，但它们不驱动 AutoSeq、AutoCQ 或自动 TX。它们也不会再次用于填充 AP cache。
 
 默认：OFF。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="988"/>
         <source>FT2: skip redundant end-slot decode (reduces lock-in latency):</source>
-        <translation type="vanished">FT2：跳过冗余的时隙末尾解码（减少锁定延迟）：</translation>
+        <translation>FT2：跳过冗余的时隙末尾解码（减少锁定延迟）：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="1012"/>
         <source>FT2 async only: when the asynchronous decode (incremental every 100 ms) has ALREADY decoded a slot, skip the end-of-slot synchronous decode pass for that slot.
 
 Benefit: removes contention (~1.8 s after TX) on the same worker, so the partner reply is picked up faster.
@@ -24467,7 +28276,7 @@ Benefit: removes contention (~1.8 s after TX) on the same worker, so the partner
 Cost: for slots already covered by async you lose the full end-of-slot weak-averaging pass, which can recover weak/marginal stations. Slots where async returned EMPTY still keep the sync decode.
 
 Default: OFF.</source>
-        <translation type="vanished">仅 FT2 async：当异步解码（每 100 ms 增量）已经解码了某个时段时，跳过该时段的时段末尾同步解码遍。
+        <translation>仅 FT2 async：当异步解码（每 100 ms 增量）已经解码了某个时段时，跳过该时段的时段末尾同步解码遍。
 
 好处：消除同一 worker 上的争用（TX 后约 1.8 秒），因此能更快接收伙伴回复。
 
@@ -24476,20 +28285,50 @@ Default: OFF.</source>
 默认：OFF。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="1019"/>
         <source>FT2/FT8 MAM multi-stream (MSHV, sperimentale):</source>
-        <translation type="vanished">FT2/FT8 MAM multi-stream（MSHV，实验性）：</translation>
+        <translation>FT2/FT8 MAM multi-stream（MSHV，实验性）：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="1043"/>
         <source>MSHV multi-stream mode: in a single period it replies to MULTIPLE callers at the same time, each on ITS own audio frequency (like a DX-pedition station).
 
 This is an ADDITIONAL MAM option: MAM (Multi-Answer Mode) or AutoCQ must be active before it can run. With this OFF, MAM remains serial, one caller at a time, as before.
 
 EXPERIMENTAL. Default: OFF.</source>
-        <translation type="vanished">MSHV multi-stream 模式：在单个周期内同时回复多个呼叫者，每个在其自己的音频频率上（像 DX-pedition 电台）。
+        <translation>MSHV multi-stream 模式：在单个周期内同时回复多个呼叫者，每个在其自己的音频频率上（像 DX-pedition 电台）。
 
 这是一个附加的 MAM 选项：必须先激活 MAM（Multi-Answer Mode）或 AutoCQ 才能运行。当此项 OFF 时，MAM 仍像以前一样串行，一次一个呼叫者。
 
 实验性。默认：OFF。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="1048"/>
+        <source>MAM multi-stream: max stream simultanei (1-10):</source>
+        <translation>MAM 多流：最大同时流数（1-10）：</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="1076"/>
+        <source>How many parallel QSOs MAM multi-stream can run at the same time, each on its own frequency.
+
+Range 1-10. Default: 3. With 1 you answer one caller at a time, but still on THEIR frequency (MSHV style).
+
+Higher values split the TX power across the streams (about 1/sqrt(N) each) and need more CPU to generate the overlapping audio. Enabled only when MAM multi-stream is active.</source>
+        <translation>MAM 多流可同时进行多少个并行 QSO，每个使用各自的频率。
+
+范围 1-10。默认：3。设为 1 时每次只回应一个呼叫者，但使用对方的频率（MSHV 方式）。
+
+较高的值会在各流之间分配 TX 功率（每个约 1/√N），并需要更多 CPU 来生成重叠的音频。仅在 MAM 多流启用时有效。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="1171"/>
+        <source>Elapsed periods (not CQ calls)</source>
+        <translation>已过去的周期（不是 CQ 呼叫次数）</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="1209"/>
+        <source>TX Watchdog periods:</source>
+        <translation>TX 看门狗周期：</translation>
     </message>
     <message>
         <source>MAM multi-stream: max stream simultanei:</source>
@@ -24508,209 +28347,251 @@ Higher values require more CPU to generate overlapping audio streams. Enabled on
 较高的值需要更多 CPU 来生成重叠的音频 stream。仅在 MAM multi-stream 激活时启用。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="1081"/>
         <source>FT2 partner-memory (anti-QSB):</source>
-        <translation type="vanished">FT2 partner-memory（抗 QSB）：</translation>
+        <translation>FT2 partner-memory（抗 QSB）：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="1103"/>
         <source>Caches partner state (callsign + TX num + qsoProgress + SNR) for 30 seconds: if the partner disappears for QSB and reappears within 30s, restores the qsoProgress instead of restarting from TX1.
 
 Requires Conservative FT2 active.
 
 Default: OFF (opt-in after the 1.0.186 revert — strict gate + [FT2WS-F] log). Automatically disabled if Conservative is OFF.</source>
-        <translation type="vanished">缓存伙伴状态（callsign + TX num + qsoProgress + SNR）30 秒：若伙伴因 QSB 消失并在 30 秒内重新出现，则恢复 qsoProgress 而非从 TX1 重新开始。
+        <translation>缓存伙伴状态（callsign + TX num + qsoProgress + SNR）30 秒：若伙伴因 QSB 消失并在 30 秒内重新出现，则恢复 qsoProgress 而非从 TX1 重新开始。
 
 需要 Conservative FT2 激活。
 
 默认：OFF（1.0.186 回退后采用 opt-in — 严格门控 + [FT2WS-F] 日志）。若 Conservative 为 OFF 则自动禁用。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="1108"/>
         <source>FT2 TX2 re-send on stall:</source>
-        <translation type="vanished">FT2 停滞时重发 TX2：</translation>
+        <translation>FT2 停滞时重发 TX2：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="1130"/>
         <source>If you&apos;re in TX3 (R+report) and the partner doesn&apos;t reply for 2 periods (~7.5s), re-sends TX2 (signal report) once before leaving the QSO.
 
 Helps with weak partners that didn&apos;t ack the first time. Capped to 1 re-send per QSO (no loops).
 
 Requires Conservative FT2 active. Default: ON under Conservative.</source>
-        <translation type="vanished">如果您处于 TX3（R+report）而伙伴在 2 个周期（约 7.5 秒）内不回复，则在离开 QSO 前重发一次 TX2（信号报告）。
+        <translation>如果您处于 TX3（R+report）而伙伴在 2 个周期（约 7.5 秒）内不回复，则在离开 QSO 前重发一次 TX2（信号报告）。
 
 有助于第一次未 ack 的弱伙伴。每个 QSO 上限为 1 次重发（无循环）。
 
 需要 Conservative FT2 激活。默认：在 Conservative 下为 ON。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="1138"/>
         <source>Smooth decode flow:</source>
-        <translation type="vanished">Smooth decode flow：</translation>
+        <translation>Smooth decode flow：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="1159"/>
         <source>Spreads FT8/FT4 decodes from the final end-of-period batch into continuous streaming with animated fade (~100 ms per row). FT2 async is unchanged because it already streams. Default: ON; auto-fallback if UI stalls are detected on modest PCs. Disable for legacy batch behavior.</source>
-        <translation type="vanished">将 FT8/FT4 解码从最终的周期末批处理铺展为带动画淡入的连续流式输出（每行约 100 ms）。FT2 async 不变，因为它已是流式的。默认：ON；若在性能一般的 PC 上检测到 UI 卡顿，则自动回退。要使用旧版批处理行为请禁用。</translation>
+        <translation>将 FT8/FT4 解码从最终的周期末批处理铺展为带动画淡入的连续流式输出（每行约 100 ms）。FT2 async 不变，因为它已是流式的。默认：ON；若在性能一般的 PC 上检测到 UI 卡顿，则自动回退。要使用旧版批处理行为请禁用。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="1165"/>
         <source>WATCHDOG</source>
-        <translation type="vanished">看门狗</translation>
+        <translation>看门狗</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="1168"/>
         <source>TX Watchdog Mode:</source>
-        <translation type="vanished">TX Watchdog 模式：</translation>
+        <translation>TX Watchdog 模式：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="1171"/>
         <source>Off</source>
-        <translation type="vanished">取消</translation>
+        <translation>取消</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="1171"/>
         <source>Time</source>
-        <translation type="vanished">时间</translation>
+        <translation>时间</translation>
     </message>
     <message>
         <source>Count</source>
         <translation type="vanished">次数</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="1191"/>
         <source>TX Watchdog Time (min):</source>
-        <translation type="vanished">TX Watchdog 时间（分钟）：</translation>
+        <translation>TX Watchdog 时间（分钟）：</translation>
     </message>
     <message>
         <source>TX Watchdog Count:</source>
         <translation type="vanished">TX Watchdog 次数：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="1228"/>
         <source>Log QSO at watchdog timeout:</source>
-        <translation type="vanished">在 watchdog 超时时记录 QSO：</translation>
+        <translation>在 watchdog 超时时记录 QSO：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="1239"/>
         <source>When ON, if the TX watchdog fires while a QSO has already completed the two-way report exchange (both reports exchanged, progress &gt;= ROGER_REPORT), the QSO is logged instead of abandoned.
 
 Default OFF = 1.0.445 behavior (only a deferred snapshot, recovered only if the partner re-sends 73; in a manual QSO it is lost).</source>
-        <translation type="vanished">启用后，如果 TX watchdog 在 QSO 已完成双向报告交换（双方报告已交换，进度 &gt;= ROGER_REPORT）时触发，则记录该 QSO 而不是放弃。
+        <translation>启用后，如果 TX watchdog 在 QSO 已完成双向报告交换（双方报告已交换，进度 &gt;= ROGER_REPORT）时触发，则记录该 QSO 而不是放弃。
 
 默认关闭 = 1.0.445 行为（仅延迟快照，仅当对方重发 73 时才恢复；在手动 QSO 中会丢失）。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="1241"/>
         <source>Tune Watchdog (s):</source>
-        <translation type="vanished">调整看门狗：</translation>
+        <translation>调整看门狗：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="1262"/>
         <source>CW ID</source>
-        <translation type="vanished">CW ID</translation>
+        <translation>CW ID</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="1265"/>
         <source>CW ID after 73:</source>
-        <translation type="vanished">73之后的CW ID：</translation>
+        <translation>73之后的CW ID：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="1272"/>
         <source>CW ID Interval (min):</source>
-        <translation type="vanished">CW ID 间隔（分钟）：</translation>
+        <translation>CW ID 间隔（分钟）：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="1283"/>
         <source>TONE SPACING</source>
-        <translation type="vanished">音调间距</translation>
+        <translation>音调间距</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="1286"/>
         <source>2x Tone Spacing:</source>
-        <translation type="vanished">2x 音调间距：</translation>
+        <translation>2x 音调间距：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="1300"/>
         <source>4x Tone Spacing:</source>
-        <translation type="vanished">4x 音调间距：</translation>
+        <translation>4x 音调间距：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab3.qml" line="1321"/>
         <source>Alt F1-F6 Bind:</source>
-        <translation type="vanished">Alt F1-F6 绑定：</translation>
+        <translation>Alt F1-F6 绑定：</translation>
     </message>
 </context>
 <context>
     <name>SettingsTab4</name>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="69"/>
         <source>ASPETTO / TEMA</source>
-        <translation type="vanished">外观 / 主题</translation>
+        <translation>外观 / 主题</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="72"/>
         <source>Theme:</source>
-        <translation type="vanished">主题：</translation>
+        <translation>主题：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="100"/>
         <source>Accent:</source>
-        <translation type="vanished">强调色：</translation>
+        <translation>强调色：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="137"/>
         <source>Density:</source>
-        <translation type="vanished">密度：</translation>
+        <translation>密度：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="178"/>
         <source>DX-Pedition Workspace (3-column tactical layout)</source>
-        <translation type="vanished">DX-Pedition Workspace（三列战术布局）</translation>
+        <translation>DX-Pedition Workspace（三列战术布局）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="193"/>
         <source>Alternative single-panel operator view optimized for DX pile-ups: a tactical 3-column dashboard (Cluster / Waterfall / TX) instead of the classic workspace. Opt-in, default OFF: the standard layout is unchanged when disabled.</source>
-        <translation type="vanished">为 DX pile-up 优化的可选单面板操作员视图：一个战术三列仪表盘（Cluster / Waterfall / TX），而非经典工作区。Opt-in，默认 OFF：禁用时标准布局保持不变。</translation>
+        <translation>为 DX pile-up 优化的可选单面板操作员视图：一个战术三列仪表盘（Cluster / Waterfall / TX），而非经典工作区。Opt-in，默认 OFF：禁用时标准布局保持不变。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="197"/>
         <source>UI Scale:</source>
-        <translation type="vanished">UI 缩放：</translation>
+        <translation>UI 缩放：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="229"/>
         <source>↻ restart to apply</source>
-        <translation type="vanished">↻ 重启以应用</translation>
+        <translation>↻ 重启以应用</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="236"/>
         <source>OPERATING BANDS</source>
-        <translation type="vanished">操作波段</translation>
+        <translation>操作波段</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="239"/>
         <source>Click to show/hide bands in the selector. Deselected bands disappear from the HF / V-U / SHF bar.</source>
-        <translation type="vanished">点击以在选择器中显示/隐藏波段。取消选择的波段会从 HF / V-U / SHF 栏中消失。</translation>
+        <translation>点击以在选择器中显示/隐藏波段。取消选择的波段会从 HF / V-U / SHF 栏中消失。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="268"/>
         <source>visible (click to hide)</source>
-        <translation type="vanished">可见（点击隐藏）</translation>
+        <translation>可见（点击隐藏）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="268"/>
         <source>hidden (click to show)</source>
-        <translation type="vanished">隐藏（点击显示）</translation>
+        <translation>隐藏（点击显示）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="277"/>
         <source>UI — PERFORMANCE</source>
-        <translation type="vanished">UI — 性能</translation>
+        <translation>UI — 性能</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="281"/>
         <source>UI Quality preset:</source>
-        <translation type="vanished">UI 质量预设：</translation>
+        <translation>UI 质量预设：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="298"/>
         <source>Low = no effects (modest PCs).
 Medium = light animations.
 High = all available animations.
 
 Default: Medium.</source>
-        <translation type="vanished">Low = 无特效（性能一般的 PC）。
+        <translation>Low = 无特效（性能一般的 PC）。
 Medium = 轻量动画。
 High = 所有可用动画。
 
 默认：Medium。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="303"/>
         <source>Process priority:</source>
-        <translation type="vanished">进程优先级:</translation>
+        <translation>进程优先级:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="312"/>
         <source>Normal</source>
-        <translation type="vanished">正常</translation>
+        <translation>正常</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="312"/>
         <source>Above normal</source>
-        <translation type="vanished">高于正常</translation>
+        <translation>高于正常</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="312"/>
         <source>High (recommended)</source>
-        <translation type="vanished">高（推荐）</translation>
+        <translation>高（推荐）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="312"/>
         <source>Realtime ⚠️</source>
-        <translation type="vanished">实时 ⚠️</translation>
+        <translation>实时 ⚠️</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="321"/>
         <source>CPU scheduling priority for the Decodium process (Windows).
 
 Normal / Above normal (default) = safe.
@@ -24718,7 +28599,7 @@ High = smoother audio/decode with low risk (recommended if you notice stutters).
 Realtime ⚠️ = maximum scheduling priority, but it can make the PC unresponsive (mouse/keyboard) and requires administrator privileges. Without admin rights Windows downgrades it to High.
 
 If unsure, use High.</source>
-        <translation type="vanished">Decodium 进程的 CPU 调度优先级（Windows）。
+        <translation>Decodium 进程的 CPU 调度优先级（Windows）。
 
 正常 / 高于正常（默认）= 安全。
 高 = 音频/解码更流畅，风险低（如出现卡顿建议使用）。
@@ -24727,70 +28608,81 @@ If unsure, use High.</source>
 如不确定，请使用“高”。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="326"/>
         <source>UI Style (restart):</source>
-        <translation type="vanished">UI 样式（重启）：</translation>
+        <translation>UI 样式（重启）：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="349"/>
         <source>QML Quick Controls style (requires restart):
 • Material (recommended) — Google Material 3, customizable, Decodium&apos;s historical default
 • FluentWinUI3 — native Windows 11 (Mica/acrylic). Automatic fallback for SplitView/StackView.
 • Universal — Microsoft Universal (WinPhone-style)
 • Fusion — neutral cross-platform desktop</source>
-        <translation type="vanished">QML Quick Controls 样式（需要重启）：
+        <translation>QML Quick Controls 样式（需要重启）：
 • Material（推荐）— Google Material 3，可定制，Decodium 历史默认
 • FluentWinUI3 — 原生 Windows 11（Mica/亚克力）。SplitView/StackView 自动回退。
 • Universal — Microsoft Universal（WinPhone 风格）
 • Fusion — 中性跨平台桌面</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="360"/>
         <source>Frameless pop-out:</source>
-        <translation type="vanished">无边框 pop-out：</translation>
+        <translation>无边框 pop-out：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="373"/>
         <source>Pop-out windows (Waterfall, Period1, DecoSync) become frameless with drag via the border.
 
 Windows 11 aesthetic.
 
 Default: OFF. Requires closing and reopening the window.</source>
-        <translation type="vanished">Pop-out 窗口（Waterfall、Period1、DecoSync）变为无边框，可通过边框拖动。
+        <translation>Pop-out 窗口（Waterfall、Period1、DecoSync）变为无边框，可通过边框拖动。
 
 Windows 11 美学。
 
 默认：OFF。需要关闭并重新打开窗口。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="378"/>
         <source>Detach Full Spectrum:</source>
-        <translation type="vanished">分离 Full Spectrum：</translation>
+        <translation>分离 Full Spectrum：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="391"/>
         <source>At startup, opens Full Spectrum (Band Activity) in a separate window, isolating the Main render thread from ListView animations.
 
 Reduces stalls on modest PCs.
 
 Default: OFF. Requires restart.</source>
-        <translation type="vanished">在启动时，于单独窗口中打开 Full Spectrum（Band Activity），将 Main 渲染线程与 ListView 动画隔离。
+        <translation>在启动时，于单独窗口中打开 Full Spectrum（Band Activity），将 Main 渲染线程与 ListView 动画隔离。
 
 减少性能一般 PC 上的卡顿。
 
 默认：OFF。需要重启。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="396"/>
         <source>Full screen:</source>
-        <translation type="vanished">全屏:</translation>
+        <translation>全屏:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="400"/>
         <source>Enable (F11)</source>
-        <translation type="vanished">启用 (F11)</translation>
+        <translation>启用 (F11)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="405"/>
         <source>Switch Decodium to full screen. To exit: F11, Esc, or the top ✕ button. This is not saved: Decodium starts in normal window mode after restart.</source>
-        <translation type="vanished">将 Decodium 切换到全屏。退出方式：F11、Esc 或顶部的 ✕ 按钮。此设置不会保存：重启后 Decodium 以普通窗口模式启动。</translation>
+        <translation>将 Decodium 切换到全屏。退出方式：F11、Esc 或顶部的 ✕ 按钮。此设置不会保存：重启后 Decodium 以普通窗口模式启动。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="410"/>
         <source>Spectrum FPS cap:</source>
-        <translation type="vanished">Spectrum FPS 上限：</translation>
+        <translation>Spectrum FPS 上限：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="430"/>
         <source>Maximum frame rate of the embedded waterfall/panadapter.
 
   • 15 = modest PCs
@@ -24798,7 +28690,7 @@ Default: OFF. Requires restart.</source>
   • 30 = modern hardware
 
 When Full Spectrum is detached the separate render thread holds 30 fps without affecting the decoder.</source>
-        <translation type="vanished">嵌入式 waterfall/panadapter 的最大帧率。
+        <translation>嵌入式 waterfall/panadapter 的最大帧率。
 
   • 15 = 性能一般的 PC
   • 20 = 均衡默认
@@ -24807,295 +28699,388 @@ When Full Spectrum is detached the separate render thread holds 30 fps without a
 当 Full Spectrum 被分离时，单独的渲染线程保持 30 fps，而不影响解码器。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="436"/>
         <source>CPU pressure:</source>
-        <translation type="vanished">CPU 压力:</translation>
+        <translation>CPU 压力:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="450"/>
         <source>events: total=%1 · severe=%2 (session)</source>
-        <translation type="vanished">事件: 总计=%1 · 严重=%2 (会话)</translation>
+        <translation>事件: 总计=%1 · 严重=%2 (会话)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="453"/>
         <source>events: total=0 · severe=0</source>
-        <translation type="vanished">事件: 总计=0 · 严重=0</translation>
+        <translation>事件: 总计=0 · 严重=0</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="463"/>
         <source>cpuPressure event counters for the current session.
 
 Severe ones (≥1100ms or burst of 4+ short stalls) are the strongest signal: if you see ≥5 after an hour of use, lower UI Quality to Low or Spectrum FPS cap to 15.</source>
-        <translation type="vanished">当前会话的 cpuPressure 事件计数器。
+        <translation>当前会话的 cpuPressure 事件计数器。
 
 严重事件（≥1100ms 或连续 4+ 次短卡顿）是最强的信号：若使用一小时后看到 ≥5 次，请将 UI Quality 降到 Low 或将 Spectrum FPS 上限降到 15。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="469"/>
         <source>FONT</source>
-        <translation type="vanished">字体</translation>
+        <translation>字体</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="472"/>
         <source>Font:</source>
-        <translation type="vanished">字体：</translation>
+        <translation>字体：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="497"/>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="533"/>
         <source>Choose</source>
-        <translation type="vanished">选择</translation>
+        <translation>选择</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="504"/>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="540"/>
         <source>Reset</source>
-        <translation type="vanished">重置</translation>
+        <translation>重置</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="508"/>
         <source>Decoded Font:</source>
-        <translation type="vanished">解码字体：</translation>
+        <translation>解码字体：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="546"/>
         <source>DECODES</source>
-        <translation type="vanished">解码器</translation>
+        <translation>解码器</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="549"/>
         <source>Show DXCC:</source>
-        <translation type="vanished">显示 DXCC：</translation>
+        <translation>显示 DXCC：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="557"/>
         <source>US State:</source>
-        <translation type="vanished">US State：</translation>
+        <translation>US State：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="571"/>
         <source>Updating...</source>
-        <translation type="vanished">更新中…</translation>
+        <translation>更新中…</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="572"/>
         <source>%1 calls</source>
-        <translation type="vanished">%1 个呼号</translation>
+        <translation>%1 个呼号</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="573"/>
         <source>Not loaded</source>
-        <translation type="vanished">未加载</translation>
+        <translation>未加载</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="582"/>
         <source>Update</source>
-        <translation type="vanished">更新</translation>
+        <translation>更新</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="600"/>
         <source>TX Msg to RX:</source>
-        <translation type="vanished">TX 发送至 RX 的消息：</translation>
+        <translation>TX 发送至 RX 的消息：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="608"/>
         <source>Waterfall Calls:</source>
-        <translation type="vanished">Waterfall 呼号：</translation>
+        <translation>Waterfall 呼号：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="616"/>
         <source>FS Dist:</source>
-        <translation type="vanished">FS Dist：</translation>
+        <translation>FS Dist：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="624"/>
         <source>FS Az:</source>
-        <translation type="vanished">FS Az：</translation>
+        <translation>FS Az：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="632"/>
         <source>RX Freq:</source>
-        <translation type="vanished">RX Freq：</translation>
+        <translation>RX Freq：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="640"/>
         <source>RX Dist:</source>
-        <translation type="vanished">RX Dist：</translation>
+        <translation>RX Dist：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="648"/>
         <source>RX Az:</source>
-        <translation type="vanished">RX Az：</translation>
+        <translation>RX Az：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="658"/>
         <source>MAP AND DISTANCE</source>
-        <translation type="vanished">地图和距离</translation>
+        <translation>地图和距离</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="661"/>
         <source>Miles:</source>
-        <translation type="vanished">里程：</translation>
+        <translation>里程：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="668"/>
         <source>Greyline:</source>
-        <translation type="vanished">灰线：</translation>
+        <translation>灰线：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="680"/>
         <source>Map All Msgs:</source>
-        <translation type="vanished">映射所有消息：</translation>
+        <translation>映射所有消息：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="688"/>
         <source>Click TX:</source>
-        <translation type="vanished">单击TX：</translation>
+        <translation>单击TX：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="696"/>
+        <source>Map GPU:</source>
+        <translation>地图 GPU：</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="702"/>
+        <source>Use GPU rendering for the live map (default). Disable to use the CPU renderer if station markers are missing or the map has graphical problems.</source>
+        <translation>对实时地图使用 GPU 渲染（默认）。如果站点标记缺失或地图有图形问题，请禁用以使用 CPU 渲染器。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="707"/>
+        <source>Disable if map markers are missing. Uses CPU rendering when off.</source>
+        <translation>如果地图标记缺失请禁用。关闭时使用 CPU 渲染。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="716"/>
         <source>ALIGNMENT</source>
-        <translation type="vanished">对齐</translation>
+        <translation>对齐</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="719"/>
         <source>Align:</source>
-        <translation type="vanished">对齐：</translation>
+        <translation>对齐：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="726"/>
         <source>Align Steps:</source>
-        <translation type="vanished">对齐步骤：</translation>
+        <translation>对齐步骤：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab4.qml" line="736"/>
         <source>Align Steps 2:</source>
-        <translation type="vanished">对齐步骤 2：</translation>
+        <translation>对齐步骤 2：</translation>
     </message>
 </context>
 <context>
     <name>SettingsTab5</name>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="67"/>
         <source>REMOTE WEB SERVER (iPad / mobile PWA)</source>
-        <translation type="vanished">远程 WEB 服务器 (iPad / 移动 PWA)</translation>
+        <translation>远程 WEB 服务器 (iPad / 移动 PWA)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="70"/>
         <source>Enable Web Server:</source>
-        <translation type="vanished">启用 Web 服务器：</translation>
+        <translation>启用 Web 服务器：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="84"/>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="106"/>
         <source>(not active)</source>
-        <translation type="vanished">（未激活）</translation>
+        <translation>（未激活）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="90"/>
         <source>Porta TCP:</source>
-        <translation type="vanished">TCP 端口：</translation>
+        <translation>TCP 端口：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="103"/>
         <source>URL accesso:</source>
-        <translation type="vanished">访问 URL：</translation>
+        <translation>访问 URL：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="114"/>
+        <source></source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="117"/>
         <source>📱 Open Remote for iPad</source>
-        <translation type="vanished">📱 打开 iPad 版 Remote</translation>
+        <translation>📱 打开 iPad 版 Remote</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="141"/>
         <source>DECODE LIST DISPLAY</source>
-        <translation type="vanished">解码列表显示</translation>
+        <translation>解码列表显示</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="144"/>
         <source>Colored period separator:</source>
-        <translation type="vanished">彩色周期分隔符：</translation>
+        <translation>彩色周期分隔符：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="158"/>
         <source>Newest first:</source>
-        <translation type="vanished">最新在前：</translation>
+        <translation>最新在前：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="167"/>
         <source>DECODE PARAMETERS</source>
-        <translation type="vanished">解码参数</translation>
+        <translation>解码参数</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="170"/>
         <source>Decode Depth:</source>
-        <translation type="vanished">解码深度：</translation>
+        <translation>解码深度：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="173"/>
         <source>Fast</source>
-        <translation type="vanished">快速</translation>
+        <translation>快速</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="173"/>
         <source>Normal</source>
-        <translation type="vanished">正常</translation>
+        <translation>正常</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="173"/>
         <source>Deep</source>
-        <translation type="vanished">深度</translation>
+        <translation>深度</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="187"/>
         <source>Low Freq (Hz):</source>
-        <translation type="vanished">低频 (Hz)：</translation>
+        <translation>低频 (Hz)：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="199"/>
         <source>High Freq (Hz):</source>
-        <translation type="vanished">高频 (Hz)：</translation>
+        <translation>高频 (Hz)：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="212"/>
         <source>RX Bandwidth:</source>
-        <translation type="vanished">RX 带宽：</translation>
+        <translation>RX 带宽：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="221"/>
         <source>Decode at 52s:</source>
-        <translation type="vanished">52秒解码：</translation>
+        <translation>52秒解码：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="229"/>
         <source>Single Decode:</source>
-        <translation type="vanished">单次解码：</translation>
+        <translation>单次解码：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="242"/>
         <source>JT65 VHF/UHF</source>
-        <translation type="vanished">JT65 VHF/UHF</translation>
+        <translation>JT65 VHF/UHF</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="245"/>
         <source>Erasure Patterns:</source>
-        <translation type="vanished">擦除模式：</translation>
+        <translation>擦除模式：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="254"/>
         <source>Aggressive:</source>
-        <translation type="vanished">攻击性：</translation>
+        <translation>攻击性：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="264"/>
         <source>Two-Pass:</source>
-        <translation type="vanished">两次通过：</translation>
+        <translation>两次通过：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="274"/>
         <source>SIDELOBE CONTROL</source>
-        <translation type="vanished">旁瓣控制</translation>
+        <translation>旁瓣控制</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="277"/>
         <source>Sidelobe Mode:</source>
-        <translation type="vanished">旁瓣模式：</translation>
+        <translation>旁瓣模式：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="280"/>
         <source>Low Sidelobes</source>
-        <translation type="vanished">低旁瓣</translation>
+        <translation>低旁瓣</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="280"/>
         <source>Max Sensitivity</source>
-        <translation type="vanished">最大灵敏度</translation>
+        <translation>最大灵敏度</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="289"/>
         <source>Degrade S/N:</source>
-        <translation type="vanished">降级 S/N：</translation>
+        <translation>降级 S/N：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="300"/>
         <source>DECODE FILTERS</source>
-        <translation type="vanished">解码过滤器</translation>
+        <translation>解码过滤器</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="303"/>
         <source>CQ Only:</source>
-        <translation type="vanished">仅限 CQ：</translation>
+        <translation>仅限 CQ：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="314"/>
         <source>CQ filter:</source>
-        <translation type="vanished">CQ 筛选：</translation>
+        <translation>CQ 筛选：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="334"/>
         <source>My Call Only:</source>
-        <translation type="vanished">仅我的呼号：</translation>
+        <translation>仅我的呼号：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="345"/>
         <source>Zap:</source>
-        <translation type="vanished">电击：</translation>
+        <translation>电击：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="355"/>
         <source>Deep Search:</source>
-        <translation type="vanished">深度搜索：</translation>
+        <translation>深度搜索：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="366"/>
         <source>AP Decode:</source>
-        <translation type="vanished">AP解码：</translation>
+        <translation>AP解码：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="377"/>
         <source>Avg Decode:</source>
-        <translation type="vanished">平均解码：</translation>
+        <translation>平均解码：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="390"/>
         <source>Deep decode of last RX slot during TX (list only):</source>
-        <translation type="vanished">TX期间深度解码最后一个RX时隙（仅列表）：</translation>
+        <translation>TX期间深度解码最后一个RX时隙（仅列表）：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab5.qml" line="409"/>
         <source>While operating/in QSO in FT8, ALSO launch the deep decode depth-4 (decode-list only) in addition to the fast depth-2 that drives TX.
 
 Recovers third-party stations that the fast pass would miss during operation, WITHOUT touching timing or QSO closure (it&apos;s pure decode-list, not auto-seq).
 
 Costs extra CPU during QSOs. Default: OFF.</source>
-        <translation type="vanished">在 FT8 中操作/QSO 时，除驱动 TX 的快速 depth-2 外，还启动 deep decode depth-4（仅解码列表）。
+        <translation>在 FT8 中操作/QSO 时，除驱动 TX 的快速 depth-2 外，还启动 deep decode depth-4（仅解码列表）。
 
 恢复快速遍历在操作中会错过的第三方电台，且不影响时序或 QSO 关闭（它是纯解码列表，非 auto-seq）。
 
@@ -25105,1013 +29090,1405 @@ Costs extra CPU during QSOs. Default: OFF.</source>
 <context>
     <name>SettingsTab6</name>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="136"/>
         <source>NETWORK SERVICES</source>
-        <translation type="vanished">网络服务</translation>
+        <translation>网络服务</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="139"/>
         <source>PSK Reporter:</source>
-        <translation type="vanished">PSK Reporter：</translation>
+        <translation>PSK Reporter：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="149"/>
         <source>TCP/IP:</source>
-        <translation type="vanished">TCP/IP：</translation>
+        <translation>TCP/IP：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="156"/>
         <source>Query history:</source>
-        <translation type="vanished">查询历史:</translation>
+        <translation>查询历史:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="169"/>
         <source>PSK Reporter look-back period for callsign search and heard-by results.</source>
-        <translation type="vanished">PSK Reporter 用于呼号搜索与被谁收到结果的回溯时长。</translation>
+        <translation>PSK Reporter 用于呼号搜索与被谁收到结果的回溯时长。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="173"/>
         <source>DX CLUSTER</source>
-        <translation type="vanished">DX集群</translation>
+        <translation>DX集群</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="176"/>
         <source>Server:</source>
-        <translation type="vanished">服务器：</translation>
+        <translation>服务器：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="190"/>
         <source>Port:</source>
-        <translation type="vanished">端口:</translation>
+        <translation>端口:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="207"/>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="401"/>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1082"/>
         <source>Status:</source>
-        <translation type="vanished">状态：</translation>
+        <translation>状态：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="214"/>
         <source>Connected</source>
-        <translation type="vanished">已连接</translation>
+        <translation>已连接</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="214"/>
         <source>Disconnected</source>
-        <translation type="vanished">已断开连接</translation>
+        <translation>已断开连接</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="223"/>
         <source>Connect</source>
-        <translation type="vanished">连接</translation>
+        <translation>连接</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="243"/>
         <source>Disconnect</source>
-        <translation type="vanished">断开连接</translation>
+        <translation>断开连接</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="254"/>
         <source>Detail:</source>
-        <translation type="vanished">详细信息：</translation>
+        <translation>详细信息：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="256"/>
         <source>No message</source>
-        <translation type="vanished">没有消息</translation>
+        <translation>没有消息</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="265"/>
+        <source>DECOLOG</source>
+        <translation>DECOLOG</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="268"/>
+        <source>DecoLink:</source>
+        <translation>DecoLink:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="288"/>
+        <source>Porta:</source>
+        <translation>端口：</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="309"/>
         <source>CLOUDLOG</source>
-        <translation type="vanished">云日志</translation>
+        <translation>云日志</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="312"/>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="361"/>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="613"/>
         <source>Enabled:</source>
-        <translation type="vanished">已启用：</translation>
+        <translation>已启用：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="324"/>
         <source>API URL:</source>
-        <translation type="vanished">API URL：</translation>
+        <translation>API URL：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="335"/>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="387"/>
         <source>API Key:</source>
-        <translation type="vanished">API 密钥：</translation>
+        <translation>API 密钥：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="346"/>
         <source>Station ID:</source>
-        <translation type="vanished">站号：</translation>
+        <translation>站号：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="358"/>
         <source>QRZ LOGBOOK</source>
-        <translation type="vanished">QRZ LOGBOOK</translation>
+        <translation>QRZ LOGBOOK</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="374"/>
         <source>Replace duplicates:</source>
-        <translation type="vanished">替换重复项：</translation>
+        <translation>替换重复项：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="409"/>
         <source>Testing...</source>
-        <translation type="vanished">测试中…</translation>
+        <translation>测试中…</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="409"/>
         <source>Test</source>
-        <translation type="vanished">测试</translation>
+        <translation>测试</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="422"/>
         <source>Testing QRZ API key...</source>
-        <translation type="vanished">正在测试 QRZ API 密钥…</translation>
+        <translation>正在测试 QRZ API 密钥…</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="440"/>
         <source>LOTW</source>
-        <translation type="vanished">洛特</translation>
+        <translation>洛特</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="443"/>
         <source>LotW Enabled:</source>
-        <translation type="vanished">LotW 已启用：</translation>
+        <translation>LotW 已启用：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="455"/>
         <source>Password:</source>
-        <translation type="vanished">密码：</translation>
+        <translation>密码：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="464"/>
         <source>Non-QSL&apos;d:</source>
-        <translation type="vanished">Non-QSL&apos;d：</translation>
+        <translation>Non-QSL&apos;d：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="473"/>
         <source>Days Upload:</source>
-        <translation type="vanished">天上传：</translation>
+        <translation>天上传：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="484"/>
         <source>LOGGING</source>
-        <translation type="vanished">记录</translation>
+        <translation>记录</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="487"/>
         <source>Prompt to Log:</source>
-        <translation type="vanished">提示登录：</translation>
+        <translation>提示登录：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="500"/>
         <source>Auto Log:</source>
-        <translation type="vanished">自动记录：</translation>
+        <translation>自动记录：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="515"/>
         <source>Log as RTTY:</source>
-        <translation type="vanished">以 RTTY 身份登录：</translation>
+        <translation>以 RTTY 身份登录：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="525"/>
         <source>4-digit Grids:</source>
-        <translation type="vanished">4位网格：</translation>
+        <translation>4位网格：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="534"/>
         <source>Contest Only:</source>
-        <translation type="vanished">仅比赛：</translation>
+        <translation>仅比赛：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="546"/>
         <source>Spec Op Cmts:</source>
-        <translation type="vanished">规范操作 CMT：</translation>
+        <translation>规范操作 CMT：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="555"/>
         <source>dB in Cmts:</source>
-        <translation type="vanished">Cmts 中的 dB：</translation>
+        <translation>Cmts 中的 dB：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="563"/>
         <source>ZZ00:</source>
-        <translation type="vanished">ZZ00：</translation>
+        <translation>ZZ00：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="573"/>
         <source>RECORDING</source>
-        <translation type="vanished">录音</translation>
+        <translation>录音</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="576"/>
         <source>Record RX:</source>
-        <translation type="vanished">记录RX：</translation>
+        <translation>记录RX：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="586"/>
         <source>Record TX:</source>
-        <translation type="vanished">记录TX：</translation>
+        <translation>记录TX：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="597"/>
         <source>WSPR Upload:</source>
-        <translation type="vanished">WSPR 上传：</translation>
+        <translation>WSPR 上传：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="610"/>
         <source>REMOTE WEB DASHBOARD (LAN)</source>
-        <translation type="vanished">远程网络仪表板 (LAN)</translation>
+        <translation>远程网络仪表板 (LAN)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="620"/>
         <source>HTTP port:</source>
-        <translation type="vanished">HTTP 端口：</translation>
+        <translation>HTTP 端口：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="630"/>
         <source>WS socket port:</source>
-        <translation type="vanished">WS 套接字端口：</translation>
+        <translation>WS 套接字端口：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="643"/>
         <source>WS bind:</source>
-        <translation type="vanished">WS 绑定：</translation>
+        <translation>WS 绑定：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="650"/>
         <source>Username:</source>
-        <translation type="vanished">用户名：</translation>
+        <translation>用户名：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="658"/>
         <source>Access token:</source>
-        <translation type="vanished">访问令牌：</translation>
+        <translation>访问令牌：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="662"/>
         <source>Required for LAN/WAN</source>
-        <translation type="vanished">LAN/WAN 需要</translation>
+        <translation>LAN/WAN 需要</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="668"/>
         <source>App restart required. For LAN/WAN, use a token of at least 12 characters.</source>
-        <translation type="vanished">需要重新启动应用程序。对于 LAN/WAN，请使用至少 12 个字符的令牌。</translation>
+        <translation>需要重新启动应用程序。对于 LAN/WAN，请使用至少 12 个字符的令牌。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="676"/>
         <source>UDP SERVER</source>
-        <translation type="vanished">UDP 服务器</translation>
+        <translation>UDP 服务器</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="679"/>
         <source>Client ID:</source>
-        <translation type="vanished">Client ID：</translation>
+        <translation>Client ID：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="701"/>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="827"/>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="938"/>
         <source>Preset:</source>
-        <translation type="vanished">预设：</translation>
+        <translation>预设：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="720"/>
         <source>Server Name:</source>
-        <translation type="vanished">服务器名称：</translation>
+        <translation>服务器名称：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="727"/>
         <source>Server Port:</source>
-        <translation type="vanished">服务器端口：</translation>
+        <translation>服务器端口：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="737"/>
         <source>Listen Port:</source>
-        <translation type="vanished">监听端口：</translation>
+        <translation>监听端口：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="746"/>
         <source>Multicast TTL:</source>
-        <translation type="vanished">多点传送 TTL:</translation>
+        <translation>多点传送 TTL:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="756"/>
         <source>Interface Used:</source>
-        <translation type="vanished">使用的接口：</translation>
+        <translation>使用的接口：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="759"/>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="867"/>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="982"/>
         <source>All interfaces</source>
-        <translation type="vanished">所有接口</translation>
+        <translation>所有接口</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1018"/>
+        <source>FT2 LOG BRIDGE</source>
+        <translation>FT2 LOG BRIDGE</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1022"/>
+        <source>The FT2 Community client that uploads every logged QSO to the Online Log on community.ft2.it. Download it already configured from the Dashboard of the site: Decodium finds it and starts it together with itself.</source>
+        <translation>FT2 Community 客户端，会将每条已记录的 QSO 上传到 community.ft2.it 的在线日志。请从网站的控制面板下载已配置好的版本：Decodium 会找到它并随自身一起启动。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1030"/>
+        <source>Start with Decodium:</source>
+        <translation>随 Decodium 启动：</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1035"/>
+        <source>Start FT2 Log Bridge automatically</source>
+        <translation>自动启动 FT2 Log Bridge</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1038"/>
+        <source>Program:</source>
+        <translation>程序：</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1045"/>
+        <source>ft2logbridge.exe (found automatically)</source>
+        <translation>ft2logbridge.exe（自动找到）</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1057"/>
+        <source>Browse...</source>
+        <translation>浏览...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1068"/>
+        <source>Find automatically</source>
+        <translation>自动查找</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1072"/>
+        <source>Looks in Downloads, Documents and Desktop for the most recent ft2logbridge with a config.json containing your API key.</source>
+        <translation>在“下载”、“文档”和“桌面”中查找包含您 API 密钥的 config.json 的最新 ft2logbridge。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1076"/>
+        <source>Start now</source>
+        <translation>立即启动</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1086"/>
+        <source>Not started in this session.</source>
+        <translation>本次会话中未启动。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1104"/>
+        <source>Select the FT2 Log Bridge program</source>
+        <translation>选择 FT2 Log Bridge 程序</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1107"/>
+        <source>FT2 Log Bridge (ft2logbridge*.exe)</source>
+        <translation>FT2 Log Bridge (ft2logbridge*.exe)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1107"/>
+        <source>Programs (*.exe)</source>
+        <translation>程序 (*.exe)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1108"/>
+        <source>FT2 Log Bridge (ft2logbridge*)</source>
+        <translation>FT2 Log Bridge (ft2logbridge*)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1108"/>
+        <source>All files (*)</source>
+        <translation>所有文件 (*)</translation>
     </message>
     <message>
         <source>Send ADIF:</source>
         <translation type="vanished">发送ADIF：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="788"/>
         <source>Secondary UDP:</source>
-        <translation type="vanished">次要 UDP：</translation>
+        <translation>次要 UDP：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="796"/>
         <source>Secondary Server:</source>
-        <translation type="vanished">辅助服务器：</translation>
+        <translation>辅助服务器：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="845"/>
         <source>Secondary Port:</source>
-        <translation type="vanished">辅助端口：</translation>
+        <translation>辅助端口：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="854"/>
         <source>Secondary TTL:</source>
-        <translation type="vanished">辅助 TTL：</translation>
+        <translation>辅助 TTL：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="864"/>
         <source>Secondary Interface:</source>
-        <translation type="vanished">辅助接口：</translation>
+        <translation>辅助接口：</translation>
     </message>
     <message>
         <source>Secondary ADIF:</source>
         <translation type="vanished">次要 ADIF：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="897"/>
         <source>Tertiary UDP:</source>
-        <translation type="vanished">第三 UDP：</translation>
+        <translation>第三 UDP：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="905"/>
         <source>Tertiary Server:</source>
-        <translation type="vanished">第三服务器：</translation>
+        <translation>第三服务器：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="956"/>
         <source>Tertiary Port:</source>
-        <translation type="vanished">第三端口：</translation>
+        <translation>第三端口：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="967"/>
         <source>Tertiary TTL:</source>
-        <translation type="vanished">第三 TTL：</translation>
+        <translation>第三 TTL：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="979"/>
         <source>Tertiary Interface:</source>
-        <translation type="vanished">第三接口：</translation>
+        <translation>第三接口：</translation>
     </message>
     <message>
         <source>Tertiary ADIF:</source>
         <translation type="vanished">第三 ADIF：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1118"/>
         <source>N1MM / HRD LOGBOOK / EASYLOG</source>
-        <translation type="vanished">N1MM / HRD LOGBOOK / EASYLOG</translation>
+        <translation>N1MM / HRD LOGBOOK / EASYLOG</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1122"/>
         <source>Use this ADIF UDP output for N1MM Logger+ or HRD Logbook QSO Forwarding. HRD normally listens on 127.0.0.1:2333; this is different from the primary WSJT-X UDP Server above.</source>
-        <translation type="vanished">将此 ADIF UDP 输出用于 N1MM Logger+ 或 HRD Logbook 的 QSO Forwarding。HRD 通常监听 127.0.0.1:2333；这与上面的主 WSJT-X UDP 服务器不同。</translation>
+        <translation>将此 ADIF UDP 输出用于 N1MM Logger+ 或 HRD Logbook 的 QSO Forwarding。HRD 通常监听 127.0.0.1:2333；这与上面的主 WSJT-X UDP 服务器不同。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1130"/>
+        <source>EasyLog band format:</source>
+        <translation>EasyLog 波段格式：</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1135"/>
+        <source>Send BAND as 20m (lowercase)</source>
+        <translation>将 BAND 以 20m（小写）形式发送</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1141"/>
         <source>Use HRD Logbook preset</source>
-        <translation type="vanished">使用 HRD Logbook 预设</translation>
+        <translation>使用 HRD Logbook 预设</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1173"/>
         <source>Enables the N1MM-compatible ADIF UDP output and sets 127.0.0.1:2333. In HRD Logbook, enable UDP Receive / WSJT-X QSO Forwarding on port 2333.</source>
-        <translation type="vanished">启用与 N1MM 兼容的 ADIF UDP 输出，并设置为 127.0.0.1:2333。请在 HRD Logbook 中于端口 2333 启用 UDP Receive / WSJT-X QSO Forwarding。</translation>
+        <translation>启用与 N1MM 兼容的 ADIF UDP 输出，并设置为 127.0.0.1:2333。请在 HRD Logbook 中于端口 2333 启用 UDP Receive / WSJT-X QSO Forwarding。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1176"/>
         <source>Enable output:</source>
-        <translation type="vanished">启用输出:</translation>
+        <translation>启用输出:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1184"/>
         <source>UDP Port:</source>
-        <translation type="vanished">UDP 端口:</translation>
+        <translation>UDP 端口:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1196"/>
         <source>UDP Server:</source>
-        <translation type="vanished">UDP服务器:</translation>
+        <translation>UDP服务器:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1208"/>
         <source>Accept UDP:</source>
-        <translation type="vanished">接受UDP：</translation>
+        <translation>接受UDP：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1218"/>
         <source>Notify Request:</source>
-        <translation type="vanished">通知请求：</translation>
+        <translation>通知请求：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1226"/>
         <source>Restore Win:</source>
-        <translation type="vanished">恢复胜利：</translation>
+        <translation>恢复胜利：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1236"/>
         <source>ADIF TCP</source>
-        <translation type="vanished">ADIF TCP</translation>
+        <translation>ADIF TCP</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1239"/>
         <source>Enable TCP ADIF:</source>
-        <translation type="vanished">启用 TCP ADIF：</translation>
+        <translation>启用 TCP ADIF：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1247"/>
         <source>TCP Port:</source>
-        <translation type="vanished">TCP 端口：</translation>
+        <translation>TCP 端口：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1259"/>
         <source>TCP Server:</source>
-        <translation type="vanished">TCP 服务器：</translation>
+        <translation>TCP 服务器：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="186"/>
         <source>dx.iz7auh.net</source>
-        <translation type="vanished">dx.iz7auh.net</translation>
+        <translation>dx.iz7auh.net</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="774"/>
         <source>Primary traffic:</source>
-        <translation type="vanished">主要流量：</translation>
+        <translation>主要流量：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="779"/>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="887"/>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1005"/>
         <source>Decode</source>
-        <translation type="vanished">解码</translation>
+        <translation>解码</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="780"/>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="888"/>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1006"/>
         <source>Status</source>
-        <translation type="vanished">状态</translation>
+        <translation>状态</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="782"/>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="890"/>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1008"/>
         <source>QSO logged</source>
-        <translation type="vanished">已记录的 QSO</translation>
+        <translation>已记录的 QSO</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="785"/>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="894"/>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1012"/>
         <source>WSPR</source>
-        <translation type="vanished">WSPR</translation>
+        <translation>WSPR</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="805"/>
         <source>Secondary Client ID:</source>
-        <translation type="vanished">次要客户端 ID：</translation>
+        <translation>次要客户端 ID：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="882"/>
         <source>Secondary traffic:</source>
-        <translation type="vanished">次要流量：</translation>
+        <translation>次要流量：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="916"/>
         <source>Tertiary Client ID:</source>
-        <translation type="vanished">第三客户端 ID：</translation>
+        <translation>第三客户端 ID：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="1000"/>
         <source>Tertiary traffic:</source>
-        <translation type="vanished">第三流量：</translation>
+        <translation>第三流量：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="280"/>
         <source>DecoLog not running: retrying every 5 s</source>
-        <translation type="vanished">DecoLog 未运行：每 5 秒重试一次</translation>
+        <translation>DecoLog 未运行：每 5 秒重试一次</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="280"/>
         <source>disabled</source>
-        <translation type="vanished">已停用</translation>
+        <translation>已停用</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab6.qml" line="300"/>
         <source>QSOs reach DecoLog over UDP as they do any logger. With DecoLink, DecoLog sends Decodium its own log (worked-before, new DXCC), the acknowledgement of every stored QSO and the FT2 Award status. 127.0.0.1 only.</source>
-        <translation type="vanished">QSO 像发给其他日志程序一样通过 UDP 送达 DecoLog。启用 DecoLink 后，DecoLog 会把自己的日志（worked-before、新 DXCC）、每条已保存 QSO 的确认以及 FT2 Award 状态发送给 Decodium。仅限 127.0.0.1。</translation>
+        <translation>QSO 像发给其他日志程序一样通过 UDP 送达 DecoLog。启用 DecoLink 后，DecoLog 会把自己的日志（worked-before、新 DXCC）、每条已保存 QSO 的确认以及 FT2 Award 状态发送给 Decodium。仅限 127.0.0.1。</translation>
     </message>
 </context>
 <context>
     <name>SettingsTab7</name>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="86"/>
         <source>FREQUENCY CALIBRATION</source>
-        <translation type="vanished">频率校准</translation>
+        <translation>频率校准</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="94"/>
         <source>Refresh</source>
-        <translation type="vanished">刷新</translation>
+        <translation>刷新</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="120"/>
         <source>Slope:</source>
-        <translation type="vanished">斜率：</translation>
+        <translation>斜率：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="138"/>
         <source>ppm</source>
-        <translation type="vanished">ppm</translation>
+        <translation>ppm</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="140"/>
         <source>Intercept:</source>
-        <translation type="vanished">截距：</translation>
+        <translation>截距：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="158"/>
         <source>Hz</source>
-        <translation type="vanished">Hz</translation>
+        <translation>Hz</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="162"/>
         <source>Reset</source>
-        <translation type="vanished">重置</translation>
+        <translation>重置</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="177"/>
         <source>Reset calibration (slope=0, intercept=0). The frequency is written to the rig without correction (fast path).</source>
-        <translation type="vanished">重置校准（斜率=0，截距=0）。频率将不经校正写入电台（快速路径）。</translation>
+        <translation>重置校准（斜率=0，截距=0）。频率将不经校正写入电台（快速路径）。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="189"/>
         <source>Preview correzione:</source>
-        <translation type="vanished">校正预览：</translation>
+        <translation>校正预览：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="200"/>
         <source>14.074 MHz → %1 Hz · 28.074 MHz → %2 Hz</source>
-        <translation type="vanished">14.074 MHz → %1 Hz · 28.074 MHz → %2 Hz</translation>
+        <translation>14.074 MHz → %1 Hz · 28.074 MHz → %2 Hz</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="215"/>
         <source>WORKING FREQUENCIES</source>
-        <translation type="vanished">WORKING FREQUENCIES</translation>
+        <translation>WORKING FREQUENCIES</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="223"/>
         <source>Load</source>
-        <translation type="vanished">加载</translation>
+        <translation>加载</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="232"/>
         <source>Merge</source>
-        <translation type="vanished">合并</translation>
+        <translation>合并</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="241"/>
         <source>Save as</source>
-        <translation type="vanished">另存为</translation>
+        <translation>另存为</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="250"/>
         <source>Defaults</source>
-        <translation type="vanished">默认值</translation>
+        <translation>默认值</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="280"/>
         <source>Region:</source>
-        <translation type="vanished">区域：</translation>
+        <translation>区域：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="287"/>
         <source>Mode:</source>
-        <translation type="vanished">模式：</translation>
+        <translation>模式：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="295"/>
         <source>Freq MHz:</source>
-        <translation type="vanished">频率 MHz：</translation>
+        <translation>频率 MHz：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="317"/>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="445"/>
         <source>Pref</source>
-        <translation type="vanished">Pref</translation>
+        <translation>Pref</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="326"/>
         <source>Description:</source>
-        <translation type="vanished">描述：</translation>
+        <translation>描述：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="340"/>
         <source>Start:</source>
-        <translation type="vanished">起始：</translation>
+        <translation>起始：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="351"/>
         <source>End:</source>
-        <translation type="vanished">结束：</translation>
+        <translation>结束：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="370"/>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="588"/>
         <source>Add</source>
-        <translation type="vanished">添加</translation>
+        <translation>添加</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="380"/>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="598"/>
         <source>Update</source>
-        <translation type="vanished">更新</translation>
+        <translation>更新</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="391"/>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="609"/>
         <source>Delete</source>
-        <translation type="vanished">删除</translation>
+        <translation>删除</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="401"/>
         <source>New</source>
-        <translation type="vanished">新建</translation>
+        <translation>新建</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="442"/>
         <source>IARU Region</source>
-        <translation type="vanished">IARU Region</translation>
+        <translation>IARU Region</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="443"/>
         <source>Mode</source>
-        <translation type="vanished">模式</translation>
+        <translation>模式</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="444"/>
         <source>Frequency</source>
-        <translation type="vanished">频率</translation>
+        <translation>频率</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="446"/>
         <source>Description</source>
-        <translation type="vanished">描述</translation>
+        <translation>描述</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="447"/>
         <source>Start Date/Time</source>
-        <translation type="vanished">起始日期/时间</translation>
+        <translation>起始日期/时间</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="448"/>
         <source>End Date/Time</source>
-        <translation type="vanished">结束日期/时间</translation>
+        <translation>结束日期/时间</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="501"/>
         <source>STATION INFORMATION</source>
-        <translation type="vanished">电台信息</translation>
+        <translation>电台信息</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="508"/>
         <source>Band offset is the transverter/station frequency offset for that band; use 0.000000 when unused.</source>
-        <translation type="vanished">波段偏移是该波段的 transverter/电台频率偏移；不使用时填 0.000000。</translation>
+        <translation>波段偏移是该波段的 transverter/电台频率偏移；不使用时填 0.000000。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="532"/>
         <source>Band:</source>
-        <translation type="vanished">波段：</translation>
+        <translation>波段：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="540"/>
         <source>Offset MHz:</source>
-        <translation type="vanished">偏移 MHz：</translation>
+        <translation>偏移 MHz：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="563"/>
         <source>Antenna:</source>
-        <translation type="vanished">天线：</translation>
+        <translation>天线：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="639"/>
         <source>Band</source>
-        <translation type="vanished">波段</translation>
+        <translation>波段</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="640"/>
         <source>Offset</source>
-        <translation type="vanished">偏移</translation>
+        <translation>偏移</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab7.qml" line="641"/>
         <source>Antenna Description</source>
-        <translation type="vanished">天线描述</translation>
+        <translation>天线描述</translation>
     </message>
 </context>
 <context>
     <name>SettingsTab8</name>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab8.qml" line="69"/>
         <source>DECODE COLORS</source>
-        <translation type="vanished">解码颜色</translation>
+        <translation>解码颜色</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab8.qml" line="122"/>
         <source>Use this specific decode color. When OFF, this category uses the shared default color.</source>
-        <translation type="vanished">对此类别使用此特定解码颜色。OFF 时该类别使用共享的默认颜色。</translation>
+        <translation>对此类别使用此特定解码颜色。OFF 时该类别使用共享的默认颜色。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab8.qml" line="198"/>
         <source>Reset</source>
-        <translation type="vanished">重置</translation>
+        <translation>重置</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab8.qml" line="221"/>
         <source>Bold</source>
-        <translation type="vanished">大胆</translation>
+        <translation>大胆</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab8.qml" line="237"/>
         <source>BG:</source>
-        <translation type="vanished">BG：</translation>
+        <translation>BG：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab8.qml" line="251"/>
         <source>Colors the row BACKGROUND (in addition to the text) for this category. OFF = no custom background.</source>
-        <translation type="vanished">为此类别的行背景着色（除文本外）。OFF = 无自定义背景。</translation>
+        <translation>为此类别的行背景着色（除文本外）。OFF = 无自定义背景。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab8.qml" line="326"/>
         <source>B4 Strikethrough:</source>
-        <translation type="vanished">B4 删除线：</translation>
+        <translation>B4 删除线：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab8.qml" line="339"/>
         <source>Decode Boost:</source>
-        <translation type="vanished">Decode Boost：</translation>
+        <translation>Decode Boost：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab8.qml" line="366"/>
         <source>Visual contrast only; it does not change decoder sensitivity.</source>
-        <translation type="vanished">仅调整视觉对比度；不会改变解码器灵敏度。</translation>
+        <translation>仅调整视觉对比度；不会改变解码器灵敏度。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab8.qml" line="374"/>
         <source>HIGHLIGHTING</source>
-        <translation type="vanished">突出显示</translation>
+        <translation>突出显示</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab8.qml" line="377"/>
         <source>Highlight 73:</source>
-        <translation type="vanished">亮点73：</translation>
+        <translation>亮点73：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab8.qml" line="386"/>
         <source>HL Orange:</source>
-        <translation type="vanished">HL橙：</translation>
+        <translation>HL橙：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab8.qml" line="393"/>
         <source>Orange Calls:</source>
-        <translation type="vanished">橙色呼号：</translation>
+        <translation>橙色呼号：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab8.qml" line="401"/>
         <source>HL Blue:</source>
-        <translation type="vanished">HL 蓝色：</translation>
+        <translation>HL 蓝色：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab8.qml" line="408"/>
         <source>Blue Calls:</source>
-        <translation type="vanished">蓝色呼号：</translation>
+        <translation>蓝色呼号：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab8.qml" line="417"/>
         <source>COLORI INTERFACCIA (sfondo + testo)</source>
-        <translation type="vanished">界面颜色（背景 + 文本）</translation>
+        <translation>界面颜色（背景 + 文本）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab8.qml" line="422"/>
         <source>Usa colori personalizzati:</source>
-        <translation type="vanished">使用自定义颜色：</translation>
+        <translation>使用自定义颜色：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab8.qml" line="429"/>
         <source>(overrides theme background and text)</source>
-        <translation type="vanished">（覆盖主题背景和文本）</translation>
+        <translation>（覆盖主题背景和文本）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab8.qml" line="436"/>
         <source>Background:</source>
-        <translation type="vanished">背景：</translation>
+        <translation>背景：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab8.qml" line="456"/>
         <source>Text:</source>
-        <translation type="vanished">文本：</translation>
+        <translation>文本：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab8.qml" line="473"/>
         <source>SPECTRUM</source>
-        <translation type="vanished">频谱</translation>
+        <translation>频谱</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab8.qml" line="476"/>
         <source>Palette:</source>
-        <translation type="vanished">调色板：</translation>
+        <translation>调色板：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab8.qml" line="492"/>
         <source>Black Level:</source>
-        <translation type="vanished">黑电平：</translation>
+        <translation>黑电平：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab8.qml" line="498"/>
         <source>Color Gain:</source>
-        <translation type="vanished">色彩增益：</translation>
+        <translation>色彩增益：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab8.qml" line="504"/>
         <source>Contrast:</source>
-        <translation type="vanished">对比：</translation>
+        <translation>对比：</translation>
     </message>
 </context>
 <context>
     <name>SettingsTab9</name>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="67"/>
         <source>STARTUP</source>
-        <translation type="vanished">启动</translation>
+        <translation>启动</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="84"/>
         <source>Monitor OFF:</source>
-        <translation type="vanished">显示器关闭：</translation>
+        <translation>显示器关闭：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="93"/>
         <source>Monitor Last:</source>
-        <translation type="vanished">监控最后：</translation>
+        <translation>监控最后：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="102"/>
         <source>Auto Astro:</source>
-        <translation type="vanished">自动天文：</translation>
+        <translation>自动天文：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="110"/>
         <source>kHz no k:</source>
-        <translation type="vanished">kHz 无 k：</translation>
+        <translation>kHz 无 k：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="119"/>
         <source>Progress Red:</source>
-        <translation type="vanished">进度红色：</translation>
+        <translation>进度红色：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="127"/>
         <source>High DPI:</source>
-        <translation type="vanished">高DPI：</translation>
+        <translation>高DPI：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="136"/>
         <source>Larger Tab:</source>
-        <translation type="vanished">更大的选项卡：</translation>
+        <translation>更大的选项卡：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="144"/>
         <source>Direct Visual:</source>
-        <translation type="vanished">Direct Visual：</translation>
+        <translation>Direct Visual：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="150"/>
         <source>Fast visual panadapter. In legacy mode it may open a second audio capture; in normal mode it only increases the visual refresh rate. Default: OFF.</source>
-        <translation type="vanished">快速可视化 panadapter。在 legacy 模式下可能打开第二个音频捕获；在正常模式下仅提高可视刷新率。默认：OFF。</translation>
+        <translation>快速可视化 panadapter。在 legacy 模式下可能打开第二个音频捕获；在正常模式下仅提高可视刷新率。默认：OFF。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="188"/>
         <source>Slow-PC mode:</source>
-        <translation type="vanished">低速电脑模式:</translation>
+        <translation>低速电脑模式:</translation>
     </message>
     <message>
         <source>One switch for old/slow PCs. Enables: OpenGL graphics (stable on old GPUs, needs restart), Low CPU mode, max 4 FT threads, normal process priority, CPU decode profile, and hides Live Map / Full Spectrum by default. Default: OFF.</source>
         <translation type="vanished">为老旧/低速电脑提供的一键开关。启用：OpenGL 图形（在老旧 GPU 上稳定，需要重启）、低 CPU 模式、最多 4 个 FT 线程、正常进程优先级、CPU 解码配置，并默认隐藏实时地图／全频谱。默认：关闭。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="203"/>
+        <source>Reset graphics on next launch:</source>
+        <translation>下次启动时重置图形：</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="217"/>
+        <source>On the next launch, clears persistent graphics fallback settings and scene-graph caches, equivalent to --reset-safe-graphics. The option is one-shot and clears itself after startup.</source>
+        <translation>下次启动时，清除持久的图形回退设置和场景图缓存，相当于 --reset-safe-graphics。此选项仅一次有效，启动后会自动关闭。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="222"/>
         <source>Low CPU:</source>
-        <translation type="vanished">Low CPU：</translation>
+        <translation>Low CPU：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="231"/>
         <source>Profile for slow PCs: maximum 2 FT threads, slower waterfall, reduced early/deep decoding. Default: OFF.</source>
-        <translation type="vanished">慢速 PC 的配置文件：最多 2 个 FT 线程、较慢的 waterfall、减少的 early/deep 解码。默认：OFF。</translation>
+        <translation>慢速 PC 的配置文件：最多 2 个 FT 线程、较慢的 waterfall、减少的 early/deep 解码。默认：OFF。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="236"/>
         <source>Reduces FT threads, waterfall refresh, and QML rendering during monitor/TX.</source>
-        <translation type="vanished">在 monitor/TX 期间减少 FT 线程、waterfall 刷新和 QML 渲染。</translation>
+        <translation>在 monitor/TX 期间减少 FT 线程、waterfall 刷新和 QML 渲染。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="247"/>
         <source>DATA UPDATES</source>
-        <translation type="vanished">数据更新</translation>
+        <translation>数据更新</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="250"/>
         <source>LotW Users:</source>
-        <translation type="vanished">LoTW 用户：</translation>
+        <translation>LoTW 用户：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="252"/>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="265"/>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="313"/>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="326"/>
         <source>Updating...</source>
-        <translation type="vanished">更新中…</translation>
+        <translation>更新中…</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="253"/>
         <source>%1 users</source>
-        <translation type="vanished">%1 个用户</translation>
+        <translation>%1 个用户</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="254"/>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="315"/>
         <source>Not loaded</source>
-        <translation type="vanished">未加载</translation>
+        <translation>未加载</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="265"/>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="326"/>
         <source>Force Update</source>
-        <translation type="vanished">强制更新</translation>
+        <translation>强制更新</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="311"/>
         <source>US States:</source>
-        <translation type="vanished">US States：</translation>
+        <translation>US States：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="314"/>
         <source>%1 calls, %2 locators</source>
-        <translation type="vanished">%1 个呼号，%2 个网格</translation>
+        <translation>%1 个呼号，%2 个网格</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="373"/>
         <source>BEHAVIOR</source>
-        <translation type="vanished">行为</translation>
+        <translation>行为</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="390"/>
         <source>Quick Call:</source>
-        <translation type="vanished">快速呼叫：</translation>
+        <translation>快速呼叫：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="398"/>
         <source>Force Call 1st:</source>
-        <translation type="vanished">强制优先呼号：</translation>
+        <translation>强制优先呼号：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="407"/>
         <source>VHF/UHF:</source>
-        <translation type="vanished">VHF/UHF：</translation>
+        <translation>VHF/UHF：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="419"/>
         <source>Wait Features:</source>
-        <translation type="vanished">等待特点：</translation>
+        <translation>等待特点：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="428"/>
         <source>Erase Band Act:</source>
-        <translation type="vanished">擦除带行为：</translation>
+        <translation>擦除带行为：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="436"/>
         <source>Clear DX Grid:</source>
-        <translation type="vanished">清除DX网格：</translation>
+        <translation>清除DX网格：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="445"/>
         <source>Clear DX Call:</source>
-        <translation type="vanished">清除DX呼号：</translation>
+        <translation>清除DX呼号：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="453"/>
         <source>RX&gt;TX after QSO:</source>
-        <translation type="vanished">RX&gt;QSO 之后的 TX：</translation>
+        <translation>RX&gt;QSO 之后的 TX：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="462"/>
         <source>Alt Erase Btn:</source>
-        <translation type="vanished">Alt 擦除按钮：</translation>
+        <translation>Alt 擦除按钮：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="470"/>
         <source>No Btn Color:</source>
-        <translation type="vanished">无按钮颜色：</translation>
+        <translation>无按钮颜色：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="482"/>
         <source>OPERATING MODE</source>
-        <translation type="vanished">操作模式</translation>
+        <translation>操作模式</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="499"/>
         <source>Fox Mode:</source>
-        <translation type="vanished">Fox 模式：</translation>
+        <translation>Fox 模式：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="511"/>
         <source>Hound Mode:</source>
-        <translation type="vanished">Hound 模式：</translation>
+        <translation>Hound 模式：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="523"/>
         <source>SuperFox:</source>
-        <translation type="vanished">SuperFox：</translation>
+        <translation>SuperFox：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="531"/>
+        <source>To work a SuperFox DXpedition, select FT8 and enable Hound Mode as well. This option alone does not enable SuperHound reception.</source>
+        <translation>要联络 SuperFox DX 远征，请选择 FT8 并同时启用 Hound 模式。仅此选项不会启用 SuperHound 接收。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="535"/>
         <source>Show OTP:</source>
-        <translation type="vanished">显示 OTP：</translation>
+        <translation>显示 OTP：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="547"/>
         <source>CONTEST</source>
-        <translation type="vanished">竞赛</translation>
+        <translation>竞赛</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="550"/>
         <source>Activity:</source>
-        <translation type="vanished">活动：</translation>
+        <translation>活动：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="553"/>
         <source>None</source>
-        <translation type="vanished">无</translation>
+        <translation>无</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="553"/>
         <source>Field Day</source>
-        <translation type="vanished">野外日</translation>
+        <translation>野外日</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="553"/>
         <source>Fox</source>
-        <translation type="vanished">狐狸</translation>
+        <translation>狐狸</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="553"/>
         <source>Hound</source>
-        <translation type="vanished">猎犬</translation>
+        <translation>猎犬</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="566"/>
         <source>FD Exchange:</source>
-        <translation type="vanished">FD 兑换：</translation>
+        <translation>FD 兑换：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="573"/>
         <source>RTTY Exchange:</source>
-        <translation type="vanished">RTTY 兑换：</translation>
+        <translation>RTTY 兑换：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="581"/>
         <source>Contest Name:</source>
-        <translation type="vanished">比赛名称：</translation>
+        <translation>比赛名称：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="588"/>
         <source>Indiv Name:</source>
-        <translation type="vanished">个人姓名：</translation>
+        <translation>个人姓名：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="596"/>
         <source>NCCC Sprint:</source>
-        <translation type="vanished">NCCC 冲刺：</translation>
+        <translation>NCCC 冲刺：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="606"/>
         <source>NTP TIME SYNC</source>
-        <translation type="vanished">NTP 时间同步</translation>
+        <translation>NTP 时间同步</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="609"/>
         <source>Enable NTP:</source>
-        <translation type="vanished">启用 NTP：</translation>
+        <translation>启用 NTP：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="626"/>
         <source>Custom Server:</source>
-        <translation type="vanished">自定义服务器：</translation>
+        <translation>自定义服务器：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="636"/>
         <source>Empty = automatic public servers</source>
-        <translation type="vanished">空=自动公共服务器</translation>
+        <translation>空=自动公共服务器</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="651"/>
         <source>Sync Now</source>
-        <translation type="vanished">立即同步</translation>
+        <translation>立即同步</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="667"/>
         <source>Leave the server empty to automatically use pool.ntp.org, Apple, Cloudflare, and Google.</source>
-        <translation type="vanished">将服务器留空以自动使用 pool.ntp.org、Apple、Cloudflare 和 Google。</translation>
+        <translation>将服务器留空以自动使用 pool.ntp.org、Apple、Cloudflare 和 Google。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="673"/>
         <source>RF self-calibration:</source>
-        <translation type="vanished">RF 自校准：</translation>
+        <translation>RF 自校准：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="678"/>
         <source>Use received decode DT values only as a secondary time-sync hint after NTP/HTTPS is already locked. Default: OFF.</source>
-        <translation type="vanished">仅在 NTP/HTTPS 已锁定后，将接收解码的 DT 值用作次要时间同步提示。默认：OFF。</translation>
+        <translation>仅在 NTP/HTTPS 已锁定后，将接收解码的 DT 值用作次要时间同步提示。默认：OFF。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="683"/>
         <source>Secondary hint only; it cannot create the first time lock.</source>
-        <translation type="vanished">仅作次要提示；它无法创建首次时间锁定。</translation>
+        <translation>仅作次要提示；它无法创建首次时间锁定。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="691"/>
         <source>ADV DECODING</source>
-        <translation type="vanished">高级解码</translation>
+        <translation>高级解码</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="694"/>
         <source>Auto Mode:</source>
-        <translation type="vanished">自动模式：</translation>
+        <translation>自动模式：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="698"/>
         <source>AUTO - enable the 3 technologies when needed</source>
-        <translation type="vanished">自动 - 需要时启用这 3 项技术</translation>
+        <translation>自动 - 需要时启用这 3 项技术</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="711"/>
         <source>When ON, the 3 features below are managed automatically. Trigger: Neural+Turbo when decodes &lt; 2/slot for 4 slots. Coherent when Q65 SNR &lt; -22 dB.</source>
-        <translation type="vanished">当 ON 时，下面 3 项功能自动管理。触发条件：当解码 &lt; 2/时段 持续 4 个时段时启用 Neural+Turbo。当 Q65 SNR &lt; -22 dB 时启用 Coherent。</translation>
+        <translation>当 ON 时，下面 3 项功能自动管理。触发条件：当解码 &lt; 2/时段 持续 4 个时段时启用 Neural+Turbo。当 Q65 SNR &lt; -22 dB 时启用 Coherent。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="719"/>
         <source>Live state:</source>
-        <translation type="vanished">实时状态：</translation>
+        <translation>实时状态：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="721"/>
         <source>Neural</source>
-        <translation type="vanished">Neural</translation>
+        <translation>Neural</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="723"/>
         <source>Turbo</source>
-        <translation type="vanished">Turbo</translation>
+        <translation>Turbo</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="725"/>
         <source>Coherent</source>
-        <translation type="vanished">Coherent</translation>
+        <translation>Coherent</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="729"/>
         <source>Coherent Avg:</source>
-        <translation type="vanished">Coherent Avg：</translation>
+        <translation>Coherent Avg：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="734"/>
         <source>Coherent Average (Q65/JT65)</source>
-        <translation type="vanished">Coherent Average (Q65/JT65)</translation>
+        <translation>Coherent Average (Q65/JT65)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="748"/>
         <source>Accumulates multi-slot averaging for Q65/JT65 decodes (+1-3 dB)</source>
-        <translation type="vanished">为 Q65/JT65 解码累积多时段平均 (+1-3 dB)</translation>
+        <translation>为 Q65/JT65 解码累积多时段平均 (+1-3 dB)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="755"/>
         <source>Neural Sync:</source>
-        <translation type="vanished">Neural Sync：</translation>
+        <translation>Neural Sync：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="760"/>
         <source>Neural Sync (FT8 OSD decoder)</source>
-        <translation type="vanished">Neural Sync（FT8 OSD 解码器）</translation>
+        <translation>Neural Sync（FT8 OSD 解码器）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="774"/>
         <source>Forces OSD-aware FT8 decoding (+2-3 dB on borderline signals)</source>
-        <translation type="vanished">强制 OSD 感知的 FT8 解码（边缘信号上 +2-3 dB）</translation>
+        <translation>强制 OSD 感知的 FT8 解码（边缘信号上 +2-3 dB）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="781"/>
         <source>Turbo Feedback:</source>
-        <translation type="vanished">Turbo Feedback：</translation>
+        <translation>Turbo Feedback：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="786"/>
         <source>Turbo Feedback (extended LDPC iterations)</source>
-        <translation type="vanished">Turbo Feedback（扩展 LDPC 迭代）</translation>
+        <translation>Turbo Feedback（扩展 LDPC 迭代）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="800"/>
         <source>Extended LDPC iterations for marginal decode recovery</source>
-        <translation type="vanished">用于边缘解码恢复的扩展 LDPC 迭代</translation>
+        <translation>用于边缘解码恢复的扩展 LDPC 迭代</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="808"/>
         <source>OTP</source>
-        <translation type="vanished">OTP</translation>
+        <translation>OTP</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="811"/>
         <source>OTP Enabled:</source>
-        <translation type="vanished">OTP 已启用：</translation>
+        <translation>OTP 已启用：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="818"/>
         <source>OTP Seed:</source>
-        <translation type="vanished">OTP 种子：</translation>
+        <translation>OTP 种子：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="826"/>
         <source>OTP Interval:</source>
-        <translation type="vanished">OTP 间隔：</translation>
+        <translation>OTP 间隔：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="835"/>
         <source>OTP URL:</source>
-        <translation type="vanished">OTP 网址:</translation>
+        <translation>OTP 网址:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="197"/>
         <source>One switch for old/slow PCs. Enables: conservative D3D11 graphics on Windows (needs restart), Low CPU mode, max 4 FT threads, normal process priority, CPU decode profile, and hides Live Map / Full Spectrum by default. Default: OFF.</source>
-        <translation type="vanished">面向老旧或缓慢电脑的一个开关。启用：Windows 上保守的 D3D11 图形（需重启）、低 CPU 模式、最多 4 个 FT 线程、普通进程优先级、CPU 解码配置，并隐藏 Live Map 与 Full Spectrum。默认：关闭。</translation>
+        <translation>面向老旧或缓慢电脑的一个开关。启用：Windows 上保守的 D3D11 图形（需重启）、低 CPU 模式、最多 4 个 FT 线程、普通进程优先级、CPU 解码配置，并隐藏 Live Map 与 Full Spectrum。默认：关闭。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="157"/>
         <source>OpenGL GPU FFT:</source>
-        <translation type="vanished">OpenGL GPU FFT：</translation>
+        <translation>OpenGL GPU FFT：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="172"/>
         <source>After restart, offloads the visual panadapter FFT to OpenGL compute on supported Linux drivers. It does not move FT decoding to the GPU. A failed or stalled GPU path falls back automatically to asynchronous CPU FFT. Default: OFF.</source>
-        <translation type="vanished">重启后，将全景显示的可视 FFT 移到 OpenGL 计算上（仅限支持的 Linux 驱动）。FT 解码不会移到 GPU。若 GPU 路径失败或停滞，会自动回退到异步的 CPU FFT。默认：关闭。</translation>
+        <translation>重启后，将全景显示的可视 FFT 移到 OpenGL 计算上（仅限支持的 Linux 驱动）。FT 解码不会移到 GPU。若 GPU 路径失败或停滞，会自动回退到异步的 CPU FFT。默认：关闭。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab9.qml" line="178"/>
         <source>Visual FFT only; restart required; safe CPU fallback remains active.</source>
-        <translation type="vanished">仅限可视 FFT；需要重启；安全的 CPU 回退仍然有效。</translation>
+        <translation>仅限可视 FFT；需要重启；安全的 CPU 回退仍然有效。</translation>
     </message>
 </context>
 <context>
@@ -26125,8 +30502,9 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation type="vanished">立即生效</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/SetupDialog.qml" line="45"/>
         <source>STATION</source>
-        <translation type="vanished">电台信息</translation>
+        <translation>电台信息</translation>
     </message>
     <message>
         <source>MY CALL</source>
@@ -26141,27 +30519,37 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation type="vanished">QTH</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/SetupDialog.qml" line="63"/>
+        <source>Callsign, station name and QTH come from Decodium station settings.</source>
+        <translation>呼号、电台名称和 QTH 来自 Decodium 的电台设置。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/rtty/SetupDialog.qml" line="82"/>
         <source>MACROS</source>
-        <translation type="vanished">宏</translation>
+        <translation>宏</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/SetupDialog.qml" line="181"/>
         <source>Restore defaults</source>
-        <translation type="vanished">恢复默认</translation>
+        <translation>恢复默认</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/SetupDialog.qml" line="187"/>
         <source>Close</source>
-        <translation type="vanished">关闭</translation>
+        <translation>关闭</translation>
     </message>
 </context>
 <context>
     <name>SignalRxPanel</name>
     <message>
+        <location filename="../qml/decodium/components/SignalRxPanel.qml" line="265"/>
         <source>QSO LOCK</source>
-        <translation type="vanished">QSO 锁定</translation>
+        <translation>QSO 锁定</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SignalRxPanel.qml" line="482"/>
         <source>No RX-frequency decodes</source>
-        <translation type="vanished">接收频率上没有解码</translation>
+        <translation>接收频率上没有解码</translation>
     </message>
 </context>
 <context>
@@ -26380,307 +30768,609 @@ Costs extra CPU during QSOs. Default: OFF.</source>
 <context>
     <name>SplashScreen</name>
     <message>
+        <location filename="../qml/decodium/components/SplashScreen.qml" line="192"/>
         <source>Loading…</source>
-        <translation type="vanished">加载中…</translation>
+        <translation>加载中…</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SplashScreen.qml" line="212"/>
         <source>☕  Buy me a coffee</source>
-        <translation type="vanished">☕  请我喝杯咖啡</translation>
+        <translation>☕  请我喝杯咖啡</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SplashScreen.qml" line="233"/>
         <source>Start  ▶</source>
-        <translation type="vanished">启动  ▶</translation>
+        <translation>启动  ▶</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SplashScreen.qml" line="255"/>
         <source>Named after Robert G. Gallager · Father of LDPC Codes</source>
-        <translation type="vanished">以 Robert G. Gallager 命名 · LDPC 码之父</translation>
+        <translation>以 Robert G. Gallager 命名 · LDPC 码之父</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SplashScreen.qml" line="262"/>
         <source>© 2024-2026 IU8LMC  ·  GPL Open Source  ·  Based on WSJT-X by K1JT et al. &amp; WSJT-X by K1JT</source>
-        <translation type="vanished">© 2024-2026 IU8LMC  ·  GPL 开源  ·  基于 K1JT 等人的 WSJT-X &amp; WSJT-X by K1JT</translation>
+        <translation>© 2024-2026 IU8LMC  ·  GPL 开源  ·  基于 K1JT 等人的 WSJT-X &amp; WSJT-X by K1JT</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SplashScreen.qml" line="131"/>
         <source>Core Gallager</source>
-        <translation type="vanished">Core Gallager</translation>
+        <translation>Core Gallager</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SplashScreen.qml" line="142"/>
         <source>Advanced Digital Mode Decoder for Amateur Radio</source>
-        <translation type="vanished">面向业余无线电的高级数字模式解码器</translation>
+        <translation>面向业余无线电的高级数字模式解码器</translation>
     </message>
 </context>
 <context>
     <name>SsbWindow</name>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="174"/>
         <source>Hold the space bar to talk (Esc stops).</source>
-        <translation type="vanished">按住空格键讲话（Esc 停止）。</translation>
+        <translation>按住空格键讲话（Esc 停止）。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="102"/>
         <source>AF gain %</source>
-        <translation type="vanished">AF 增益 %</translation>
+        <translation>AF 增益 %</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="103"/>
         <source>Squelch %</source>
-        <translation type="vanished">静噪 %</translation>
+        <translation>静噪 %</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="104"/>
         <source>Noise reduction %</source>
-        <translation type="vanished">降噪 %</translation>
+        <translation>降噪 %</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="105"/>
         <source>Noise blanker %</source>
-        <translation type="vanished">噪声消隐器 (NB) %</translation>
+        <translation>噪声消隐器 (NB) %</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="106"/>
         <source>Speech compressor %</source>
-        <translation type="vanished">语音压缩器 %</translation>
+        <translation>语音压缩器 %</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="107"/>
         <source>VOX gain %</source>
-        <translation type="vanished">VOX 增益 %</translation>
+        <translation>VOX 增益 %</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="108"/>
         <source>IF shift Hz</source>
-        <translation type="vanished">中频偏移 Hz</translation>
+        <translation>中频偏移 Hz</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="109"/>
         <source>Notch Hz</source>
-        <translation type="vanished">陷波 Hz</translation>
+        <translation>陷波 Hz</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="110"/>
         <source>Preamp dB</source>
-        <translation type="vanished">前置放大器 dB</translation>
+        <translation>前置放大器 dB</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="111"/>
         <source>Attenuator dB</source>
-        <translation type="vanished">衰减器 dB</translation>
+        <translation>衰减器 dB</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="114"/>
         <source>Noise blanker</source>
-        <translation type="vanished">噪声消隐器 (NB)</translation>
+        <translation>噪声消隐器 (NB)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="115"/>
         <source>Noise reduction</source>
-        <translation type="vanished">降噪</translation>
+        <translation>降噪</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="116"/>
         <source>Auto notch</source>
-        <translation type="vanished">自动陷波</translation>
+        <translation>自动陷波</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="117"/>
         <source>Speech compressor</source>
-        <translation type="vanished">语音压缩器</translation>
+        <translation>语音压缩器</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="118"/>
         <source>VOX</source>
-        <translation type="vanished">VOX</translation>
+        <translation>VOX</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="119"/>
         <source>Dial lock</source>
-        <translation type="vanished">频率锁定</translation>
+        <translation>频率锁定</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="151"/>
+        <source>Radio ATU disabled</source>
+        <translation>电台 ATU 已禁用</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="220"/>
+        <source>Voice keyer • preregistered messages</source>
+        <translation>语音键控器 • 预录消息</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="226"/>
+        <source>Hold Record while speaking, release to save. Play sends the message on SSB; Preview plays it only on this computer. Esc stops.</source>
+        <translation>说话时按住录音，松开即保存。播放会在 SSB 上发送该消息；预览仅在本机上播放。Esc 停止。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="231"/>
+        <source>Voice speed</source>
+        <translation>语音速度</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="278"/>
+        <source>text of the message</source>
+        <translation>消息文本</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="286"/>
+        <source>Record</source>
+        <translation>录音</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="293"/>
+        <source>Preview</source>
+        <translation>预览</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="299"/>
+        <source>AI help</source>
+        <translation>AI 帮助</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="302"/>
+        <source>Ask the assistant to rewrite this text so it reads well on the air</source>
+        <translation>请助手改写此文本，使其在电台里读起来顺口</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="305"/>
+        <source>Rewrite this message so that a radio operator reads it aloud: short, clear, in the same language, no abbreviations that are hard to pronounce. Reply with the message only: </source>
+        <translation>请改写这条消息，使业余无线电操作员可以朗读：简短、清晰、使用相同语言，不要使用难以发音的缩写。只回复消息本身： </translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="310"/>
+        <source>recorded</source>
+        <translation>已录音</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="310"/>
+        <source>text only</source>
+        <translation>仅文本</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="314"/>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="357"/>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="407"/>
+        <source>Clear</source>
+        <translation>清除</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="319"/>
+        <source>Play</source>
+        <translation>播放</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="339"/>
+        <source>Hold to listen</source>
+        <translation>按住以收听</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="354"/>
+        <source>What you said appears here</source>
+        <translation>您说的话会显示在这里</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="365"/>
+        <source>Assistant • helps you write and read your messages</source>
+        <translation>助手 • 帮助您撰写和朗读消息</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="375"/>
+        <source>Install the Assistant pack (in the right column) to chat here. Nothing leaves this computer.</source>
+        <translation>请安装助手包（在右侧栏中）即可在此聊天。任何内容都不会离开这台计算机。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="380"/>
+        <source>Ask for a CQ call, a signal report, a short reply. Press AI help on a message to have it rewritten for the voice.</source>
+        <translation>可以请求 CQ 呼叫、信号报告或简短回复。在消息上点击 AI 帮助，即可将其改写为适合朗读的版本。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="387"/>
+        <source>The conversation appears here</source>
+        <translation>对话会显示在这里</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="397"/>
+        <source>Ask something…</source>
+        <translation>提问…</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="402"/>
+        <source>Ask</source>
+        <translation>提问</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="406"/>
+        <source>Stop</source>
+        <translation>停止</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="413"/>
+        <source>Preview reply</source>
+        <translation>预览回复</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="420"/>
+        <source>Send reply by voice (transmits)</source>
+        <translation>以语音发送回复（会发射）</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="439"/>
+        <source>Optional packs • install only what you use</source>
+        <translation>可选包 • 仅安装您会用到的</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="444"/>
+        <source>Install only what you need. Untick Use to switch a pack off without deleting it; Remove frees its disk space. Nothing goes to the internet during use, and no account is needed.</source>
+        <translation>仅安装您需要的。取消勾选“使用”可在不删除的情况下关闭某个包；“移除”会释放其磁盘空间。使用期间不会访问互联网，也不需要账号。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="449"/>
+        <source>Voice (Italian and English)</source>
+        <translation>语音（意大利语和英语）</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="450"/>
+        <source>Speech recognition</source>
+        <translation>语音识别</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="451"/>
+        <source>Assistant (local language model)</source>
+        <translation>助手（本地语言模型）</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="462"/>
+        <source>installed</source>
+        <translation>已安装</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="462"/>
+        <source>not installed</source>
+        <translation>未安装</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="468"/>
+        <source>Use</source>
+        <translation>使用</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="474"/>
+        <source>Install</source>
+        <translation>安装</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="480"/>
+        <source>Remove</source>
+        <translation>移除</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="491"/>
+        <source>Cancel</source>
+        <translation>取消</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="560"/>
+        <source>ATU state: </source>
+        <translation>ATU 状态： </translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="562"/>
+        <source>ON</source>
+        <translation>开</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="562"/>
+        <source>OFF</source>
+        <translation>关</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="563"/>
+        <source>unknown</source>
+        <translation>未知</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="564"/>
+        <source>—</source>
+        <translation>—</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="568"/>
+        <source>Read ATU state</source>
+        <translation>读取 ATU 状态</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="584"/>
+        <source>ATU OFF</source>
+        <translation>ATU 关</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="589"/>
+        <source>Disable the radio&apos;s automatic antenna tuner.</source>
+        <translation>禁用电台的自动天线调谐器。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="599"/>
+        <source>Ask a supported radio to power on through direct Hamlib CAT. The selected CAT port must remain available while the radio is in standby.</source>
+        <translation>请求受支持的电台通过直接 Hamlib CAT 开机。电台处于待机状态时，所选 CAT 端口必须保持可用。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="622"/>
         <source>Receive • radio settings (read and set by CAT)</source>
-        <translation type="vanished">接收 • 电台设置（通过 CAT 读取和设置）</translation>
+        <translation>接收 • 电台设置（通过 CAT 读取和设置）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="662"/>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="699"/>
         <source>Off</source>
-        <translation type="vanished">关</translation>
+        <translation>关</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="696"/>
         <source>Listen AGC</source>
-        <translation type="vanished">监听 AGC</translation>
+        <translation>监听 AGC</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="699"/>
         <source>Auto</source>
-        <translation type="vanished">自动</translation>
+        <translation>自动</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="699"/>
         <source>Fast</source>
-        <translation type="vanished">快</translation>
+        <translation>快</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="699"/>
         <source>Medium</source>
-        <translation type="vanished">中</translation>
+        <translation>中</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="699"/>
         <source>Slow</source>
-        <translation type="vanished">慢</translation>
+        <translation>慢</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="699"/>
         <source>Long</source>
-        <translation type="vanished">长</translation>
+        <translation>长</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="703"/>
         <source>Threshold</source>
-        <translation type="vanished">阈值</translation>
+        <translation>阈值</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="711"/>
         <source>Gain %1 dB</source>
-        <translation type="vanished">增益 %1 dB</translation>
+        <translation>增益 %1 dB</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="714"/>
         <source>Software AGC on the listening audio only (from DECODIUM SDR). Auto follows the noise floor by itself. It does not touch the decoder or the radio&apos;s AGC.</source>
-        <translation type="vanished">仅作用于监听音频的软件 AGC（来自 DECODIUM SDR）。自动模式会自行跟随底噪。它不会影响解码器或电台的 AGC。</translation>
+        <translation>仅作用于监听音频的软件 AGC（来自 DECODIUM SDR）。自动模式会自行跟随底噪。它不会影响解码器或电台的 AGC。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="13"/>
         <source>SSB — PC microphone</source>
-        <translation type="vanished">SSB — PC 麦克风</translation>
+        <translation>SSB — PC 麦克风</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="183"/>
         <source>REMOTE RADIO</source>
-        <translation type="vanished">远程电台</translation>
+        <translation>远程电台</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="183"/>
         <source>LOCAL RADIO</source>
-        <translation type="vanished">本地电台</translation>
+        <translation>本地电台</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="203"/>
         <source>CAT disconnected</source>
-        <translation type="vanished">CAT 已断开</translation>
+        <translation>CAT 已断开</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="194"/>
         <source>Frequency in MHz. Press Enter to tune.</source>
-        <translation type="vanished">频率（MHz）。按 Enter 键调谐。</translation>
+        <translation>频率（MHz）。按 Enter 键调谐。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="200"/>
         <source>USB/data audio input</source>
-        <translation type="vanished">USB/数据音频输入</translation>
+        <translation>USB/数据音频输入</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="202"/>
         <source>Activate SSB</source>
-        <translation type="vanished">启用 SSB</translation>
+        <translation>启用 SSB</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="206"/>
         <source>TX uses the radio audio output selected in Settings. USB/LSB requires the radio to accept PC audio; use data input when needed.</source>
-        <translation type="vanished">TX 使用在设置中选择的电台音频输出。USB/LSB 需要电台接受 PC 音频；必要时请使用数据输入。</translation>
+        <translation>TX 使用在设置中选择的电台音频输出。USB/LSB 需要电台接受 PC 音频；必要时请使用数据输入。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="497"/>
         <source>PC microphone • voice processing</source>
-        <translation type="vanished">PC 麦克风 • 语音处理</translation>
+        <translation>PC 麦克风 • 语音处理</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="505"/>
         <source>Select PC microphone…</source>
-        <translation type="vanished">选择 PC 麦克风…</translation>
+        <translation>选择 PC 麦克风…</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="509"/>
         <source>Mic gain</source>
-        <translation type="vanished">麦克风增益</translation>
+        <translation>麦克风增益</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="512"/>
         <source>Automatic gain</source>
-        <translation type="vanished">自动增益</translation>
+        <translation>自动增益</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="515"/>
         <source>Voice filter</source>
-        <translation type="vanished">语音滤波器</translation>
+        <translation>语音滤波器</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="519"/>
         <source>Hz • limiter active</source>
-        <translation type="vanished">Hz • 限幅器已启用</translation>
+        <translation>Hz • 限幅器已启用</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="522"/>
         <source>Voice level</source>
-        <translation type="vanished">语音电平</translation>
+        <translation>语音电平</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="529"/>
         <source>Radio • CAT controls</source>
-        <translation type="vanished">电台 • CAT 控制</translation>
+        <translation>电台 • CAT 控制</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="533"/>
         <source>RF power %</source>
-        <translation type="vanished">RF 功率 %</translation>
+        <translation>RF 功率 %</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="535"/>
         <source>RX filter Hz</source>
-        <translation type="vanished">RX 滤波器 Hz</translation>
+        <translation>RX 滤波器 Hz</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="537"/>
         <source>Radio AGC</source>
-        <translation type="vanished">电台 AGC</translation>
+        <translation>电台 AGC</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="554"/>
         <source>RF gain %</source>
-        <translation type="vanished">RF 增益 %</translation>
+        <translation>RF 增益 %</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="556"/>
         <source>Radio mic gain %</source>
-        <translation type="vanished">电台麦克风增益 %</translation>
+        <translation>电台麦克风增益 %</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="558"/>
         <source>Read radio</source>
-        <translation type="vanished">读取电台</translation>
+        <translation>读取电台</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="617"/>
         <source>AGC OFF enables manual reception gain using RF gain. Unavailable controls are disabled.</source>
-        <translation type="vanished">AGC 关闭时，可通过 RF 增益手动调节接收增益。不可用的控件已被禁用。</translation>
+        <translation>AGC 关闭时，可通过 RF 增益手动调节接收增益。不可用的控件已被禁用。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="687"/>
         <source>RF: </source>
-        <translation type="vanished">RF: </translation>
+        <translation>RF: </translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="688"/>
         <source>SWR: </source>
-        <translation type="vanished">SWR: </translation>
+        <translation>SWR: </translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="691"/>
         <source>Listen RX</source>
-        <translation type="vanished">监听 RX</translation>
+        <translation>监听 RX</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="165"/>
         <source>TRANSMITTING — release to receive</source>
-        <translation type="vanished">发射中 — 松开以接收</translation>
+        <translation>发射中 — 松开以接收</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="165"/>
         <source>HOLD TO TALK • PTT</source>
-        <translation type="vanished">按住讲话 • PTT</translation>
+        <translation>按住讲话 • PTT</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="123"/>
         <source>Power off radio?</source>
-        <translation type="vanished">关闭电台电源？</translation>
+        <translation>关闭电台电源？</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="128"/>
         <source>This will switch off the radio connected through Hamlib CAT. The CAT session is kept open so you can try Power On afterward.</source>
-        <translation type="vanished">这将关闭通过 Hamlib CAT 连接的电台。CAT 会话保持打开，之后您可以尝试开机。</translation>
+        <translation>这将关闭通过 Hamlib CAT 连接的电台。CAT 会话保持打开，之后您可以尝试开机。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="152"/>
         <source>Radio ATU command sent</source>
-        <translation type="vanished">已向电台发送 ATU 命令</translation>
+        <translation>已向电台发送 ATU 命令</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="153"/>
         <source>Radio power-on command sent</source>
-        <translation type="vanished">已向电台发送开机命令</translation>
+        <translation>已向电台发送开机命令</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="154"/>
         <source>Radio power-off command sent</source>
-        <translation type="vanished">已向电台发送关机命令</translation>
+        <translation>已向电台发送关机命令</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="155"/>
         <source>Radio command failed</source>
-        <translation type="vanished">电台命令失败</translation>
+        <translation>电台命令失败</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="575"/>
         <source>ATU Tune</source>
-        <translation type="vanished">ATU 调谐</translation>
+        <translation>ATU 调谐</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="580"/>
         <source>Ask the radio to start its internal antenna tuner.</source>
-        <translation type="vanished">请求电台启动其内置天线调谐器。</translation>
+        <translation>请求电台启动其内置天线调谐器。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="593"/>
         <source>Power on radio</source>
-        <translation type="vanished">打开电台电源</translation>
+        <translation>打开电台电源</translation>
     </message>
     <message>
         <source>Ask the radio to power on through Hamlib CAT, if supported by the model.</source>
         <translation type="vanished">如果型号支持，请求电台通过 Hamlib CAT 开机。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="603"/>
         <source>Power off radio</source>
-        <translation type="vanished">关闭电台电源</translation>
+        <translation>关闭电台电源</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SsbWindow.qml" line="612"/>
         <source>failed</source>
-        <translation type="vanished">失败</translation>
+        <translation>失败</translation>
     </message>
 </context>
 <context>
@@ -26740,19 +31430,100 @@ Costs extra CPU during QSOs. Default: OFF.</source>
     </message>
 </context>
 <context>
+    <name>StationTelemetryDialog</name>
+    <message>
+        <location filename="../qml/decodium/components/StationTelemetryDialog.qml" line="12"/>
+        <source>Station info received</source>
+        <translation>已收到电台信息</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/StationTelemetryDialog.qml" line="44"/>
+        <source>Presumably from %1</source>
+        <translation>可能来自 %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/StationTelemetryDialog.qml" line="45"/>
+        <source>Sender unknown — this message type carries no callsign</source>
+        <translation>发送方未知 — 此消息类型不含呼号</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/StationTelemetryDialog.qml" line="58"/>
+        <source>Temperature:</source>
+        <translation>温度：</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/StationTelemetryDialog.qml" line="61"/>
+        <source>unknown</source>
+        <translation>未知</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/StationTelemetryDialog.qml" line="61"/>
+        <source>%1 °C</source>
+        <translation>%1 °C</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/StationTelemetryDialog.qml" line="64"/>
+        <source>Wind:</source>
+        <translation>风：</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/StationTelemetryDialog.qml" line="65"/>
+        <source>%1 km/h %2</source>
+        <translation>%1 km/h %2</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/StationTelemetryDialog.qml" line="66"/>
+        <source>Sky:</source>
+        <translation>天空：</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/StationTelemetryDialog.qml" line="68"/>
+        <source>Locator:</source>
+        <translation>网格定位：</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/StationTelemetryDialog.qml" line="70"/>
+        <source>Power:</source>
+        <translation>功率：</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/StationTelemetryDialog.qml" line="71"/>
+        <source>%1 W</source>
+        <translation>%1 瓦</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/StationTelemetryDialog.qml" line="72"/>
+        <source>Radio:</source>
+        <translation>电台:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/StationTelemetryDialog.qml" line="74"/>
+        <source>Antenna:</source>
+        <translation>天线：</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/StationTelemetryDialog.qml" line="80"/>
+        <source>Close</source>
+        <translation>关闭</translation>
+    </message>
+</context>
+<context>
     <name>StationWeather</name>
     <message>
-        <location filename="../src/bridge/DecodiumBridge.cpp" line="27406"/>
+        <location filename="../qml/decodium/components/SettingsTab0.qml" line="284"/>
+        <location filename="../src/bridge/DecodiumBridge.cpp" line="27455"/>
         <source>Now: %1°C, wind %2 km/h %3, %4</source>
         <translation>当前：%1°C，风速 %2 km/h %3，%4</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab0.qml" line="285"/>
         <source>Fetching…</source>
-        <translation type="vanished">正在获取…</translation>
+        <translation>正在获取…</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab0.qml" line="286"/>
         <source>Off — temperature/wind sent as “unknown”</source>
-        <translation type="vanished">关闭 — 温度和风作为未知数据发送</translation>
+        <translation>关闭 — 温度和风作为未知数据发送</translation>
     </message>
     <message>
         <location filename="../src/radio/StationTelemetryCodec.cpp" line="186"/>
@@ -26798,84 +31569,156 @@ Costs extra CPU during QSOs. Default: OFF.</source>
 <context>
     <name>StatsPanel</name>
     <message>
+        <location filename="../qml/decodium/rotor/StatsPanel.qml" line="7"/>
         <source>OPERATION</source>
-        <translation type="vanished">运行</translation>
+        <translation>运行</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/StatsPanel.qml" line="15"/>
         <source>Frames sent</source>
-        <translation type="vanished">已发送帧</translation>
+        <translation>已发送帧</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/StatsPanel.qml" line="16"/>
         <source>Frames received</source>
-        <translation type="vanished">已接收帧</translation>
+        <translation>已接收帧</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/StatsPanel.qml" line="17"/>
         <source>Lost replies</source>
-        <translation type="vanished">丢失的应答</translation>
+        <translation>丢失的应答</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/StatsPanel.qml" line="19"/>
         <source>Reconnections</source>
-        <translation type="vanished">重新连接</translation>
+        <translation>重新连接</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/StatsPanel.qml" line="21"/>
         <source>Up for</source>
-        <translation type="vanished">运行时间</translation>
+        <translation>运行时间</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/StatsPanel.qml" line="22"/>
         <source>Connected clients</source>
-        <translation type="vanished">已连接客户端</translation>
+        <translation>已连接客户端</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/StatsPanel.qml" line="61"/>
         <source>Control box</source>
-        <translation type="vanished">控制盒</translation>
+        <translation>控制盒</translation>
     </message>
 </context>
 <context>
     <name>StatusBar</name>
     <message>
+        <location filename="../qml/decodium/components/StatusBar.qml" line="579"/>
         <source>ALC meter 0..100
 &gt;60 = excessive ALC (TX power too high)</source>
-        <translation type="vanished">ALC 表 0..100
+        <translation>ALC 表 0..100
 &gt;60 = ALC 过量（TX 功率过高）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/StatusBar.qml" line="580"/>
         <source>ALC is not reported by Hamlib for this rig/backend</source>
-        <translation type="vanished">此电台/后端的 Hamlib 未报告 ALC</translation>
+        <translation>此电台/后端的 Hamlib 未报告 ALC</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/StatusBar.qml" line="393"/>
         <source>FT Decoder Threads: </source>
-        <translation type="vanished">FT 解码器线程数：</translation>
+        <translation>FT 解码器线程数：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/StatusBar.qml" line="461"/>
+        <source>no address</source>
+        <translation>无地址</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/StatusBar.qml" line="482"/>
+        <location filename="../qml/decodium/components/StatusBar.qml" line="489"/>
+        <source>Click to open DecoPort</source>
+        <translation>点击以打开 DecoPort</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/StatusBar.qml" line="485"/>
+        <source>This radio is published on the network, %1 client connected</source>
+        <translation>此电台已在网络上发布，已连接 %1 个客户端</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/StatusBar.qml" line="487"/>
+        <source>also reachable at: </source>
+        <translation>也可通过以下地址访问： </translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/StatusBar.qml" line="817"/>
         <source>Decodium 4.0</source>
-        <translation type="vanished">Decodium 4.0</translation>
+        <translation>Decodium 4.0</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/StatusBar.qml" line="77"/>
         <source>Decodium&apos;s radio</source>
-        <translation type="vanished">Decodium 的电台</translation>
+        <translation>Decodium 的电台</translation>
     </message>
 </context>
 <context>
     <name>StatusStrip</name>
     <message>
+        <location filename="../qml/decodium/rotor/StatusStrip.qml" line="25"/>
         <source>ready</source>
-        <translation type="vanished">就绪</translation>
+        <translation>就绪</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/StatusStrip.qml" line="34"/>
         <source>app</source>
-        <translation type="vanished">app</translation>
+        <translation>app</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/StatusStrip.qml" line="35"/>
         <source>web</source>
-        <translation type="vanished">web</translation>
+        <translation>web</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/StatusStrip.qml" line="36"/>
         <source>rotctld</source>
-        <translation type="vanished">rotctld</translation>
+        <translation>rotctld</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/StatusStrip.qml" line="42"/>
         <source>%1 %2</source>
-        <translation type="vanished">%1 %2</translation>
+        <translation>%1 %2</translation>
+    </message>
+</context>
+<context>
+    <name>SuperFoxIndicator</name>
+    <message>
+        <location filename="../qml/decodium/components/SuperFoxIndicator.qml" line="25"/>
+        <source>SuperFox will activate after the current QSO is logged</source>
+        <translation>SuperFox 将在当前 QSO 记录后启用</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SuperFoxIndicator.qml" line="27"/>
+        <source>SuperHound reception active</source>
+        <translation>SuperHound 接收已启用</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SuperFoxIndicator.qml" line="27"/>
+        <source>SuperFox transmission mode active</source>
+        <translation>SuperFox 发射模式已启用</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SuperFoxIndicator.qml" line="28"/>
+        <source>Click to enable SuperFox reception in FT8</source>
+        <translation>点击以在 FT8 中启用 SuperFox 接收</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SuperFoxIndicator.qml" line="29"/>
+        <source>SuperFox requires FT8 mode</source>
+        <translation>SuperFox 需要 FT8 模式</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SuperFoxIndicator.qml" line="30"/>
+        <source>Enable Hound or Fox mode to use SuperFox</source>
+        <translation>请启用 Hound 或 Fox 模式以使用 SuperFox</translation>
     </message>
 </context>
 <context>
@@ -27104,6 +31947,7 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>解码时序</translation>
     </message>
     <message>
+        <location filename="../qml/panels/TimeSyncPanel.qml" line="237"/>
         <location filename="../widgets/TimeSyncPanel.ui" line="181"/>
         <source>Avg DT:</source>
         <translation>平均DT：</translation>
@@ -27184,100 +32028,123 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>清除历史记录</translation>
     </message>
     <message>
+        <location filename="../qml/panels/TimeSyncPanel.qml" line="75"/>
         <source>TIME SYNC</source>
-        <translation type="vanished">时间同步</translation>
+        <translation>时间同步</translation>
     </message>
     <message>
+        <location filename="../qml/panels/TimeSyncPanel.qml" line="192"/>
         <source>NTP Offset:</source>
-        <translation type="vanished">NTP 偏移：</translation>
+        <translation>NTP 偏移：</translation>
     </message>
     <message>
+        <location filename="../qml/panels/TimeSyncPanel.qml" line="217"/>
         <source>SC Drift:</source>
-        <translation type="vanished">SC 漂移：</translation>
+        <translation>SC 漂移：</translation>
     </message>
     <message>
+        <location filename="../qml/panels/TimeSyncPanel.qml" line="267"/>
         <source>Decode Latency:</source>
-        <translation type="vanished">解码延迟：</translation>
+        <translation>解码延迟：</translation>
     </message>
     <message>
+        <location filename="../qml/panels/TimeSyncPanel.qml" line="292"/>
         <source>Settings:</source>
-        <translation type="vanished">设置：</translation>
+        <translation>设置：</translation>
     </message>
     <message>
+        <location filename="../qml/panels/TimeSyncPanel.qml" line="308"/>
         <source>Open</source>
-        <translation type="vanished">打开文件</translation>
+        <translation>打开文件</translation>
     </message>
     <message>
+        <location filename="../qml/panels/TimeSyncPanel.qml" line="246"/>
         <source>No qualifying decodes</source>
-        <translation type="vanished">没有可用的解码</translation>
+        <translation>没有可用的解码</translation>
     </message>
     <message>
+        <location filename="../qml/panels/TimeSyncPanel.qml" line="246"/>
+        <location filename="../qml/panels/TimeSyncPanel.qml" line="276"/>
         <source>Waiting cycle</source>
-        <translation type="vanished">等待周期</translation>
+        <translation>等待周期</translation>
     </message>
     <message>
+        <location filename="../qml/panels/TimeSyncPanel.qml" line="249"/>
         <source>LOCKED</source>
-        <translation type="vanished">已锁定</translation>
+        <translation>已锁定</translation>
     </message>
     <message>
+        <location filename="../qml/panels/TimeSyncPanel.qml" line="250"/>
         <source>Converging</source>
-        <translation type="vanished">收敛中</translation>
+        <translation>收敛中</translation>
     </message>
     <message>
+        <location filename="../qml/panels/TimeSyncPanel.qml" line="250"/>
         <source>Adjusting</source>
-        <translation type="vanished">调整中</translation>
+        <translation>调整中</translation>
     </message>
 </context>
 <context>
     <name>TopBar</name>
     <message>
+        <location filename="../qml/decodium/rotor/TopBar.qml" line="54"/>
         <source>%1 · %2</source>
-        <translation type="vanished">%1 · %2</translation>
+        <translation>%1 · %2</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/TopBar.qml" line="64"/>
         <source>CONTROL BOX %1</source>
-        <translation type="vanished">控制盒 %1</translation>
+        <translation>控制盒 %1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/TopBar.qml" line="65"/>
         <source>CONTROL BOX MISSING</source>
-        <translation type="vanished">控制盒缺失</translation>
+        <translation>控制盒缺失</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/TopBar.qml" line="71"/>
         <source>ROTATING</source>
-        <translation type="vanished">正在旋转</translation>
+        <translation>正在旋转</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/TopBar.qml" line="71"/>
         <source>STOPPED</source>
-        <translation type="vanished">已停止</translation>
+        <translation>已停止</translation>
     </message>
     <message numerus="yes">
+        <location filename="../qml/decodium/rotor/TopBar.qml" line="77"/>
         <source>%n client</source>
-        <translation type="vanished">
+        <translation>
             <numerusform>%n 个客户端</numerusform>
         </translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/TopBar.qml" line="115"/>
         <source>Switch to the light dial</source>
-        <translation type="vanished">切换到浅色表盘</translation>
+        <translation>切换到浅色表盘</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/TopBar.qml" line="116"/>
         <source>Switch to the night dial</source>
-        <translation type="vanished">切换到夜间表盘</translation>
+        <translation>切换到夜间表盘</translation>
     </message>
 </context>
 <context>
     <name>TrafficPanel</name>
     <message>
+        <location filename="../qml/decodium/rotor/TrafficPanel.qml" line="8"/>
         <source>SERIAL TRAFFIC</source>
-        <translation type="vanished">串口通信</translation>
+        <translation>串口通信</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/TrafficPanel.qml" line="19"/>
         <source>%1 @ %2 8N1</source>
-        <translation type="vanished">%1 @ %2 8N1</translation>
+        <translation>%1 @ %2 8N1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rotor/TrafficPanel.qml" line="29"/>
         <source>%1 frame</source>
-        <translation type="vanished">%1 帧</translation>
+        <translation>%1 帧</translation>
     </message>
 </context>
 <context>
@@ -27291,28 +32158,48 @@ Costs extra CPU during QSOs. Default: OFF.</source>
 <context>
     <name>TransmitPanel</name>
     <message>
+        <location filename="../qml/decodium/rtty/TransmitPanel.qml" line="73"/>
         <source>Type here — Enter sends the line</source>
-        <translation type="vanished">在此输入 — 回车发送该行</translation>
+        <translation>在此输入 — 回车发送该行</translation>
     </message>
     <message>
         <source>Connect a radio to transmit</source>
         <translation type="vanished">连接电台后才能发射</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/TransmitPanel.qml" line="74"/>
+        <source>Select RTTY and an available audio output</source>
+        <translation>请选择 RTTY 和可用的音频输出</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/rtty/TransmitPanel.qml" line="104"/>
         <source>TRANSMITTING</source>
-        <translation type="vanished">正在发射</translation>
+        <translation>正在发射</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/TransmitPanel.qml" line="104"/>
         <source>TRANSMIT</source>
-        <translation type="vanished">发射</translation>
+        <translation>发射</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/TransmitPanel.qml" line="146"/>
         <source>Abort</source>
-        <translation type="vanished">中止</translation>
+        <translation>中止</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/rtty/TransmitPanel.qml" line="156"/>
         <source>Clear</source>
-        <translation type="vanished">清除</translation>
+        <translation>清除</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/rtty/TransmitPanel.qml" line="237"/>
+        <source>QMX FSK requires 100% application audio; RF power is set on the radio.</source>
+        <translation>QMX FSK 需要 100% 应用程序音频；射频功率在电台上设置。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/rtty/TransmitPanel.qml" line="238"/>
+        <source>Set the level so the radio&apos;s ALC barely moves.</source>
+        <translation>请调整电平，使电台的 ALC 几乎不动。</translation>
     </message>
     <message>
         <source>High enough to drive the ALC — check the meter.</source>
@@ -27322,278 +32209,369 @@ Costs extra CPU during QSOs. Default: OFF.</source>
 <context>
     <name>TuningScope</name>
     <message>
+        <location filename="../qml/decodium/rtty/TuningScope.qml" line="26"/>
         <source>TUNING</source>
-        <translation type="vanished">调谐</translation>
+        <translation>调谐</translation>
     </message>
 </context>
 <context>
     <name>TxPanel</name>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1563"/>
         <source>TX slot
 1st: :00/:30
 2nd: :15/:45</source>
-        <translation type="vanished">TX时隙
+        <translation>TX时隙
 1st: :00/:30
 2nd: :15/:45</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="352"/>
         <source>TX Power</source>
-        <translation type="vanished">TX 功率</translation>
+        <translation>TX 功率</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1316"/>
         <source>Multi-Answer Mode (MAM) - right-click opens the window (default OFF)</source>
-        <translation type="vanished">Multi-Answer Mode (MAM) - 右键点击打开窗口（默认 OFF）</translation>
+        <translation>Multi-Answer Mode (MAM) - 右键点击打开窗口（默认 OFF）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1345"/>
         <source>Deep Search: deeper weak-signal search using known callsigns (default OFF)</source>
-        <translation type="vanished">Deep Search：使用已知 callsign 进行更深入的弱信号搜索（默认 OFF）</translation>
+        <translation>Deep Search：使用已知 callsign 进行更深入的弱信号搜索（默认 OFF）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1369"/>
         <source>A priori decode (AP): uses known information to recover weak signals (default OFF)</source>
-        <translation type="vanished">A priori decode (AP)：使用已知信息恢复弱信号（默认 OFF）</translation>
+        <translation>A priori decode (AP)：使用已知信息恢复弱信号（默认 OFF）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1393"/>
         <source>Automatic QSO sequencing (default OFF)</source>
-        <translation type="vanished">自动 QSO 排序（默认 OFF）</translation>
+        <translation>自动 QSO 排序（默认 OFF）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1417"/>
         <source>Quick QSO: skips TX1 and starts from TX2 (direct report) (default OFF)</source>
-        <translation type="vanished">Quick QSO：跳过 TX1 并从 TX2（直接报告）开始（默认 OFF）</translation>
+        <translation>Quick QSO：跳过 TX1 并从 TX2（直接报告）开始（默认 OFF）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1443"/>
         <source>Enable TX
 Right button + mouse wheel: adjust TX power</source>
-        <translation type="vanished">启用 TX
+        <translation>启用 TX
 右键 + 鼠标滚轮：调节 TX 功率</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1478"/>
         <source>Lock the TX frequency
 (Hold Tx Freq)</source>
-        <translation type="vanished">锁定 TX 频率
+        <translation>锁定 TX 频率
 (Hold Tx Freq)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1503"/>
         <source>Repeated Auto CQ
 Automatically calls CQ until a reply arrives (default OFF)</source>
-        <translation type="vanished">重复 Auto CQ
+        <translation>重复 Auto CQ
 自动呼叫 CQ 直到收到回复（默认 OFF）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1702"/>
         <source>CQ filter active (%1). Click: change level / turn off.</source>
-        <translation type="vanished">CQ 筛选已启用 (%1)。点击：更改级别 / 关闭。</translation>
+        <translation>CQ 筛选已启用 (%1)。点击：更改级别 / 关闭。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1703"/>
         <source>CQ only</source>
-        <translation type="vanished">仅 CQ</translation>
+        <translation>仅 CQ</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1704"/>
         <source>CQ filter off. Click: show only CQ, then cycle 73 / RR73 / RRR.</source>
-        <translation type="vanished">CQ 筛选已关闭。点击：仅显示 CQ，然后循环 73 / RR73 / RRR。</translation>
+        <translation>CQ 筛选已关闭。点击：仅显示 CQ，然后循环 73 / RR73 / RRR。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2528"/>
         <source>Locator (e.g. JN71) — enter manually</source>
-        <translation type="vanished">Locator（例如 JN71）— 手动输入</translation>
+        <translation>Locator（例如 JN71）— 手动输入</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="3024"/>
         <source>Edit TX%1 message</source>
-        <translation type="vanished">编辑 TX%1 消息</translation>
+        <translation>编辑 TX%1 消息</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="3031"/>
         <source>Re-enable TX%1</source>
-        <translation type="vanished">重新启用 TX%1</translation>
+        <translation>重新启用 TX%1</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="3031"/>
         <source>Skip TX%1 (skip auto-seq)</source>
-        <translation type="vanished">跳过 TX%1（跳过自动序列）</translation>
+        <translation>跳过 TX%1（跳过自动序列）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1535"/>
         <source>Active call: %1 (missed target %2/%3)
 Click to open the panel</source>
-        <translation type="vanished">活动呼叫：%1（未命中目标 %2/%3）
+        <translation>活动呼叫：%1（未命中目标 %2/%3）
 点击打开面板</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="505"/>
+        <source>Freq</source>
+        <translation>Freq</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1039"/>
+        <source>Select a %1 working frequency; starred entries are preferred</source>
+        <translation>选择 %1 工作频率；带星号的条目优先</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1538"/>
         <source>Direct call (CALL)
 Open the direct callsign call panel
 with missed-target limit, timeout, and period control</source>
-        <translation type="vanished">直接呼叫 (CALL)
+        <translation>直接呼叫 (CALL)
 打开直接 callsign 呼叫面板，
 带未命中目标上限、超时和周期控制</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1590"/>
         <source>Auto CQ: alternates TX/RX phases after repeated unanswered CQs (default OFF)</source>
-        <translation type="vanished">Auto CQ：在多次 CQ 无应答后交替 TX/RX 阶段（默认 OFF）</translation>
+        <translation>Auto CQ：在多次 CQ 无应答后交替 TX/RX 阶段（默认 OFF）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1615"/>
         <source>Stop TX</source>
-        <translation type="vanished">停止 TX</translation>
+        <translation>停止 TX</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1642"/>
         <source>Clear DX, reports, and TX1-TX5</source>
-        <translation type="vanished">清除 DX、报告和 TX1-TX5</translation>
+        <translation>清除 DX、报告和 TX1-TX5</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1667"/>
         <source>Tune (transmits the tuning carrier)</source>
-        <translation type="vanished">Tune（发送调谐载波）</translation>
+        <translation>Tune（发送调谐载波）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1735"/>
         <source>Async FT2 mode - sine wave: green=RX, red=TX (default OFF)</source>
-        <translation type="vanished">Async FT2 模式 - 正弦波：绿=RX，红=TX（默认 OFF）</translation>
+        <translation>Async FT2 模式 - 正弦波：绿=RX，红=TX（默认 OFF）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1750"/>
         <source>Hound mode active</source>
-        <translation type="vanished">Hound 模式已激活</translation>
+        <translation>Hound 模式已激活</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2332"/>
         <source>Cancel</source>
-        <translation type="vanished">取消</translation>
+        <translation>取消</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2337"/>
         <source>Standard</source>
-        <translation type="vanished">标准</translation>
+        <translation>标准</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2346"/>
         <source>Apply</source>
-        <translation type="vanished">应用</translation>
+        <translation>应用</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2364"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2493"/>
         <source>Confirm QSO logging</source>
-        <translation type="vanished">确认记录 QSO</translation>
+        <translation>确认记录 QSO</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2518"/>
+        <source>Grid:</source>
+        <translation>网格：</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2550"/>
         <source>Start UTC:</source>
-        <translation type="vanished">Start UTC：</translation>
+        <translation>Start UTC：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2570"/>
         <source>End UTC:</source>
-        <translation type="vanished">End UTC：</translation>
+        <translation>End UTC：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2763"/>
         <source>Sat Mode:</source>
-        <translation type="vanished">卫星模式:</translation>
+        <translation>卫星模式:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2774"/>
+        <source>RX / downlink MHz:</source>
+        <translation>RX / 下行 MHz：</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2786"/>
+        <source>e.g. 10489.540000</source>
+        <translation>例如 10489.540000</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2799"/>
         <source>DX Cluster:</source>
-        <translation type="vanished">DX集群:</translation>
+        <translation>DX集群:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="3006"/>
         <source>TX%1 disabled (right-click -&gt; menu to re-enable)</source>
-        <translation type="vanished">TX%1 已禁用（右键点击 -&gt; 菜单以重新启用）</translation>
+        <translation>TX%1 已禁用（右键点击 -&gt; 菜单以重新启用）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="3007"/>
         <source>Click: send now
 Right-click: menu (Edit / Skip TX%1)
 Long-press: edit message</source>
-        <translation type="vanished">点击：立即发送
+        <translation>点击：立即发送
 右键点击：菜单（Edit / Skip TX%1）
 长按：编辑消息</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2813"/>
         <source>Spot to cluster</source>
-        <translation type="vanished">发送Spot到集群</translation>
+        <translation>发送Spot到集群</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2813"/>
         <source>Cluster not connected</source>
-        <translation type="vanished">集群未连接</translation>
+        <translation>集群未连接</translation>
     </message>
     <message>
         <source>Close</source>
         <translation type="vanished">关闭</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2856"/>
         <source>Add</source>
-        <translation type="vanished">添加</translation>
+        <translation>添加</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2117"/>
         <source>Finish TX before logging the QSO</source>
-        <translation type="vanished">记录 QSO 前请先结束发射</translation>
+        <translation>记录 QSO 前请先结束发射</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2119"/>
         <source>Log current QSO</source>
-        <translation type="vanished">记录当前 QSO</translation>
+        <translation>记录当前 QSO</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2120"/>
         <source>No active QSO to log</source>
-        <translation type="vanished">没有可记录的进行中 QSO</translation>
+        <translation>没有可记录的进行中 QSO</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2830"/>
         <source>Skip</source>
-        <translation type="vanished">跳过</translation>
+        <translation>跳过</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2515"/>
         <source>Call:</source>
-        <translation type="vanished">呼号：</translation>
+        <translation>呼号：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2541"/>
         <source>Report:</source>
-        <translation type="vanished">报告：</translation>
+        <translation>报告：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2544"/>
         <source>Mode:</source>
-        <translation type="vanished">模式：</translation>
+        <translation>模式：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2547"/>
         <source>Freq:</source>
-        <translation type="vanished">频率：</translation>
+        <translation>频率：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2590"/>
         <source>Comment:</source>
-        <translation type="vanished">备注：</translation>
+        <translation>备注：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2749"/>
         <source>Satellite:</source>
-        <translation type="vanished">卫星：</translation>
+        <translation>卫星：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2653"/>
         <source>Copy</source>
-        <translation type="vanished">复制</translation>
+        <translation>复制</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2626"/>
         <source>Cut</source>
-        <translation type="vanished">剪切</translation>
+        <translation>剪切</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2679"/>
         <source>Paste</source>
-        <translation type="vanished">粘贴</translation>
+        <translation>粘贴</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2713"/>
         <source>Select All</source>
-        <translation type="vanished">全选</translation>
+        <translation>全选</translation>
     </message>
 </context>
 <context>
     <name>UpdateDialog</name>
     <message>
+        <location filename="../qml/decodium/components/UpdateDialog.qml" line="89"/>
         <source>Update available</source>
-        <translation type="vanished">有可用更新</translation>
+        <translation>有可用更新</translation>
     </message>
     <message>
         <source>Decodium %1 is available</source>
         <translation type="vanished">Decodium %1 可用</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/UpdateDialog.qml" line="140"/>
         <source>You are running %1.</source>
-        <translation type="vanished">你正在运行 %1。</translation>
+        <translation>你正在运行 %1。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/UpdateDialog.qml" line="149"/>
+        <source>Source: %1</source>
+        <translation>来源：%1</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/UpdateDialog.qml" line="161"/>
         <source>What&apos;s new:</source>
-        <translation type="vanished">新增内容:</translation>
+        <translation>新增内容:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/UpdateDialog.qml" line="241"/>
         <source>Decodium will close and the installer will start. Your settings and QSO log are kept.</source>
-        <translation type="vanished">Decodium 将关闭并启动安装程序。你的设置和 QSO 日志将保留。</translation>
+        <translation>Decodium 将关闭并启动安装程序。你的设置和 QSO 日志将保留。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/UpdateDialog.qml" line="285"/>
         <source>Skip this version</source>
-        <translation type="vanished">跳过此版本</translation>
+        <translation>跳过此版本</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/UpdateDialog.qml" line="302"/>
         <source>Later</source>
-        <translation type="vanished">稍后</translation>
+        <translation>稍后</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/UpdateDialog.qml" line="321"/>
         <source>Update now</source>
-        <translation type="vanished">立即更新</translation>
+        <translation>立即更新</translation>
     </message>
     <message>
         <source>Cannot create the Downloads folder.</source>
@@ -27620,165 +32598,204 @@ Long-press: edit message</source>
         <translation type="vanished">AppImage 已保存到 %1。请手动启动以完成更新。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/UpdateDialog.qml" line="234"/>
         <source>The current AppImage will be replaced safely and Decodium will restart. Your settings and QSO log are kept.</source>
-        <translation type="vanished">当前 AppImage 将被安全替换，Decodium 将重启。您的设置和 QSO 日志将保留。</translation>
+        <translation>当前 AppImage 将被安全替换，Decodium 将重启。您的设置和 QSO 日志将保留。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/UpdateDialog.qml" line="237"/>
         <source>The new AppImage will be saved to your Downloads folder. Launch it manually to complete the update.</source>
-        <translation type="vanished">新的 AppImage 将保存到“下载”文件夹。请手动启动以完成更新。</translation>
+        <translation>新的 AppImage 将保存到“下载”文件夹。请手动启动以完成更新。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/UpdateDialog.qml" line="244"/>
         <source>The update package will be downloaded and opened. Your settings and QSO log are kept.</source>
-        <translation type="vanished">更新包将被下载并打开。您的设置和 QSO 日志将保留。</translation>
+        <translation>更新包将被下载并打开。您的设置和 QSO 日志将保留。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/UpdateDialog.qml" line="319"/>
         <source>Update AppImage</source>
-        <translation type="vanished">更新 AppImage</translation>
+        <translation>更新 AppImage</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/UpdateDialog.qml" line="321"/>
         <source>Download update</source>
-        <translation type="vanished">下载更新</translation>
+        <translation>下载更新</translation>
     </message>
 </context>
 <context>
     <name>Waterfall</name>
     <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="964"/>
         <source>Hide</source>
-        <translation type="vanished">隐藏</translation>
+        <translation>隐藏</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="987"/>
         <source>Hide waterfall controls</source>
-        <translation type="vanished">隐藏 waterfall 控件</translation>
+        <translation>隐藏 waterfall 控件</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="2150"/>
         <source>4096-bin panadapter · SmartSDR style
 Click MONITOR to start</source>
-        <translation type="vanished">4096 格 panadapter · SmartSDR 风格
+        <translation>4096 格 panadapter · SmartSDR 风格
 点击 MONITOR 开始</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="2196"/>
         <source>Show controls</source>
-        <translation type="vanished">显示控件</translation>
+        <translation>显示控件</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="2258"/>
         <source>Show waterfall controls</source>
-        <translation type="vanished">显示 waterfall 控件</translation>
+        <translation>显示 waterfall 控件</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="850"/>
         <source>Traces:</source>
-        <translation type="vanished">迹线：</translation>
+        <translation>迹线：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="875"/>
         <source>Floor:</source>
-        <translation type="vanished">基准：</translation>
+        <translation>基准：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="828"/>
         <source>Stacked-trace 3D spectrum: shows the history of the band receding into the distance. It costs more to draw, so leave it off on modest machines.</source>
-        <translation type="vanished">堆叠迹线三维频谱：显示频段历史向远处退去。绘制开销较大，配置一般的机器建议保持关闭。</translation>
+        <translation>堆叠迹线三维频谱：显示频段历史向远处退去。绘制开销较大，配置一般的机器建议保持关闭。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="827"/>
         <source>Stacked-trace 3D spectrum: on. Click to go back to the 2D trace.</source>
-        <translation type="vanished">堆叠迹线三维频谱：已开启。点击可返回二维迹线。</translation>
+        <translation>堆叠迹线三维频谱：已开启。点击可返回二维迹线。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="864"/>
         <source>How many history traces are drawn. Fewer traces separate the ridges; more of them show a longer history.</source>
-        <translation type="vanished">绘制多少条历史迹线。迹线少则山脊分明，多则显示更长的历史。</translation>
+        <translation>绘制多少条历史迹线。迹线少则山脊分明，多则显示更长的历史。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="889"/>
         <source>How far above the minimum the ridges start. Raise it to flatten the noise and leave only the signals standing.</source>
-        <translation type="vanished">山脊从最小值以上多高开始。调高可压平噪声，只让信号立起来。</translation>
+        <translation>山脊从最小值以上多高开始。调高可压平噪声，只让信号立起来。</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="473"/>
         <source>Calls:</source>
-        <translation type="vanished">呼号：</translation>
+        <translation>呼号：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="489"/>
         <source>Show decoded callsigns on the waterfall</source>
-        <translation type="vanished">在瀑布图上显示已解码的呼号</translation>
+        <translation>在瀑布图上显示已解码的呼号</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="503"/>
         <source>Font</source>
-        <translation type="vanished">字体</translation>
+        <translation>字体</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="523"/>
         <source>Gap</source>
-        <translation type="vanished">间距</translation>
+        <translation>间距</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="559"/>
         <source>Bold</source>
-        <translation type="vanished">大胆</translation>
+        <translation>大胆</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="563"/>
         <source>Color</source>
-        <translation type="vanished">颜色</translation>
+        <translation>颜色</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="673"/>
         <source>Palette:</source>
-        <translation type="vanished">调色板：</translation>
+        <translation>调色板：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="758"/>
         <source>Automatic noise threshold (IIR)</source>
-        <translation type="vanished">自动噪声门限 (IIR)</translation>
+        <translation>自动噪声门限 (IIR)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="932"/>
         <source>Show DX Cluster spots on the waterfall (click to call)</source>
-        <translation type="vanished">在瀑布图上显示 DX 集群点位（点击即可呼叫）</translation>
+        <translation>在瀑布图上显示 DX 集群点位（点击即可呼叫）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="942"/>
         <source>Cluster</source>
-        <translation type="vanished">集群</translation>
+        <translation>集群</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="970"/>
         <source>▴</source>
-        <translation type="vanished">▴</translation>
+        <translation>▴</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="1000"/>
         <source>Peak Hold: keeps spectrum peaks visible</source>
-        <translation type="vanished">峰值保持：让频谱峰值持续可见</translation>
+        <translation>峰值保持：让频谱峰值持续可见</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="1010"/>
         <source>Peak</source>
-        <translation type="vanished">Peak</translation>
+        <translation>Peak</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="1013"/>
         <source>Zoom</source>
-        <translation type="vanished">Zoom</translation>
+        <translation>Zoom</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="1045"/>
         <source>Measured noise threshold</source>
-        <translation type="vanished">实测噪声门限</translation>
+        <translation>实测噪声门限</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="1059"/>
         <source>Black:</source>
-        <translation type="vanished">黑：</translation>
+        <translation>黑：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="1072"/>
         <source>Gain:</source>
-        <translation type="vanished">增益：</translation>
+        <translation>增益：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="1087"/>
         <source>Contrasto:</source>
-        <translation type="vanished">对比度：</translation>
+        <translation>对比度：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="1103"/>
         <source>Vel:</source>
-        <translation type="vanished">速度：</translation>
+        <translation>速度：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="2190"/>
         <source>☰</source>
-        <translation type="vanished">☰</translation>
+        <translation>☰</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="2226"/>
         <source>⠿</source>
-        <translation type="vanished">⠿</translation>
+        <translation>⠿</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="773"/>
         <source>Cut:</source>
-        <translation type="vanished">裁切：</translation>
+        <translation>裁切：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="788"/>
         <source>How much of the spectrum the automatic threshold calls noise and cuts away. 10 is the historical setting: raise it to clean up an empty band, lower it if weak signals disappear.</source>
-        <translation type="vanished">自动门限把多大比例的频谱当作噪声并裁掉。10 是历史设置：波段空旷时调高以清理画面，弱信号消失时调低。</translation>
+        <translation>自动门限把多大比例的频谱当作噪声并裁掉。10 是历史设置：波段空旷时调高以清理画面，弱信号消失时调低。</translation>
     </message>
 </context>
 <context>
@@ -30556,181 +35573,650 @@ Right click for insert and delete options.</source>
 <context>
     <name>decodium::cw::CwController</name>
     <message>
+        <location filename="../src/cw/CwController.cpp" line="611"/>
+        <location filename="../src/cw/CwController.cpp" line="624"/>
         <source>CW transmit is not ready</source>
-        <translation type="vanished">CW 发射未就绪</translation>
+        <translation>CW 发射未就绪</translation>
     </message>
     <message>
+        <location filename="../src/cw/CwController.cpp" line="674"/>
         <source>The CW audio did not start</source>
-        <translation type="vanished">CW 音频未启动</translation>
+        <translation>CW 音频未启动</translation>
     </message>
     <message>
+        <location filename="../src/cw/CwController.cpp" line="717"/>
+        <location filename="../src/cw/CwController.cpp" line="720"/>
+        <source>The radio CAT keyer did not accept the CW text</source>
+        <translation>电台的 CAT 键控器未接受 CW 文本</translation>
+    </message>
+    <message>
+        <location filename="../src/cw/CwController.cpp" line="767"/>
         <source>The CW key did not reach the remote radio</source>
-        <translation type="vanished">CW 键控未到达远程电台</translation>
+        <translation>CW 键控未到达远程电台</translation>
     </message>
     <message>
+        <location filename="../src/cw/CwController.cpp" line="491"/>
         <source>The WinKeyer on %1 did not open</source>
-        <translation type="vanished">%1 上的 WinKeyer 未能打开</translation>
+        <translation>%1 上的 WinKeyer 未能打开</translation>
     </message>
     <message>
+        <location filename="../src/cw/CwController.cpp" line="67"/>
+        <source>The CAT CW keyer did not confirm the send command</source>
+        <translation>CAT CW 键控器未确认发送命令</translation>
+    </message>
+    <message>
+        <location filename="../src/cw/CwController.cpp" line="137"/>
+        <location filename="../src/cw/CwController.cpp" line="379"/>
+        <location filename="../src/cw/CwController.cpp" line="477"/>
+        <location filename="../src/cw/CwController.cpp" line="479"/>
+        <source>serial keyer</source>
+        <translation>串口键控器</translation>
+    </message>
+    <message>
+        <location filename="../src/cw/CwController.cpp" line="141"/>
+        <location filename="../src/cw/CwController.cpp" line="404"/>
+        <location filename="../src/cw/CwController.cpp" line="486"/>
+        <location filename="../src/cw/CwController.cpp" line="488"/>
+        <source>WinKeyer</source>
+        <translation>WinKeyer</translation>
+    </message>
+    <message>
+        <location filename="../src/cw/CwController.cpp" line="242"/>
+        <source>Cannot tune: check CAT connection and stop transmitting.</source>
+        <translation>无法调谐：请检查 CAT 连接并停止发射。</translation>
+    </message>
+    <message>
+        <location filename="../src/cw/CwController.cpp" line="263"/>
+        <source>Wait for a CW signal with Decoder tone set to Auto.</source>
+        <translation>请等待 CW 信号，并将解码器音调设置为自动。</translation>
+    </message>
+    <message>
+        <location filename="../src/cw/CwController.cpp" line="268"/>
+        <source>CW is already centered.</source>
+        <translation>CW 已居中。</translation>
+    </message>
+    <message>
+        <location filename="../src/cw/CwController.cpp" line="273"/>
+        <source>CW centered at %1 Hz.</source>
+        <translation>CW 已居中于 %1 Hz。</translation>
+    </message>
+    <message>
+        <location filename="../src/cw/CwController.cpp" line="482"/>
         <source>The keyer port %1 did not open</source>
-        <translation type="vanished">键控器端口 %1 未能打开</translation>
+        <translation>键控器端口 %1 未能打开</translation>
+    </message>
+    <message>
+        <location filename="../src/cw/CwController.cpp" line="505"/>
+        <source>%1 is a TCP CAT/rigctld address, not a local %2 port. Configure it under CAT and select a real COM or tty device here.</source>
+        <translation>%1 是 TCP CAT/rigctld 地址，不是本地 %2 端口。请在 CAT 中配置它，并在此处选择真实的 COM 或 tty 设备。</translation>
+    </message>
+    <message>
+        <location filename="../src/cw/CwController.cpp" line="523"/>
+        <source>%1 cannot be used for the %2 because it is already reserved by %3. A serial CW keyer needs a different local COM or tty port. Select Audio tone, the radio CAT keyer, or a separate keyer port.</source>
+        <translation>%1 无法用于 %2，因为它已被 %3 占用。串口 CW 键控器需要另一个本地 COM 或 tty 端口。请选择音频音调、电台的 CAT 键控器或单独的键控器端口。</translation>
+    </message>
+</context>
+<context>
+    <name>decodium::cw::CwKeyer</name>
+    <message>
+        <location filename="../src/cw/CwKeyer.cpp" line="291"/>
+        <source>No serial port chosen for the CW keyer</source>
+        <translation>未为 CW 键控器选择串口</translation>
+    </message>
+</context>
+<context>
+    <name>decodium::cw::CwKeyerWorker</name>
+    <message>
+        <location filename="../src/cw/CwKeyer.cpp" line="78"/>
+        <source>Cannot open %1: %2</source>
+        <translation>无法打开 %1：%2</translation>
+    </message>
+</context>
+<context>
+    <name>decodium::cw::CwSidetoneWorker</name>
+    <message>
+        <location filename="../src/cw/CwSidetone.cpp" line="209"/>
+        <source>Cannot play the CW listening output %1 (audio error %2).</source>
+        <translation>无法在 CW 监听输出 %1 上播放（音频错误 %2）。</translation>
+    </message>
+    <message>
+        <location filename="../src/cw/CwSidetone.cpp" line="240"/>
+        <source>CW listening output is unavailable. Select speakers or headphones and try again.</source>
+        <translation>CW 监听输出不可用。请选择扬声器或耳机后重试。</translation>
+    </message>
+    <message>
+        <location filename="../src/cw/CwSidetone.cpp" line="261"/>
+        <source>CW listening output %1 does not support a compatible PCM audio format (preferred: %2 Hz, %3 channels).</source>
+        <translation>CW 监听输出 %1 不支持兼容的 PCM 音频格式（首选：%2 Hz，%3 声道）。</translation>
     </message>
 </context>
 <context>
     <name>decodium::jtty::JttyController</name>
     <message>
+        <location filename="../src/jtty/JttyController.cpp" line="41"/>
         <source>unknown ARRL/RAC section</source>
-        <translation type="vanished">未知的 ARRL/RAC 分区</translation>
+        <translation>未知的 ARRL/RAC 分区</translation>
     </message>
     <message>
+        <location filename="../src/jtty/JttyController.cpp" line="42"/>
         <source>invalid native atom</source>
-        <translation type="vanished">无效的原生原子</translation>
+        <translation>无效的原生原子</translation>
     </message>
     <message>
+        <location filename="../src/jtty/JttyController.cpp" line="220"/>
         <source>Transmission stopped by the watchdog.</source>
-        <translation type="vanished">发射已被看门狗停止。</translation>
+        <translation>发射已被看门狗停止。</translation>
     </message>
     <message>
+        <location filename="../src/jtty/JttyController.cpp" line="475"/>
         <source>The message does not fit in 16 JTTY frames.</source>
-        <translation type="vanished">消息超出 16 个 JTTY 帧。</translation>
+        <translation>消息超出 16 个 JTTY 帧。</translation>
     </message>
     <message>
+        <location filename="../src/jtty/JttyController.cpp" line="475"/>
         <source>Nothing to send.</source>
-        <translation type="vanished">没有要发送的内容。</translation>
+        <translation>没有要发送的内容。</translation>
     </message>
     <message>
+        <location filename="../src/jtty/JttyController.cpp" line="530"/>
         <source>too long (max 16 frames)</source>
-        <translation type="vanished">太长 (最多 16 帧)</translation>
+        <translation>太长 (最多 16 帧)</translation>
     </message>
     <message>
+        <location filename="../src/jtty/JttyController.cpp" line="531"/>
         <source>%1 frames, %2 s</source>
-        <translation type="vanished">%1 帧，%2 秒</translation>
+        <translation>%1 帧，%2 秒</translation>
     </message>
     <message>
+        <location filename="../src/jtty/JttyController.cpp" line="541"/>
         <source>Cannot transmit: JTTY must be the active mode, the TX audio output must be available and no other transmission may be running.</source>
-        <translation type="vanished">无法发射：JTTY 必须是当前模式，TX 音频输出可用，且没有其他发射在进行。</translation>
+        <translation>无法发射：JTTY 必须是当前模式，TX 音频输出可用，且没有其他发射在进行。</translation>
     </message>
     <message>
+        <location filename="../src/jtty/JttyController.cpp" line="548"/>
         <source>The transmitter did not key (PTT refused).</source>
-        <translation type="vanished">发射机未键控 (PTT 被拒绝)。</translation>
+        <translation>发射机未键控 (PTT 被拒绝)。</translation>
     </message>
     <message>
+        <location filename="../src/jtty/JttyController.cpp" line="604"/>
         <source>Transmission interrupted: PTT dropped.</source>
-        <translation type="vanished">发射中断：PTT 已释放。</translation>
+        <translation>发射中断：PTT 已释放。</translation>
     </message>
     <message>
+        <location filename="../src/jtty/JttyController.cpp" line="675"/>
         <source>No DX call to log.</source>
-        <translation type="vanished">没有可记录的 DX 呼号。</translation>
+        <translation>没有可记录的 DX 呼号。</translation>
     </message>
 </context>
 <context>
     <name>decodium::rotor::RotorModule</name>
     <message>
+        <location filename="../src/rotor/RotorModule.cpp" line="134"/>
         <source>rotctld port %1: %2</source>
-        <translation type="vanished">rotctld 端口 %1：%2</translation>
+        <translation>rotctld 端口 %1：%2</translation>
     </message>
     <message>
+        <location filename="../src/rotor/RotorModule.cpp" line="138"/>
         <source>WebSocket port %1: %2</source>
-        <translation type="vanished">WebSocket 端口 %1：%2</translation>
+        <translation>WebSocket 端口 %1：%2</translation>
     </message>
     <message>
+        <location filename="../src/rotor/RotorModule.cpp" line="145"/>
         <source>HTTP port %1: %2</source>
-        <translation type="vanished">HTTP 端口 %1：%2</translation>
+        <translation>HTTP 端口 %1：%2</translation>
     </message>
     <message>
+        <location filename="../src/rotor/RotorModule.cpp" line="297"/>
         <source>app</source>
-        <translation type="vanished">app</translation>
+        <translation>app</translation>
     </message>
     <message>
+        <location filename="../src/rotor/RotorModule.cpp" line="300"/>
         <source>web</source>
-        <translation type="vanished">web</translation>
+        <translation>web</translation>
     </message>
     <message>
+        <location filename="../src/rotor/RotorModule.cpp" line="303"/>
         <source>rotctld</source>
-        <translation type="vanished">rotctld</translation>
+        <translation>rotctld</translation>
     </message>
     <message>
+        <location filename="../src/rotor/RotorModule.cpp" line="328"/>
         <source>Auto-detect</source>
-        <translation type="vanished">自动检测</translation>
+        <translation>自动检测</translation>
     </message>
     <message>
+        <location filename="../src/rotor/RotorModule.cpp" line="376"/>
         <source>Rotator is off: enable it in the Settings tab.</source>
-        <translation type="vanished">旋转器已关闭：请在“设置”选项卡中启用。</translation>
+        <translation>旋转器已关闭：请在“设置”选项卡中启用。</translation>
     </message>
     <message>
+        <location filename="../src/rotor/RotorModule.cpp" line="396"/>
         <source>Enter at least one angle.</source>
-        <translation type="vanished">请至少输入一个角度。</translation>
+        <translation>请至少输入一个角度。</translation>
     </message>
     <message>
+        <location filename="../src/rotor/RotorModule.cpp" line="417"/>
         <source>Stop sent to the control box.</source>
-        <translation type="vanished">已向控制盒发送停止。</translation>
+        <translation>已向控制盒发送停止。</translation>
     </message>
     <message>
+        <location filename="../src/rotor/RotorModule.cpp" line="442"/>
         <source>Towards %1: %2°</source>
-        <translation type="vanished">朝向 %1：%2°</translation>
+        <translation>朝向 %1：%2°</translation>
     </message>
     <message>
+        <location filename="../src/rotor/RotorModule.cpp" line="488"/>
         <source>Station no longer in the list.</source>
-        <translation type="vanished">电台已不在列表中。</translation>
+        <translation>电台已不在列表中。</translation>
     </message>
     <message>
+        <location filename="../src/rotor/RotorModule.cpp" line="493"/>
         <source>Towards %1: %2° at %3 km</source>
-        <translation type="vanished">朝向 %1：%2°，%3 km</translation>
+        <translation>朝向 %1：%2°，%3 km</translation>
     </message>
 </context>
 <context>
     <name>decodium::ssb::SsbController</name>
     <message>
+        <location filename="../src/ssb/SsbController.cpp" line="13"/>
         <source>Audio devices changed; PTT released</source>
-        <translation type="vanished">音频设备已更改；PTT 已释放</translation>
+        <translation>音频设备已更改；PTT 已释放</translation>
     </message>
     <message>
+        <location filename="../src/ssb/SsbController.cpp" line="19"/>
         <source>Radio unavailable or mode changed; PTT released</source>
-        <translation type="vanished">电台不可用或模式已更改；PTT 已释放</translation>
+        <translation>电台不可用或模式已更改；PTT 已释放</translation>
     </message>
     <message>
+        <location filename="../src/ssb/SsbController.cpp" line="20"/>
         <source>Microphone stopped; PTT released</source>
-        <translation type="vanished">麦克风已停止；PTT 已释放</translation>
+        <translation>麦克风已停止；PTT 已释放</translation>
     </message>
     <message>
+        <location filename="../src/ssb/SsbController.cpp" line="21"/>
         <source>Three-minute TX limit reached; release and press PTT again</source>
-        <translation type="vanished">已达到三分钟 TX 限制；请松开后再次按 PTT</translation>
+        <translation>已达到三分钟 TX 限制；请松开后再次按 PTT</translation>
     </message>
     <message>
+        <location filename="../src/ssb/SsbController.cpp" line="43"/>
         <source>Select a PC microphone</source>
-        <translation type="vanished">请选择 PC 麦克风</translation>
+        <translation>请选择 PC 麦克风</translation>
     </message>
     <message>
+        <location filename="../src/ssb/SsbController.cpp" line="53"/>
         <source>Microphone must support 48 kHz PCM</source>
-        <translation type="vanished">麦克风必须支持 48 kHz PCM</translation>
+        <translation>麦克风必须支持 48 kHz PCM</translation>
     </message>
     <message>
+        <location filename="../src/ssb/SsbController.cpp" line="57"/>
         <source>Cannot open microphone</source>
-        <translation type="vanished">无法打开麦克风</translation>
+        <translation>无法打开麦克风</translation>
     </message>
     <message>
+        <location filename="../src/ssb/SsbController.cpp" line="58"/>
         <source>PTT refused: check CAT, USB/LSB mode and TX audio output</source>
-        <translation type="vanished">PTT 被拒绝：请检查 CAT、USB/LSB 模式和 TX 音频输出</translation>
+        <translation>PTT 被拒绝：请检查 CAT、USB/LSB 模式和 TX 音频输出</translation>
     </message>
     <message>
+        <location filename="../src/ssb/SsbController.cpp" line="59"/>
         <source>SSB transmitting</source>
-        <translation type="vanished">SSB 发射中</translation>
+        <translation>SSB 发射中</translation>
     </message>
     <message>
+        <location filename="../src/ssb/SsbController.cpp" line="64"/>
         <source>Microphone error; PTT released</source>
-        <translation type="vanished">麦克风错误；PTT 已释放</translation>
+        <translation>麦克风错误；PTT 已释放</translation>
     </message>
     <message>
+        <location filename="../src/ssb/SsbController.cpp" line="73"/>
         <source>Receiving</source>
-        <translation type="vanished">接收中</translation>
+        <translation>接收中</translation>
     </message>
     <message>
+        <location filename="../src/ssb/SsbController.cpp" line="78"/>
         <source>Radio unavailable; PTT released</source>
-        <translation type="vanished">电台不可用；PTT 已释放</translation>
+        <translation>电台不可用；PTT 已释放</translation>
     </message>
     <message>
+        <location filename="../src/ssb/SsbController.cpp" line="81"/>
         <source>Microphone backlog; PTT released</source>
-        <translation type="vanished">麦克风音频积压；PTT 已释放</translation>
+        <translation>麦克风音频积压；PTT 已释放</translation>
+    </message>
+</context>
+<context>
+    <name>decodium::voicekeyer::AssistantChat</name>
+    <message>
+        <location filename="../src/voicekeyer/AssistantChat.cpp" line="50"/>
+        <source>Ask a question</source>
+        <translation>提出问题</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/AssistantChat.cpp" line="50"/>
+        <location filename="../src/voicekeyer/AssistantChat.cpp" line="83"/>
+        <source>Assistant not installed or not selected: see Optional packs</source>
+        <translation>助手未安装或未选择：请参阅可选包</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/AssistantChat.cpp" line="67"/>
+        <source>You: </source>
+        <translation>您： </translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/AssistantChat.cpp" line="67"/>
+        <source>Decodium: </source>
+        <translation>Decodium: </translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/AssistantChat.cpp" line="91"/>
+        <source>The assistant could not start</source>
+        <translation>助手无法启动</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/AssistantChat.cpp" line="105"/>
+        <source>Thinking…</source>
+        <translation>思考中…</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/AssistantChat.cpp" line="111"/>
+        <source>The assistant took too long and was stopped</source>
+        <translation>助手耗时过长，已被停止</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/AssistantChat.cpp" line="124"/>
+        <source>The assistant stopped with an error: %1</source>
+        <translation>助手因错误而停止：%1</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/AssistantChat.cpp" line="129"/>
+        <source>No answer: try a shorter question</source>
+        <translation>无回答：请尝试更短的问题</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/AssistantChat.cpp" line="135"/>
+        <source>Answered</source>
+        <translation>已回答</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/AssistantChat.cpp" line="144"/>
+        <source>Stopped</source>
+        <translation>停止</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/AssistantChat.cpp" line="152"/>
+        <source>Conversation cleared</source>
+        <translation>对话已清除</translation>
+    </message>
+</context>
+<context>
+    <name>decodium::voicekeyer::PackManager</name>
+    <message>
+        <location filename="../src/voicekeyer/PackManager.cpp" line="69"/>
+        <source>Optional packs: install only what you want</source>
+        <translation>可选包：仅安装您想要的</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/PackManager.cpp" line="141"/>
+        <source>Downloading…</source>
+        <translation>正在下载…</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/PackManager.cpp" line="158"/>
+        <source>Pack removed</source>
+        <translation>包已移除</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/PackManager.cpp" line="166"/>
+        <source>Download cancelled</source>
+        <translation>下载已取消</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/PackManager.cpp" line="184"/>
+        <source>Cannot write %1</source>
+        <translation>无法写入 %1</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/PackManager.cpp" line="196"/>
+        <source>Downloading %1…</source>
+        <translation>正在下载 %1…</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/PackManager.cpp" line="208"/>
+        <source>Download failed: %1</source>
+        <translation>下载失败: %1</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/PackManager.cpp" line="212"/>
+        <source>Cannot read %1</source>
+        <translation>无法读取 %1</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/PackManager.cpp" line="218"/>
+        <source>Checksum mismatch for %1: the file was discarded</source>
+        <translation>%1 的校验和不匹配：文件已被丢弃</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/PackManager.cpp" line="225"/>
+        <source>Unpacking…</source>
+        <translation>正在解压…</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/PackManager.cpp" line="243"/>
+        <source>Cannot unpack %1</source>
+        <translation>无法解压 %1</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/PackManager.cpp" line="253"/>
+        <source>Pack installed</source>
+        <translation>包已安装</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/PackManager.cpp" line="253"/>
+        <source>Pack incomplete: try installing again</source>
+        <translation>包不完整：请尝试重新安装</translation>
+    </message>
+</context>
+<context>
+    <name>decodium::voicekeyer::SpeechToText</name>
+    <message>
+        <location filename="../src/voicekeyer/SpeechToText.cpp" line="37"/>
+        <source>Hold Listen and speak</source>
+        <translation>按住“收听”并说话</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/SpeechToText.cpp" line="38"/>
+        <source>Speech recognition not installed or not selected</source>
+        <translation>语音识别未安装或未选择</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/SpeechToText.cpp" line="56"/>
+        <source>Speech recognition is not installed or not selected: see Optional packs</source>
+        <translation>语音识别未安装或未选择：请参阅可选包</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/SpeechToText.cpp" line="62"/>
+        <source>No microphone found</source>
+        <translation>未找到麦克风</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/SpeechToText.cpp" line="70"/>
+        <source>Microphone must support 48 kHz 16-bit PCM</source>
+        <translation>麦克风必须支持 48 kHz 16 位 PCM</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/SpeechToText.cpp" line="80"/>
+        <source>Cannot open the microphone</source>
+        <translation>无法打开麦克风</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/SpeechToText.cpp" line="84"/>
+        <source>Listening…</source>
+        <translation>正在收听…</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/SpeechToText.cpp" line="117"/>
+        <source>Too short: keep Listen pressed while speaking</source>
+        <translation>时间太短：说话时请一直按住“收听”</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/SpeechToText.cpp" line="126"/>
+        <source>Cannot save the recording: %1</source>
+        <translation>无法保存录音：%1</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/SpeechToText.cpp" line="131"/>
+        <source>Transcribing…</source>
+        <translation>正在转写…</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/SpeechToText.cpp" line="140"/>
+        <source>Recognition failed: %1</source>
+        <translation>识别失败：%1</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/SpeechToText.cpp" line="145"/>
+        <source>Nothing recognised</source>
+        <translation>未识别到任何内容</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/SpeechToText.cpp" line="149"/>
+        <source>Recognised</source>
+        <translation>已识别</translation>
+    </message>
+</context>
+<context>
+    <name>decodium::voicekeyer::VoiceKeyer</name>
+    <message>
+        <location filename="../src/voicekeyer/VoiceKeyer.cpp" line="144"/>
+        <source>Ready</source>
+        <translation>就绪</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/VoiceKeyer.cpp" line="235"/>
+        <location filename="../src/voicekeyer/VoiceKeyer.cpp" line="245"/>
+        <source>To read text aloud install and enable the Voice pack first</source>
+        <translation>要朗读文本，请先安装并启用语音包</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/VoiceKeyer.cpp" line="238"/>
+        <source>reply</source>
+        <translation>回复</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/VoiceKeyer.cpp" line="248"/>
+        <source>preview</source>
+        <translation>预览</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/VoiceKeyer.cpp" line="265"/>
+        <source>Voice synthesis failed: %1</source>
+        <translation>语音合成失败：%1</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/VoiceKeyer.cpp" line="272"/>
+        <source>Synthesising %1…</source>
+        <translation>正在合成 %1…</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/VoiceKeyer.cpp" line="283"/>
+        <source>Voice synthesis failed: the engine stopped</source>
+        <translation>语音合成失败：引擎已停止</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/VoiceKeyer.cpp" line="288"/>
+        <source>Voice synthesis failed: no audio produced</source>
+        <translation>语音合成失败：未生成音频</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/VoiceKeyer.cpp" line="308"/>
+        <source>No speaker found for the preview</source>
+        <translation>未找到用于预览的扬声器</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/VoiceKeyer.cpp" line="319"/>
+        <source>Preview finished</source>
+        <translation>预览已结束</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/VoiceKeyer.cpp" line="323"/>
+        <source>Preview on this computer (not transmitted)</source>
+        <translation>在本机上预览（不发射）</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/VoiceKeyer.cpp" line="337"/>
+        <source>Cannot read the recording of %1: %2</source>
+        <translation>无法读取 %1 的录音：%2</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/VoiceKeyer.cpp" line="344"/>
+        <source>F%1 is empty: record it or write a text first</source>
+        <translation>F%1 为空：请先录音或输入文本</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/VoiceKeyer.cpp" line="348"/>
+        <source>To read text aloud install the voice pack first</source>
+        <translation>要朗读文本，请先安装语音包</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/VoiceKeyer.cpp" line="359"/>
+        <source>PTT refused: check CAT, SSB mode and the TX audio output</source>
+        <translation>PTT 被拒绝：请检查 CAT、SSB 模式和 TX 音频输出</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/VoiceKeyer.cpp" line="366"/>
+        <source>Sending %1</source>
+        <translation>正在发送 %1</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/VoiceKeyer.cpp" line="375"/>
+        <source>Radio unavailable; PTT released</source>
+        <translation>电台不可用；PTT 已释放</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/VoiceKeyer.cpp" line="386"/>
+        <source>Message sent</source>
+        <translation>消息已发送</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/VoiceKeyer.cpp" line="406"/>
+        <location filename="../src/voicekeyer/VoiceKeyer.cpp" line="413"/>
+        <source>Stopped</source>
+        <translation>停止</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/VoiceKeyer.cpp" line="421"/>
+        <source>No microphone found</source>
+        <translation>未找到麦克风</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/VoiceKeyer.cpp" line="429"/>
+        <source>Microphone must support 48 kHz 16-bit PCM</source>
+        <translation>麦克风必须支持 48 kHz 16 位 PCM</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/VoiceKeyer.cpp" line="439"/>
+        <source>Cannot open the microphone</source>
+        <translation>无法打开麦克风</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/VoiceKeyer.cpp" line="445"/>
+        <source>Recording F%1 (release to save)</source>
+        <translation>正在录制 F%1（松开即保存）</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/VoiceKeyer.cpp" line="477"/>
+        <source>Recording too short: keep the key pressed while speaking</source>
+        <translation>录音太短：说话时请一直按住该键</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/VoiceKeyer.cpp" line="483"/>
+        <source>Cannot save the recording: %1</source>
+        <translation>无法保存录音：%1</translation>
+    </message>
+    <message>
+        <location filename="../src/voicekeyer/VoiceKeyer.cpp" line="486"/>
+        <source>F%1 recorded (%2 s)</source>
+        <translation>F%1 已录音（%2 秒）</translation>
     </message>
 </context>
 <context>
