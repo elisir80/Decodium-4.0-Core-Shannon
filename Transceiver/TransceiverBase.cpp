@@ -69,6 +69,18 @@ void TransceiverBase::set (TransceiverState const& s,
       return;
     }
 
+  // Do not consume the requested state while a connected back end has
+  // explicitly said that the radio cannot yet accept ordinary CAT commands
+  // (for example a rig in standby just before its Power On command settles).
+  // The caller retains the latest desired state and can submit it again once
+  // the back end reports that writes are available.
+  if (s.online () && requested_.online () && !do_state_commands_available ())
+    {
+      last_sequence_number_ = sequence_number;
+      CAT_TRACE ("deferring state commands while rig is temporarily unavailable");
+      return;
+    }
+
   try
     {
       do_txvolume (s.txvolume ());

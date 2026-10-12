@@ -77,6 +77,8 @@ class DecodiumTransceiverManager : public QObject
     Q_PROPERTY(bool    compressionValid   READ compressionValid   NOTIFY paMetersChanged)
     Q_PROPERTY(double  powerSettingPct    READ powerSettingPct    NOTIFY paMetersChanged)
     Q_PROPERTY(bool    powerSettingValid  READ powerSettingValid  NOTIFY paMetersChanged)
+    Q_PROPERTY(bool    atuEnabled         READ atuEnabled         NOTIFY atuStateChanged)
+    Q_PROPERTY(bool    atuStateValid      READ atuStateValid      NOTIFY atuStateChanged)
 
     // ── Liste per UI ──────────────────────────────────────────────────────
     Q_PROPERTY(QStringList rigList  READ rigList  NOTIFY rigListChanged)
@@ -144,6 +146,8 @@ public:
     // La manopola della potenza, in percento del massimo del rig.
     double  powerSettingPct()   const { return m_powerSettingPct; }
     bool    powerSettingValid() const { return m_powerSettingValid; }
+    bool    atuEnabled()        const { return m_atuEnabled; }
+    bool    atuStateValid()     const { return m_atuStateValid && m_connected; }
 
     QStringList rigList()       const;
     QStringList portList()      const { return m_portList; }
@@ -207,6 +211,8 @@ public:
     Q_INVOKABLE void setRigAudio(bool on, double periodSeconds = 15.0, int blockSize = 6912 / 2);
     Q_INVOKABLE void setRigTune(bool on);
     Q_INVOKABLE void requestAtuTune();
+    Q_INVOKABLE void requestAtuOff();
+    Q_INVOKABLE void requestAtuState();
     Q_INVOKABLE void requestRadioPowerOn();
     Q_INVOKABLE void requestRadioPowerOff();
     Q_INVOKABLE void startRigTxAudio(const QString& mode, unsigned symbolsLength,
@@ -257,6 +263,7 @@ signals:
     void swrChanged();
     void alcChanged();
     void paMetersChanged();   // 1.0.581 — tensione, corrente, temperatura, compressione
+    void atuStateChanged();
     void catAutoConnectChanged();
     void audioAutoStartChanged();
     void tciAudioEnabledChanged();
@@ -275,6 +282,7 @@ signals:
 private:
     void enforceForceLineAvailability();
     void updateTelemetry(double powerWatts, double swr, double alc = 0.0, bool alcValid = false);
+    void setAtuState(bool valid, bool enabled);
     void reconnectRigForParameterChange(const QString& reason);
     void disconnectRigInternal(bool reconnectAfterDisconnect);
     void scheduleTransientReconnect(const QString& reason);
@@ -331,6 +339,8 @@ private:
     bool    m_compressionValid   {false};
     double  m_powerSettingPct    {0.0};
     bool    m_powerSettingValid  {false};
+    bool    m_atuEnabled         {false};
+    bool    m_atuStateValid      {false};
 
     QStringList m_portList;
     bool    m_catAutoConnect {false};
@@ -347,6 +357,15 @@ private:
     bool    m_transientCatReconnectPending {false};
     bool    m_reconnectAfterDisconnect {false};
     bool    m_disconnectInProgress {false};
+    // One-shot intent set only by the explicit dashboard Power On action
+    // while CAT is disconnected. It becomes Hamlib's auto_power_on config
+    // for the next direct CAT connection, never for ordinary startup.
+    bool    m_coldStartPowerOnPending {false};
+    // A successful power-on frame can make a USB CAT adapter briefly
+    // disappear while its radio wakes.  Do not send a second wake-up frame
+    // during the bounded reconnect window; wait for the same endpoint to
+    // enumerate again and reopen it normally.
+    bool    m_coldStartPowerOnWakeSent {false};
     quint64 m_transientCatReconnectSerial {0};
     QElapsedTimer m_connectAttemptTimer;
 };

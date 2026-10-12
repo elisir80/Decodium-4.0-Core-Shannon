@@ -199,6 +199,26 @@ SettingsPageScroll {
                     contentItem: Text { text: ""; leftPadding: 24 }
                 }
 
+                Text {
+                    text: qsTr("Reset graphics on next launch:")
+                    color: textSecondary
+                    font.pixelSize: 12
+                    elide: Text.ElideRight
+                    verticalAlignment: Text.AlignVCenter
+                    Layout.preferredWidth: advancedStartupGrid.labelWidth
+                    Layout.preferredHeight: visible ? controlHeight : 0
+                }
+                CheckBox {
+                    Layout.preferredWidth: advancedStartupGrid.checkWidth
+                    Layout.preferredHeight: controlHeight
+                    checked: bridge.resetSafeGraphicsNextLaunch
+                    onToggled: bridge.resetSafeGraphicsNextLaunch = checked
+                    ToolTip.visible: hovered
+                    ToolTip.text: qsTr("On the next launch, clears persistent graphics fallback settings and scene-graph caches, equivalent to --reset-safe-graphics. The option is one-shot and clears itself after startup.")
+                    indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                    contentItem: Text { text: ""; leftPadding: 24 }
+                }
+
                 Text { text: qsTr("Low CPU:"); color: textSecondary; font.pixelSize: 12; elide: Text.ElideRight; verticalAlignment: Text.AlignVCenter; Layout.preferredWidth: advancedStartupGrid.labelWidth; Layout.preferredHeight: controlHeight }
                 CheckBox {
                     Layout.preferredWidth: advancedStartupGrid.checkWidth; Layout.preferredHeight: controlHeight

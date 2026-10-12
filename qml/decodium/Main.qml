@@ -33,6 +33,12 @@ ApplicationWindow {
     readonly property bool dashboardRadioControlsEnabled: !!(bridge && bridge.hamlibCat
         && bridge.hamlibCat.connected && !bridge.decoPortUseRemote
         && !bridge.transmitting && !bridge.tuning)
+    // Power On is also useful when a direct CAT session is not open yet: the
+    // backend will create a one-shot Hamlib connection with auto_power_on.
+    // All other dashboard controls still require an existing CAT session.
+    readonly property bool dashboardPowerOnEnabled: !!(bridge && bridge.hamlibCat
+        && !bridge.hamlibCat.connecting && !bridge.decoPortUseRemote
+        && !bridge.transmitting && !bridge.tuning)
     property string dashboardRadioActionStatus: ""
     Dialog {
         id: dashboardPowerOffDialog
@@ -64,11 +70,14 @@ ApplicationWindow {
         Layout.fillWidth: true
         Layout.preferredHeight: 16
         radius: 2
-        color: radioQuickMouse.containsMouse && mainWindow.dashboardRadioControlsEnabled
+        readonly property bool actionEnabled: action === "on"
+            ? mainWindow.dashboardPowerOnEnabled
+            : mainWindow.dashboardRadioControlsEnabled
+        color: radioQuickMouse.containsMouse && actionEnabled
                ? Qt.rgba(activeColor.r, activeColor.g, activeColor.b, 0.24)
                : Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.9)
-        border.color: mainWindow.dashboardRadioControlsEnabled ? activeColor : glassBorder
-        opacity: mainWindow.dashboardRadioControlsEnabled ? 1.0 : 0.45
+        border.color: actionEnabled ? activeColor : glassBorder
+        opacity: actionEnabled ? 1.0 : 0.45
         Text {
             anchors.centerIn: parent
             text: parent.label
@@ -80,18 +89,20 @@ ApplicationWindow {
             id: radioQuickMouse
             anchors.fill: parent
             hoverEnabled: true
-            enabled: mainWindow.dashboardRadioControlsEnabled
+            enabled: parent.actionEnabled
             cursorShape: Qt.PointingHandCursor
             onClicked: {
                 if (!bridge || !bridge.hamlibCat) return
                 if (parent.action === "atu") bridge.hamlibCat.requestAtuTune()
+                else if (parent.action === "atu-off") bridge.hamlibCat.requestAtuOff()
                 else if (parent.action === "on") bridge.hamlibCat.requestRadioPowerOn()
                 else dashboardPowerOffDialog.open()
             }
         }
         ToolTip.visible: radioQuickMouse.containsMouse
         ToolTip.text: action === "atu" ? qsTr("Start the radio ATU")
-                       : action === "on" ? qsTr("Power on the radio")
+                       : action === "atu-off" ? qsTr("Disable the radio ATU")
+                       : action === "on" ? qsTr("Power on a supported radio through direct CAT. Its CAT port must be available after mains power is restored.")
                        : qsTr("Power off the radio")
     }
     readonly property string dxpeditionModeLabel: !bridge || bridge.mode !== "FT8" ? ""
@@ -5621,7 +5632,8 @@ ApplicationWindow {
                             Layout.fillWidth: true
                             Layout.preferredHeight: 16
 
-                            RadioQuickButton { label: "ATU"; action: "atu"; activeColor: secondaryCyan }
+                            RadioQuickButton { label: "ATU ON"; action: "atu"; activeColor: secondaryCyan }
+                            RadioQuickButton { label: "ATU OFF"; action: "atu-off"; activeColor: bridge.themeManager.warningColor }
                             RadioQuickButton { label: "PWR ON"; action: "on"; activeColor: accentGreen }
                             RadioQuickButton { label: "PWR OFF"; action: "off"; activeColor: bridge.themeManager.warningColor }
                         }
@@ -9894,6 +9906,7 @@ NumberAnimation {
                                             border.color: highlightBorder ? highlightBorder : "transparent"
                                             border.width: highlightFill ? 1 : 0
                                             radius: 2
+                                            clip: true
 
                                             // Linea sottile discreta (1px, rosso scuro)
                                             Rectangle {
@@ -9960,6 +9973,7 @@ NumberAnimation {
                                                 anchors.leftMargin: 6
                                                 anchors.rightMargin: 6
                                                 spacing: 6
+                                                clip: true
 
                                                 Repeater {
                                                     model: mainWindow.fsColumnsForWidth(period1Panel.width)
@@ -10571,7 +10585,8 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                                                    entry.isMyCall ? mainWindow.boostedDecodeBackgroundColor(Qt.rgba(244/255, 67/255, 54/255, 0.3)) :
                                                    (entry.isCQ && bridge.decodeColorEnabled("colorCQ")) ? mainWindow.boostedDecodeBackgroundColor(Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.15)) :
                                                    index % 2 === 0 ? mainWindow.boostedDecodeBackgroundColor(Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.08)) : mainWindow.boostedDecodeBackgroundColor(Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.15))
-                                            radius: 2
+	                                            radius: 2
+	                                            clip: true
 
 	                                            Rectangle {
 	                                                visible: rxFrequencyDelegate.isPeriodSeparator
@@ -10646,7 +10661,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
 		                                                Text { visible: rxFreqPanel.freqColumnWidth > 0; text: rxFrequencyDelegate.entry.freq || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(rxFrequencyDelegate.entry.isTx ? "#f1c40f" : secondaryCyan); font.bold: rxFrequencyDelegate.entry.isTx === true; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqPanel.freqColumnWidth }
                                                 Item { Layout.preferredWidth: rxFreqPanel.gapColumnWidth }
                                                 Rectangle { property int dotSize: Math.max(5, Math.round(6 * fs)); visible: rxFrequencyDelegate.entry.isLotw === true; width: dotSize; height: dotSize; Layout.preferredWidth: dotSize; Layout.preferredHeight: dotSize; Layout.alignment: Qt.AlignVCenter; radius: dotSize / 2; color: mainWindow.lotwMarkerColor(); border.color: mainWindow.boostedDecodeTextColor(textSecondary); border.width: 1 }
-                                                Text { text: rxFrequencyDelegate.entry.displayMessage || rxFrequencyDelegate.entry.message || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); font.bold: decodePanel.decodeEntryBold(rxFrequencyDelegate.entry); font.strikeout: decodePanel.decodeEntryStrikeout(rxFrequencyDelegate.entry); color: getDxccColor(rxFrequencyDelegate.entry); Layout.fillWidth: true; Layout.minimumWidth: 0; elide: messageElideMode(rxFrequencyDelegate.entry.displayMessage || rxFrequencyDelegate.entry.message) }
+		                                                Text { text: rxFrequencyDelegate.entry.displayMessage || rxFrequencyDelegate.entry.message || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); font.bold: decodePanel.decodeEntryBold(rxFrequencyDelegate.entry); font.strikeout: decodePanel.decodeEntryStrikeout(rxFrequencyDelegate.entry); color: getDxccColor(rxFrequencyDelegate.entry); Layout.fillHeight: true; Layout.fillWidth: true; Layout.minimumWidth: 0; verticalAlignment: Text.AlignVCenter; elide: messageElideMode(rxFrequencyDelegate.entry.displayMessage || rxFrequencyDelegate.entry.message) }
 		                                                Text { visible: rxFreqPanel.distanceColumnWidth > 0; text: decodePanel.distanceText(rxFrequencyDelegate.entry); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(textSecondary); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqPanel.distanceColumnWidth }
 		                                                Text { visible: rxFreqPanel.azColumnWidth > 0; text: formatBearingDegrees(rxFrequencyDelegate.entry.dxBearing); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(secondaryCyan); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqPanel.azColumnWidth }
 	                                            }
@@ -15895,8 +15910,8 @@ NumberAnimation {
                             width: 8
                         }
 
-		                        delegate: Rectangle {
-                            id: fsRowFloating
+	                        delegate: Rectangle {
+	                            id: fsRowFloating
 			                            width: parent ? parent.width : 100
 		                            readonly property bool isPeriodSeparator: !!(modelData && modelData.isSeparator === true)
 		                            readonly property var entry: modelData || ({})
@@ -15934,6 +15949,7 @@ NumberAnimation {
                                 anchors.fill: parent
                                 anchors.margins: 4
                                 spacing: 6
+                                clip: true
 
                                 Repeater {
                                     model: mainWindow.fsColumnsForWidth(period1FloatingWindow.width)
@@ -16547,6 +16563,7 @@ NumberAnimation {
 	                            // 1.0.253 — height adattiva compact mode Signal RX
 	                            height: isPeriodSeparator ? Math.round(4 * fs) : Math.round(mainWindow.signalRxRowHeight * fs)
 	                            radius: 3
+	                            clip: true
 	                            // 1.0.254 fix: guard !modelData mancante (era in evenPeriodList
 	                            // e period1FloatingList dal 1.0.205, dimenticato qui).
 	                            // Durante shift-diff + scroll concorrenti, modelData diventa

@@ -127,6 +127,11 @@ protected:
   virtual void do_modulator_start(QString, unsigned, double, double, double, bool, bool, double, double) {}
   virtual void do_modulator_stop(bool) {}
 
+  // Some back ends can keep a transport session open while the physical rig
+  // is in standby. They may temporarily decline ordinary VFO/PTT state
+  // commands without being disconnected; defer those commands until the
+  // radio is ready instead of turning that condition into a CAT failure.
+  virtual bool do_state_commands_available () const {return true;}
   virtual bool do_pre_update () {return true;}
 
   // sub classes report rig state changes with these methods

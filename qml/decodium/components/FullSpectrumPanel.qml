@@ -338,6 +338,7 @@ Item {
                    (index % 2 === 0) ? Qt.rgba(root.cText.r, root.cText.g, root.cText.b, 0.02)
                                      : Qt.rgba(root.cText.r, root.cText.g, root.cText.b, 0.05)
             radius: 2
+            clip: true
 
             // Subtle separator line.
             Rectangle {
@@ -384,6 +385,7 @@ Item {
                 visible: !del.isSep
                 anchors { fill: parent; leftMargin: 8; rightMargin: 8 }
                 spacing: 0
+                clip: true
                 Text {
                     text: !modelData ? "" : (del.entry.formattedTime || del.entry.time || "")
                     color: !modelData ? root.cTextDim : (del.entry.isTx ? "#f1c40f" : root.cTextDim)
@@ -426,7 +428,9 @@ Item {
                                         && !!root.bridge
                                         && root.bridge.b4Strikethrough
                     elide: Text.ElideRight
+                    Layout.fillHeight: true
                     Layout.fillWidth: true
+                    verticalAlignment: Text.AlignVCenter
                 }
                 Item {
                     visible: root.wDxcc > 0

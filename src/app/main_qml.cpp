@@ -68,6 +68,59 @@
 #include <thread>
 #include <vector>
 
+static bool hasCommandLineSwitchAny(int argc, char* argv[], const char* name)
+{
+    for (int i = 1; i < argc; ++i) {
+        if (QString::fromLocal8Bit(argv[i]) == QLatin1String(name))
+            return true;
+    }
+    return false;
+}
+
+static QString portableResetSafeGraphicsNextLaunchKey()
+{
+    return QStringLiteral("Graphics/ResetSafeGraphicsNextLaunch");
+}
+
+static bool portableResetSafeGraphicsRequestedInSettings()
+{
+    QSettings settings {QSettings::IniFormat, QSettings::UserScope,
+                        QStringLiteral("Decodium"), QStringLiteral("Decodium3")};
+    return settings.value(portableResetSafeGraphicsNextLaunchKey(), false).toBool();
+}
+
+static void clearPortableResetSafeGraphicsRequest()
+{
+    QSettings settings {QSettings::IniFormat, QSettings::UserScope,
+                        QStringLiteral("Decodium"), QStringLiteral("Decodium3")};
+    settings.remove(portableResetSafeGraphicsNextLaunchKey());
+    settings.sync();
+}
+
+static void clearPortableGraphicsFallbackSettings()
+{
+    QSettings settings {QSettings::IniFormat, QSettings::UserScope,
+                        QStringLiteral("Decodium"), QStringLiteral("Decodium3")};
+    settings.remove(QStringLiteral("Graphics/PersistentD3D11FallbackAfterD3D12Failure"));
+    settings.remove(QStringLiteral("Graphics/PersistentD3D11FallbackReason"));
+    settings.remove(QStringLiteral("Graphics/PersistentD3D11FallbackUtc"));
+    settings.remove(QStringLiteral("Graphics/PersistentFallbackMode"));
+    settings.sync();
+}
+
+static void clearPortableGraphicsPipelineCaches()
+{
+    QString const cachePath = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+    if (cachePath.isEmpty())
+        return;
+    QDir cacheDir(cachePath);
+    cacheDir.remove(QStringLiteral("qsg_pipeline_cache.bin"));
+    QStringList const cacheFiles = cacheDir.entryList(
+        QStringList {QStringLiteral("qsg_pipeline_cache_main_*.bin")}, QDir::Files);
+    for (const QString& file : cacheFiles)
+        cacheDir.remove(file);
+}
+
 #ifdef Q_OS_WIN
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -788,6 +841,26 @@ static QString persistentGraphicsFallbackModeKey()
     return QStringLiteral("Graphics/PersistentFallbackMode");
 }
 
+static QString resetSafeGraphicsNextLaunchKey()
+{
+    return QStringLiteral("Graphics/ResetSafeGraphicsNextLaunch");
+}
+
+static bool resetSafeGraphicsRequestedInSettings()
+{
+    QSettings settings {QSettings::IniFormat, QSettings::UserScope,
+                        QStringLiteral("Decodium"), QStringLiteral("Decodium3")};
+    return settings.value(resetSafeGraphicsNextLaunchKey(), false).toBool();
+}
+
+static void clearResetSafeGraphicsRequest()
+{
+    QSettings settings {QSettings::IniFormat, QSettings::UserScope,
+                        QStringLiteral("Decodium"), QStringLiteral("Decodium3")};
+    settings.remove(resetSafeGraphicsNextLaunchKey());
+    settings.sync();
+}
+
 static void writePersistentD3d11Fallback(const QString& reason)
 {
     QSettings settings {QSettings::IniFormat, QSettings::UserScope,
@@ -993,9 +1066,14 @@ static bool runWindowsGraphicsStartupSupervisor(int argc, char* argv[], int *exi
     }
 
     QString const markerPath = graphicsStartupPendingFlagPath();
-    if (hasCommandLineSwitch(argc, argv, "--reset-safe-graphics"))
+    bool const commandLineResetRequested =
+        hasCommandLineSwitch(argc, argv, "--reset-safe-graphics");
+    bool const settingsResetRequested = resetSafeGraphicsRequestedInSettings();
+    if (commandLineResetRequested || settingsResetRequested)
         QFile::remove(markerPath);
-    std::wstring const baseCommandLine = GetCommandLineW();
+    std::wstring baseCommandLine = GetCommandLineW();
+    if (settingsResetRequested && !commandLineResetRequested)
+        baseCommandLine += L" --reset-safe-graphics";
     constexpr int kMaxAttempts = 4;
 
     for (int attempt = 0; attempt < kMaxAttempts; ++attempt) {
@@ -1524,6 +1602,20 @@ int main(int argc, char* argv[])
         return graphicsSupervisorExitCode;
 #endif
 
+    // The reset can be armed from Setup and is intentionally one-shot. On
+    // Windows the supervisor forwards it as --reset-safe-graphics to the
+    // worker; on macOS/Linux this same block performs the portable part
+    // directly before the graphics backend is selected.
+    bool const startupResetFromCommandLine =
+        hasCommandLineSwitchAny(argc, argv, "--reset-safe-graphics");
+    bool const startupResetFromSettings = portableResetSafeGraphicsRequestedInSettings();
+    if (startupResetFromCommandLine || startupResetFromSettings) {
+        clearPortableGraphicsFallbackSettings();
+        if (startupResetFromSettings)
+            clearPortableResetSafeGraphicsRequest();
+        L("Graphics reset requested: cleared persistent fallback settings");
+    }
+
     decodium::fft_compat::initialize_planner_thread_safety();
 
     qInstallMessageHandler(qtMsgHandler);
@@ -1601,12 +1693,16 @@ int main(int argc, char* argv[])
     QString const graphicsStartupPendingFlag = graphicsStartupPendingFlagPath();
     bool const graphicsRecoveryWorker =
         hasCommandLineSwitch(argc, argv, "--decodium-graphics-recovery");
+    bool const settingsResetSafeGraphics = resetSafeGraphicsRequestedInSettings();
     bool const commandLineResetSafeGraphics =
-        hasCommandLineSwitch(argc, argv, "--reset-safe-graphics") && !graphicsRecoveryWorker;
+        (hasCommandLineSwitch(argc, argv, "--reset-safe-graphics")
+         || settingsResetSafeGraphics) && !graphicsRecoveryWorker;
     if (commandLineResetSafeGraphics) {
         removeFileIfExists(slowQmlStartupFlag);
         removeFileIfExists(graphicsStartupPendingFlag);
         clearPersistentD3d11Fallback();
+        if (settingsResetSafeGraphics)
+            clearResetSafeGraphicsRequest();
     }
     auto normalizedBackend = [] (const char* name) -> QByteArray {
         return qEnvironmentVariableIsSet(name) ? qgetenv(name).trimmed().toLower() : QByteArray {};
@@ -1802,6 +1898,11 @@ int main(int argc, char* argv[])
     app.setApplicationVersion(QStringLiteral(FORK_RELEASE_VERSION));
     app.setOrganizationName(DecodiumStorageMigration::organizationName());  // IU8LMC: "Decodium" su Windows
     app.setOrganizationDomain("decodium.iu8lmc.it");
+
+    if (startupResetFromCommandLine || startupResetFromSettings) {
+        clearPortableGraphicsPipelineCaches();
+        L("Graphics reset requested: cleared scene-graph caches");
+    }
 
     // 1.0.180 — Pipeline cache shader: build path here, apply via objectCreated
     // (setGraphicsConfiguration is an instance method on QQuickWindow, must be

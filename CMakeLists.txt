@@ -58,6 +58,14 @@ if (POLICY CMP0156)
   cmake_policy (SET CMP0156 NEW) # deduplicate static libraries per platform linker rules
 endif ()
 
+if (POLICY CMP0153)
+  cmake_policy (SET CMP0153 NEW) # exec_program is deprecated; use execute_process
+endif ()
+
+if (POLICY CMP0167)
+  cmake_policy (SET CMP0167 NEW) # use the installed Boost package configuration
+endif ()
+
 if (POLICY CMP0075)
   cmake_policy (SET CMP0075 NEW) # honour CMAKE_REQUIRED_LIBRARIES in config checks
 endif ()
@@ -1338,10 +1346,16 @@ endif ()
 get_target_property (QMAKE_EXECUTABLE Qt6::qmake LOCATION)
 get_target_property (LCONVERT_EXECUTABLE Qt6::lconvert LOCATION)
 function (QUERY_QMAKE VAR RESULT)
-  exec_program (${QMAKE_EXECUTABLE} ARGS "-query ${VAR}" RETURN_VALUE return_code OUTPUT_VARIABLE output)
+  execute_process (
+    COMMAND "${QMAKE_EXECUTABLE}" -query "${VAR}"
+    RESULT_VARIABLE return_code
+    OUTPUT_VARIABLE output
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+    )
   if (NOT return_code)
     file (TO_CMAKE_PATH "${output}" output)
-    set (${RESULT} ${output} PARENT_SCOPE)
+    set (${RESULT} "${output}" PARENT_SCOPE)
   endif (NOT return_code)
   message (STATUS "Asking qmake for ${RESULT} and got ${output}")
 endfunction (QUERY_QMAKE)

@@ -30,6 +30,8 @@ public:
 
   QVariantMap voice_controls(QString const&, double, bool) override;
   bool request_atu_tune(QString * error);
+  bool request_atu_off(QString * error);
+  bool read_atu_state(bool * enabled, QString * error);
   bool request_power_on(QString * error);
   bool request_power_off(QString * error);
   bool supports_morse () const noexcept;
@@ -42,6 +44,7 @@ private:
   void load_user_settings ();
   int do_start () override;
   void do_stop () override;
+  bool do_state_commands_available () const override;
   void do_frequency (Frequency, MODE, bool no_ignore) override;
   void do_tx_frequency (Frequency, MODE, bool no_ignore) override;
   void do_mode (MODE) override;
@@ -75,6 +78,11 @@ private:
 
   bool ptt_on_ = false;
   bool ptt_off_failed_recently_ = false;
+  // A few CAT backends (notably Yaesu NewCAT) keep the serial interface alive
+  // while the rig is powered off, but reject all VFO queries. Keep that
+  // session usable long enough for the dashboard Power On command.
+  bool rig_powered_off_ = false;
+  QElapsedTimer power_on_settle_clock_;
   bool rig_split_control_enabled_ = true;
   bool explicit_frequency_poll_vfo_ = false;
   bool frequency_poll_vfo_logged_ = false;
@@ -124,6 +132,7 @@ private:
   static constexpr int kQmxRawTelemetryMaxFailures_ = 8;
   static constexpr int kCatKeepAliveIntervalMs_ = 300;
   static constexpr int kCatKeepAliveMaxFailures_ = 3;
+  static constexpr int kPowerOnSettleMs_ = 5000;
   static constexpr int kFrequencyPollMaxFailures_ = 2;
   static constexpr int kFrequencyPollInitialBackoffTicks_ = 2;
   static constexpr int kFrequencyPollMaxBackoffTicks_ = 10;

@@ -702,6 +702,33 @@ bool linuxSerialByIdPathAvailable(QString const& port)
 }
 #endif
 
+#if defined(Q_OS_MACOS)
+QStringList enumerateMacSerialDevicePaths()
+{
+    // QSerialPortInfo is normally backed by IOKit, but it can lag behind the
+    // /dev nodes immediately after a cold boot or a USB bus reset.  The
+    // callout device is what Hamlib opens on macOS, so expose those real nodes
+    // as a conservative fallback both in the UI and in the reconnect logic.
+    QDir const devDir(QStringLiteral("/dev"));
+    static QStringList const nameFilters = {
+        QStringLiteral("cu.usbserial*"),
+        QStringLiteral("cu.usbmodem*"),
+        QStringLiteral("cu.SLAB_USBtoUART*"),
+        QStringLiteral("cu.wchusbserial*"),
+    };
+    QFileInfoList const entries = devDir.entryInfoList(
+        nameFilters, QDir::AllEntries | QDir::System | QDir::NoDotAndDotDot,
+        QDir::Name);
+
+    QStringList paths;
+    for (QFileInfo const& entry : entries) {
+        if (entry.exists())
+            paths << entry.absoluteFilePath();
+    }
+    return paths;
+}
+#endif
+
 int serialPortNumber(QString const& port)
 {
     static QRegularExpression const rx(QStringLiteral(R"(^COM(\d+)$)"),
@@ -738,6 +765,11 @@ QStringList enumerateSerialPorts(QString const& savedSerialPort, QString const& 
         appendUniqueSerialPort(ports, path);
 #endif
 
+#if defined(Q_OS_MACOS)
+    for (QString const& path : enumerateMacSerialDevicePaths())
+        appendUniqueSerialPort(ports, path);
+#endif
+
 #if defined(Q_OS_WIN)
     // Qt occasionally misses virtual/driver-created ports on Windows. The
     // canonical Windows COM mapping is also exposed in this registry key.
@@ -770,6 +802,18 @@ bool serialPortCurrentlyAvailable(QString const& port)
         }
     }
 
+#if !defined(Q_OS_WIN)
+    // Qt's serial-port inventory can lag behind IOKit/udev after a cold boot
+    // or a USB bus resume.  Do not reject a real /dev node merely because it
+    // has not made it into QSerialPortInfo yet: Hamlib is the authority that
+    // opens the path and can report a genuine permission or I/O error.
+    QString const devicePath = normalizeDevicePath(port);
+    if (devicePath.startsWith(QStringLiteral("/dev/"))
+        && QFileInfo::exists(devicePath)) {
+        return true;
+    }
+#endif
+
 #if defined(Q_OS_LINUX)
     if (linuxSerialByIdPathAvailable(port))
         return true;
@@ -790,131 +834,6 @@ bool serialPortCurrentlyAvailable(QString const& port)
 #endif
 
     return false;
-}
-
-QString serialPortFamilyKey(QString const& port)
-{
-    QString value = comparablePortName(port);
-    if (value.startsWith(QStringLiteral("/dev/")))
-        value.remove(0, 5);
-    if (value.startsWith(QStringLiteral("cu.")))
-        value.remove(0, 3);
-    if (value.startsWith(QStringLiteral("tty.")))
-        value.remove(0, 4);
-
-    int const dash = value.lastIndexOf(QLatin1Char('-'));
-    if (dash > 0)
-        value = value.left(dash);
-
-    while (!value.isEmpty() && value.back().isDigit())
-        value.chop(1);
-
-    return value;
-}
-
-bool serialPortAutoFallbackCandidate(QString const& port)
-{
-    QString const value = comparablePortName(port);
-    if (value.isEmpty()
-        || value == QStringLiteral("cat")
-        || value == QStringLiteral("none")) {
-        return false;
-    }
-
-    static QStringList const excludedMarkers = {
-        QStringLiteral("bluetooth"),
-        QStringLiteral("debug-console"),
-        QStringLiteral("incoming-port"),
-        QStringLiteral("wireless"),
-    };
-    for (auto const& marker : excludedMarkers) {
-        if (value.contains(marker, Qt::CaseInsensitive))
-            return false;
-    }
-    return true;
-}
-
-QString autoFallbackSerialPortForMissing(QString const& missingPort)
-{
-    QStringList rawCandidates;
-    for (QSerialPortInfo const& info : QSerialPortInfo::availablePorts()) {
-        appendUniqueSerialPort(rawCandidates, info.systemLocation());
-        appendUniqueSerialPort(rawCandidates, info.portName());
-    }
-
-#if defined(Q_OS_LINUX)
-    for (QString const& path : enumerateLinuxSerialByIdPaths())
-        appendUniqueSerialPort(rawCandidates, path);
-#endif
-
-#if defined(Q_OS_WIN)
-    QSettings serialMap(QStringLiteral("HKEY_LOCAL_MACHINE\\HARDWARE\\DEVICEMAP\\SERIALCOMM"),
-                        QSettings::NativeFormat);
-    for (QString const& key : serialMap.allKeys())
-        appendUniqueSerialPort(rawCandidates, serialMap.value(key).toString());
-#endif
-
-    QString const missingComparable = comparablePortName(missingPort);
-    QString const missingFamily = serialPortFamilyKey(missingPort);
-
-    QStringList seen;
-    QString onlyUsable;
-    int usableCount = 0;
-    QString best;
-    int bestScore = -100000;
-    bool bestTied = false;
-
-    for (QString const& raw : rawCandidates) {
-        QString const candidate = normalizeDevicePath(raw);
-        QString const comparable = comparablePortName(candidate);
-        if (seen.contains(comparable, Qt::CaseInsensitive))
-            continue;
-        seen << comparable;
-
-        if (!serialPortAutoFallbackCandidate(candidate)
-            || !serialPortCurrentlyAvailable(candidate)
-            || comparable == missingComparable) {
-            continue;
-        }
-
-        ++usableCount;
-        onlyUsable = candidate;
-
-        int score = 0;
-        QString const family = serialPortFamilyKey(candidate);
-        if (!missingFamily.isEmpty() && family == missingFamily)
-            score += 120;
-        if (missingComparable.contains(QStringLiteral("usbserial"))
-            && comparable.contains(QStringLiteral("usbserial"))) {
-            score += 90;
-        } else if (missingComparable.contains(QStringLiteral("usbmodem"))
-                   && comparable.contains(QStringLiteral("usbmodem"))) {
-            score += 90;
-        } else if (missingComparable.contains(QStringLiteral("usb"))
-                   && comparable.contains(QStringLiteral("usb"))) {
-            score += 35;
-        }
-        if (comparable.contains(QStringLiteral("usb")))
-            score += 20;
-        if (candidate.startsWith(QStringLiteral("/dev/cu.")))
-            score += 15;
-        if (candidate.startsWith(QStringLiteral("/dev/tty.")))
-            score -= 5;
-
-        if (score > bestScore) {
-            best = candidate;
-            bestScore = score;
-            bestTied = false;
-        } else if (score == bestScore) {
-            bestTied = true;
-        }
-    }
-
-    if (!best.isEmpty() && !bestTied && bestScore >= 50)
-        return best;
-    if (usableCount == 1)
-        return onlyUsable;
-    return QString();
 }
 
 bool isSerialPortMissingFailure(QString const& reason)
@@ -1630,7 +1549,8 @@ static Transceiver::MODE parseMode(const QString& s)
 }
 
 // ── buildParams ───────────────────────────────────────────────────────────
-static TransceiverFactory::ParameterPack buildParams(const DecodiumTransceiverManager* m)
+static TransceiverFactory::ParameterPack buildParams(const DecodiumTransceiverManager* m,
+                                                     bool autoPowerOn = false)
 {
     TransceiverFactory::ParameterPack p;
     bool const canForceDtr = d3ForceDtrAvailable(m->portType(), m->pttMethod(), m->serialPort(), m->pttPort());
@@ -1700,6 +1620,7 @@ static TransceiverFactory::ParameterPack buildParams(const DecodiumTransceiverMa
     p.ptt_port      = resolvedPttPort(m);
     p.civ_address   = m->civAddress();
     p.cat_keep_alive = m->catKeepAlive();
+    p.auto_power_on = autoPowerOn;
     p.poll_interval = basePollInterval;
     if (pwrAndSwrEnabled)
         p.poll_interval |= do__pwr;
@@ -1736,6 +1657,7 @@ static TransceiverFactory::ParameterPack buildParams(const DecodiumTransceiverMa
 #endif
         << "split=" << splitModeName(p.split_mode)
         << "catKeepAlive=" << p.cat_keep_alive
+        << "autoPowerOn=" << p.auto_power_on
         << "poll=" << (p.poll_interval & 0xffff);
     return p;
 }
@@ -1744,12 +1666,18 @@ static TransceiverFactory::ParameterPack buildParams(const DecodiumTransceiverMa
 void DecodiumTransceiverManager::connectRig()
 {
     if (catSuppressedByEnvironment()) {
+        if (m_coldStartPowerOnPending) {
+            m_coldStartPowerOnPending = false;
+            m_coldStartPowerOnWakeSent = false;
+            emit radioActionCompleted(QStringLiteral("Power on"), false, catSuppressionReason());
+        }
         ++m_transientCatReconnectSerial;
         m_transientCatReconnectPending = false;
         m_transientCatRetryCount = 0;
         setConnecting(false);
         if (m_connected) {
             m_connected = false;
+            setAtuState(false, false);
             emit connectedChanged();
         }
         updateTelemetry(0.0, 0.0);
@@ -1809,6 +1737,12 @@ void DecodiumTransceiverManager::connectRig()
 
     // Valida che il rig sia effettivamente nel registry (evita rig_init(0) → crash Hamlib 4.7)
     if (!d->factory.supported_transceivers().contains(m_rigName)) {
+        if (m_coldStartPowerOnPending) {
+            m_coldStartPowerOnPending = false;
+            m_coldStartPowerOnWakeSent = false;
+            emit radioActionCompleted(QStringLiteral("Power on"), false,
+                                      tr("The selected transceiver is not available in Hamlib"));
+        }
         emit errorOccurred("Transceiver non trovato nel registry: \"" + m_rigName
                            + "\". Seleziona un rig dalla lista.");
         return;
@@ -1821,38 +1755,31 @@ void DecodiumTransceiverManager::connectRig()
     if (serialTransport
         && !isHamRadioDeluxeRig(m_rigName)
         && !serialPortCurrentlyAvailable(m_serialPort)) {
-        QString const previousPort = m_serialPort;
-        QString const fallbackPort = autoFallbackSerialPortForMissing(previousPort);
-        if (!fallbackPort.isEmpty()) {
-            setSerialPort(fallbackPort);
-            saveSettings();
-            refreshPorts();
-            qInfo().noquote()
-                << "[CATDBG] Serial port auto-fallback"
-                << "rig=" << m_rigName
-                << "portType=" << m_portType
-                << "old=" << previousPort
-                << "new=" << m_serialPort;
-            emit statusUpdate(QStringLiteral("Porta CAT %1 non disponibile: uso %2.")
-                              .arg(previousPort.trimmed().isEmpty()
-                                   ? QStringLiteral("<non impostata>")
-                                   : previousPort.trimmed(),
-                                   m_serialPort));
-        }
-    }
-    if (serialTransport
-        && !isHamRadioDeluxeRig(m_rigName)
-        && !serialPortCurrentlyAvailable(m_serialPort)) {
         refreshPorts();
         qInfo().noquote()
             << "[CATDBG] Connect deferred: serial port unavailable"
             << "rig=" << m_rigName
             << "portType=" << m_portType
             << "serial=" << m_serialPort;
+        if (m_coldStartPowerOnPending) {
+            // USB CAT bridges may need a few seconds to enumerate after the
+            // radio supply is restored.  Keep the user's explicit Power On
+            // intent, but never guess a different serial port.
+            emit statusUpdate(tr("Waiting for configured CAT port %1 after radio power restore (%2/5)…")
+                              .arg(m_serialPort.trimmed())
+                              .arg(m_transientCatRetryCount + 1));
+            scheduleTransientReconnect(QStringLiteral("configured CAT port unavailable"));
+            return;
+        }
         emit statusUpdate(QStringLiteral("Porta %1 non ancora disponibile, ritento CAT a breve...")
                           .arg(m_serialPort.trimmed().isEmpty()
                                ? QStringLiteral("<non impostata>")
                                : m_serialPort.trimmed()));
+        // The former code promised a retry but returned without scheduling
+        // one.  This is especially visible just after Windows/macOS starts,
+        // while a USB CAT device is still being enumerated.  Reuse the bounded
+        // reconnect scheduler so a manual disconnect still cancels the retry.
+        scheduleTransientReconnect(QStringLiteral("serial port unavailable"));
         return;
     }
 
@@ -1865,7 +1792,13 @@ void DecodiumTransceiverManager::connectRig()
     TransceiverFactory::ParameterPack params;
     Transceiver* xcv = nullptr;
     try {
-        params = buildParams(this);
+        params = buildParams(this, m_coldStartPowerOnPending && !m_coldStartPowerOnWakeSent);
+        if (params.auto_power_on) {
+            // Mark it before handing the object to the worker: if the command
+            // resets the USB bridge, the recovery connection must wait for
+            // the original endpoint rather than repeat the power command.
+            m_coldStartPowerOnWakeSent = true;
+        }
         qInfo().noquote()
             << "[CATDBG] Connect attempt"
             << "rig=" << params.rig_name
@@ -1884,6 +1817,7 @@ void DecodiumTransceiverManager::connectRig()
             << "pttPort=" << params.ptt_port
             << "split=" << splitModeName(params.split_mode)
             << "catKeepAlive=" << params.cat_keep_alive
+            << "autoPowerOn=" << params.auto_power_on
             << "poll=" << (params.poll_interval & 0xffff);
         auto uptr = d->factory.create(params, thread);
         xcv = uptr.release();          // trasferisce ownership al thread (via deleteLater)
@@ -1896,6 +1830,13 @@ void DecodiumTransceiverManager::connectRig()
             << "network=" << m_networkPort
             << "tci=" << m_tciPort
             << "reason=" << e.what();
+        if (params.auto_power_on) {
+            m_coldStartPowerOnPending = false;
+            m_coldStartPowerOnWakeSent = false;
+            emit radioActionCompleted(QStringLiteral("Power on"), false,
+                                      tr("Could not prepare the CAT power-on request: %1")
+                                      .arg(QString::fromLocal8Bit(e.what())));
+        }
         emit errorOccurred(QString("Errore creazione transceiver: %1").arg(e.what()));
         delete thread;
         d->xcvThread = nullptr;
@@ -1909,6 +1850,12 @@ void DecodiumTransceiverManager::connectRig()
             << "network=" << m_networkPort
             << "tci=" << m_tciPort
             << "reason=unknown";
+        if (params.auto_power_on) {
+            m_coldStartPowerOnPending = false;
+            m_coldStartPowerOnWakeSent = false;
+            emit radioActionCompleted(QStringLiteral("Power on"), false,
+                                      tr("Could not prepare the CAT power-on request"));
+        }
         emit errorOccurred("Errore sconosciuto durante la creazione del transceiver");
         delete thread;
         d->xcvThread = nullptr;
@@ -1962,6 +1909,7 @@ void DecodiumTransceiverManager::connectRig()
                 thread->deleteLater();
                 if (m_connected) {
                     m_connected = false;
+                    setAtuState(false, false);
                     emit connectedChanged();
                 }
                 updateTelemetry(0.0, 0.0);
@@ -1978,7 +1926,10 @@ void DecodiumTransceiverManager::connectRig()
     // Aggiornamenti di stato dal rig → main thread
     connect(xcv, &Transceiver::update,
             this,
-            [this](Transceiver::TransceiverState const& state, unsigned /*seq*/) {
+            [this, xcv](Transceiver::TransceiverState const& state, unsigned /*seq*/) {
+                if (d->transceiver != xcv) {
+                    return;
+                }
                 auto const requestedAudio = d->desired.audio();
                 auto const requestedPeriod = d->desired.period();
                 auto const requestedBlocksize = d->desired.blocksize();
@@ -2020,6 +1971,7 @@ void DecodiumTransceiverManager::connectRig()
                 if (m_connected != onl) {
                     setConnecting(false);
                     m_connected = onl;
+                    setAtuState(false, false);
                     emit connectedChanged();
                     emit statusUpdate(onl ? ("Connesso: " + m_rigName) : "Disconnesso");
                     if (onl) {
@@ -2028,6 +1980,14 @@ void DecodiumTransceiverManager::connectRig()
                     }
                     if (onl && m_audioAutoStart)
                         emit audioAutoStartChanged();
+                }
+                if (onl && m_coldStartPowerOnPending) {
+                    m_coldStartPowerOnPending = false;
+                    m_coldStartPowerOnWakeSent = false;
+                    qInfo().noquote()
+                        << "[CATDBG] Explicit cold-start Power On completed"
+                        << "rig=" << m_rigName;
+                    emit radioActionCompleted(QStringLiteral("Power on"), true, {});
                 }
                 if (freq > 0 && m_frequency != freq) {
                     double const previousFrequency = m_frequency;
@@ -2106,10 +2066,12 @@ void DecodiumTransceiverManager::connectRig()
     QString const attemptHandshake = handshakeName(params.handshake);
     QString const attemptPtt = pttMethodName(params.ptt_type);
     QString const attemptPttPort = params.ptt_port;
+    bool const attemptAutoPowerOn = params.auto_power_on;
     connect(xcv, &Transceiver::failure,
             this,
             [this, attemptRig, attemptPortType, attemptSerial, attemptNetwork, attemptTci,
-             attemptBaud, attemptHandshake, attemptPtt, attemptPttPort](QString const& reason) {
+             attemptBaud, attemptHandshake, attemptPtt, attemptPttPort,
+             attemptAutoPowerOn](QString const& reason) {
                 bool const wasConnected = m_connected;
                 bool const startupAttempt = m_connecting && !wasConnected;
                 setConnecting(false);
@@ -2131,9 +2093,31 @@ void DecodiumTransceiverManager::connectRig()
                     << "handshake=" << attemptHandshake
                     << "ptt=" << attemptPtt
                     << "pttPort=" << attemptPttPort
+                    << "autoPowerOn=" << attemptAutoPowerOn
                     << "raw=" << reason
                     << "shown=" << shownReason;
-                if (startupAttempt && isSerialPortMissingFailure(reason)) {
+                bool const wakeUpReconnect = startupAttempt
+                    && m_coldStartPowerOnPending
+                    && m_coldStartPowerOnWakeSent
+                    && (attemptAutoPowerOn
+                        || isSerialPortMissingFailure(reason)
+                        || isTransientCatIoFailure(reason));
+                if (wakeUpReconnect) {
+                    emit statusUpdate(tr("CAT wake-up sent; waiting for %1 to return (%2/5)…")
+                                      .arg(attemptSerial,
+                                           QString::number(m_transientCatRetryCount + 1)));
+                    scheduleTransientReconnect(reason);
+                } else if (attemptAutoPowerOn && startupAttempt) {
+                    m_coldStartPowerOnPending = false;
+                    m_coldStartPowerOnWakeSent = false;
+                    QString const powerOnReason = tr(
+                        "No reply arrived from the selected CAT port while sending the explicit "
+                        "power-on wake-up. Check the selected CAT port and its serial settings. "
+                        "If the radio's USB/serial interface disappears while it is off, it cannot "
+                        "be switched on through that interface.");
+                    emit radioActionCompleted(QStringLiteral("Power on"), false, powerOnReason);
+                    emit errorOccurred(QStringLiteral("CAT failure: ") + powerOnReason);
+                } else if (startupAttempt && isSerialPortMissingFailure(reason)) {
                     emit statusUpdate(shownReason + QStringLiteral(" Ritento CAT a breve..."));
                 } else if (startupAttempt && isTransientCatIoFailure(reason)) {
                     emit statusUpdate(QStringLiteral("CAT non connesso: ") + shownReason);
@@ -2143,7 +2127,7 @@ void DecodiumTransceiverManager::connectRig()
                 } else {
                     emit errorOccurred("CAT failure: " + shownReason);
                 }
-                if (m_connected) { m_connected = false; emit connectedChanged(); }
+                if (m_connected) { m_connected = false; setAtuState(false, false); emit connectedChanged(); }
                 updateTelemetry(0.0, 0.0);
             },
             Qt::QueuedConnection);
@@ -2169,6 +2153,11 @@ void DecodiumTransceiverManager::connectRig()
 // ── disconnectRig ─────────────────────────────────────────────────────────
 void DecodiumTransceiverManager::disconnectRig()
 {
+    // A manual disconnect cancels a requested cold-start wake-up. An internal
+    // reconnect keeps it intact so the queued replacement connection can use
+    // the user's explicit Power On intent.
+    m_coldStartPowerOnPending = false;
+    m_coldStartPowerOnWakeSent = false;
     disconnectRigInternal(false);
 }
 
@@ -2257,6 +2246,7 @@ void DecodiumTransceiverManager::disconnectRigInternal(bool reconnectAfterDiscon
 
     if (m_connected) {
         m_connected = false;
+        setAtuState(false, false);
         emit connectedChanged();
     }
     updateTelemetry(0.0, 0.0);
@@ -2282,6 +2272,16 @@ void DecodiumTransceiverManager::scheduleTransientReconnect(const QString& reaso
     static constexpr int maxRetries = 5;
     if (m_transientCatRetryCount >= maxRetries) {
         m_transientCatRetryCount = 0;
+        if (m_coldStartPowerOnPending) {
+            m_coldStartPowerOnPending = false;
+            m_coldStartPowerOnWakeSent = false;
+            QString const message = tr(
+                "The configured CAT port did not return after the radio power was restored. "
+                "Check that the radio supply is on and select its actual CAT port.");
+            emit radioActionCompleted(QStringLiteral("Power on"), false, message);
+            emit errorOccurred(QStringLiteral("CAT failure: ") + message);
+            return;
+        }
         emit errorOccurred(QStringLiteral("CAT failure: ") + sanitizeHamlibFailure(reason));
         return;
     }
@@ -2702,18 +2702,142 @@ void DecodiumTransceiverManager::requestAtuTune()
         QString error;
         bool const ok = hamlib && hamlib->request_atu_tune(&error);
         if (!hamlib) error = QStringLiteral("ATU control is available only for Hamlib radios");
-        if (owner) QMetaObject::invokeMethod(owner, [owner, xcv, action, ok, error]() {
-            if (owner && owner->m_connected && owner->d->transceiver == xcv)
+        bool stateValid = false;
+        bool enabled = false;
+        QString stateError;
+        if (ok && hamlib)
+            stateValid = hamlib->read_atu_state(&enabled, &stateError);
+        if (owner) QMetaObject::invokeMethod(owner, [owner, xcv, action, ok, error,
+                                                      stateValid, enabled]() {
+            if (owner && owner->m_connected && owner->d->transceiver == xcv) {
+                owner->setAtuState(stateValid, enabled);
                 emit owner->radioActionCompleted(action, ok, error);
+            }
         }, Qt::QueuedConnection);
     }, Qt::QueuedConnection);
+}
+
+void DecodiumTransceiverManager::requestAtuOff()
+{
+    const QString action = QStringLiteral("ATU Off");
+    if (!m_connected || !d->transceiver) {
+        setAtuState(false, false);
+        emit radioActionCompleted(action, false, tr("CAT disconnected"));
+        return;
+    }
+    QPointer<DecodiumTransceiverManager> owner(this);
+    QPointer<Transceiver> xcv = d->transceiver;
+    QMetaObject::invokeMethod(xcv, [owner, xcv, action]() {
+        auto *hamlib = dynamic_cast<HamlibTransceiver *>(xcv.data());
+        QString error;
+        bool const commandOk = hamlib && hamlib->request_atu_off(&error);
+        if (!hamlib) error = QStringLiteral("ATU control is available only for Hamlib radios");
+        bool stateValid = false;
+        bool enabled = false;
+        QString stateError;
+        if (commandOk && hamlib)
+            stateValid = hamlib->read_atu_state(&enabled, &stateError);
+        bool const ok = commandOk && stateValid && !enabled;
+        if (commandOk && !stateValid)
+            error = QStringLiteral("ATU OFF command sent, but the radio state could not be read back: ") + stateError;
+        else if (commandOk && enabled)
+            error = QStringLiteral("The radio did not confirm ATU OFF");
+        if (owner) QMetaObject::invokeMethod(owner, [owner, xcv, action, ok, error,
+                                                      stateValid, enabled]() {
+            if (owner && owner->m_connected && owner->d->transceiver == xcv) {
+                owner->setAtuState(stateValid, enabled);
+                emit owner->radioActionCompleted(action, ok, error);
+            }
+        }, Qt::QueuedConnection);
+    }, Qt::QueuedConnection);
+}
+
+void DecodiumTransceiverManager::requestAtuState()
+{
+    if (!m_connected || !d->transceiver) {
+        setAtuState(false, false);
+        return;
+    }
+    QPointer<DecodiumTransceiverManager> owner(this);
+    QPointer<Transceiver> xcv = d->transceiver;
+    QMetaObject::invokeMethod(xcv, [owner, xcv]() {
+        auto *hamlib = dynamic_cast<HamlibTransceiver *>(xcv.data());
+        bool enabled = false;
+        QString error;
+        bool const ok = hamlib && hamlib->read_atu_state(&enabled, &error);
+        if (owner) QMetaObject::invokeMethod(owner, [owner, xcv, ok, enabled]() {
+            if (owner && owner->m_connected && owner->d->transceiver == xcv)
+                owner->setAtuState(ok, enabled);
+        }, Qt::QueuedConnection);
+    }, Qt::QueuedConnection);
+}
+
+void DecodiumTransceiverManager::setAtuState(bool valid, bool enabled)
+{
+    if (m_atuStateValid == valid && m_atuEnabled == enabled)
+        return;
+    m_atuStateValid = valid;
+    m_atuEnabled = enabled;
+    emit atuStateChanged();
 }
 
 void DecodiumTransceiverManager::requestRadioPowerOn()
 {
     const QString action = QStringLiteral("Power on");
     if (!m_connected || !d->transceiver) {
-        emit radioActionCompleted(action, false, tr("CAT disconnected"));
+        QString const transport = m_portType.trimmed().toLower();
+        bool const directCat = transport == QStringLiteral("serial")
+            || transport == QStringLiteral("usb");
+        if (!directCat) {
+            emit radioActionCompleted(action, false, tr(
+                "Power On while disconnected requires a direct serial or USB Hamlib CAT connection."));
+            return;
+        }
+        if (m_connecting) {
+            emit radioActionCompleted(action, false,
+                                      tr("A CAT connection attempt is already in progress"));
+            return;
+        }
+        if (isDefaultSerialChoice(m_serialPort)) {
+            refreshPorts();
+            emit radioActionCompleted(action, false, tr(
+                "Select the radio's CAT port before using Power On."));
+            return;
+        }
+        if (!serialPortCurrentlyAvailable(m_serialPort)) {
+            refreshPorts();
+            ++m_transientCatReconnectSerial;
+            m_transientCatReconnectPending = false;
+            m_transientCatRetryCount = 0;
+            m_coldStartPowerOnPending = true;
+            m_coldStartPowerOnWakeSent = false;
+            qInfo().noquote()
+                << "[CATDBG] Explicit cold-start Power On waiting for CAT port"
+                << "rig=" << m_rigName
+                << "portType=" << m_portType
+                << "serial=" << m_serialPort;
+            emit statusUpdate(tr("Waiting for configured CAT port %1 after radio power restore…")
+                .arg(m_serialPort.trimmed().isEmpty()
+                     ? QStringLiteral("<not configured>") : m_serialPort.trimmed()));
+            scheduleTransientReconnect(QStringLiteral("configured CAT port unavailable"));
+            return;
+        }
+
+        // Hamlib must be told before rig_open(), not after it has sent its
+        // normal probe. This uses the model-specific wake-up implementation
+        // only for the user's explicit Power On request.
+        ++m_transientCatReconnectSerial;
+        m_transientCatReconnectPending = false;
+        m_transientCatRetryCount = 0;
+        m_coldStartPowerOnPending = true;
+        m_coldStartPowerOnWakeSent = false;
+        qInfo().noquote()
+            << "[CATDBG] Explicit cold-start Power On requested"
+            << "rig=" << m_rigName
+            << "portType=" << m_portType
+            << "serial=" << m_serialPort;
+        emit statusUpdate(tr("Sending CAT power-on wake-up to %1…").arg(m_rigName));
+        connectRig();
         return;
     }
     QPointer<DecodiumTransceiverManager> owner(this);
@@ -2724,8 +2848,23 @@ void DecodiumTransceiverManager::requestRadioPowerOn()
         bool const ok = hamlib && hamlib->request_power_on(&error);
         if (!hamlib) error = QStringLiteral("Power control is available only for Hamlib radios");
         if (owner) QMetaObject::invokeMethod(owner, [owner, xcv, action, ok, error]() {
-            if (owner && owner->m_connected && owner->d->transceiver == xcv)
+            if (owner && owner->m_connected && owner->d->transceiver == xcv) {
                 emit owner->radioActionCompleted(action, ok, error);
+                if (ok) {
+                    // Hamlib/NewCAT can acknowledge power-on before the rig
+                    // accepts VFO writes. Re-submit the latest desired state
+                    // only after the worker's bounded settle window so a mode
+                    // or frequency request deferred in standby is not lost.
+                    QTimer::singleShot(5500, owner.data(), [owner, xcv]() {
+                        if (!owner || !owner->m_connected || owner->d->transceiver != xcv)
+                            return;
+                        qInfo().noquote()
+                            << "[CATDBG] Replaying deferred CAT state after Power On"
+                            << "rig=" << owner->m_rigName;
+                        sendState(owner->d.get());
+                    });
+                }
+            }
         }, Qt::QueuedConnection);
     }, Qt::QueuedConnection);
 }

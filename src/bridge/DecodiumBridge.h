@@ -441,6 +441,7 @@ class DecodiumBridge : public QObject
     // (grafica OpenGL all'avvio, lowCpuMode, thread bassi, priorità normale,
     // profilo cpu). La grafica richiede riavvio (letta in main_qml).
     Q_PROPERTY(bool   lowEndMode           READ lowEndMode           WRITE setLowEndMode NOTIFY lowEndModeChanged)
+    Q_PROPERTY(bool   resetSafeGraphicsNextLaunch READ resetSafeGraphicsNextLaunch WRITE setResetSafeGraphicsNextLaunch NOTIFY resetSafeGraphicsNextLaunchChanged)
 
     // === PSK REPORTER ===
     Q_PROPERTY(bool       pskSearchFound      READ pskSearchFound      NOTIFY pskSearchFoundChanged)
@@ -1232,6 +1233,8 @@ public:
     bool   lowCpuModeEnabled()    const { return m_lowCpuModeEnabled; }
     bool   lowEndMode()           const { return m_lowEndMode; }
     Q_INVOKABLE void setLowEndMode(bool enabled);
+    bool resetSafeGraphicsNextLaunch() const { return m_resetSafeGraphicsNextLaunch; }
+    Q_INVOKABLE void setResetSafeGraphicsNextLaunch(bool enabled);
     Q_INVOKABLE void setLowCpuModeEnabled(bool enabled);
 
     // PSK Reporter
@@ -2412,6 +2415,7 @@ signals:
     void ftThreadsChanged();
     void lowCpuModeEnabledChanged();
     void lowEndModeChanged();
+    void resetSafeGraphicsNextLaunchChanged();
     void alertOnCqChanged();
     void alertOnMyCallChanged();
     void recordRxEnabledChanged();
@@ -3363,6 +3367,7 @@ private:
     bool        m_ftThreadsAuto {true};
     bool        m_lowCpuModeEnabled {false};
     bool        m_lowEndMode {false};   // 1.0.497 — Modalità PC lento (master)
+    bool        m_resetSafeGraphicsNextLaunch {false};
     double m_fontScale {1.08};
     int m_nfa {200}, m_nfb {4000}, m_ndepth {3}, m_ncontest {0};
     bool m_singleDecode {false};

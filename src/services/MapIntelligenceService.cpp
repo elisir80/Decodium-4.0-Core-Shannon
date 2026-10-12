@@ -61,6 +61,18 @@ constexpr qint64 kLiveRetentionMs = 30LL * 24LL * 60LL * 60LL * 1000LL;
 // historical stream used by the heatmap, timeline and path overlays.
 constexpr qint64 kSpotEventRetentionMs = 30LL * 24LL * 60LL * 60LL * 1000LL;
 
+bool mapIntelligenceTraceEnabled()
+{
+    // Snapshot publication is intentionally quiet in normal operation. Keep
+    // the full summary available for diagnosing map/database refreshes without
+    // adding terminal I/O to every coalesced snapshot.
+    static const bool enabled =
+        qEnvironmentVariableIsSet("DECODIUM_MAPINT_TRACE")
+        && qEnvironmentVariable("DECODIUM_MAPINT_TRACE").trimmed()
+               .compare(QStringLiteral("0"), Qt::CaseInsensitive) != 0;
+    return enabled;
+}
+
 QStringList mapCtyDatSearchPaths()
 {
     QString const appDir = QCoreApplication::applicationDirPath();
@@ -7952,18 +7964,20 @@ void MapIntelligenceService::applySnapshotNow(Snapshot snapshot)
     if (statisticsDataChanged) notificationFlags |= SnapshotNotifyStatistics;
     queueSnapshotNotifications(notificationFlags);
 
-    qInfo().noquote()
-        << QStringLiteral("[MAPINT] snapshot qso=%1 worked=%2 confirmed=%3 active=%4 missing=%5 live=%6 roster=%7 wanted=%8 alerts=%9 db=%10")
-               .arg(m_qsoCount)
-               .arg(m_workedGridCount)
-               .arg(m_confirmedGridCount)
-               .arg(m_activeGridCount)
-               .arg(m_missingGridCount)
-               .arg(m_liveSpotCount)
-               .arg(m_roster.size())
-               .arg(m_rosterWantedCount)
-               .arg(m_unreadAlertCount)
-               .arg(m_databasePath);
+    if (mapIntelligenceTraceEnabled()) {
+        qInfo().noquote()
+            << QStringLiteral("[MAPINT] snapshot qso=%1 worked=%2 confirmed=%3 active=%4 missing=%5 live=%6 roster=%7 wanted=%8 alerts=%9 db=%10")
+                   .arg(m_qsoCount)
+                   .arg(m_workedGridCount)
+                   .arg(m_confirmedGridCount)
+                   .arg(m_activeGridCount)
+                   .arg(m_missingGridCount)
+                   .arg(m_liveSpotCount)
+                   .arg(m_roster.size())
+                   .arg(m_rosterWantedCount)
+                   .arg(m_unreadAlertCount)
+                   .arg(m_databasePath);
+    }
 }
 
 void MapIntelligenceService::applyGridDetails(quint64 generation,

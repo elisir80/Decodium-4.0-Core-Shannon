@@ -40,8 +40,15 @@ ApplicationWindow {
     onClosing: voice.stop()
     onActiveChanged: if (!active) voice.stop()
     Component.onDestruction: voice.stop()
-    onVisibleChanged: if (visible) { syncRadioModeFromCat(); bridge.ssbRefreshControls() }
-    Component.onCompleted: syncRadioModeFromCat()
+    onVisibleChanged: if (visible) {
+        syncRadioModeFromCat()
+        bridge.ssbRefreshControls()
+        if (bridge.hamlibCat) bridge.hamlibCat.requestAtuState()
+    }
+    Component.onCompleted: {
+        syncRadioModeFromCat()
+        if (bridge.hamlibCat) bridge.hamlibCat.requestAtuState()
+    }
     Shortcut { sequence: "Escape"; onActivated: { voice.stop(); voiceKeyer.stop() } }
 
     // Barra spaziatrice = PTT: si trasmette finche' e' premuta. Con il cursore in
@@ -111,7 +118,13 @@ ApplicationWindow {
     }
     Connections {
         target: bridge
-        function onCatConnectedChanged() { if (!bridge.catConnected) voice.stop(); if(win.visible) { syncRadioModeFromCat(); bridge.ssbRefreshControls() } }
+        function onCatConnectedChanged() {
+            if (!bridge.catConnected) voice.stop()
+            if (win.visible) {
+                syncRadioModeFromCat(); bridge.ssbRefreshControls()
+                if (bridge.catConnected && bridge.hamlibCat) bridge.hamlibCat.requestAtuState()
+            }
+        }
         function onCatModeChanged() { syncRadioModeFromCat() }
         function onModeChanged() { if (bridge.mode !== "SSB") voice.stop() }
         function onDecoPortUseRemoteChanged() { voice.stop(); bridge.ssbRefreshControls() }
@@ -120,7 +133,8 @@ ApplicationWindow {
         target: bridge.hamlibCat
         function onRadioActionCompleted(action, ok, error) {
             win.radioActionStatus = ok
-                ? (action.toLowerCase().indexOf("atu") >= 0 ? qsTr("Radio ATU command sent")
+                ? (action.toLowerCase().indexOf("atu off") >= 0 ? qsTr("Radio ATU disabled")
+                   : action.toLowerCase().indexOf("atu") >= 0 ? qsTr("Radio ATU command sent")
                    : action.toLowerCase().indexOf("on") >= 0 ? qsTr("Radio power-on command sent")
                    : qsTr("Radio power-off command sent"))
                 : (error || qsTr("Radio command failed"))
@@ -424,7 +438,22 @@ ApplicationWindow {
                     SpinBox { from: 0; to: 100; value: controls.rf === undefined ? 0 : Math.round(controls.rf); enabled: ready && controls.busy !== true && !voice.transmitting && controls.rfSupported === true; onValueModified: bridge.ssbSetControl("rf",value) }
                     Label { text: qsTr("Radio mic gain %") }
                     SpinBox { from: 0; to: 100; value: controls.mic === undefined ? 0 : Math.round(controls.mic); enabled: ready && controls.busy !== true && !voice.transmitting && controls.micSupported === true; onValueModified: bridge.ssbSetControl("mic",value) }
-                    Button { text: qsTr("Read radio"); Layout.columnSpan: 2; enabled: ready && controls.busy !== true && !voice.transmitting; onClicked: bridge.ssbRefreshControls() }
+                    Button { text: qsTr("Read radio"); Layout.columnSpan: 2; enabled: ready && controls.busy !== true && !voice.transmitting; onClicked: { bridge.ssbRefreshControls(); if (bridge.hamlibCat) bridge.hamlibCat.requestAtuState() } }
+                    Label {
+                        text: qsTr("ATU state: ") + (bridge.hamlibCat && bridge.hamlibCat.connected
+                              ? (bridge.hamlibCat.atuStateValid
+                                 ? (bridge.hamlibCat.atuEnabled ? qsTr("ON") : qsTr("OFF"))
+                                 : qsTr("unknown"))
+                              : qsTr("—"))
+                        Layout.columnSpan: 2
+                    }
+                    Button {
+                        text: qsTr("Read ATU state")
+                        Layout.columnSpan: 2
+                        enabled: ready && controls.busy !== true && !voice.transmitting
+                                 && !bridge.decoPortUseRemote && bridge.hamlibCat && bridge.hamlibCat.connected
+                        onClicked: bridge.hamlibCat.requestAtuState()
+                    }
                     Button {
                         text: qsTr("ATU Tune")
                         Layout.columnSpan: 2
@@ -435,12 +464,22 @@ ApplicationWindow {
                         onClicked: bridge.hamlibCat.requestAtuTune()
                     }
                     Button {
-                        text: qsTr("Power on radio")
+                        text: qsTr("ATU OFF")
                         Layout.columnSpan: 2
                         enabled: ready && controls.busy !== true && !voice.transmitting
                                  && !bridge.decoPortUseRemote && bridge.hamlibCat && bridge.hamlibCat.connected
                         ToolTip.visible: hovered
-                        ToolTip.text: qsTr("Ask the radio to power on through Hamlib CAT, if supported by the model.")
+                        ToolTip.text: qsTr("Disable the radio's automatic antenna tuner.")
+                        onClicked: bridge.hamlibCat.requestAtuOff()
+                    }
+                    Button {
+                        text: qsTr("Power on radio")
+                        Layout.columnSpan: 2
+                        enabled: bridge.mode === "SSB" && controls.busy !== true && !voice.transmitting
+                                 && !bridge.decoPortUseRemote && bridge.hamlibCat
+                                 && !bridge.hamlibCat.connecting
+                        ToolTip.visible: hovered
+                        ToolTip.text: qsTr("Ask a supported radio to power on through direct Hamlib CAT. The selected CAT port must remain available while the radio is in standby.")
                         onClicked: bridge.hamlibCat.requestRadioPowerOn()
                     }
                     Button {

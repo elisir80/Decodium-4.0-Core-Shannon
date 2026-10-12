@@ -362,6 +362,7 @@ Item {
                    (index % 2 === 0) ? Qt.rgba(root.cBlue.r, root.cBlue.g, root.cBlue.b, 0.07)
                                      : Qt.rgba(root.cBlue.r, root.cBlue.g, root.cBlue.b, 0.13)
             radius: 2
+            clip: true
 
             Rectangle {
                 visible: del.isSep
@@ -406,6 +407,7 @@ Item {
                 visible: !del.isSep
                 anchors { fill: parent; leftMargin: 6; rightMargin: 6 }
                 spacing: 0
+                clip: true
                 Text {
                     text: !modelData ? "" : (del.entry.formattedTime || del.entry.time || "")
                     color: !modelData ? root.cTextDim : (del.entry.isTx ? "#f1c40f" : root.cTextDim)
@@ -467,7 +469,9 @@ Item {
                                         && !!root.bridge
                                         && root.bridge.b4Strikethrough
                     elide: Text.ElideRight
+                    Layout.fillHeight: true
                     Layout.fillWidth: true
+                    verticalAlignment: Text.AlignVCenter
                 }
             }
         }

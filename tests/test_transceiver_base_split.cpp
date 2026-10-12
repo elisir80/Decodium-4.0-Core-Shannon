@@ -24,10 +24,12 @@ namespace
 
     QStringList commands;
     bool reject_rx {false};   // a rig that refuses the RX frequency change
+    bool state_commands_available {true};
 
   protected:
     int do_start () override {return 0;}
     void do_stop () override {}
+    bool do_state_commands_available () const override {return state_commands_available;}
 
     void do_frequency (Frequency f, MODE m, bool) override
     {
@@ -148,6 +150,17 @@ private slots:
   {
     send (request (kRx, 0, false));
     QVERIFY2 (rig_->commands.isEmpty (), qPrintable (rig_->commands.join (',')));
+  }
+
+  void commandsAreDeferredUntilTheRigIsReady ()
+  {
+    rig_->state_commands_available = false;
+    send (request (kRx + 1000, 0, false));
+    QVERIFY2 (rig_->commands.isEmpty (), qPrintable (rig_->commands.join (',')));
+
+    rig_->state_commands_available = true;
+    send (request (kRx + 1000, 0, false));
+    QCOMPARE (rig_->commands, QStringList {QStringLiteral ("rx:%1").arg (kRx + 1000)});
   }
 
   // The branch that was moved must keep doing its own job.

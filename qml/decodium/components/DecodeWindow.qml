@@ -1314,6 +1314,7 @@ Component.onCompleted: {
                                 }
                                 border.width: (!isPeriodSeparator && decodeWindow.wsjtxBgColor(modelData)) ? 1 : 0
                                 radius: 2
+                                clip: true
 
                                 // Linea visibile centrata nel separatore
                                 Rectangle {
@@ -1403,6 +1404,7 @@ Component.onCompleted: {
                                     anchors.leftMargin: 4
                                     anchors.rightMargin: 4
                                     spacing: 0
+                                    clip: true
 
                                     Text {
                                         text: modelData.formattedTime || formatUtcForDisplay(modelData.time)
@@ -1483,8 +1485,10 @@ Component.onCompleted: {
                                         // Shannon strikethrough per B4
                                         font.strikeout: modelData.isB4 && bridge.b4Strikethrough
                                         color: getDxccColor(modelData)
+                                        Layout.fillHeight: true
                                         Layout.fillWidth: true
                                         Layout.minimumWidth: decodeWindow.bandMessageMinWidth
+                                        verticalAlignment: Text.AlignVCenter
                                         elide: decodeWindow.messageElideMode(modelData.displayMessage || modelData.message)
                                     }
 
@@ -1863,6 +1867,7 @@ Component.onCompleted: {
                                 }
                                 border.width: (!isPeriodSeparator && decodeWindow.wsjtxBgColor(modelData)) ? 1 : 0
                                 radius: 2
+                                clip: true
 
                                 Rectangle {
                                     visible: parent.isPeriodSeparator
@@ -1945,6 +1950,7 @@ Component.onCompleted: {
                                     anchors.leftMargin: 4
                                     anchors.rightMargin: 4
                                     spacing: 0
+                                    clip: true
 
                                     Text {
                                         text: modelData.formattedTime || formatUtcForDisplay(modelData.time)
@@ -2016,7 +2022,9 @@ Component.onCompleted: {
                                         font.bold: decodeWindow.decodeEntryBold(modelData)
                                         font.strikeout: modelData.isB4 && bridge.b4Strikethrough
                                         color: getDxccColor(modelData)
+                                        Layout.fillHeight: true
                                         Layout.fillWidth: true
+                                        verticalAlignment: Text.AlignVCenter
                                         elide: decodeWindow.messageElideMode(modelData.displayMessage || modelData.message)
                                     }
 

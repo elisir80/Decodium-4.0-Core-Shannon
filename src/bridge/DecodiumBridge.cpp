@@ -11143,6 +11143,24 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
                 emit catConnectedChanged();
                 emit catRigNameChanged();
                 refreshPskReporterLocalStation();
+                if (!c && m_tciAudioCaptureActive) {
+                    // TCI audio is a network stream, not a local sound card.
+                    // When CAT drops, stop it immediately and reopen the
+                    // selected local input so RX remains observable to
+                    // PulseAudio/PipeWire and the decoder does not stay on an
+                    // empty TCI buffer.
+                    bridgeLog(QStringLiteral("CAT[%1] disconnected: falling back from TCI audio to local RX input")
+                                  .arg(backend));
+                    stopAudioCapture();
+                    if (m_monitoring) {
+                        QTimer::singleShot(0, this, [this]() {
+                            if (m_monitoring && !usingTciAudioInput()
+                                && !m_transmitting && !m_tuning) {
+                                startAudioCapture();
+                            }
+                        });
+                    }
+                }
                 bool autoStart = catProp("audioAutoStart").toBool();
                 if (c && autoStart && !m_monitoring)
                     QTimer::singleShot(300, this, [this]() { setMonitoring(true); });
@@ -11226,6 +11244,13 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
                     && usingTciAudioInput()) {
                     QTimer::singleShot(150, this, [this]() {
                         if (m_catBackend == QStringLiteral("tci") && m_monitoring && usingTciAudioInput()) {
+                            // A disconnected TCI profile may have fallen back
+                            // to the local QAudioSource while CAT was down.
+                            // Release it before handing RX back to the TCI
+                            // stream, otherwise both paths remain armed.
+                            if (m_soundInput) {
+                                stopAudioCapture();
+                            }
                             startTciAudioCapture();
                         }
                     });
@@ -16007,6 +16032,30 @@ void DecodiumBridge::setLowEndMode(bool enabled)
 
     emit lowEndModeChanged();
     emit settingValueChanged(QStringLiteral("LowEndMode"), m_lowEndMode);
+}
+
+void DecodiumBridge::setResetSafeGraphicsNextLaunch(bool enabled)
+{
+    if (m_resetSafeGraphicsNextLaunch == enabled)
+        return;
+
+    m_resetSafeGraphicsNextLaunch = enabled;
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope,
+                       QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    constexpr auto key = "Graphics/ResetSafeGraphicsNextLaunch";
+    if (enabled)
+        settings.setValue(QString::fromLatin1(key), true);
+    else
+        settings.remove(QString::fromLatin1(key));
+    settings.sync();
+
+    bridgeLog(QStringLiteral("Reset graphics next launch: %1")
+                  .arg(enabled ? QStringLiteral("armed") : QStringLiteral("cancelled")));
+    emit resetSafeGraphicsNextLaunchChanged();
+    emit settingValueChanged(QStringLiteral("ResetSafeGraphicsNextLaunch"), enabled);
+    emit statusMessage(enabled
+                       ? QStringLiteral("Al prossimo avvio verranno ripristinate le impostazioni grafiche automatiche")
+                       : QStringLiteral("Reset grafico al prossimo avvio annullato"));
 }
 
 // ---------------------------------------------------------------------------
@@ -43195,7 +43244,7 @@ void DecodiumBridge::testCwMonitor() {
     for (const auto& e : decodium::cw::timelineFor(QStringLiteral("V"), 20))
         events.append({e.deltaMs, e.down});
     if (playCwMonitor(events, 700))
-        emit statusMessage(tr("CW tone test sent to the selected local audio output (V)."));
+        emit statusMessage(tr("CW tone test queued for the selected local audio output (V)."));
 }
 
 // SSB voice workspace.
@@ -51821,7 +51870,8 @@ bool DecodiumBridge::usingTciAudioInput() const
     // silenzio pur essendo il collegamento gia' su TCI e l'opzione attiva.
     // Il flag tci__audio nel gestore CAT usa gia' portType: le due
     // condizioni erano incoerenti fra loro.
-    if (!m_hamlibCat || !m_hamlibCat->tciAudioEnabled()) {
+    if (!m_hamlibCat || !m_hamlibCat->tciAudioEnabled()
+        || !m_hamlibCat->connected()) {
         return false;
     }
     return m_catBackend == QStringLiteral("tci")

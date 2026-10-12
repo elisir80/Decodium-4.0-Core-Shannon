@@ -7,19 +7,16 @@
 // istanti si mettono in fila, e lo Stop svuota tutto.
 #pragma once
 
-#include <QAudioSink>
-#include <QIODevice>
+#include <QByteArray>
 #include <QList>
-#include <QMutex>
 #include <QObject>
-#include <QPointer>
-#include <QTimer>
 
-#include <memory>
+class QThread;
 
 namespace decodium::cw {
 
 class SidetoneSource;
+class CwSidetoneWorker;
 
 class CwSidetone : public QObject {
     Q_OBJECT
@@ -32,22 +29,12 @@ public:
     bool enqueue(const QList<int>& deltasMs, const QList<bool>& down, int toneHz);
     void clear();
     void setDeviceId(const QByteArray& id);
+    void setVolume(double volume);   // 0..1
 signals:
     void failed(const QString& message);
 private:
-    QByteArray m_deviceId;
-public:
-    void setVolume(double volume);   // 0..1
-
-private:
-    bool ensureSink();
-    void idleCheck();
-
-    std::unique_ptr<SidetoneSource> m_source;
-    QPointer<QAudioSink> m_sink;
-    QTimer m_idle;
-    double m_volume {0.35};
-    int m_sampleRate {48000};
+    QThread* m_thread {nullptr};
+    CwSidetoneWorker* m_worker {nullptr};
 };
 
 }  // namespace decodium::cw

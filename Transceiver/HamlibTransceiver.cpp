@@ -698,6 +698,19 @@ HamlibTransceiver::HamlibTransceiver (logger_type * logger,
   // do this late to allow any configuration option to be overriden
   load_user_settings ();
 
+  // A radio that is fully asleep can reject Hamlib's normal opening probes.
+  // Hamlib's portable auto_power_on option runs its model-specific wake-up
+  // sequence before those probes.  It is deliberately set only for the one
+  // connection created by an explicit dashboard Power On action; normal CAT
+  // startup must never turn a radio on by itself.
+  if (params.auto_power_on)
+    {
+      m_->set_conf ("auto_power_on", "1");
+      qInfo ().noquote ()
+        << "[CATDBG] Explicit cold-start Power On enabled for Hamlib open"
+        << "rig=" << params.rig_name;
+    }
+
   // would be nice to get events but not supported on Windows and also not on a lot of rigs
   // rig_set_freq_callback (m_->rig_.data (), &frequency_change_callback, this);
 }
@@ -772,6 +785,32 @@ int HamlibTransceiver::do_start ()
     {
       rig_close (m_->rig_.data ());   // release serial port before throwing
       throw error {tr ("Rig not ready — caps null after open (no response from radio?)")};
+    }
+
+  rig_powered_off_ = false;
+  power_on_settle_clock_.invalidate ();
+  // Some rigs keep CAT alive in standby/off. NewCAT is one example: it
+  // accepts the PS command but deliberately rejects VS/FA while power is off.
+  // Do not turn this into a failed connection: the open serial session is the
+  // route required by the dashboard's Power On command.
+  if (!m_->is_dummy_ && m_->rig_->caps->get_powerstat)
+    {
+      powerstat_t power_status {RIG_POWER_UNKNOWN};
+      int const power_rc = rig_get_powerstat (m_->rig_.data (), &power_status);
+      if (RIG_OK == power_rc && RIG_POWER_OFF == power_status)
+        {
+          rig_powered_off_ = true;
+          qInfo ().noquote ()
+            << "[CATDBG] Hamlib CAT session opened while rig power is off"
+            << "rig=" << rig_get_caps_cptr (m_->model_, RIG_CAPS_MODEL_NAME_CPTR)
+            << "— waiting for dashboard Power On";
+          // TransceiverBase has already set its online state. Publish it so
+          // the QML dashboard can issue request_power_on() on this live port.
+          update_complete (true);
+          return -1;
+        }
+      CAT_TRACE ("startup rig_get_powerstat rc=" << power_rc
+                 << "status=" << power_status);
     }
 
   if (RIG_PTT_NONE != m_->rig_->state.pttport.type.ptt)
@@ -917,8 +956,44 @@ int HamlibTransceiver::do_start ()
       m_->error_check (rc, "testing getting current VFO");
     }
 
-  if ((WSJT_RIG_NONE_CAN_SPLIT || !m_->is_dummy_)
-      && rig_get_function_ptr (m_->model_, RIG_FUNCTION_SET_SPLIT_VFO)) // if split is possible do some extra setup
+  // Icom CI-V can set VFO A/B but cannot report which VFO is selected.  The
+  // traditional Hamlib startup workaround switches to the other VFO, reads
+  // it, then forces VFO A.  That is visible as a real (and surprising) QSY
+  // whenever A and B hold different band frequencies.  With rig split
+  // control disabled we neither need nor have permission to alter the
+  // operator's VFO selection: obtain the selected VFO's state using only
+  // read commands instead.
+  bool const preserve_selected_icom_vfo = adaptive_frequency_poll_
+      && !rig_split_control_enabled_;
+  if (preserve_selected_icom_vfo)
+    {
+      freq_t current_frequency {0};
+      rmode_t current_mode {RIG_MODE_USB};
+      pbwidth_t current_width {RIG_PASSBAND_NORMAL};
+
+      if (m_->freq_query_works_)
+        {
+          m_->error_check (rig_get_freq (m_->rig_.data (), RIG_VFO_CURR, &current_frequency),
+                           tr ("getting current VFO frequency"));
+          current_frequency = std::round (current_frequency);
+          update_rx_frequency (current_frequency);
+        }
+      if (m_->mode_query_works_)
+        {
+          m_->error_check (rig_get_mode (m_->rig_.data (), RIG_VFO_CURR,
+                                         &current_mode, &current_width),
+                           tr ("getting current VFO mode"));
+          update_mode (m_->map_mode (current_mode));
+        }
+
+      qInfo ().noquote ()
+        << "[CATDBG] Hamlib Icom startup preserved selected VFO"
+        << "splitControl=" << rig_split_control_enabled_
+        << "frequencyHz=" << current_frequency
+        << "mode=" << rig_strrmode (current_mode);
+    }
+  else if ((WSJT_RIG_NONE_CAN_SPLIT || !m_->is_dummy_)
+           && rig_get_function_ptr (m_->model_, RIG_FUNCTION_SET_SPLIT_VFO)) // if split is possible do some extra setup
     {
       freq_t f1;
       freq_t f2;
@@ -1128,6 +1203,16 @@ int HamlibTransceiver::do_start ()
 
   CAT_TRACE ("finished start " << state () << " reversed=" << m_->reversed_ << " resolution=" << resolution);
   return resolution;
+}
+
+bool HamlibTransceiver::do_state_commands_available () const
+{
+  if (rig_powered_off_)
+    {
+      return false;
+    }
+  return !power_on_settle_clock_.isValid ()
+      || power_on_settle_clock_.elapsed () >= kPowerOnSettleMs_;
 }
 
 void HamlibTransceiver::do_stop ()
@@ -1662,6 +1747,28 @@ void HamlibTransceiver::do_poll ()
       return;
     }
 
+  // A serial CAT link can remain alive while the rig is in standby.  Do not
+  // let the ordinary polling cycle turn that usable link into a failure by
+  // asking NewCAT for VFO/mode data before the radio has been powered on.
+  if (rig_powered_off_)
+    {
+      return;
+    }
+
+  // Some radios acknowledge their CAT Power On command before their VFO
+  // command parser is ready.  The timer keeps running, but its work is held
+  // for a short bounded window so the worker thread and the GUI stay live.
+  if (power_on_settle_clock_.isValid ())
+    {
+      if (power_on_settle_clock_.elapsed () < kPowerOnSettleMs_)
+        {
+          return;
+        }
+      power_on_settle_clock_.invalidate ();
+      start_cat_keep_alive_timer ();
+      qInfo ().noquote () << "[CATDBG] Hamlib power-on settle complete";
+    }
+
   freq_t f {0};
   rmode_t m {RIG_MODE_USB};
   pbwidth_t w {RIG_PASSBAND_NORMAL};
@@ -1856,6 +1963,28 @@ void HamlibTransceiver::start_cat_keep_alive_timer ()
       || !m_->freq_query_works_)
     {
       return;
+    }
+
+  // Keep the serial CAT session quiet while the radio is genuinely off.  A
+  // powered-off NewCAT rig rejects ordinary VFO/mode queries with a protocol
+  // error; treating that as a lost COM port used to discard the very session
+  // needed to wake the radio.
+  if (rig_powered_off_)
+    {
+      return;
+    }
+
+  // The power-on command is accepted before some radios are ready to answer
+  // normal CAT queries.  Give their firmware a bounded settling window rather
+  // than immediately taking the just-restored session offline.
+  if (power_on_settle_clock_.isValid ())
+    {
+      if (power_on_settle_clock_.elapsed () < kPowerOnSettleMs_)
+        {
+          return;
+        }
+      power_on_settle_clock_.invalidate ();
+      qInfo ().noquote () << "[CATDBG] Hamlib power-on settle complete";
     }
 
   if (!cat_keep_alive_timer_)
@@ -2546,6 +2675,42 @@ bool HamlibTransceiver::request_atu_tune (QString * error)
   return true;
 }
 
+bool HamlibTransceiver::request_atu_off (QString * error)
+{
+  auto * rig = m_->rig_.data ();
+  if (!rig) { if (error) *error = tr ("Radio disconnected"); return false; }
+  if (ptt_on_) { if (error) *error = tr ("Cannot disable the ATU while transmitting"); return false; }
+  if (!rig_has_set_func (rig, RIG_FUNC_TUNER)) {
+    if (error) *error = tr ("This radio does not expose ATU enable/disable through Hamlib");
+    return false;
+  }
+  int const rc = rig_set_func (rig, RIG_VFO_CURR, RIG_FUNC_TUNER, 0);
+  if (rc != RIG_OK) {
+    if (error) *error = QString::fromLocal8Bit (rigerror (rc));
+    return false;
+  }
+  return true;
+}
+
+bool HamlibTransceiver::read_atu_state (bool * enabled, QString * error)
+{
+  if (enabled) *enabled = false;
+  auto * rig = m_->rig_.data ();
+  if (!rig) { if (error) *error = tr ("Radio disconnected"); return false; }
+  if (!rig_has_get_func (rig, RIG_FUNC_TUNER)) {
+    if (error) *error = tr ("This radio does not expose ATU state through Hamlib");
+    return false;
+  }
+  int status = 0;
+  int const rc = rig_get_func (rig, RIG_VFO_CURR, RIG_FUNC_TUNER, &status);
+  if (rc != RIG_OK) {
+    if (error) *error = QString::fromLocal8Bit (rigerror (rc));
+    return false;
+  }
+  if (enabled) *enabled = status != 0;
+  return true;
+}
+
 bool HamlibTransceiver::request_power_on (QString * error)
 {
   auto * rig = m_->rig_.data ();
@@ -2556,6 +2721,10 @@ bool HamlibTransceiver::request_power_on (QString * error)
     if (error) *error = QString::fromLocal8Bit (rigerror (rc));
     return false;
   }
+  rig_powered_off_ = false;
+  power_on_settle_clock_.restart ();
+  qInfo ().noquote () << "[CATDBG] Hamlib power-on accepted; CAT reads paused for"
+                      << kPowerOnSettleMs_ << "ms";
   return true;
 }
 
@@ -2569,6 +2738,10 @@ bool HamlibTransceiver::request_power_off (QString * error)
     if (error) *error = QString::fromLocal8Bit (rigerror (rc));
     return false;
   }
+  rig_powered_off_ = true;
+  power_on_settle_clock_.invalidate ();
+  stop_cat_keep_alive_timer ();
+  qInfo ().noquote () << "[CATDBG] Hamlib power-off accepted; preserving CAT session for Power On";
   return true;
 }
 
