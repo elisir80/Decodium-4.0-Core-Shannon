@@ -1,5 +1,7 @@
 #include "AssistantChat.h"
 
+#include "PackManager.h"
+
 #include <QFileInfo>
 #include <QPointer>
 #include <QRegularExpression>
@@ -41,12 +43,11 @@ QString cleanReply(const QString& raw)
     return s.trimmed();
 }
 
-AssistantChat::AssistantChat(const QString& llamaExe, const QString& modelPath, QObject* parent)
+AssistantChat::AssistantChat(PackManager* packs, QObject* parent)
     : QObject(parent)
-    , m_exe(llamaExe)
-    , m_model(modelPath)
+    , m_packs(packs)
 {
-    m_status = available() ? tr("Ask a question") : tr("Assistant not installed: install the Assistant pack");
+    m_status = available() ? tr("Ask a question") : tr("Assistant not installed or not selected: see Optional packs");
 }
 
 AssistantChat::~AssistantChat()
@@ -56,7 +57,7 @@ AssistantChat::~AssistantChat()
 
 bool AssistantChat::available() const
 {
-    return QFileInfo::exists(m_exe) && QFileInfo::exists(m_model);
+    return m_packs->active(Pack::Assistant);
 }
 
 QString AssistantChat::transcript() const
@@ -79,7 +80,7 @@ void AssistantChat::ask(const QString& question)
     const QString q = question.trimmed();
     if (q.isEmpty() || busy()) return;
     if (!available()) {
-        setStatus(tr("Assistant not installed: install the Assistant pack"));
+        setStatus(tr("Assistant not installed or not selected: see Optional packs"));
         return;
     }
     m_pendingQuestion = q;
@@ -93,7 +94,7 @@ void AssistantChat::ask(const QString& question)
         emit changed();
     });
     const QString prompt = buildChatPrompt(m_history, q);
-    m_process->start(m_exe, {QStringLiteral("-m"), m_model, QStringLiteral("-p"), prompt,
+    m_process->start(m_packs->llamaExecutable(), {QStringLiteral("-m"), m_packs->assistantModel(), QStringLiteral("-p"), prompt,
                              QStringLiteral("-n"), QString::number(kMaxReplyTokens),
                              QStringLiteral("--temp"), QStringLiteral("0.3"),
                              QStringLiteral("-c"), QStringLiteral("2048"),

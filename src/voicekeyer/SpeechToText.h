@@ -8,6 +8,7 @@
 #include <QString>
 
 class QAudioSource;
+namespace decodium::voicekeyer { class PackManager; }
 class QIODevice;
 
 namespace decodium::voicekeyer {
@@ -24,7 +25,7 @@ class SpeechToText : public QObject {
     Q_PROPERTY(QString status READ status NOTIFY changed)
 
 public:
-    SpeechToText(const QString& engineExe, const QString& modelPath, QObject* parent = nullptr);
+    explicit SpeechToText(PackManager* packs, QObject* parent = nullptr);
     ~SpeechToText() override;
 
     QString transcript() const { return m_transcript; }
@@ -44,8 +45,7 @@ private:
     void transcribe();
     void setStatus(const QString& text);
 
-    QString m_engine;
-    QString m_model;
+    PackManager* m_packs;
     QString m_lang {QStringLiteral("it")};
     QString m_transcript;
     QString m_status;

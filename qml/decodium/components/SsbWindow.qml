@@ -183,7 +183,7 @@ ApplicationWindow {
                 ColumnLayout {
                     anchors.fill: parent
                     Label {
-                        text: qsTr("Each pack runs on this computer, with no account and no internet during use. Remove a pack to free its disk space.")
+                        text: qsTr("Install only what you need. Untick Use to switch a pack off without deleting it; Remove frees its disk space. Nothing goes to the internet during use, and no account is needed.")
                         wrapMode: Text.WordWrap; Layout.fillWidth: true; color: "#a9bac9"
                     }
                     Repeater {
@@ -201,14 +201,20 @@ ApplicationWindow {
                             Label { text: packRow.modelData.name; Layout.fillWidth: true }
                             Label { text: packRow.modelData.size; color: "#6f8294"; Layout.preferredWidth: 70 }
                             Label {
-                                text: packRow.isOn ? qsTr("installed")
-                                      : packRow.modelData.key === 1 ? qsTr("engine not yet available") : qsTr("not installed")
+                                text: packRow.isOn ? qsTr("installed") : qsTr("not installed")
                                 color: packRow.isOn ? "#77e7a9" : "#a9bac9"
-                                Layout.preferredWidth: 170
+                                Layout.preferredWidth: 110
+                            }
+                            CheckBox {
+                                // Selezione: un pacchetto installato si puo' spegnere senza cancellarlo.
+                                text: qsTr("Use")
+                                visible: packRow.isOn
+                                checked: packs.isEnabled(packRow.modelData.key)
+                                onToggled: packs.setEnabled(packRow.modelData.key, checked)
                             }
                             Button {
                                 text: qsTr("Install")
-                                visible: !packRow.isOn && packRow.modelData.key !== 1
+                                visible: !packRow.isOn
                                 enabled: !packs.busy
                                 onClicked: packs.install(packRow.modelData.key)
                             }
@@ -277,7 +283,7 @@ ApplicationWindow {
                             Label { text: "F" + (keyRow.modelData.index + 1); Layout.preferredWidth: 26; color: "#44d4df" }
                             TextField {
                                 id: keyLabel
-                                text: keyRow.modelData.label; maxLength: 12; Layout.preferredWidth: 110
+                                text: keyRow.modelData.label; maximumLength: 12; Layout.preferredWidth: 110
                                 onEditingFinished: voiceKeyer.setSlotText(keyRow.modelData.index, text, keyText.text)
                             }
                             ComboBox {

@@ -1,6 +1,7 @@
 #include "SpeechToText.h"
 
 #include "VoiceKeyer.h"
+#include "PackManager.h"
 
 #include <QAudioDevice>
 #include <QAudioFormat>
@@ -28,14 +29,13 @@ QString cleanTranscript(const QString& raw)
     return s.simplified();
 }
 
-SpeechToText::SpeechToText(const QString& engineExe, const QString& modelPath, QObject* parent)
+SpeechToText::SpeechToText(PackManager* packs, QObject* parent)
     : QObject(parent)
-    , m_engine(engineExe)
-    , m_model(modelPath)
+    , m_packs(packs)
 {
-    m_status = QFileInfo::exists(m_engine) && QFileInfo::exists(m_model)
+    m_status = m_packs->active(Pack::Speech)
         ? tr("Hold Listen and speak")
-        : tr("Speech recognition not installed");
+        : tr("Speech recognition not installed or not selected");
 }
 
 SpeechToText::~SpeechToText()
@@ -52,8 +52,8 @@ void SpeechToText::setStatus(const QString& text)
 void SpeechToText::startListening(const QString& lang)
 {
     if (m_source || m_working) return;
-    if (!QFileInfo::exists(m_engine) || !QFileInfo::exists(m_model)) {
-        setStatus(tr("Speech recognition not installed: install the voice pack first"));
+    if (!m_packs->active(Pack::Speech)) {
+        setStatus(tr("Speech recognition is not installed or not selected: see Optional packs"));
         return;
     }
     m_lang = (lang == QLatin1String("en")) ? QStringLiteral("en") : QStringLiteral("it");
@@ -148,7 +148,7 @@ void SpeechToText::transcribe()
         m_transcript = text;
         setStatus(tr("Recognised"));
     });
-    m_process->start(m_engine, {QStringLiteral("-m"), m_model, QStringLiteral("-f"), wavPath,
+    m_process->start(m_packs->whisperExecutable(), {QStringLiteral("-m"), m_packs->speechModel(), QStringLiteral("-f"), wavPath,
                                 QStringLiteral("-l"), m_lang, QStringLiteral("-nt"), QStringLiteral("-np")});
 }
 

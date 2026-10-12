@@ -31,6 +31,11 @@ public:
     explicit PackManager(const QString& root, QObject* parent = nullptr);
 
     bool installed(Pack pack) const;
+    // Attivo = installato e selezionato dall'utente. Il file resta sul disco
+    // anche se il pacchetto viene disattivato.
+    bool active(Pack pack) const;
+    Q_INVOKABLE bool isEnabled(int pack) const;
+    Q_INVOKABLE void setEnabled(int pack, bool on);
     bool voiceInstalled() const { return installed(Pack::Voice); }
     bool speechInstalled() const { return installed(Pack::Speech); }
     bool assistantInstalled() const { return installed(Pack::Assistant); }

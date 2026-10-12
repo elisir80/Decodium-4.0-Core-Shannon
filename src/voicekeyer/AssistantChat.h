@@ -13,6 +13,9 @@
 
 namespace decodium::voicekeyer {
 
+class PackManager;
+
+
 struct ChatTurn {
     QString role;   // "user" o "assistant"
     QString text;
@@ -32,7 +35,7 @@ class AssistantChat : public QObject {
     Q_PROPERTY(QString lastReply READ lastReply NOTIFY changed)
 
 public:
-    AssistantChat(const QString& llamaExe, const QString& modelPath, QObject* parent = nullptr);
+    explicit AssistantChat(PackManager* packs, QObject* parent = nullptr);
     ~AssistantChat() override;
 
     QString transcript() const;
@@ -52,8 +55,7 @@ private:
     void setStatus(const QString& text);
     void finish(int code, QProcess::ExitStatus st);
 
-    QString m_exe;
-    QString m_model;
+    PackManager* m_packs;
     QVector<ChatTurn> m_history;
     QString m_status;
     QString m_lastReply;

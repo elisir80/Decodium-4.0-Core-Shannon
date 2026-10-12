@@ -4503,10 +4503,10 @@ int main(int argc, char* argv[])
         QObject::connect(&app,&QCoreApplication::aboutToQuit,&voiceKeyer,&decodium::voicekeyer::VoiceKeyer::stop);
         engine.rootContext()->setContextProperty("voiceKeyer",&voiceKeyer);
         // Riconoscimento vocale locale (whisper.cpp), stesso pacchetto vocale.
-        static decodium::voicekeyer::SpeechToText speech(packs.whisperExecutable(), packs.speechModel());
+        static decodium::voicekeyer::SpeechToText speech(&packs);
         engine.rootContext()->setContextProperty("speech",&speech);
         // Assistente: chat in testo con il modello locale del pacchetto Assistente.
-        static decodium::voicekeyer::AssistantChat assistant(packs.llamaExecutable(), packs.assistantModel());
+        static decodium::voicekeyer::AssistantChat assistant(&packs);
         engine.rootContext()->setContextProperty("assistant",&assistant);
         engine.rootContext()->setContextProperty("packs",&packs);
     }

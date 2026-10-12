@@ -1,6 +1,7 @@
 #include "PackManager.h"
 
 #include <QCryptographicHash>
+#include <QSettings>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
@@ -15,7 +16,7 @@ namespace decodium::voicekeyer {
 namespace {
 const QString kPiperZip = QStringLiteral("https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_windows_amd64.zip");
 const QString kVoiceIt = QStringLiteral("https://huggingface.co/rhasspy/piper-voices/resolve/main/it/it_IT/paola/medium/");
-const QString kVoiceEn = QStringLiteral("https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/medium/");
+const QString kVoiceEn = QStringLiteral("https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/amy/medium/");
 const QString kLlamaZip = QStringLiteral("https://github.com/ggml-org/llama.cpp/releases/download/b11574/llama-b11574-bin-win-cpu-x64.zip");
 const QString kQwen = QStringLiteral("https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/qwen2.5-1.5b-instruct-q4_k_m.gguf");
 }  // namespace
@@ -33,14 +34,20 @@ const QVector<PackManager::Item>& PackManager::manifest()
         {Pack::Voice, kVoiceIt + QStringLiteral("it_IT-paola-medium.onnx.json"),
          QStringLiteral("aea19c0a7fce29fbc359b93f10e7902854401e4c95ae2ea328ae516b15d296cf"),
          7099, QStringLiteral("voices/it_IT-paola-medium.onnx.json"), QString()},
-        {Pack::Voice, kVoiceEn + QStringLiteral("en_US-lessac-medium.onnx"),
-         QStringLiteral("5efe09e69902187827af646e1a6e9d269dee769f9877d17b16b1b46eeaaf019f"),
-         63201294, QStringLiteral("voices/en_US-lessac-medium.onnx"), QString()},
-        {Pack::Voice, kVoiceEn + QStringLiteral("en_US-lessac-medium.onnx.json"),
-         QStringLiteral("efe19c417bed055f2d69908248c6ba650fa135bc868b0e6abb3da181dab690a0"),
-         4885, QStringLiteral("voices/en_US-lessac-medium.onnx.json"), QString()},
+        // Voce inglese "amy" (CC BY-SA 4.0, dataset mimic3-voices): la lessac usa dati
+        // del Blizzard 2013 con licenza nominativa, non ridistribuibile.
+        {Pack::Voice, kVoiceEn + QStringLiteral("en_US-amy-medium.onnx"),
+         QStringLiteral("b3a6e47b57b8c7fbe6a0ce2518161a50f59a9cdd8a50835c02cb02bdd6206c18"),
+         63201294, QStringLiteral("voices/en_US-amy-medium.onnx"), QString()},
+        {Pack::Voice, kVoiceEn + QStringLiteral("en_US-amy-medium.onnx.json"),
+         QStringLiteral("95a23eb4d42909d38df73bb9ac7f45f597dbfcde2d1bf9526fdeaf5466977d77"),
+         4882, QStringLiteral("voices/en_US-amy-medium.onnx.json"), QString()},
         // Riconoscimento: il modello si puo' scaricare, il motore whisper-cli no
         // (non ha ancora un URL pubblico): per questo il pacchetto non si installa da qui.
+        // Motore di riconoscimento: whisper-cli (MIT) con le sue DLL, pubblicato dal fork.
+        {Pack::Speech, QStringLiteral("https://github.com/iu8lmc/Decodium-4.0-Core-Shannon/releases/download/packs-whisper-1/whisper-win-x64.zip"),
+         QStringLiteral("ab3871c09b579024f94ed6b45bfbdceb1533f1543a78149d17b53450ed22d7af"),
+         2739161, QStringLiteral("whisper-win-x64.zip"), QStringLiteral("whisper")},
         {Pack::Speech, QStringLiteral("https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin"),
          QStringLiteral("1be3a9b2063867b937e64e2ec7483364a79917e157fa98c5d94b5c1fffea987b"),
          487601967, QStringLiteral("models/ggml-small.bin"), QString()},
@@ -72,9 +79,31 @@ QString PackManager::assistantModel() const { return QDir(m_root).absoluteFilePa
 
 QString PackManager::voiceModel(const QString& lang) const
 {
-    const QString name = lang == QLatin1String("en") ? QStringLiteral("en_US-lessac-medium.onnx")
+    const QString name = lang == QLatin1String("en") ? QStringLiteral("en_US-amy-medium.onnx")
                                                      : QStringLiteral("it_IT-paola-medium.onnx");
     return QDir(m_root).absoluteFilePath(QStringLiteral("voices/") + name);
+}
+
+bool PackManager::active(Pack pack) const
+{
+    return installed(pack) && isEnabled(static_cast<int>(pack));
+}
+
+bool PackManager::isEnabled(int pack) const
+{
+    static const char* keys[] = {"Packs/voice", "Packs/speech", "Packs/assistant"};
+    if (pack < 0 || pack > 2) return false;
+    QSettings s;
+    return s.value(QLatin1String(keys[pack]), true).toBool();
+}
+
+void PackManager::setEnabled(int pack, bool on)
+{
+    static const char* keys[] = {"Packs/voice", "Packs/speech", "Packs/assistant"};
+    if (pack < 0 || pack > 2) return;
+    QSettings s;
+    s.setValue(QLatin1String(keys[pack]), on);
+    emit changed();
 }
 
 bool PackManager::installed(Pack pack) const
@@ -97,11 +126,6 @@ void PackManager::install(int packId)
     if (m_busy) return;
     const Pack pack = static_cast<Pack>(packId);
     if (installed(pack)) return;
-    if (pack == Pack::Speech) {
-        m_status = tr("Speech recognition engine not yet available for download: it will be added in a later update");
-        emit changed();
-        return;
-    }
     m_queue.clear();
     m_totalBytes = 0;
     for (const Item& item : manifest()) {

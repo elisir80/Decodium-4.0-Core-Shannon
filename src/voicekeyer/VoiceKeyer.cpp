@@ -227,8 +227,8 @@ void VoiceKeyer::sayText(const QString& text, const QString& lang)
 {
     if (m_playing || m_recording) return;
     if (text.trimmed().isEmpty()) return;
-    if (!m_pack->installed(Pack::Voice)) {
-        setStatus(tr("To read text aloud install the Voice pack first"));
+    if (!m_pack->active(Pack::Voice)) {
+        setStatus(tr("To read text aloud install and enable the Voice pack first"));
         return;
     }
     setStatus(tr("Synthesising…"));
@@ -264,7 +264,7 @@ void VoiceKeyer::play(int index)
         setStatus(tr("F%1 is empty: record it or write a text first").arg(index + 1));
         return;
     }
-    if (!m_pack->installed(Pack::Voice)) {
+    if (!m_pack->active(Pack::Voice)) {
         setStatus(tr("To read text aloud install the voice pack first"));
         return;
     }

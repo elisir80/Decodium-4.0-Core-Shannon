@@ -97,13 +97,14 @@ private slots:
         QVERIFY(!packs.busy());
     }
 
-    void speechPackIsNotDownloadableYet()
+    void inactivePackIsNotActive()
     {
+        // Senza file un pacchetto non e' mai attivo, qualunque sia la selezione dell'utente.
+        // (Non si scrive QSettings nei test: non tocca il profilo dell'utente.)
         QTemporaryDir dir;
         PackManager packs(dir.path());
-        packs.install(static_cast<int>(Pack::Speech));
-        QVERIFY(!packs.busy());
-        QVERIFY(packs.status().contains(QStringLiteral("not yet")));
+        QVERIFY(!packs.active(Pack::Speech));
+        QVERIFY(!packs.active(Pack::Assistant));
     }
 
     void transcriptIsCleaned()
