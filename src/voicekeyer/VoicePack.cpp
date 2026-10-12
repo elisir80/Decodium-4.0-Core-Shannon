@@ -37,6 +37,10 @@ const QVector<VoicePack::Item>& VoicePack::manifest()
         {QString::fromLatin1(kVoiceEn) + QStringLiteral("en_US-lessac-medium.onnx"),
          QStringLiteral("5efe09e69902187827af646e1a6e9d269dee769f9877d17b16b1b46eeaaf019f"),
          63201294, QStringLiteral("voices/en_US-lessac-medium.onnx"), false},
+        // Riconoscimento vocale (whisper.cpp, MIT): il modello multilingue "small".
+        {QStringLiteral("https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin"),
+         QStringLiteral("1be3a9b2063867b937e64e2ec7483364a79917e157fa98c5d94b5c1fffea987b"),
+         487601967, QStringLiteral("models/ggml-small.bin"), false},
         {QString::fromLatin1(kVoiceEn) + QStringLiteral("en_US-lessac-medium.onnx.json"),
          QStringLiteral("efe19c417bed055f2d69908248c6ba650fa135bc868b0e6abb3da181dab690a0"),
          4885, QStringLiteral("voices/en_US-lessac-medium.onnx.json"), false},
@@ -60,6 +64,16 @@ QString VoicePack::runtimeDirectory() const
 QString VoicePack::piperExecutable() const
 {
     return QDir(runtimeDirectory()).absoluteFilePath(QStringLiteral("piper.exe"));
+}
+
+QString VoicePack::speechModel() const
+{
+    return QDir(m_root).absoluteFilePath(QStringLiteral("models/ggml-small.bin"));
+}
+
+QString VoicePack::whisperExecutable() const
+{
+    return QDir(m_root).absoluteFilePath(QStringLiteral("whisper/whisper-cli.exe"));
 }
 
 QString VoicePack::voiceModel(const QString& lang) const

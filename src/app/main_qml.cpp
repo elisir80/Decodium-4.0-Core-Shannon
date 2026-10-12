@@ -91,6 +91,7 @@ __declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance = 0x00000001;
 #include "CwController.h"
 #include "SsbController.h"
 #include "VoiceKeyer.h"
+#include "SpeechToText.h"
 #include "RotorModule.h"
 #include "DecodiumDiagnostics.h"
 #include "DecodiumDxCluster.h"
@@ -4494,6 +4495,11 @@ int main(int argc, char* argv[])
         voiceKeyer.setHooks(std::move(keyerHooks));
         QObject::connect(&app,&QCoreApplication::aboutToQuit,&voiceKeyer,&decodium::voicekeyer::VoiceKeyer::stop);
         engine.rootContext()->setContextProperty("voiceKeyer",&voiceKeyer);
+        // Riconoscimento vocale locale (whisper.cpp), stesso pacchetto vocale.
+        static decodium::voicekeyer::SpeechToText speech(
+            QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + QStringLiteral("/voicepack/whisper/whisper-cli.exe"),
+            QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + QStringLiteral("/voicepack/models/ggml-small.bin"));
+        engine.rootContext()->setContextProperty("speech",&speech);
     }
     {
         // Rotore: nominativo e locatore sono quelli di Decodium; ogni stazione

@@ -29,6 +29,8 @@ public:
     // Percorsi dentro il pacchetto (validi solo se installed()).
     QString piperExecutable() const;
     QString voiceModel(const QString& lang) const;   // "it" o "en"
+    QString speechModel() const;                     // modello whisper multilingue
+    QString whisperExecutable() const;               // motore di riconoscimento (whisper-cli)
     QString runtimeDirectory() const;
     QString root() const { return m_root; }
 

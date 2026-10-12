@@ -283,6 +283,32 @@ ApplicationWindow {
                         }
                     }
                     Label { text: voiceKeyer.status; Layout.fillWidth: true; wrapMode: Text.WordWrap; color: "#a9bac9" }
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Button {
+                            text: qsTr("Hold to listen")
+                            enabled: !voiceKeyer.playing && !voiceKeyer.recording && !speech.working
+                            onPressed: speech.startListening(keyLangBox.currentText)
+                            onReleased: speech.stopListening()
+                            onCanceled: speech.stopListening()
+                        }
+                        ComboBox {
+                            id: keyLangBox
+                            Layout.preferredWidth: 72
+                            model: ["it", "en"]
+                        }
+                        TextField {
+                            Layout.fillWidth: true
+                            readOnly: true
+                            text: speech.transcript
+                            placeholderText: qsTr("What you said appears here")
+                        }
+                        Button {
+                            text: qsTr("Clear"); enabled: speech.transcript.length > 0
+                            onClicked: speech.clearTranscript()
+                        }
+                    }
+                    Label { text: speech.status; Layout.fillWidth: true; wrapMode: Text.WordWrap; color: "#a9bac9" }
                 }
             }
             GroupBox {

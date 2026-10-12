@@ -1,6 +1,9 @@
 #include "VoiceKeyer.h"
 #include "PiperTts.h"
 #include "VoicePack.h"
+#include "SpeechToText.h"
+
+#include <QProcess>
 
 #include <QFileInfo>
 
@@ -113,6 +116,31 @@ private slots:
         QTRY_VERIFY_WITH_TIMEOUT(!pack.busy(), 900000);
         QVERIFY2(pack.installed(), qPrintable(pack.status()));
         QVERIFY(QFileInfo::exists(pack.voiceModel(QStringLiteral("en"))));
+    }
+
+    void transcriptIsCleaned()
+    {
+        QCOMPARE(cleanTranscript(QStringLiteral("  [BLANK_AUDIO]  CQ  CQ de IU8LMC [MUSIC] ")),
+                 QStringLiteral("CQ CQ de IU8LMC"));
+        QVERIFY(cleanTranscript(QStringLiteral("[BLANK_AUDIO]")).isEmpty());
+    }
+
+    void whisperRunsOnARecording()
+    {
+        // Facoltativo: serve il motore whisper-cli e il modello.
+        const QString exe = qEnvironmentVariable("DECODIUM_TEST_WHISPER_EXE");
+        const QString model = qEnvironmentVariable("DECODIUM_TEST_WHISPER_MODEL");
+        if (exe.isEmpty() || model.isEmpty()) QSKIP("set DECODIUM_TEST_WHISPER_EXE and DECODIUM_TEST_WHISPER_MODEL");
+        QTemporaryDir dir;
+        QVector<short> tone(16000 * 2);
+        for (int i = 0; i < tone.size(); ++i) tone[i] = short(std::sin(i * 0.2) * 3000);
+        const QString wav = dir.filePath(QStringLiteral("tone.wav"));
+        QVERIFY(writeWav(wav, tone, 16000));
+        QProcess p;
+        p.start(exe, {QStringLiteral("-m"), model, QStringLiteral("-f"), wav, QStringLiteral("-nt"), QStringLiteral("-np")});
+        QVERIFY(p.waitForFinished(120000));
+        QCOMPARE(p.exitCode(), 0);
+        QVERIFY(cleanTranscript(QString::fromUtf8(p.readAllStandardOutput())).size() < 200);
     }
 };
 
