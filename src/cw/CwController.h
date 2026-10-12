@@ -134,6 +134,17 @@ public:
     void setHooks(Hooks hooks) { m_hooks = std::move(hooks); }
     // Carica le impostazioni (gruppo "CW") e apre il manipolatore scelto.
     void start(QSettings* settings);
+    // Il modulo non parte all'avvio di Decodium: si attiva la prima volta che
+    // l'operatore apre la finestra CW (ensureStarted), mai prima.
+    void deferStart(QSettings* settings) { m_deferredSettings = settings; }
+    Q_INVOKABLE void ensureStarted()
+    {
+        if (!m_started && m_deferredSettings) {
+            m_started = true;
+            start(m_deferredSettings);
+        }
+    }
+    bool started() const { return m_started; }
 
     // ── decodificatore ──
     bool decoderOn() const { return m_decoderOn; }
@@ -224,6 +235,8 @@ signals:
     void message(const QString& text, const QString& level);
 
 private:
+    QSettings* m_deferredSettings {nullptr};
+    bool m_started {false};
     void applyBackend();
     bool rejectNetworkKeyerPort(const QString& port, const QString& keyerName);
     bool rejectReservedKeyerPort(const QString& port, const QString& keyerName);

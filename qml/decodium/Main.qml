@@ -2003,8 +2003,7 @@ ApplicationWindow {
         active: false
         asynchronous: true
         source: "components/CwWindow.qml"
-        // Riaprendo Decodium gia' in modo CW la finestra torna da sola.
-        Component.onCompleted: if (bridge && bridge.mode === "CW") active = true
+        // Nessuna riapertura automatica: la finestra CW si apre quando lo decide l'operatore.
         onLoaded: {
             item.show()
             item.raise()

@@ -18,6 +18,8 @@ Window {
 
     readonly property var eng: (typeof appEngine !== 'undefined' ? appEngine : null)
     readonly property var cw: (typeof cwModule !== 'undefined' ? cwModule : null)
+    // Aprire la finestra e' la sola cosa che avvia il modulo CW.
+    Component.onCompleted: if (cw) cw.ensureStarted()
     readonly property var tm: eng ? eng.themeManager : null
     readonly property color cBg:     tm ? tm.bgDeep        : "#0a0f14"
     readonly property color cPanel:  tm ? tm.panelColor    : "#111a22"

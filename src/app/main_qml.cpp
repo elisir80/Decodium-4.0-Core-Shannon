@@ -4417,7 +4417,8 @@ int main(int argc, char* argv[])
         h.sendAudio   = [&bridge] (QString const& t, int wpm) { return bridge.cwSendAudio (t, wpm); };
         h.abortAudio  = [&bridge] { bridge.cwAbortAudio (); };
         cwModule.setHooks (std::move (h));
-        cwModule.start (&cwSettings);
+        // Niente avvio automatico: il modulo parte quando l'operatore apre la finestra CW.
+        cwModule.deferStart (&cwSettings);
         QObject::connect (&bridge, &DecodiumBridge::frequencyChanged,
                           &cwModule, &decodium::cw::CwController::invalidateTuningSignal);
         QObject::connect (&bridge, &DecodiumBridge::catModeChanged,
@@ -4458,7 +4459,8 @@ int main(int argc, char* argv[])
         // JTTY: vale anche con la radio remota.
         QObject::connect (&bridge, &DecodiumBridge::campioniRxCw,
                           &cwModule, [&cwModule] (QVector<short> const& campioni) {
-            cwModule.feedRxAudio (campioni, 12000);
+            if (cwModule.started ())
+                cwModule.feedRxAudio (campioni, 12000);
         });
         // Cambiando la banda il decodificatore dimentica quello che ha letto:
         // il testo di un'altra banda non e' il seguito del nuovo.
