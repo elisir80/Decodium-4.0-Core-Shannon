@@ -446,6 +446,152 @@ private slots:
         QCOMPARE(c.effectiveBackend(), QString("audio"));
     }
 
+    void explicitHardwareBackendIsNotOverriddenByCat()
+    {
+        QSettings s(iniPath(), QSettings::IniFormat);
+        CwController c;
+        CwController::Hooks h;
+        h.rigKeyerAvailable = [] { return true; };
+        c.setHooks(h);
+        c.start(&s);
+        c.setTxBackend("serial");
+        QCOMPARE(c.effectiveBackend(), QStringLiteral("serial"));
+        c.setTxBackend("winkeyer");
+        QCOMPARE(c.effectiveBackend(), QStringLiteral("winkeyer"));
+        c.setTxBackend("audio");
+        QCOMPARE(c.effectiveBackend(), QStringLiteral("rigkey"));
+    }
+
+    void catDoesNotStartWhenAnotherTransmissionIsActive()
+    {
+        QSettings s(iniPath(), QSettings::IniFormat);
+        CwController c;
+        int calls = 0;
+        CwController::Hooks h;
+        h.rigKeyerAvailable = [] { return true; };
+        h.canTransmit = [] { return false; };
+        h.sendRigMorse = [&](const QString&, int) { ++calls; return true; };
+        c.setHooks(h);
+        c.start(&s);
+        QVERIFY(!c.canSend());
+        c.sendText("V", {});
+        QCOMPARE(calls, 0);
+        QVERIFY(!c.sending());
+    }
+
+    void catDurationBeginsAfterTheWorkerAcknowledges()
+    {
+        QSettings s(iniPath(), QSettings::IniFormat);
+        CwController c;
+        CwController::Hooks::MorseCompletion done;
+        QVector<bool> ptt;
+        CwController::Hooks h;
+        h.rigKeyerAvailable = [] { return true; };
+        h.rigPtt = [&](bool on) { ptt.append(on); };
+        h.sendRigMorseAsync = [&](const QString&, int, auto completion) { done = completion; return true; };
+        c.setHooks(h);
+        c.start(&s);
+        c.setWpm(60);
+        c.sendText("E", {});
+        QTest::qWait(250); // longer than the entire E: it is still awaiting CAT
+        QVERIFY(c.sending());
+        QCOMPARE(ptt, (QVector<bool>{true}));
+        QVERIFY(bool(done));
+        done({});
+        QTRY_VERIFY_WITH_TIMEOUT(!c.sending(), 400);
+        QCOMPARE(ptt, (QVector<bool>{true, false}));
+    }
+
+    void failedCatCommandReleasesPttAndReportsTheDriverError()
+    {
+        QSettings s(iniPath(), QSettings::IniFormat);
+        CwController c;
+        CwController::Hooks::MorseCompletion done;
+        QVector<bool> ptt;
+        CwController::Hooks h;
+        h.rigKeyerAvailable = [] { return true; };
+        h.rigPtt = [&](bool on) { ptt.append(on); };
+        h.sendRigMorseAsync = [&](const QString&, int, auto completion) { done = completion; return true; };
+        c.setHooks(h);
+        c.start(&s);
+        QSignalSpy messages(&c, &CwController::message);
+        c.sendText("TEST", {});
+        done(QStringLiteral("Setting CW speed failed: timeout (-5)"));
+        QVERIFY(!c.sending());
+        QCOMPARE(ptt, (QVector<bool>{true, false}));
+        QCOMPARE(messages.size(), 1);
+        QVERIFY(messages.first().first().toString().contains("timeout"));
+    }
+
+    void longCatMessageIsSplitWithoutLosingTextOrCyclingPtt()
+    {
+        QSettings s(iniPath(), QSettings::IniFormat);
+        CwController c;
+        QStringList sent;
+        QVector<bool> ptt;
+        CwController::Hooks h;
+        h.rigKeyerAvailable = [] { return true; };
+        h.rigMorseTextLimit = [] { return 49; };
+        h.rigPtt = [&](bool on) { ptt.append(on); };
+        h.sendRigMorse = [&](const QString& text, int) { sent.append(text); return true; };
+        c.setHooks(h);
+        c.start(&s);
+        c.setWpm(60);
+        const QString text(101, QLatin1Char('E'));
+        c.sendText(text, {});
+        QCOMPARE(sent.size(), 1);
+        QCOMPARE(sent.first().size(), 49);
+        QTRY_VERIFY_WITH_TIMEOUT(!c.sending(), 10000);
+        QCOMPARE(sent.size(), 3);
+        QCOMPARE(sent.join(QString()), text);
+        QCOMPARE(ptt, (QVector<bool>{true, false}));
+    }
+
+    void stoppingCatAfterBackendChangeIgnoresLateAcknowledgements()
+    {
+        QSettings s(iniPath(), QSettings::IniFormat);
+        CwController c;
+        CwController::Hooks::MorseCompletion done;
+        bool available = true;
+        int stops = 0;
+        QVector<bool> ptt;
+        CwController::Hooks h;
+        h.rigKeyerAvailable = [&] { return available; };
+        h.rigPtt = [&](bool on) { ptt.append(on); };
+        h.stopRigMorse = [&] { ++stops; };
+        h.sendRigMorseAsync = [&](const QString&, int, auto completion) { done = completion; return true; };
+        c.setHooks(h);
+        c.start(&s);
+        c.sendText("TEST", {});
+        available = false;
+        c.stop();
+        QCOMPARE(stops, 1);
+        QCOMPARE(ptt, (QVector<bool>{true, false}));
+        done({});
+        QTest::qWait(200);
+        QVERIFY(!c.sending());
+        QCOMPARE(ptt.size(), 2);
+    }
+
+    void typedChunksKeepWordBoundariesAndRejectBusyInput()
+    {
+        QSettings s(iniPath(), QSettings::IniFormat);
+        CwController c;
+        QStringList sent;
+        CwController::Hooks h;
+        h.rigKeyerAvailable = [] { return true; };
+        h.sendRigMorse = [&](const QString& text, int) { sent.append(text); return true; };
+        c.setHooks(h);
+        c.start(&s);
+        c.setWpm(60);
+        QVERIFY(c.sendTypedText("e"));
+        QVERIFY(!c.sendTypedText("x"));
+        QTRY_VERIFY_WITH_TIMEOUT(!c.sending(), 400);
+        QVERIFY(c.sendTypedText(" k "));
+        QCOMPARE(sent, (QStringList{"E", " K "}));
+        c.stop();
+    }
+
     void remoteKeySendsThePttThenTheWholeTraceThenReleasesIt()
     {
         QSettings s(iniPath(), QSettings::IniFormat);

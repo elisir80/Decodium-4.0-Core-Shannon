@@ -4,6 +4,7 @@
 #include <cmath>
 #include <QDateTime>
 #include <QDebug>
+#include <QPointer>
 #include <QRegularExpression>
 
 namespace decodium::cw {
@@ -58,10 +59,17 @@ CwController::CwController(QObject* parent)
     connect(&m_audioDone, &QTimer::timeout, this, [this] {
         // Per il keyer CAT il PTT alto e' lo stato atteso durante l'invio:
         // non passare da canTransmit(), che in TX risulta correttamente falso.
-        if (effectiveBackend() == QLatin1String("rigkey")) {
-            if (m_hooks.rigPtt)
-                m_hooks.rigPtt(false);
-            setSending(false, -1);
+        if (m_rigActive) {
+            if (m_rigWaiting) {
+                // No completion from the CAT worker: stop before releasing PTT.
+                if (m_hooks.stopRigMorse) m_hooks.stopRigMorse();
+                finishRigKey();
+                emit message(tr("The CAT CW keyer did not confirm the send command"), QStringLiteral("warning"));
+            } else if (!m_rigQueuedText.isEmpty()) {
+                sendNextRigChunk();
+            } else {
+                finishRigKey();
+            }
             return;
         }
         // The bridge may still be draining its audio device after the Morse
@@ -407,7 +415,8 @@ void CwController::setWinKeyerPort(const QString& port)
 QString CwController::effectiveBackend() const
 {
     if (!remoteRadio()) {
-        if (m_hooks.rigKeyerAvailable && m_hooks.rigKeyerAvailable())
+        if (m_backend == QLatin1String("audio")
+            && m_hooks.rigKeyerAvailable && m_hooks.rigKeyerAvailable())
             return QStringLiteral("rigkey");
         return m_backend;
     }
@@ -542,7 +551,7 @@ bool CwController::canSend() const
     if (backend == QLatin1String("remotekey"))
         return true;     // effectiveBackend() l'ha scelto perche' la strada c'e'
     if (backend == QLatin1String("rigkey"))
-        return true;
+        return m_rigActive || !m_hooks.canTransmit || m_hooks.canTransmit();
     return m_hooks.sendAudio && (!m_hooks.canTransmit || m_hooks.canTransmit());
 }
 
@@ -619,23 +628,33 @@ void CwController::sendText(const QString& text, const QVariantMap& context)
     sendExpanded(ready);
 }
 
+bool CwController::sendTypedText(const QString& text)
+{
+    QString ready = text.toUpper();
+    ready.replace(QRegularExpression(QStringLiteral("\\s")), QStringLiteral(" "));
+    if (ready.trimmed().isEmpty() || !canSend() || m_sending)
+        return false;
+    setSending(true, -1);
+    sendExpanded(ready);
+    return m_sending;
+}
+
 void CwController::sendExpanded(const QString& ready)
 {
     // Il tempo che il messaggio ci mette: serve a sapere quando l'audio finisce
     // (non lo dice nessuno) e a non lasciare un tasto acceso per sempre.
     const int ms = CwKeyer::millisFor(ready, m_wpm);
     const QString backend = effectiveBackend();
-    if (backend == QLatin1String("rigkey")) {
-        if (m_hooks.rigPtt)
-            m_hooks.rigPtt(true);
-        if (!m_hooks.sendRigMorse || !m_hooks.sendRigMorse(ready, m_wpm)) {
-            if (m_hooks.rigPtt)
-                m_hooks.rigPtt(false);
-            setSending(false, -1);
-            emit message(tr("The radio CAT keyer did not accept the CW text"), QStringLiteral("warning"));
+    if (m_rigActive || backend == QLatin1String("rigkey")) {
+        if (m_rigActive) {
+            // Another macro must not overwrite the message memory in flight.
+            m_rigQueuedText += QLatin1Char(' ') + ready;
             return;
         }
-        m_audioDone.start(ms + 100);
+        m_rigQueuedText = ready;
+        m_rigActive = true;
+        if (m_hooks.rigPtt) m_hooks.rigPtt(true);
+        sendNextRigChunk();
         return;
     }
     if (backend == QLatin1String("remotekey")) {
@@ -670,6 +689,48 @@ void CwController::sendExpanded(const QString& ready)
 // questo si tiene davanti mezzo secondo di traccia gia' consegnata. Il prezzo
 // e' che un Stop non ferma subito: smette di mandare e abbassa il tasto, ma
 // quel mezzo secondo gia' in coda il gateway lo suona.
+
+void CwController::sendNextRigChunk()
+{
+    const int limit = m_hooks.rigMorseTextLimit ? m_hooks.rigMorseTextLimit() : 0;
+    const int count = limit > 0 ? qMin(limit, int(m_rigQueuedText.size())) : int(m_rigQueuedText.size());
+    const QString chunk = m_rigQueuedText.left(count);
+    m_rigQueuedText.remove(0, count);
+    const int duration = CwKeyer::millisFor(chunk, m_wpm);
+    const int tail = qMax(100, 3 * (1200 / m_wpm));
+    const quint64 generation = ++m_rigGeneration;
+    m_rigWaiting = true;
+    m_audioDone.start(10000);
+    QPointer<CwController> self(this);
+    auto completed = [self, generation, duration, tail](const QString& error) {
+        if (!self || !self->m_rigActive || generation != self->m_rigGeneration) return;
+        self->m_rigWaiting = false;
+        if (!error.isEmpty()) {
+            self->finishRigKey();
+            emit self->message(error, QStringLiteral("warning"));
+        } else {
+            self->m_audioDone.start(duration + tail);
+        }
+    };
+    if (m_hooks.sendRigMorseAsync) {
+        if (!m_hooks.sendRigMorseAsync(chunk, m_wpm, completed))
+            completed(tr("The radio CAT keyer did not accept the CW text"));
+    } else {
+        const bool accepted = m_hooks.sendRigMorse && m_hooks.sendRigMorse(chunk, m_wpm);
+        completed(accepted ? QString {} : tr("The radio CAT keyer did not accept the CW text"));
+    }
+}
+
+void CwController::finishRigKey()
+{
+    ++m_rigGeneration; // invalidate acknowledgements from an earlier send
+    m_rigActive = false;
+    m_rigWaiting = false;
+    m_rigQueuedText.clear();
+    m_audioDone.stop();
+    if (m_hooks.rigPtt) m_hooks.rigPtt(false);
+    setSending(false, -1);
+}
 
 void CwController::startRemoteKey(const QString& text)
 {
@@ -736,11 +797,10 @@ void CwController::finishRemoteKey(bool immediate)
 
 void CwController::stop()
 {
-    if (m_sending && effectiveBackend() == QLatin1String("rigkey")) {
-        if (m_hooks.stopRigMorse)
-            m_hooks.stopRigMorse();
-        if (m_hooks.rigPtt)
-            m_hooks.rigPtt(false);
+    if (m_rigActive) {
+        if (m_hooks.stopRigMorse) m_hooks.stopRigMorse();
+        // Release the path that started TX, even after CAT/backend changes.
+        finishRigKey();
     }
     finishRemoteKey(true);
     m_audioDone.stop();

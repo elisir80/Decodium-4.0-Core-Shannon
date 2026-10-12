@@ -10,6 +10,7 @@
 #include <QTimer>
 #include <QVector>
 #include <memory>
+#include <functional>
 
 // Forward-declare per nascondere le dipendenze Boost/Hamlib dall'header
 struct DecodiumTransceiverManagerPrivate;
@@ -197,7 +198,9 @@ public:
     Q_INVOKABLE void setRigPtt(bool on);
     Q_INVOKABLE void setRigMode(const QString& mode);
     bool rigMorseAvailable() const;
-    bool sendRigMorse(const QString& text, int wpm);
+    int rigMorseTextLimit() const;
+    bool sendRigMorse(const QString& text, int wpm,
+                      std::function<void(const QString&)> completion = {});
     void stopRigMorse();
     void requestVoiceControl(const QString& key = {}, double value = 0, bool write = false);
     Q_SIGNAL void voiceControlsReady(QVariantMap controls);

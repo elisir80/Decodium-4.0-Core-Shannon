@@ -1,4 +1,5 @@
 #include "HamlibTransceiver.hpp"
+#include "src/cw/CwCatText.h"
 
 #include <cstring>
 #include <cmath>
@@ -2436,22 +2437,54 @@ bool HamlibTransceiver::supports_morse () const noexcept
   return m_->rig_ && m_->rig_->caps && m_->rig_->caps->send_morse;
 }
 
+int HamlibTransceiver::morse_text_limit () const noexcept
+{
+  return m_->rig_ && m_->rig_->caps->rig_model == RIG_MODEL_FT991
+    ? decodium::cw::ft991TextLimit : 0;
+}
+
+QString HamlibTransceiver::send_morse_checked (QString const& text, int wpm)
+{
+  if (!supports_morse ())
+    return tr ("The radio CAT CW keyer is unavailable");
+  QString payload = text;
+  if (m_->rig_->caps->rig_model == RIG_MODEL_FT991)
+    {
+      payload = decodium::cw::ft991MorsePayload (text);
+      if (payload.isEmpty ())
+        return tr ("FT-991A CW text must contain 1-49 characters without CAT delimiters");
+    }
+  if (payload.trimmed ().isEmpty ())
+    return tr ("CW text is empty");
+  if (wpm > 0)
+    {
+      value_t speed {}; speed.i = wpm;
+      int const rc = rig_set_level (m_->rig_.data (), RIG_VFO_CURR, RIG_LEVEL_KEYSPD, speed);
+      if (rc != RIG_OK)
+        return tr ("Setting CW speed failed: %1 (%2)").arg (QString::fromLatin1 (rigerror (rc))).arg (rc);
+    }
+  QByteArray const bytes = payload.toLatin1 ();
+  int const rc = rig_send_morse (m_->rig_.data (), RIG_VFO_CURR, bytes.constData ());
+  qInfo ().noquote () << "[CW-CAT] send result=" << rc << "model=" << m_->rig_->caps->rig_model
+                     << "text_chars=" << text.size () << "payload_chars=" << payload.size () << "wpm=" << wpm;
+  return rc == RIG_OK ? QString {} : tr ("Sending CW failed: %1 (%2)")
+    .arg (QString::fromLatin1 (rigerror (rc))).arg (rc);
+}
+
 void HamlibTransceiver::send_morse (QString const& text, int wpm) noexcept
 {
   try
     {
-      if (!m_->rig_ || text.isEmpty ()) return;
-      CAT_TRACE ("send_morse: '" << text << "' wpm=" << wpm);
-      if (wpm > 0)
-        {
-          value_t v; v.i = wpm;
-          rig_set_level (m_->rig_.data (), RIG_VFO_CURR, RIG_LEVEL_KEYSPD, v);
-        }
-      rig_send_morse (m_->rig_.data (), RIG_VFO_CURR, text.toLatin1 ().constData ());
+      QString const error = send_morse_checked (text, wpm);
+      if (!error.isEmpty ()) qWarning ().noquote () << "[CW-CAT]" << error;
+    }
+  catch (std::exception const& error)
+    {
+      qWarning () << "[CW-CAT] send exception:" << error.what ();
     }
   catch (...)
     {
-      // slot noexcept: non propagare eccezioni fuori dal thread del transceiver
+      qWarning () << "[CW-CAT] unknown send exception";
     }
 }
 

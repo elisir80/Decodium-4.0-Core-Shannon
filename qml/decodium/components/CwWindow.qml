@@ -31,6 +31,7 @@ Window {
     readonly property string mono:   (typeof decodiumMonoFontFamily !== 'undefined') ? decodiumMonoFontFamily : "monospace"
     property bool transmitWhileTyping: false
     property string queuedTypedText: ""
+    property bool flushingTypedInput: false
     property int lastTypedPosition: 0
     property string lastTypedText: ""
 
@@ -107,11 +108,21 @@ Window {
             flushTypedInput()
         }
     }
+    function stopSending() {
+        queuedTypedText = ""
+        if (cw) cw.stop()
+    }
     function flushTypedInput() {
         if (!transmitWhileTyping || !cw || cw.sending || !canSend || queuedTypedText.length === 0) return
+        // Keep a standalone space until the next letter, so each chunk
+        // preserves the word boundary rather than losing it in macro expansion.
+        if (queuedTypedText.trim().length === 0) return
         var chunk = queuedTypedText
         queuedTypedText = ""
-        cw.sendText(chunk, ctx())
+        flushingTypedInput = true
+        var accepted = cw.sendTypedText(chunk)
+        flushingTypedInput = false
+        if (!accepted) queuedTypedText = chunk + queuedTypedText
     }
 
     Connections {
@@ -126,8 +137,8 @@ Window {
     Connections {
         target: win.cw
         function onSendingChanged() {
-            if (win.transmitWhileTyping && win.cw && !win.cw.sending && win.queuedTypedText.length > 0)
-                win.flushTypedInput()
+            if (!win.flushingTypedInput && win.transmitWhileTyping && win.cw && !win.cw.sending && win.queuedTypedText.length > 0)
+                Qt.callLater(win.flushTypedInput)
         }
     }
 
@@ -484,7 +495,7 @@ Window {
                                    : win.cw.effectiveBackend === "serial" ? qsTr("serial keyer") : "WinKeyer") : "")
                       + (win.remote ? "   ·   " + qsTr("remote radio") : "")
             }
-            Btn { label: qsTr("Stop"); danger: true; armed: !!win.cw && win.cw.sending; onClicked: win.cw.stop() }
+            Btn { label: qsTr("Stop"); danger: true; armed: !!win.cw && win.cw.sending; onClicked: win.stopSending() }
             Btn { label: qsTr("Macros…"); onClicked: macroEditor.open() }
             Btn { label: qsTr("Setup…"); onClicked: setup.open() }
         }
@@ -650,7 +661,7 @@ Window {
                 text: qsTr("TX while typing")
                 checked: win.transmitWhileTyping
                 ToolTip.visible: hovered
-                ToolTip.text: qsTr("Transmit new text automatically after a short pause while typing.")
+                ToolTip.text: qsTr("Transmit each new character as soon as the keyer is ready.")
                 onToggled: {
                     win.transmitWhileTyping = checked
                     win.queuedTypedText = ""
@@ -965,5 +976,5 @@ Window {
             }
         }
     }
-    Shortcut { sequence: "Esc"; enabled: win.active && !macroEditor.visible && !setup.visible; onActivated: win.cw.stop() }
+    Shortcut { sequence: "Esc"; enabled: win.active && !macroEditor.visible && !setup.visible; onActivated: win.stopSending() }
 }

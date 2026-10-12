@@ -4390,6 +4390,15 @@ int main(int argc, char* argv[])
             return bridge.cwSerialKeyerPortReservation(port);
         };
         h.sendRigMorse = [&bridge] (QString const& t, int wpm) { return bridge.cwSendRigMorse (t, wpm); };
+        h.sendRigMorseAsync = [&bridge] (QString const& t, int wpm,
+                                         decodium::cw::CwController::Hooks::MorseCompletion done) {
+            auto* cat = bridge.hamlibCat();
+            return bridge.cwRigKeyerAvailable() && cat && cat->sendRigMorse(t, wpm, std::move(done));
+        };
+        h.rigMorseTextLimit = [&bridge] {
+            auto* cat = bridge.hamlibCat();
+            return cat ? cat->rigMorseTextLimit() : 0;
+        };
         h.stopRigMorse = [&bridge] { bridge.cwStopRigMorse (); };
         h.rigPtt       = [&bridge] (bool on) { bridge.cwRigPtt (on); };
         h.sendKey = [&bridge] (QVector<decodium::cw::KeyEvent> const& events, int toneHz) {

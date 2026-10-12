@@ -62,7 +62,7 @@ public:
     ~CwKeyerWorker() override { closePort(); }
 
 public slots:
-    void openPort(const QString& name, const QString& line)
+    bool openPort(const QString& name, const QString& line)
     {
         closePort();
         m_line = line.trimmed().toUpper() == QLatin1String("RTS") ? Line::Rts : Line::Dtr;
@@ -76,11 +76,10 @@ public slots:
             delete m_port;
             m_port = nullptr;
             emit failed(tr("Cannot open %1: %2").arg(name, why));
-            emit opened(false);
-            return;
+            return false;
         }
         key(false);
-        emit opened(true);
+        return true;
     }
 
     void closePort()
@@ -148,7 +147,6 @@ public slots:
     }
 
 signals:
-    void opened(bool ok);
     void charSent(const QString& character);
     void textSent(const QString& text);
     void finished();
@@ -224,8 +222,9 @@ private:
             if (!complete)
                 break;
             emit charSent(QString(raw));
-            // Fra due lettere tre punti: uno l'ha gia' fatto l'elemento.
-            waitFor(dot * 2, m_cancelledThrough, generation);
+            // The final key-up has no following element gap: wait all three
+            // dots here. A subsequent space adds four more for a seven-dot word gap.
+            waitFor(dot * 3, m_cancelledThrough, generation);
             if (cancelled(generation)) {
                 complete = false;
                 break;
@@ -262,7 +261,6 @@ CwKeyer::CwKeyer(QObject* parent)
         m_sending = false;
         emit finished();
     });
-    connect(m_worker, &CwKeyerWorker::opened, this, [this](bool ok) { m_open = ok; });
     // La manipolazione vuole precedenza: un ritardo qui si sente in aria.
     m_thread->start(QThread::TimeCriticalPriority);
 }
@@ -295,8 +293,13 @@ bool CwKeyer::open(const QString& port, const QString& line)
     }
     m_port = port.trimmed();
     m_open = false;
-    QMetaObject::invokeMethod(m_worker, "openPort", Qt::BlockingQueuedConnection,
-                              Q_ARG(QString, m_port), Q_ARG(QString, line));
+    bool opened = false;
+    // A queued signal cannot update m_open while the GUI waits for this
+    // blocking worker call. Read its return value instead; no stale opened
+    // signal can later mark a closed port as open.
+    const bool invoked = QMetaObject::invokeMethod(m_worker, "openPort", Qt::BlockingQueuedConnection,
+                              Q_RETURN_ARG(bool, opened), Q_ARG(QString, m_port), Q_ARG(QString, line));
+    m_open = invoked && opened;
     return m_open;
 }
 

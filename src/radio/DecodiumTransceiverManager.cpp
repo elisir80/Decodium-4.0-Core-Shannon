@@ -2611,15 +2611,37 @@ bool DecodiumTransceiverManager::rigMorseAvailable() const
     return hamlib && hamlib->supports_morse();
 }
 
-bool DecodiumTransceiverManager::sendRigMorse(const QString& text, int wpm)
+int DecodiumTransceiverManager::rigMorseTextLimit() const
+{
+    auto const *hamlib = dynamic_cast<HamlibTransceiver *>(d->transceiver.data());
+    return hamlib ? hamlib->morse_text_limit() : 0;
+}
+
+bool DecodiumTransceiverManager::sendRigMorse(const QString& text, int wpm,
+                                            std::function<void(const QString&)> completion)
 {
     if (text.trimmed().isEmpty() || !rigMorseAvailable() || !d->transceiver)
         return false;
     QPointer<Transceiver> xcv = d->transceiver;
-    QMetaObject::invokeMethod(xcv, [xcv, text, wpm]() {
-        if (xcv) xcv->send_morse(text, wpm);
+    QPointer<DecodiumTransceiverManager> manager(this);
+    return QMetaObject::invokeMethod(xcv, [xcv, manager, text, wpm, completion = std::move(completion)]() {
+        QString error;
+        try {
+            auto *hamlib = dynamic_cast<HamlibTransceiver *>(xcv.data());
+            error = hamlib ? hamlib->send_morse_checked(text, wpm)
+                           : QStringLiteral("CAT CW keyer disconnected before sending");
+        } catch (std::exception const& e) {
+            error = QString::fromUtf8(e.what());
+        } catch (...) {
+            error = QStringLiteral("Unknown CAT CW send failure");
+        }
+        if (manager) QMetaObject::invokeMethod(manager, [manager, completion, error]() {
+            if (!manager) return;
+            if (!error.isEmpty()) qWarning().noquote() << "[CW-CAT]" << error;
+            if (completion) completion(error);
+            else if (!error.isEmpty()) emit manager->errorOccurred(error);
+        }, Qt::QueuedConnection);
     }, Qt::QueuedConnection);
-    return true;
 }
 
 void DecodiumTransceiverManager::stopRigMorse()

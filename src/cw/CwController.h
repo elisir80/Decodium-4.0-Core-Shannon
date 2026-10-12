@@ -107,6 +107,11 @@ public:
         std::function<bool()> remoteKeySupported;
         std::function<bool()> rigKeyerAvailable;
         std::function<bool(const QString&, int)> sendRigMorse;
+        // Completion runs on the controller thread after the CAT command has
+        // actually executed; an empty error means the driver accepted it.
+        using MorseCompletion = std::function<void(const QString&)>;
+        std::function<bool(const QString&, int, MorseCompletion)> sendRigMorseAsync;
+        std::function<int()> rigMorseTextLimit;
         std::function<void()> stopRigMorse;
         // Il keyer CAT nativo spesso richiede PTT esplicito (es. Yaesu FT-991A).
         std::function<void(bool on)> rigPtt;
@@ -199,6 +204,8 @@ public:
     // volendo, call (altrimenti viene dal gancio hisCall).
     Q_INVOKABLE void sendMacro(int index, const QVariantMap& context);
     Q_INVOKABLE void sendText(const QString& text, const QVariantMap& context);
+    // Literal keyboard input: preserve word separators across small chunks.
+    Q_INVOKABLE bool sendTypedText(const QString& text);
     Q_INVOKABLE QString expandText(const QString& text, const QVariantMap& context) const;
     // Ferma tutto, subito.
     Q_INVOKABLE void stop();
@@ -222,6 +229,8 @@ private:
     bool rejectReservedKeyerPort(const QString& port, const QString& keyerName);
     void clearTxSetupError();
     void sendExpanded(const QString& ready);
+    void sendNextRigChunk();
+    void finishRigKey();
     void startRemoteKey(const QString& text);
     void pumpRemoteKey();
     void finishRemoteKey(bool immediate);
@@ -269,7 +278,11 @@ private:
     QList<Macro> m_macros;
     bool m_sending {false};
     int m_activeMacro {-1};
-    QTimer m_audioDone;   // l'audio CW non dice quando finisce: lo si calcola
+    QTimer m_audioDone;   // completion timer / CAT dispatch watchdog
+    QString m_rigQueuedText;
+    bool m_rigActive {false};
+    bool m_rigWaiting {false};
+    quint64 m_rigGeneration {0};
 };
 
 }  // namespace decodium::cw

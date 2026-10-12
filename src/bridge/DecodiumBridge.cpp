@@ -43322,7 +43322,11 @@ void DecodiumBridge::cwStopRigMorse()
 
 void DecodiumBridge::cwRigPtt(bool on)
 {
-    if (m_mode != QStringLiteral("CW") || m_decoPortUseRemote || !m_hamlibCat)
+    if (!m_hamlibCat)
+        return;
+    // Release an already-started local CW transmission even if the operator
+    // changed mode or switched to the remote path before pressing Stop.
+    if (on && (m_mode != QStringLiteral("CW") || m_decoPortUseRemote))
         return;
     m_hamlibCat->setRigPtt(on);
 }

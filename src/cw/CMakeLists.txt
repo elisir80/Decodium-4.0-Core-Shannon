@@ -26,6 +26,7 @@ add_library (decodium_cw STATIC
   CwSerialPorts.cpp   CwSerialPorts.h
   CwMacros.cpp        CwMacros.h
   CwTiming.cpp        CwTiming.h
+  CwCatText.h
   CwController.cpp    CwController.h
   CwSidetone.cpp      CwSidetone.h
   )
@@ -36,7 +37,7 @@ set_target_properties (decodium_cw PROPERTIES
   CXX_STANDARD_REQUIRED ON)
 
 if (BUILD_TESTING)
-  foreach (name test_cw_decoder test_cw_keyer test_winkeyer test_cw_macros test_cw_timing test_cw_controller)
+  foreach (name test_cw_decoder test_cw_keyer test_winkeyer test_cw_macros test_cw_timing test_cw_controller test_cw_cat_text)
     add_executable (${name} tests/${name}.cpp)
     target_link_libraries (${name} PRIVATE decodium_cw Qt6::Test)
     set_target_properties (${name} PROPERTIES
@@ -44,4 +45,13 @@ if (BUILD_TESTING)
       CXX_STANDARD_REQUIRED ON)
     add_test (NAME ${name} COMMAND ${name})
   endforeach ()
+endif ()
+
+if (BUILD_TESTING AND TARGET Qt6::Qml AND TARGET Qt6::Quick)
+  add_executable (test_cw_typing_qml tests/test_cw_typing_qml.cpp)
+  target_link_libraries (test_cw_typing_qml PRIVATE decodium_cw Qt6::Test Qt6::Qml Qt6::Quick)
+  target_compile_definitions (test_cw_typing_qml PRIVATE
+    CW_WINDOW_QML="${CMAKE_CURRENT_SOURCE_DIR}/../../qml/decodium/components/CwWindow.qml")
+  set_target_properties (test_cw_typing_qml PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+  add_test (NAME test_cw_typing_qml COMMAND test_cw_typing_qml)
 endif ()

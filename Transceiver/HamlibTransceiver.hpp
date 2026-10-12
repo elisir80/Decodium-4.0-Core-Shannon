@@ -33,6 +33,8 @@ public:
   bool request_power_on(QString * error);
   bool request_power_off(QString * error);
   bool supports_morse () const noexcept;
+  int morse_text_limit () const noexcept;
+  QString send_morse_checked (QString const&, int);
   void send_morse (QString const&, int) noexcept override;  // keying CW via Hamlib
   void stop_morse () noexcept override;
 
