@@ -1392,6 +1392,7 @@ endif ()
 add_subdirectory (src/jtty)
 add_subdirectory (src/cw)
 add_subdirectory (src/ssb)
+add_subdirectory (src/voicekeyer)
 add_subdirectory (src/rotor)
 
 if (BUILD_TESTING AND EXISTS ${CMAKE_SOURCE_DIR}/tests AND IS_DIRECTORY ${CMAKE_SOURCE_DIR}/tests)
@@ -2271,7 +2272,7 @@ endif ()
 
 
 target_link_libraries (decodium_qml decodium_jtty)
-target_link_libraries (decodium_qml decodium_cw decodium_ssb)
+target_link_libraries (decodium_qml decodium_cw decodium_ssb decodium_voicekeyer)
 target_link_libraries (decodium_qml decodium_rotor)
 
 # DecoRTTY: la libreria di aggancio porta con se' tutte le altre.

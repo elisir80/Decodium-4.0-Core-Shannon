@@ -90,6 +90,7 @@ __declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance = 0x00000001;
 #include "JttyController.h"
 #include "CwController.h"
 #include "SsbController.h"
+#include "VoiceKeyer.h"
 #include "RotorModule.h"
 #include "DecodiumDiagnostics.h"
 #include "DecodiumDxCluster.h"
@@ -4480,6 +4481,18 @@ int main(int argc, char* argv[])
         QObject::connect(&bridge,&DecodiumBridge::ssbStateChanged,&ssbModule,[&]{if(!bridge.ssbTxActive())ssbModule.stop();});
         QObject::connect(&app,&QCoreApplication::aboutToQuit,&ssbModule,&decodium::ssb::SsbController::stop);
         engine.rootContext()->setContextProperty("ssbModule",&ssbModule);
+        // Voice keyer: otto messaggi preregistrati sullo stesso percorso TX della finestra SSB.
+        static decodium::voicekeyer::VoiceKeyer voiceKeyer(
+            QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + QStringLiteral("/voicekeyer"));
+        decodium::voicekeyer::VoiceKeyer::Hooks keyerHooks;
+        keyerHooks.begin=[&bridge]{return bridge.ssbBegin();};
+        keyerHooks.end=[&bridge]{bridge.ssbStop();};
+        keyerHooks.valid=[&bridge]{return bridge.ssbTxActive() && bridge.ssbValid();};
+        keyerHooks.send=[&bridge](const QVector<short>& samples){bridge.ssbSend(samples);};
+        keyerHooks.leadMs=[&bridge]{return bridge.decoPortUseRemote() ? bridge.cwRemoteLeadMs() : 150;};
+        voiceKeyer.setHooks(std::move(keyerHooks));
+        QObject::connect(&app,&QCoreApplication::aboutToQuit,&voiceKeyer,&decodium::voicekeyer::VoiceKeyer::stop);
+        engine.rootContext()->setContextProperty("voiceKeyer",&voiceKeyer);
     }
     {
         // Rotore: nominativo e locatore sono quelli di Decodium; ogni stazione

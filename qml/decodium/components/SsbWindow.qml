@@ -42,7 +42,7 @@ ApplicationWindow {
     Component.onDestruction: voice.stop()
     onVisibleChanged: if (visible) { syncRadioModeFromCat(); bridge.ssbRefreshControls() }
     Component.onCompleted: syncRadioModeFromCat()
-    Shortcut { sequence: "Escape"; onActivated: voice.stop() }
+    Shortcut { sequence: "Escape"; onActivated: { voice.stop(); voiceKeyer.stop() } }
 
     // Barra spaziatrice = PTT: si trasmette finche' e' premuta. Con il cursore in
     // un campo di testo (frequenza) la barra scrive uno spazio e basta; con un
@@ -207,6 +207,54 @@ ApplicationWindow {
                         ProgressBar { from: 0; to: 1; value: voice.micPeak; Layout.fillWidth: true }
                         Label { text: voice.micPeak>.001 ? (20*Math.log(voice.micPeak)/Math.LN10).toFixed(0)+" dBFS" : "—"; Layout.preferredWidth: 65 }
                     }
+                }
+            }
+            GroupBox {
+                title: qsTr("Voice keyer • preregistered messages"); Layout.fillWidth: true
+                ColumnLayout {
+                    anchors.fill: parent
+                    Label {
+                        text: qsTr("Hold Record while speaking, release to save. Play sends the message on SSB; Esc stops.")
+                        wrapMode: Text.WordWrap; Layout.fillWidth: true; color: "#a9bac9"
+                    }
+                    Repeater {
+                        model: voiceKeyer.messages
+                        delegate: RowLayout {
+                            id: keyRow
+                            required property var modelData
+                            Layout.fillWidth: true
+                            Label { text: "F" + (keyRow.modelData.index + 1); Layout.preferredWidth: 26; color: "#44d4df" }
+                            TextField {
+                                id: keyLabel
+                                text: keyRow.modelData.label; maxLength: 12; Layout.preferredWidth: 110
+                                onEditingFinished: voiceKeyer.setSlotText(keyRow.modelData.index, text, keyText.text)
+                            }
+                            TextField {
+                                id: keyText
+                                text: keyRow.modelData.text; placeholderText: qsTr("text of the message"); Layout.fillWidth: true
+                                onEditingFinished: voiceKeyer.setSlotText(keyRow.modelData.index, keyLabel.text, text)
+                            }
+                            Button {
+                                text: qsTr("Record")
+                                enabled: !voiceKeyer.playing && !(voiceKeyer.recording && !pressed)
+                                onPressed: voiceKeyer.startRecording(keyRow.modelData.index)
+                                onReleased: voiceKeyer.stopRecording()
+                                onCanceled: voiceKeyer.stopRecording()
+                            }
+                            Button {
+                                text: qsTr("Play")
+                                enabled: keyRow.modelData.hasAudio && ready && controls.busy !== true
+                                         && !voiceKeyer.playing && !voiceKeyer.recording && !voice.transmitting
+                                onClicked: voiceKeyer.play(keyRow.modelData.index)
+                            }
+                            Button {
+                                text: qsTr("Clear")
+                                enabled: keyRow.modelData.hasAudio && !voiceKeyer.playing && !voiceKeyer.recording
+                                onClicked: voiceKeyer.clearSlot(keyRow.modelData.index)
+                            }
+                        }
+                    }
+                    Label { text: voiceKeyer.status; Layout.fillWidth: true; wrapMode: Text.WordWrap; color: "#a9bac9" }
                 }
             }
             GroupBox {
