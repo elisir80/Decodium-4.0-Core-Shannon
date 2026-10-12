@@ -43,6 +43,59 @@ ApplicationWindow {
     onVisibleChanged: if (visible) { syncRadioModeFromCat(); bridge.ssbRefreshControls() }
     Component.onCompleted: syncRadioModeFromCat()
     Shortcut { sequence: "Escape"; onActivated: voice.stop() }
+
+    // Barra spaziatrice = PTT: si trasmette finche' e' premuta. Con il cursore in
+    // un campo di testo (frequenza) la barra scrive uno spazio e basta; con un
+    // elenco aperto non si ruba il fuoco.
+    readonly property bool popupOpen: side.popup.visible || mic.popup.visible
+                                      || agcBox.popup.visible || rxAgc.popup.visible
+    function isTextEntry(item) { return !!item && ("cursorPosition" in item) }
+    onActiveFocusItemChanged: Qt.callLater(function () {
+        var f = win.activeFocusItem
+        if (!win.active || f === keyCatcher || win.isTextEntry(f) || win.popupOpen)
+            return
+        keyCatcher.forceActiveFocus()
+    })
+    Item {
+        id: keyCatcher
+        focus: true
+        Keys.onPressed: function (event) {
+            if (event.key === Qt.Key_Space && !event.isAutoRepeat) {
+                event.accepted = true
+                if (win.ready && controls.busy !== true && mic.currentIndex >= 0 && !voice.transmitting)
+                    voice.start()
+            }
+        }
+        Keys.onReleased: function (event) {
+            if (event.key === Qt.Key_Space && !event.isAutoRepeat) {
+                event.accepted = true
+                voice.stop()
+            }
+        }
+    }
+
+    // Altri comandi di ricezione che la radio espone via CAT: compaiono solo
+    // quelli che dichiara di saper leggere e scrivere.
+    readonly property var extraLevels: [
+        { key: "af",      label: qsTr("AF gain %"),            kind: "pct" },
+        { key: "sql",     label: qsTr("Squelch %"),            kind: "pct" },
+        { key: "nr",      label: qsTr("Noise reduction %"),    kind: "pct" },
+        { key: "nb",      label: qsTr("Noise blanker %"),      kind: "pct" },
+        { key: "comp",    label: qsTr("Speech compressor %"),  kind: "pct" },
+        { key: "voxgain", label: qsTr("VOX gain %"),           kind: "pct" },
+        { key: "ifshift", label: qsTr("IF shift Hz"),          kind: "int" },
+        { key: "notchf",  label: qsTr("Notch Hz"),             kind: "int" },
+        { key: "preamp",  label: qsTr("Preamp dB"),            kind: "list" },
+        { key: "att",     label: qsTr("Attenuator dB"),        kind: "list" }
+    ]
+    readonly property var extraFuncs: [
+        { key: "nbOn",   label: qsTr("Noise blanker") },
+        { key: "nrOn",   label: qsTr("Noise reduction") },
+        { key: "anfOn",  label: qsTr("Auto notch") },
+        { key: "compOn", label: qsTr("Speech compressor") },
+        { key: "voxOn",  label: qsTr("VOX") },
+        { key: "lockOn", label: qsTr("Dial lock") }
+    ]
     Dialog {
         id: powerOffDialog
         title: qsTr("Power off radio?")
@@ -89,6 +142,7 @@ ApplicationWindow {
             background: Rectangle { radius: 8; color: voice.transmitting ? "#b53238" : "#087f92"; opacity: parent.enabled ? 1 : .45 }
         }
         Label { text: voice.status; Layout.fillWidth: true; wrapMode: Text.WordWrap; color: "#a9bac9" }
+        Label { text: qsTr("Hold the space bar to talk (Esc stops)."); Layout.fillWidth: true; color: "#6f8294"; font.pixelSize: 12 }
         }
     }
     ScrollView {
@@ -165,6 +219,7 @@ ApplicationWindow {
                     SpinBox { from: 300; to: 4000; stepSize: 100; value: controls.filter === undefined ? 2400 : controls.filter; enabled: ready && controls.busy !== true && !voice.transmitting && controls.filterSupported === true; onValueModified: bridge.ssbSetControl("filter",value) }
                     Label { text: qsTr("Radio AGC") }
                     DecoComboBox {
+                        id: agcBox
                         model: controls.agcModes || []; textRole: "name"; valueRole: "value"
                         enabled: ready && controls.busy !== true && !voice.transmitting && controls.agcSupported === true
                         currentIndex: { var a=controls.agcModes || [];for(var i=0;i<a.length;i++)if(a[i].value===controls.agc)return i;return -1 }
@@ -221,6 +276,69 @@ ApplicationWindow {
                     Label { text: controls.error || ""; visible: text.length>0; color: "#ffa971"; Layout.columnSpan: 4; Layout.fillWidth: true; wrapMode: Text.WordWrap }
                 }
             }
+            GroupBox {
+                title: qsTr("Receive • radio settings (read and set by CAT)"); Layout.fillWidth: true
+                visible: ready && bridge.catConnected
+                GridLayout {
+                    anchors.fill: parent; columns: 2; columnSpacing: 16; rowSpacing: 4
+                    Repeater {
+                        model: win.extraLevels
+                        delegate: RowLayout {
+                            id: lvl
+                            required property var modelData
+                            readonly property bool canEdit: win.ready && controls.busy !== true && !voice.transmitting
+                            readonly property var cur: controls[modelData.key]
+                            visible: controls[modelData.key + "Supported"] === true
+                            Layout.columnSpan: 2; Layout.fillWidth: true
+                            Label { text: lvl.modelData.label; Layout.preferredWidth: 170 }
+                            Slider {
+                                visible: lvl.modelData.kind === "pct"; Layout.fillWidth: true
+                                from: 0; to: 100; stepSize: 1
+                                value: lvl.cur === undefined ? 0 : lvl.cur
+                                enabled: lvl.canEdit
+                                onPressedChanged: if (!pressed) bridge.ssbSetControl(lvl.modelData.key, Math.round(value))
+                            }
+                            Label {
+                                visible: lvl.modelData.kind === "pct"; Layout.preferredWidth: 50
+                                text: Math.round(lvl.cur === undefined ? 0 : lvl.cur) + " %"
+                            }
+                            SpinBox {
+                                visible: lvl.modelData.kind === "int"
+                                from: controls[lvl.modelData.key + "Min"] === undefined ? -1200 : controls[lvl.modelData.key + "Min"]
+                                to: controls[lvl.modelData.key + "Max"] === undefined ? 1200 : controls[lvl.modelData.key + "Max"]
+                                stepSize: 50
+                                value: lvl.cur === undefined ? 0 : lvl.cur
+                                enabled: lvl.canEdit
+                                onValueModified: bridge.ssbSetControl(lvl.modelData.key, value)
+                            }
+                            ComboBox {
+                                visible: lvl.modelData.kind === "list"
+                                model: controls[lvl.modelData.key + "Values"] || []
+                                enabled: lvl.canEdit
+                                currentIndex: { var a = controls[lvl.modelData.key + "Values"] || []; for (var i = 0; i < a.length; i++) if (a[i] === lvl.cur) return i; return -1 }
+                                displayText: currentIndex < 0 ? "—" : (model[currentIndex] === 0 ? qsTr("Off") : model[currentIndex] + " dB")
+                                onActivated: { var a = controls[lvl.modelData.key + "Values"] || []; bridge.ssbSetControl(lvl.modelData.key, Number(a[currentIndex])) }
+                            }
+                            Item { Layout.fillWidth: true; visible: lvl.modelData.kind !== "pct" }
+                        }
+                    }
+                    Repeater {
+                        model: win.extraFuncs
+                        delegate: CheckBox {
+                            id: fn
+                            required property var modelData
+                            text: modelData.label
+                            visible: controls[modelData.key + "Supported"] === true
+                            checked: controls[modelData.key] === true
+                            enabled: win.ready && controls.busy !== true && !voice.transmitting
+                            onToggled: {
+                                bridge.ssbSetControl(modelData.key, checked ? 1 : 0)
+                                checked = Qt.binding(function () { return controls[fn.modelData.key] === true })
+                            }
+                        }
+                    }
+                }
+            }
             RowLayout {
                 Label { text: "ALC: "+(bridge.rigAlcValid ? Math.round(bridge.rigAlc)+" %" : "—"); font.pixelSize: 18 }
                 Label { text: qsTr("RF: ")+(bridge.rigPowerWatts > 0 ? bridge.rigPowerWatts.toFixed(1)+" W" : "—"); Layout.fillWidth: true; font.pixelSize: 18 }
@@ -230,6 +348,28 @@ ApplicationWindow {
                 CheckBox { text: qsTr("Listen RX"); checked: bridge.decoPortMonitor; enabled: !voice.transmitting; onToggled: { bridge.decoPortMonitor=checked; if(checked)bridge.startRx() } }
                 Slider { from: 0; to: 100; stepSize: 1; value: bridge.remoteRxVolume; onMoved: bridge.remoteRxVolume=value; Layout.fillWidth: true }
                 Label { text: bridge.remoteRxVolume+" %" }
+            }
+            RowLayout {
+                Label { text: qsTr("Listen AGC") }
+                ComboBox {
+                    id: rxAgc
+                    model: [qsTr("Off"), qsTr("Auto"), qsTr("Fast"), qsTr("Medium"), qsTr("Slow"), qsTr("Long")]
+                    currentIndex: bridge.ssbRxAgcMode
+                    onActivated: bridge.ssbRxAgcMode = currentIndex
+                }
+                Label { text: qsTr("Threshold"); visible: bridge.ssbRxAgcMode > 1 }
+                Slider {
+                    visible: bridge.ssbRxAgcMode > 1; Layout.fillWidth: true
+                    from: -120; to: -20; stepSize: 1; value: bridge.ssbRxAgcThreshold
+                    onMoved: bridge.ssbRxAgcThreshold = value
+                }
+                Label { visible: bridge.ssbRxAgcMode > 1; text: bridge.ssbRxAgcThreshold + " dBFS"; Layout.preferredWidth: 80 }
+                Item { Layout.fillWidth: true; visible: bridge.ssbRxAgcMode <= 1 }
+                Label { visible: bridge.ssbRxAgcMode > 0; text: qsTr("Gain %1 dB").arg(bridge.ssbRxAgcGainDb.toFixed(0)); Layout.preferredWidth: 90 }
+            }
+            Label {
+                text: qsTr("Software AGC on the listening audio only (from DECODIUM SDR). Auto follows the noise floor by itself. It does not touch the decoder or the radio's AGC.")
+                wrapMode: Text.WordWrap; Layout.fillWidth: true; color: "#a9bac9"
             }
             ComboBox {
                 Layout.fillWidth: true; model: bridge.cwMonitorOutputs(); textRole: "label"; valueRole: "id"

@@ -1,6 +1,7 @@
 #pragma once
 namespace decodium::audio { class RttyRxRecovery; }
 #include <QObject>
+#include "SsbRxAgc.h"
 #include "CwSidetone.h"
 #include <QStringList>
 #include <QVariantList>
@@ -392,6 +393,10 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(bool ssbTxActive READ ssbTxActive NOTIFY ssbStateChanged)
     Q_PROPERTY(QVariantMap ssbControls READ ssbControls NOTIFY ssbStateChanged)
     Q_PROPERTY(QString ssbRadioMode READ ssbRadioMode NOTIFY ssbStateChanged)
+    // AGC software dell'ascolto (da DECODIUM SDR): 0 Off, 1 Auto, 2 Fast, 3 Medium, 4 Slow, 5 Long.
+    Q_PROPERTY(int ssbRxAgcMode READ ssbRxAgcMode WRITE setSsbRxAgcMode NOTIFY ssbRxAgcChanged)
+    Q_PROPERTY(int ssbRxAgcThreshold READ ssbRxAgcThreshold WRITE setSsbRxAgcThreshold NOTIFY ssbRxAgcChanged)
+    Q_PROPERTY(double ssbRxAgcGainDb READ ssbRxAgcGainDb NOTIFY ssbRxAgcChanged)
     Q_PROPERTY(bool catConnected READ catConnected NOTIFY catConnectedChanged)
     Q_PROPERTY(QString catRigName READ catRigName NOTIFY catRigNameChanged)
     Q_PROPERTY(QString catMode READ catMode NOTIFY catModeChanged)
@@ -1381,6 +1386,12 @@ public:
     bool ssbTxActive() const { return m_ssbTxActive; }
     QVariantMap ssbControls() const { return m_ssbControls; }
     QString ssbRadioMode() const { return m_ssbRadioMode; }
+    int ssbRxAgcMode() const;
+    void setSsbRxAgcMode(int mode);
+    int ssbRxAgcThreshold() const;
+    void setSsbRxAgcThreshold(int dbfs);
+    double ssbRxAgcGainDb() const { return m_ssbRxAgcGainDb; }
+    Q_SIGNAL void ssbRxAgcChanged();
     bool ssbBegin();
     bool ssbValid() const;
     void ssbSend(const QVector<short>& samples);
@@ -3373,6 +3384,9 @@ private:
     bool m_ssbTxActive {false};
     bool m_ssbRemoteTx {false};
     bool m_ssbRestoreMonitor {false};
+    decodium::ssb::RxAgc m_ssbRxAgc;
+    double m_ssbRxAgcGainDb {0.0};
+    bool m_ssbRxAgcLoaded {false};
     bool m_ssbVoiceConnected {false};
     QVariantMap m_ssbControls;
     QString m_ssbRadioMode {QStringLiteral("DIGU")};

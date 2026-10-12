@@ -115,6 +115,37 @@ void DecodiumBridge::ssbMonitorAudio(const QVector<short>& samples)
                 for (int i = 0; i < factor; ++i)
                     out_samples.append(s);
         }
+        // AGC software dell'ascolto (da DECODIUM SDR). Lavora a 12 kHz sulla
+        // copia che va all'altoparlante: all'audio del decoder non si tocca.
+        if (!m_ssbRxAgcLoaded) {
+            m_ssbRxAgc.configure(SAMPLE_RATE);
+            m_ssbRxAgc.setMode(ssbRxAgcMode());
+            m_ssbRxAgc.setThresholdDb(ssbRxAgcThreshold());
+            m_ssbRxAgcLoaded = true;
+        }
+        if (m_ssbRxAgc.mode() != 0) {
+            QVector<float> f(samples.size());
+            for (int i = 0; i < samples.size(); ++i)
+                f[i] = samples[i] / 32768.0f;
+            m_ssbRxAgc.process(f.data(), std::size_t(f.size()));
+            QVector<short> agcOut(samples.size());
+            for (int i = 0; i < f.size(); ++i)
+                agcOut[i] = short(std::lround(std::clamp(f[i], -1.0f, 1.0f) * 32767.0f));
+            const double g = m_ssbRxAgc.gainDb();
+            if (std::abs(g - m_ssbRxAgcGainDb) >= 1.0) {
+                m_ssbRxAgcGainDb = g;
+                emit ssbRxAgcChanged();
+            }
+            out_samples = agcOut;
+            if (m_decoPortMonitorRate != SAMPLE_RATE) {
+                const int f2 = m_decoPortMonitorRate / SAMPLE_RATE;
+                out_samples.clear();
+                out_samples.reserve(agcOut.size() * f2);
+                for (short s : agcOut)
+                    for (int i = 0; i < f2; ++i)
+                        out_samples.append(s);
+            }
+        }
         // Volume affects the local speaker copy only; decoder PCM stays untouched.
         for (short& sample : out_samples)
             sample = static_cast<short>(std::lround(sample * m_remoteRxGain));
@@ -124,4 +155,31 @@ void DecodiumBridge::ssbMonitorAudio(const QVector<short>& samples)
             if (out) out->enqueueSamples(out_samples, rate);
         }, Qt::QueuedConnection);
     }
+}
+
+int DecodiumBridge::ssbRxAgcMode() const
+{
+    return qBound(0, QSettings().value("SsbRx/agcMode", 0).toInt(), 5);
+}
+
+void DecodiumBridge::setSsbRxAgcMode(int mode)
+{
+    const int bounded = qBound(0, mode, 5);
+    QSettings().setValue("SsbRx/agcMode", bounded);
+    m_ssbRxAgc.setMode(bounded);
+    m_ssbRxAgcGainDb = 0.0;
+    emit ssbRxAgcChanged();
+}
+
+int DecodiumBridge::ssbRxAgcThreshold() const
+{
+    return qBound(-120, QSettings().value("SsbRx/agcThreshold", -80).toInt(), -20);
+}
+
+void DecodiumBridge::setSsbRxAgcThreshold(int dbfs)
+{
+    const int bounded = qBound(-120, dbfs, -20);
+    QSettings().setValue("SsbRx/agcThreshold", bounded);
+    m_ssbRxAgc.setThresholdDb(bounded);
+    emit ssbRxAgcChanged();
 }

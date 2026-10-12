@@ -2573,6 +2573,111 @@ bool HamlibTransceiver::request_power_off (QString * error)
 }
 
 
+namespace {
+// Altri comandi della sezione ricezione che Hamlib sa leggere e scrivere: la
+// finestra SSB li mostra solo se la radio li dichiara. kind: 0 percentuale,
+// 1 intero con limiti (Hz), 2 elenco di valori dB (preamplificatore),
+// 3 elenco di valori dB (attenuatore).
+struct SsbExtraLevel { const char* key; setting_t id; int kind; };
+struct SsbExtraFunc { const char* key; setting_t id; };
+const SsbExtraLevel kSsbExtraLevels[] = {
+  {"af", RIG_LEVEL_AF, 0}, {"sql", RIG_LEVEL_SQL, 0}, {"nr", RIG_LEVEL_NR, 0},
+  {"nb", RIG_LEVEL_NB, 0}, {"comp", RIG_LEVEL_COMP, 0}, {"voxgain", RIG_LEVEL_VOXGAIN, 0},
+  {"ifshift", RIG_LEVEL_IF, 1}, {"notchf", RIG_LEVEL_NOTCHF, 1},
+  {"preamp", RIG_LEVEL_PREAMP, 2}, {"att", RIG_LEVEL_ATT, 3},
+};
+const SsbExtraFunc kSsbExtraFuncs[] = {
+  {"nbOn", RIG_FUNC_NB}, {"nrOn", RIG_FUNC_NR}, {"anfOn", RIG_FUNC_ANF},
+  {"compOn", RIG_FUNC_COMP}, {"voxOn", RIG_FUNC_VOX}, {"lockOn", RIG_FUNC_LOCK},
+};
+
+QVariantList ssb_db_list (const int* values)
+{
+  QVariantList list;
+  list.append (0);
+  for (int i = 0; i < HAMLIB_MAXDBLSTSIZ && values[i]; ++i)
+    list.append (values[i]);
+  return list;
+}
+
+// Scrive un comando "extra": nullopt se la chiave non e' una di queste.
+std::optional<int> ssb_extra_write (RIG * rig, QString const& key, double value)
+{
+  for (auto const& l : kSsbExtraLevels)
+    {
+      if (key != QLatin1String (l.key)) continue;
+      if (!rig_has_set_level (rig, l.id)) return -RIG_ENAVAIL;
+      value_t v {};
+      if (l.kind == 0)
+        {
+          if (value < 0 || value > 100) return -RIG_EINVAL;
+          v.f = float (value / 100.);
+        }
+      else if (l.kind == 1)
+        {
+          if (value < -4000 || value > 4000) return -RIG_EINVAL;
+          v.i = int (value);
+        }
+      else
+        {
+          bool allowed = value == 0;
+          auto const* list = l.kind == 2 ? rig->caps->preamp : rig->caps->attenuator;
+          for (int i = 0; i < HAMLIB_MAXDBLSTSIZ && list[i]; ++i)
+            if (int (value) == list[i]) allowed = true;
+          if (!allowed) return -RIG_EINVAL;
+          v.i = int (value);
+        }
+      return rig_set_level (rig, RIG_VFO_CURR, l.id, v);
+    }
+  for (auto const& f : kSsbExtraFuncs)
+    {
+      if (key != QLatin1String (f.key)) continue;
+      if (!rig_has_set_func (rig, f.id)) return -RIG_ENAVAIL;
+      return rig_set_func (rig, RIG_VFO_CURR, f.id, value != 0.0 ? 1 : 0);
+    }
+  return std::nullopt;
+}
+
+void ssb_extra_read (RIG * rig, QVariantMap& result)
+{
+  for (auto const& l : kSsbExtraLevels)
+    {
+      QString const k = QString::fromLatin1 (l.key);
+      bool const canSet = rig_has_set_level (rig, l.id) != 0;
+      result[k + QStringLiteral ("Supported")] = canSet;
+      if (!canSet) continue;
+      value_t v {};
+      if (rig_has_get_level (rig, l.id) && rig_get_level (rig, RIG_VFO_CURR, l.id, &v) == RIG_OK)
+        result[k] = l.kind == 0 ? double (v.f) * 100. : double (v.i);
+      if (l.kind == 1)
+        {
+          int lo = -1200, hi = 1200;
+          int const idx = rig_setting2idx (l.id);
+          if (idx >= 0 && idx < RIG_SETTING_MAX && rig->caps->level_gran[idx].max.i > rig->caps->level_gran[idx].min.i)
+            {
+              lo = rig->caps->level_gran[idx].min.i;
+              hi = rig->caps->level_gran[idx].max.i;
+            }
+          else if (l.id == RIG_LEVEL_NOTCHF) { lo = 0; hi = 3000; }
+          result[k + QStringLiteral ("Min")] = lo;
+          result[k + QStringLiteral ("Max")] = hi;
+        }
+      else if (l.kind == 2) result[k + QStringLiteral ("Values")] = ssb_db_list (rig->caps->preamp);
+      else if (l.kind == 3) result[k + QStringLiteral ("Values")] = ssb_db_list (rig->caps->attenuator);
+    }
+  for (auto const& f : kSsbExtraFuncs)
+    {
+      QString const k = QString::fromLatin1 (f.key);
+      bool const canSet = rig_has_set_func (rig, f.id) != 0;
+      result[k + QStringLiteral ("Supported")] = canSet;
+      if (!canSet) continue;
+      int status = 0;
+      if (rig_has_get_func (rig, f.id) && rig_get_func (rig, RIG_VFO_CURR, f.id, &status) == RIG_OK)
+        result[k] = status != 0;
+    }
+}
+}
+
 QVariantMap HamlibTransceiver::voice_controls(QString const& key, double value, bool write)
 {
     QVariantMap result;
@@ -2592,7 +2697,10 @@ QVariantMap HamlibTransceiver::voice_controls(QString const& key, double value, 
     if(write) {
         int rc=-RIG_EINVAL;
         if(!std::isfinite(value)) return {{"error",QStringLiteral("Invalid control value")}};
-        if(key=="filter") {
+        bool extraHandled=false;
+        if(auto extra=ssb_extra_write(rig,key,value)) {rc=*extra;extraHandled=true;}
+        if(extraHandled) {
+        } else if(key=="filter") {
             rmode_t mode=RIG_MODE_NONE;pbwidth_t width=0;
             rc=rig_get_mode(rig,RIG_VFO_CURR,&mode,&width);
             if(rc==RIG_OK && (mode==RIG_MODE_USB || mode==RIG_MODE_LSB || mode==RIG_MODE_PKTUSB || mode==RIG_MODE_PKTLSB)
@@ -2677,6 +2785,8 @@ QVariantMap HamlibTransceiver::voice_controls(QString const& key, double value, 
                               << "write_rc=" << writeRc;
         }
     }
+
+    ssb_extra_read(rig,result);
 
     // AGC_TIME is not a reliable mode readback on every IC-7300 firmware:
     // after FAST/MEDIUM/SLOW the radio may report 0 even though AGC itself

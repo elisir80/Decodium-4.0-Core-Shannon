@@ -1,5 +1,5 @@
 set(CMAKE_AUTOMOC ON)
-add_library(decodium_ssb STATIC SsbController.cpp SsbController.h SsbDsp.h)
+add_library(decodium_ssb STATIC SsbController.cpp SsbController.h SsbDsp.h SsbRxAgc.h)
 target_include_directories(decodium_ssb PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(decodium_ssb PUBLIC Qt6::Core Qt6::Multimedia)
 set_target_properties(decodium_ssb PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
