@@ -8,6 +8,7 @@
 
 #include <QObject>
 #include <QString>
+#include <QProcess>
 #include <QTimer>
 #include <QVariantList>
 #include <QVector>
@@ -17,6 +18,7 @@
 #include <functional>
 #include <optional>
 
+class QAudioSink;
 class QAudioSource;
 class QIODevice;
 
@@ -39,6 +41,8 @@ class VoiceKeyer : public QObject {
     Q_PROPERTY(QVariantList messages READ messages NOTIFY messagesChanged)
     Q_PROPERTY(bool playing READ playing NOTIFY changed)
     Q_PROPERTY(bool recording READ recording NOTIFY changed)
+    Q_PROPERTY(bool synthesizing READ synthesizing NOTIFY changed)
+    Q_PROPERTY(double speed READ speed WRITE setSpeed NOTIFY changed)
     Q_PROPERTY(QString status READ status NOTIFY changed)
 
 public:
@@ -69,6 +73,11 @@ public:
     Q_INVOKABLE void setSlotLanguage(int index, const QString& lang);
     // Legge un testo qualsiasi (per esempio una risposta dell'assistente) con la voce del pacchetto.
     Q_INVOKABLE void sayText(const QString& text, const QString& lang);
+    // Ascolto in locale (altoparlanti del PC): non trasmette, serve a provare la voce.
+    Q_INVOKABLE void preview(const QString& text, const QString& lang);
+    bool synthesizing() const { return m_tts != nullptr; }
+    double speed() const { return m_speed; }
+    void setSpeed(double s);
 
 signals:
     void changed();
@@ -83,6 +92,9 @@ private:
         QString lang {QStringLiteral("it")};
     };
     void startPlayback(const QVector<short>& pcm, const QString& name);
+    void synthesize(const QString& text, const QString& lang, const QString& name, bool forAir);
+    void onSynthesized(int code, QProcess::ExitStatus status);
+    void playLocally(const QVector<short>& pcm);
 
     QString wavPath(int index) const;
     void load();
@@ -112,6 +124,12 @@ private:
     QIODevice* m_input {nullptr};
 
     QString m_status;
+    QProcess* m_tts {nullptr};
+    QString m_ttsName;
+    bool m_ttsForAir {true};
+    int m_ttsRate {22050};
+    double m_speed {1.0};
+    QAudioSink* m_preview {nullptr};
 };
 
 }  // namespace decodium::voicekeyer

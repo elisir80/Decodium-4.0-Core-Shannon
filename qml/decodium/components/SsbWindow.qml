@@ -11,7 +11,7 @@ ApplicationWindow {
     Material.accent: "#44d4df"
     Material.primary: "#182632"
     title: qsTr("SSB — PC microphone")
-    width: 780; height: 850; minimumWidth: 640; minimumHeight: 650
+    width: 1200; height: 820; minimumWidth: 760; minimumHeight: 560
     color: "#101923"
     palette.windowText: "#eaf1f8"
     palette.text: "#eaf1f8"
@@ -24,6 +24,21 @@ ApplicationWindow {
     property bool ready: bridge.mode === "SSB" && bridge.catConnected
     property string radioActionStatus: ""
     property bool syncingRadioMode: false
+    // Slot per cui e' stato chiesto "AI help": la risposta dell'assistente ne sostituisce il testo.
+    property int pendingSlot: -1
+    property string lastApplied: ""
+    Connections {
+        target: assistant
+        function onChanged() {
+            if (win.pendingSlot >= 0 && !assistant.busy && assistant.lastReply.length > 0
+                    && assistant.lastReply !== win.lastApplied) {
+                win.lastApplied = assistant.lastReply
+                var m = voiceKeyer.messages[win.pendingSlot]
+                if (m) voiceKeyer.setSlotText(win.pendingSlot, m.label, assistant.lastReply)
+                win.pendingSlot = -1
+            }
+        }
+    }
     function syncRadioModeFromCat() {
         syncingRadioMode = true
         var mode = (bridge.catMode || "").toString().toUpperCase()
@@ -159,41 +174,270 @@ ApplicationWindow {
         Label { text: qsTr("Hold the space bar to talk (Esc stops)."); Layout.fillWidth: true; color: "#6f8294"; font.pixelSize: 12 }
         }
     }
-    ScrollView {
-        anchors.fill: parent; anchors.margins: 18
-        contentWidth: availableWidth
-        ColumnLayout {
-            width: parent.width; spacing: 14
-            RowLayout {
-                Label { text: "SSB"; font.pixelSize: 30; font.bold: true; color: "#44d4df" }
-                Label { text: bridge.decoPortUseRemote ? qsTr("REMOTE RADIO") : qsTr("LOCAL RADIO"); Layout.fillWidth: true }
-                Label { text: bridge.catConnected ? bridge.catMode : qsTr("CAT disconnected"); color: bridge.catConnected ? "#77e7a9" : "#ffa971" }
+    ColumnLayout {
+        anchors.fill: parent; anchors.margins: 14; spacing: 10
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 10
+            Label { text: "SSB"; font.pixelSize: 26; font.bold: true; color: "#44d4df" }
+            Label { text: bridge.decoPortUseRemote ? qsTr("REMOTE RADIO") : qsTr("LOCAL RADIO"); color: "#a9bac9" }
+            TextField {
+                id: dial
+                Layout.preferredWidth: 190; font.pixelSize: 20
+                // Consolas is not installed by default on macOS/Linux and
+                // makes Qt rebuild its font-family aliases at startup.
+                font.family: (typeof decodiumMonoFontFamily !== "undefined" && decodiumMonoFontFamily)
+                             ? decodiumMonoFontFamily : "monospace"
+                text: (bridge.frequency / 1000000).toFixed(6)
+                enabled: ready && controls.busy !== true && !voice.transmitting
+                onAccepted: { bridge.cwTuneFrequency(Number(text.replace(",","."))*1000000); focus=false }
+                ToolTip.visible: hovered; ToolTip.text: qsTr("Frequency in MHz. Press Enter to tune.")
             }
-            RowLayout {
-                TextField {
-                    id: dial; Layout.fillWidth: true; font.pixelSize: 24
-                    // Consolas is not installed by default on macOS/Linux and
-                    // makes Qt rebuild its font-family aliases at startup.
-                    font.family: (typeof decodiumMonoFontFamily !== "undefined" && decodiumMonoFontFamily)
-                                 ? decodiumMonoFontFamily : "monospace"
-                    text: (bridge.frequency / 1000000).toFixed(6)
-                    enabled: ready && controls.busy !== true && !voice.transmitting
-                    onAccepted: { bridge.cwTuneFrequency(Number(text.replace(",","."))*1000000); focus=false }
-                    ToolTip.visible: hovered; ToolTip.text: qsTr("Frequency in MHz. Press Enter to tune.")
+            Label { text: "MHz" }
+            Button { text: "−100 Hz"; enabled: ready && controls.busy !== true && !voice.transmitting; onClicked: bridge.cwTuneFrequency(bridge.frequency-100) }
+            Button { text: "+100 Hz"; enabled: ready && controls.busy !== true && !voice.transmitting; onClicked: bridge.cwTuneFrequency(bridge.frequency+100) }
+            ComboBox { id: side; model: ["USB", "LSB"]; Layout.preferredWidth: 90; enabled: ready && controls.busy !== true && !voice.transmitting; onActivated: win.updateRadioMode() }
+            CheckBox { id: dataInput; text: qsTr("USB/data audio input"); checked: true; enabled: ready && controls.busy !== true && !voice.transmitting; onToggled: if(win.ready && !win.syncingRadioMode) win.updateRadioMode() }
+            Item { Layout.fillWidth: true }
+            Button { text: qsTr("Activate SSB"); visible: bridge.mode !== "SSB"; onClicked: bridge.mode="SSB" }
+            Label { text: bridge.catConnected ? bridge.catMode : qsTr("CAT disconnected"); color: bridge.catConnected ? "#77e7a9" : "#ffa971" }
+        }
+        Label {
+            text: qsTr("TX uses the radio audio output selected in Settings. USB/LSB requires the radio to accept PC audio; use data input when needed.")
+            Layout.fillWidth: true; elide: Text.ElideRight; color: "#6f8294"; font.pixelSize: 11
+        }
+        SplitView {
+            id: split
+            Layout.fillWidth: true; Layout.fillHeight: true
+            orientation: Qt.Horizontal
+            ScrollView {
+                id: leftPane
+                SplitView.preferredWidth: 680; SplitView.minimumWidth: 380
+                contentWidth: availableWidth; clip: true
+                ColumnLayout {
+                    width: leftPane.availableWidth - 10; spacing: 12
+            GroupBox {
+                title: qsTr("Voice keyer • preregistered messages"); Layout.fillWidth: true
+                background: Rectangle { radius: 10; color: "#2a182632"; border.color: "#33506a"; border.width: 1 }
+                ColumnLayout {
+                    anchors.fill: parent
+                    spacing: 8
+                    Label {
+                        text: qsTr("Hold Record while speaking, release to save. Play sends the message on SSB; Preview plays it only on this computer. Esc stops.")
+                        wrapMode: Text.WordWrap; Layout.fillWidth: true; color: "#a9bac9"
+                    }
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Label { text: qsTr("Voice speed"); color: "#a9bac9" }
+                        Slider {
+                            Layout.fillWidth: true
+                            from: 0.6; to: 1.6; stepSize: 0.05; value: voiceKeyer.speed
+                            onMoved: voiceKeyer.speed = value
+                        }
+                        Label { text: voiceKeyer.speed.toFixed(2) + "x"; Layout.preferredWidth: 46; color: "#eaf1f8" }
+                    }
+                    GridLayout {
+                        id: slotGrid
+                        Layout.fillWidth: true
+                        columns: Math.max(1, Math.floor(width / 470))
+                        columnSpacing: 10; rowSpacing: 10
+                        Repeater {
+                            model: voiceKeyer.messages
+                            delegate: Rectangle {
+                                id: card
+                                required property var modelData
+                                Layout.fillWidth: true
+                                Layout.preferredWidth: 1
+                                implicitHeight: cardCol.implicitHeight + 20
+                                radius: 10
+                                color: "#33182632"
+                                border.color: card.modelData.hasAudio ? "#2f8f6a" : "#2d4256"
+                                border.width: 1
+                                ColumnLayout {
+                                    id: cardCol
+                                    anchors.fill: parent; anchors.margins: 10
+                                    spacing: 6
+                                    RowLayout {
+                                        Layout.fillWidth: true
+                                        Label { text: "F" + (card.modelData.index + 1); color: "#44d4df"; font.bold: true; Layout.preferredWidth: 26 }
+                                        TextField {
+                                            id: keyLabel
+                                            Layout.preferredWidth: 110
+                                            text: card.modelData.label; maximumLength: 12
+                                            onEditingFinished: voiceKeyer.setSlotText(card.modelData.index, text, keyText.text)
+                                        }
+                                        ComboBox {
+                                            Layout.preferredWidth: 72
+                                            model: ["it", "en"]
+                                            currentIndex: card.modelData.lang === "en" ? 1 : 0
+                                            onActivated: voiceKeyer.setSlotLanguage(card.modelData.index, currentText)
+                                        }
+                                        TextField {
+                                            id: keyText
+                                            Layout.fillWidth: true
+                                            text: card.modelData.text; placeholderText: qsTr("text of the message")
+                                            onEditingFinished: voiceKeyer.setSlotText(card.modelData.index, keyLabel.text, text)
+                                        }
+                                    }
+                                    RowLayout {
+                                        Layout.fillWidth: true
+                                        spacing: 6
+                                        Button {
+                                            text: qsTr("Record")
+                                            enabled: !voiceKeyer.playing && !voiceKeyer.synthesizing && !(voiceKeyer.recording && !pressed)
+                                            onPressed: voiceKeyer.startRecording(card.modelData.index)
+                                            onReleased: voiceKeyer.stopRecording()
+                                            onCanceled: voiceKeyer.stopRecording()
+                                        }
+                                        Button {
+                                            text: qsTr("Preview")
+                                            enabled: card.modelData.text.length > 0 && packs.voiceInstalled
+                                                     && !voiceKeyer.playing && !voiceKeyer.recording && !voiceKeyer.synthesizing
+                                            onClicked: voiceKeyer.preview(card.modelData.text, card.modelData.lang)
+                                        }
+                                        Button {
+                                            text: qsTr("AI help")
+                                            enabled: packs.assistantInstalled && !assistant.busy && card.modelData.text.length > 0
+                                            ToolTip.visible: hovered
+                                            ToolTip.text: qsTr("Ask the assistant to rewrite this text so it reads well on the air")
+                                            onClicked: {
+                                                win.pendingSlot = card.modelData.index
+                                                assistant.ask(qsTr("Rewrite this message so that a radio operator reads it aloud: short, clear, in the same language, no abbreviations that are hard to pronounce. Reply with the message only: ") + card.modelData.text)
+                                            }
+                                        }
+                                        Item { Layout.fillWidth: true }
+                                        Label {
+                                            text: card.modelData.hasAudio ? qsTr("recorded") : qsTr("text only")
+                                            color: card.modelData.hasAudio ? "#77e7a9" : "#6f8294"
+                                        }
+                                        Button {
+                                            text: qsTr("Clear")
+                                            enabled: card.modelData.hasAudio && !voiceKeyer.playing && !voiceKeyer.recording
+                                            onClicked: voiceKeyer.clearSlot(card.modelData.index)
+                                        }
+                                        Button {
+                                            text: qsTr("Play")
+                                            highlighted: true
+                                            enabled: (card.modelData.hasAudio || (card.modelData.text.length > 0 && packs.voiceInstalled))
+                                                     && ready && controls.busy !== true
+                                                     && !voiceKeyer.playing && !voiceKeyer.recording && !voiceKeyer.synthesizing && !voice.transmitting
+                                            onClicked: voiceKeyer.play(card.modelData.index)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    RowLayout {
+                        Layout.fillWidth: true
+                        BusyIndicator { running: voiceKeyer.synthesizing; visible: running; Layout.preferredWidth: 28; Layout.preferredHeight: 28 }
+                        Label { text: voiceKeyer.status; Layout.fillWidth: true; wrapMode: Text.WordWrap; color: "#a9bac9" }
+                    }
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Button {
+                            text: qsTr("Hold to listen")
+                            enabled: !voiceKeyer.playing && !voiceKeyer.recording && !speech.working && packs.speechInstalled
+                            onPressed: speech.startListening(keyLangBox.currentText)
+                            onReleased: speech.stopListening()
+                            onCanceled: speech.stopListening()
+                        }
+                        ComboBox {
+                            id: keyLangBox
+                            Layout.preferredWidth: 72
+                            model: ["it", "en"]
+                        }
+                        TextField {
+                            Layout.fillWidth: true
+                            readOnly: true
+                            text: speech.transcript
+                            placeholderText: qsTr("What you said appears here")
+                        }
+                        Button {
+                            text: qsTr("Clear"); enabled: speech.transcript.length > 0
+                            onClicked: speech.clearTranscript()
+                        }
+                    }
+                    Label { text: speech.status; Layout.fillWidth: true; wrapMode: Text.WordWrap; color: "#a9bac9" }
                 }
-                Label { text: "MHz" }
-                Button { text: "−100 Hz"; enabled: ready && controls.busy !== true && !voice.transmitting; onClicked: bridge.cwTuneFrequency(bridge.frequency-100) }
-                Button { text: "+100 Hz"; enabled: ready && controls.busy !== true && !voice.transmitting; onClicked: bridge.cwTuneFrequency(bridge.frequency+100) }
             }
-            RowLayout {
-                ComboBox { id: side; model: ["USB", "LSB"]; enabled: ready && controls.busy !== true && !voice.transmitting; onActivated: win.updateRadioMode() }
-                CheckBox { id: dataInput; text: qsTr("USB/data audio input"); checked: true; enabled: ready && controls.busy !== true && !voice.transmitting; onToggled: if(win.ready && !win.syncingRadioMode) win.updateRadioMode() }
-                Item { Layout.fillWidth: true }
-                Button { text: qsTr("Activate SSB"); visible: bridge.mode !== "SSB"; onClicked: bridge.mode="SSB" }
+            GroupBox {
+                title: qsTr("Assistant • helps you write and read your messages"); Layout.fillWidth: true
+                // Pannello trasparente: lascia vedere lo sfondo, la risposta e' sempre leggibile.
+                background: Rectangle {
+                    radius: 12; color: "#22182632"; border.color: "#4d8aa3"; border.width: 1
+                }
+                ColumnLayout {
+                    anchors.fill: parent
+                    spacing: 8
+                    Label {
+                        visible: !packs.assistantInstalled
+                        text: qsTr("Install the Assistant pack (in the right column) to chat here. Nothing leaves this computer.")
+                        wrapMode: Text.WordWrap; Layout.fillWidth: true; color: "#ffa971"
+                    }
+                    Label {
+                        visible: packs.assistantInstalled
+                        text: qsTr("Ask for a CQ call, a signal report, a short reply. Press AI help on a message to have it rewritten for the voice.")
+                        wrapMode: Text.WordWrap; Layout.fillWidth: true; color: "#a9bac9"
+                    }
+                    TextArea {
+                        Layout.fillWidth: true; Layout.preferredHeight: 190
+                        readOnly: true; wrapMode: TextArea.Wrap
+                        text: assistant.transcript
+                        placeholderText: qsTr("The conversation appears here")
+                        color: "#eaf1f8"
+                        background: Rectangle { radius: 8; color: "#18101923"; border.color: "#2d4256" }
+                        onTextChanged: cursorPosition = length
+                    }
+                    RowLayout {
+                        Layout.fillWidth: true
+                        TextField {
+                            id: askField
+                            Layout.fillWidth: true
+                            placeholderText: qsTr("Ask something…")
+                            enabled: packs.assistantInstalled && !assistant.busy
+                            onAccepted: if (text.length > 0) { assistant.ask(text); text = "" }
+                        }
+                        Button {
+                            text: qsTr("Ask"); highlighted: true
+                            enabled: packs.assistantInstalled && !assistant.busy && askField.text.length > 0
+                            onClicked: { assistant.ask(askField.text); askField.text = "" }
+                        }
+                        Button { text: qsTr("Stop"); visible: assistant.busy; onClicked: assistant.cancel() }
+                        Button { text: qsTr("Clear"); enabled: !assistant.busy; onClicked: assistant.clear() }
+                    }
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 6
+                        Button {
+                            text: qsTr("Preview reply")
+                            enabled: assistant.lastReply.length > 0 && packs.voiceInstalled
+                                     && !voiceKeyer.playing && !voiceKeyer.synthesizing && !assistant.busy
+                            onClicked: voiceKeyer.preview(assistant.lastReply, keyLangBox.currentText)
+                        }
+                        Button {
+                            // Trasmette: la voce esce in aria, con il PTT. Per questo il nome lo dice.
+                            text: qsTr("Send reply by voice (transmits)")
+                            enabled: assistant.lastReply.length > 0 && packs.voiceInstalled && ready
+                                     && !voiceKeyer.playing && !voiceKeyer.synthesizing && !assistant.busy && controls.busy !== true
+                            onClicked: voiceKeyer.sayText(assistant.lastReply, keyLangBox.currentText)
+                        }
+                        BusyIndicator { running: assistant.busy; visible: running; Layout.preferredWidth: 28; Layout.preferredHeight: 28 }
+                        Label { text: assistant.status; Layout.fillWidth: true; wrapMode: Text.WordWrap; color: "#a9bac9" }
+                    }
+                }
             }
-            Label { text: qsTr("TX uses the radio audio output selected in Settings. USB/LSB requires the radio to accept PC audio; use data input when needed."); wrapMode: Text.WordWrap; Layout.fillWidth: true; color: "#a9bac9" }
+                }
+            }
+            ScrollView {
+                id: rightPane
+                SplitView.fillWidth: true; SplitView.minimumWidth: 340
+                contentWidth: availableWidth; clip: true
+                ColumnLayout {
+                    width: rightPane.availableWidth - 10; spacing: 12
             GroupBox {
                 title: qsTr("Optional packs • install only what you use"); Layout.fillWidth: true
+                background: Rectangle { radius: 10; color: "#2a182632"; border.color: "#33506a"; border.width: 1 }
                 ColumnLayout {
                     anchors.fill: parent
                     Label {
@@ -251,6 +495,7 @@ ApplicationWindow {
             }
             GroupBox {
                 title: qsTr("PC microphone • voice processing"); Layout.fillWidth: true
+                background: Rectangle { radius: 10; color: "#2a182632"; border.color: "#33506a"; border.width: 1 }
                 ColumnLayout {
                     anchors.fill: parent
                     ComboBox {
@@ -281,136 +526,8 @@ ApplicationWindow {
                 }
             }
             GroupBox {
-                title: qsTr("Voice keyer • preregistered messages"); Layout.fillWidth: true
-                ColumnLayout {
-                    anchors.fill: parent
-                    Label {
-                        text: qsTr("Hold Record while speaking, release to save. Play sends the message on SSB; Esc stops.")
-                        wrapMode: Text.WordWrap; Layout.fillWidth: true; color: "#a9bac9"
-                    }
-                    Repeater {
-                        model: voiceKeyer.messages
-                        delegate: RowLayout {
-                            id: keyRow
-                            required property var modelData
-                            Layout.fillWidth: true
-                            Label { text: "F" + (keyRow.modelData.index + 1); Layout.preferredWidth: 26; color: "#44d4df" }
-                            TextField {
-                                id: keyLabel
-                                text: keyRow.modelData.label; maximumLength: 12; Layout.preferredWidth: 110
-                                onEditingFinished: voiceKeyer.setSlotText(keyRow.modelData.index, text, keyText.text)
-                            }
-                            ComboBox {
-                                Layout.preferredWidth: 72
-                                model: ["it", "en"]
-                                currentIndex: keyRow.modelData.lang === "en" ? 1 : 0
-                                onActivated: voiceKeyer.setSlotLanguage(keyRow.modelData.index, currentText)
-                            }
-                            TextField {
-                                id: keyText
-                                text: keyRow.modelData.text; placeholderText: qsTr("text of the message"); Layout.fillWidth: true
-                                onEditingFinished: voiceKeyer.setSlotText(keyRow.modelData.index, keyLabel.text, text)
-                            }
-                            Button {
-                                text: qsTr("Record")
-                                enabled: !voiceKeyer.playing && !(voiceKeyer.recording && !pressed)
-                                onPressed: voiceKeyer.startRecording(keyRow.modelData.index)
-                                onReleased: voiceKeyer.stopRecording()
-                                onCanceled: voiceKeyer.stopRecording()
-                            }
-                            Button {
-                                text: qsTr("Play")
-                                enabled: (keyRow.modelData.hasAudio || (keyRow.modelData.text.length > 0 && packs.voiceInstalled))
-                                         && ready && controls.busy !== true
-                                         && !voiceKeyer.playing && !voiceKeyer.recording && !voice.transmitting
-                                onClicked: voiceKeyer.play(keyRow.modelData.index)
-                            }
-                            Button {
-                                text: qsTr("Clear")
-                                enabled: keyRow.modelData.hasAudio && !voiceKeyer.playing && !voiceKeyer.recording
-                                onClicked: voiceKeyer.clearSlot(keyRow.modelData.index)
-                            }
-                        }
-                    }
-                    Label { text: voiceKeyer.status; Layout.fillWidth: true; wrapMode: Text.WordWrap; color: "#a9bac9" }
-                    RowLayout {
-                        Layout.fillWidth: true
-                        Button {
-                            text: qsTr("Hold to listen")
-                            enabled: !voiceKeyer.playing && !voiceKeyer.recording && !speech.working
-                            onPressed: speech.startListening(keyLangBox.currentText)
-                            onReleased: speech.stopListening()
-                            onCanceled: speech.stopListening()
-                        }
-                        ComboBox {
-                            id: keyLangBox
-                            Layout.preferredWidth: 72
-                            model: ["it", "en"]
-                        }
-                        TextField {
-                            Layout.fillWidth: true
-                            readOnly: true
-                            text: speech.transcript
-                            placeholderText: qsTr("What you said appears here")
-                        }
-                        Button {
-                            text: qsTr("Clear"); enabled: speech.transcript.length > 0
-                            onClicked: speech.clearTranscript()
-                        }
-                    }
-                    Label { text: speech.status; Layout.fillWidth: true; wrapMode: Text.WordWrap; color: "#a9bac9" }
-                }
-            }
-            GroupBox {
-                title: qsTr("Assistant • local language model"); Layout.fillWidth: true
-                ColumnLayout {
-                    anchors.fill: parent
-                    Label {
-                        visible: !packs.assistantInstalled
-                        text: qsTr("Install the Assistant pack (above) to chat here. Nothing leaves this computer.")
-                        wrapMode: Text.WordWrap; Layout.fillWidth: true; color: "#ffa971"
-                    }
-                    TextArea {
-                        Layout.fillWidth: true; Layout.preferredHeight: 170
-                        readOnly: true; wrapMode: TextArea.Wrap
-                        text: assistant.transcript
-                        placeholderText: qsTr("The conversation appears here")
-                        color: "#eaf1f8"
-                        background: Rectangle { radius: 6; color: "#182632" }
-                        onTextChanged: cursorPosition = length
-                    }
-                    RowLayout {
-                        Layout.fillWidth: true
-                        TextField {
-                            id: askField
-                            Layout.fillWidth: true
-                            placeholderText: qsTr("Ask something…")
-                            enabled: packs.assistantInstalled && !assistant.busy
-                            onAccepted: if (text.length > 0) { assistant.ask(text); text = "" }
-                        }
-                        Button {
-                            text: qsTr("Ask")
-                            enabled: packs.assistantInstalled && !assistant.busy && askField.text.length > 0
-                            onClicked: { assistant.ask(askField.text); askField.text = "" }
-                        }
-                        Button { text: qsTr("Stop"); visible: assistant.busy; onClicked: assistant.cancel() }
-                        Button { text: qsTr("Clear"); enabled: !assistant.busy; onClicked: assistant.clear() }
-                    }
-                    RowLayout {
-                        Layout.fillWidth: true
-                        Button {
-                            // Trasmette: la voce esce in aria, con il PTT. Per questo il nome lo dice.
-                            text: qsTr("Send last reply by voice (transmits)")
-                            enabled: assistant.lastReply.length > 0 && packs.voiceInstalled && ready
-                                     && !voiceKeyer.playing && !assistant.busy && controls.busy !== true
-                            onClicked: voiceKeyer.sayText(assistant.lastReply, keyLangBox.currentText)
-                        }
-                        Label { text: assistant.status; Layout.fillWidth: true; wrapMode: Text.WordWrap; color: "#a9bac9" }
-                    }
-                }
-            }
-            GroupBox {
                 title: qsTr("Radio • CAT controls"); Layout.fillWidth: true
+                background: Rectangle { radius: 10; color: "#2a182632"; border.color: "#33506a"; border.width: 1 }
                 GridLayout {
                     anchors.fill: parent; columns: 4; columnSpacing: 12
                     Label { text: qsTr("RF power %") }
@@ -503,6 +620,7 @@ ApplicationWindow {
             }
             GroupBox {
                 title: qsTr("Receive • radio settings (read and set by CAT)"); Layout.fillWidth: true
+                background: Rectangle { radius: 10; color: "#2a182632"; border.color: "#33506a"; border.width: 1 }
                 visible: ready && bridge.catConnected
                 GridLayout {
                     anchors.fill: parent; columns: 2; columnSpacing: 16; rowSpacing: 4
@@ -603,6 +721,8 @@ ApplicationWindow {
                 onActivated: bridge.remoteRxDevice=currentValue
             }
 
+                }
+            }
         }
     }
 }

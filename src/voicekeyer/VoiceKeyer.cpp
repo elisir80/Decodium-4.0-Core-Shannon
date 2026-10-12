@@ -3,7 +3,9 @@
 
 #include <QAudioDevice>
 #include <QAudioFormat>
+#include <QAudioSink>
 #include <QAudioSource>
+#include <QBuffer>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
@@ -11,6 +13,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMediaDevices>
+#include <QSettings>
 
 #include <algorithm>
 #include <cmath>
@@ -132,6 +135,7 @@ VoiceKeyer::VoiceKeyer(const QString& directory, PackManager* packs, QObject* pa
     , m_pack(packs)
     , m_slots(kSlots)
 {
+    m_speed = std::clamp(QSettings().value(QStringLiteral("VoiceKeyer/speed"), 1.0).toDouble(), 0.6, 1.6);
     m_lead.setSingleShot(true);
     connect(&m_lead, &QTimer::timeout, this, [this] { m_pace.start(); });
     m_pace.setInterval(40);
@@ -231,21 +235,97 @@ void VoiceKeyer::sayText(const QString& text, const QString& lang)
         setStatus(tr("To read text aloud install and enable the Voice pack first"));
         return;
     }
-    setStatus(tr("Synthesising…"));
+    synthesize(text, lang, tr("reply"), true);
+}
+
+void VoiceKeyer::preview(const QString& text, const QString& lang)
+{
+    if (m_playing || m_recording || m_tts || text.trimmed().isEmpty()) return;
+    if (!m_pack->active(Pack::Voice)) {
+        setStatus(tr("To read text aloud install and enable the Voice pack first"));
+        return;
+    }
+    synthesize(text, lang, tr("preview"), false);
+}
+
+void VoiceKeyer::setSpeed(double s)
+{
+    m_speed = std::clamp(s, 0.6, 1.6);
+    QSettings().setValue(QStringLiteral("VoiceKeyer/speed"), m_speed);
+    emit changed();
+}
+
+void VoiceKeyer::synthesize(const QString& text, const QString& lang, const QString& name, bool forAir)
+{
+    if (m_tts) return;
     QString error;
-    const auto pcm = PiperTts::synthesize(m_pack->piperExecutable(), m_pack->runtimeDirectory(),
-                                          m_pack->voiceModel(lang == QLatin1String("en") ? QStringLiteral("en") : QStringLiteral("it")),
-                                          text, &error);
-    if (!pcm) {
+    const QString model = m_pack->voiceModel(lang == QLatin1String("en") ? QStringLiteral("en") : QStringLiteral("it"));
+    m_tts = PiperTts::start(m_pack->piperExecutable(), m_pack->runtimeDirectory(), model, text, m_speed, &error);
+    if (!m_tts) {
         setStatus(tr("Voice synthesis failed: %1").arg(error));
         return;
     }
-    startPlayback(*pcm, tr("reply"));
+    m_ttsName = name;
+    m_ttsForAir = forAir;
+    m_ttsRate = PiperTts::modelSampleRate(model);
+    connect(m_tts, &QProcess::finished, this, &VoiceKeyer::onSynthesized);
+    setStatus(tr("Synthesising %1…").arg(name));
+}
+
+void VoiceKeyer::onSynthesized(int code, QProcess::ExitStatus status)
+{
+    QProcess* p = m_tts;
+    if (!p) return;
+    const QByteArray raw = p->readAllStandardOutput();
+    m_tts = nullptr;
+    p->deleteLater();
+    if (status != QProcess::NormalExit || code != 0) {
+        setStatus(tr("Voice synthesis failed: the engine stopped"));
+        return;
+    }
+    const auto pcm = PiperTts::decode(raw, m_ttsRate);
+    if (!pcm) {
+        setStatus(tr("Voice synthesis failed: no audio produced"));
+        return;
+    }
+    if (m_ttsForAir) startPlayback(*pcm, m_ttsName);
+    else playLocally(*pcm);
+}
+
+void VoiceKeyer::playLocally(const QVector<short>& pcm)
+{
+    if (m_preview) {
+        m_preview->stop();
+        m_preview->deleteLater();
+        m_preview = nullptr;
+    }
+    QAudioFormat fmt;
+    fmt.setSampleRate(kRadioRate);
+    fmt.setChannelCount(1);
+    fmt.setSampleFormat(QAudioFormat::Int16);
+    const QAudioDevice out = QMediaDevices::defaultAudioOutput();
+    if (out.isNull() || !out.isFormatSupported(fmt)) {
+        setStatus(tr("No speaker found for the preview"));
+        return;
+    }
+    auto* buf = new QBuffer();
+    buf->setData(reinterpret_cast<const char*>(pcm.constData()), int(pcm.size() * 2));
+    buf->open(QIODevice::ReadOnly);
+    m_preview = new QAudioSink(out, fmt, this);
+    connect(m_preview, &QAudioSink::stateChanged, this, [this, buf](QAudio::State st) {
+        if (st == QAudio::IdleState || st == QAudio::StoppedState) {
+            if (m_preview) { m_preview->deleteLater(); m_preview = nullptr; }
+            buf->deleteLater();
+            setStatus(tr("Preview finished"));
+        }
+    });
+    m_preview->start(buf);
+    setStatus(tr("Preview on this computer (not transmitted)"));
 }
 
 void VoiceKeyer::play(int index)
 {
-    if (m_playing || m_recording) return;
+    if (m_playing || m_recording || m_tts) return;
     if (index < 0 || index >= kSlots) return;
     const QString name = m_slots[index].label.isEmpty() ? QStringLiteral("F%1").arg(index + 1) : m_slots[index].label;
 
@@ -270,14 +350,7 @@ void VoiceKeyer::play(int index)
     }
     const QString lang = m_slots[index].lang;
     const QString model = m_pack->voiceModel(lang);
-    setStatus(tr("Synthesising %1…").arg(name));
-    const auto pcm = PiperTts::synthesize(m_pack->piperExecutable(), m_pack->runtimeDirectory(), model,
-                                          m_slots[index].text, &error);
-    if (!pcm) {
-        setStatus(tr("Voice synthesis failed: %1").arg(error));
-        return;
-    }
-    startPlayback(*pcm, name);
+    synthesize(m_slots[index].text, lang, name, true);
 }
 
 void VoiceKeyer::startPlayback(const QVector<short>& pcm, const QString& name)
@@ -326,6 +399,17 @@ void VoiceKeyer::finish(const QString& message)
 
 void VoiceKeyer::stop()
 {
+    if (m_tts) {
+        m_tts->kill();
+        m_tts->deleteLater();
+        m_tts = nullptr;
+        setStatus(tr("Stopped"));
+    }
+    if (m_preview) {
+        m_preview->stop();
+        m_preview->deleteLater();
+        m_preview = nullptr;
+    }
     if (m_playing) finish(tr("Stopped"));
 }
 
