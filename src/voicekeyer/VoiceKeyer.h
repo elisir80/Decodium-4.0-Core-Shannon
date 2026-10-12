@@ -12,7 +12,7 @@
 #include <QVariantList>
 #include <QVector>
 
-#include "VoicePack.h"
+#include "PackManager.h"
 
 #include <functional>
 #include <optional>
@@ -40,10 +40,6 @@ class VoiceKeyer : public QObject {
     Q_PROPERTY(bool playing READ playing NOTIFY changed)
     Q_PROPERTY(bool recording READ recording NOTIFY changed)
     Q_PROPERTY(QString status READ status NOTIFY changed)
-    Q_PROPERTY(bool voicePackInstalled READ voicePackInstalled NOTIFY changed)
-    Q_PROPERTY(bool voicePackBusy READ voicePackBusy NOTIFY changed)
-    Q_PROPERTY(double voicePackProgress READ voicePackProgress NOTIFY changed)
-    Q_PROPERTY(QString voicePackStatus READ voicePackStatus NOTIFY changed)
 
 public:
     struct Hooks {
@@ -54,7 +50,7 @@ public:
         std::function<int()> leadMs;                         // attesa prima dell'audio
     };
 
-    VoiceKeyer(const QString& directory, const QString& voicePackRoot, QObject* parent = nullptr);
+    VoiceKeyer(const QString& directory, PackManager* packs, QObject* parent = nullptr);
     ~VoiceKeyer() override;
 
     void setHooks(Hooks h) { m_hooks = std::move(h); }
@@ -63,10 +59,6 @@ public:
     bool playing() const { return m_playing; }
     bool recording() const { return m_recording; }
     QString status() const { return m_status; }
-    bool voicePackInstalled() const { return m_pack->installed(); }
-    bool voicePackBusy() const { return m_pack->busy(); }
-    double voicePackProgress() const { return m_pack->progress(); }
-    QString voicePackStatus() const { return m_pack->status(); }
 
     Q_INVOKABLE void setSlotText(int index, const QString& label, const QString& text);
     Q_INVOKABLE void play(int index);
@@ -75,8 +67,8 @@ public:
     Q_INVOKABLE void stopRecording();
     Q_INVOKABLE void clearSlot(int index);
     Q_INVOKABLE void setSlotLanguage(int index, const QString& lang);
-    Q_INVOKABLE void installVoicePack();
-    Q_INVOKABLE void cancelVoicePack();
+    // Legge un testo qualsiasi (per esempio una risposta dell'assistente) con la voce del pacchetto.
+    Q_INVOKABLE void sayText(const QString& text, const QString& lang);
 
 signals:
     void changed();
@@ -102,7 +94,7 @@ private:
     void finishRecording();
 
     QString m_directory;
-    VoicePack* m_pack {nullptr};
+    PackManager* m_pack {nullptr};
     QVector<Slot> m_slots;
     Hooks m_hooks;
 

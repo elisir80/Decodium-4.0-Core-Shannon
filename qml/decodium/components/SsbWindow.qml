@@ -179,6 +179,57 @@ ApplicationWindow {
             }
             Label { text: qsTr("TX uses the radio audio output selected in Settings. USB/LSB requires the radio to accept PC audio; use data input when needed."); wrapMode: Text.WordWrap; Layout.fillWidth: true; color: "#a9bac9" }
             GroupBox {
+                title: qsTr("Optional packs • install only what you use"); Layout.fillWidth: true
+                ColumnLayout {
+                    anchors.fill: parent
+                    Label {
+                        text: qsTr("Each pack runs on this computer, with no account and no internet during use. Remove a pack to free its disk space.")
+                        wrapMode: Text.WordWrap; Layout.fillWidth: true; color: "#a9bac9"
+                    }
+                    Repeater {
+                        model: [
+                            { key: 0, name: qsTr("Voice (Italian and English)"), size: "150 MB" },
+                            { key: 1, name: qsTr("Speech recognition"), size: "490 MB" },
+                            { key: 2, name: qsTr("Assistant (local language model)"), size: "1.1 GB" }
+                        ]
+                        delegate: RowLayout {
+                            id: packRow
+                            required property var modelData
+                            readonly property bool isOn: packRow.modelData.key === 0 ? packs.voiceInstalled
+                                : packRow.modelData.key === 1 ? packs.speechInstalled : packs.assistantInstalled
+                            Layout.fillWidth: true
+                            Label { text: packRow.modelData.name; Layout.fillWidth: true }
+                            Label { text: packRow.modelData.size; color: "#6f8294"; Layout.preferredWidth: 70 }
+                            Label {
+                                text: packRow.isOn ? qsTr("installed")
+                                      : packRow.modelData.key === 1 ? qsTr("engine not yet available") : qsTr("not installed")
+                                color: packRow.isOn ? "#77e7a9" : "#a9bac9"
+                                Layout.preferredWidth: 170
+                            }
+                            Button {
+                                text: qsTr("Install")
+                                visible: !packRow.isOn && packRow.modelData.key !== 1
+                                enabled: !packs.busy
+                                onClicked: packs.install(packRow.modelData.key)
+                            }
+                            Button {
+                                text: qsTr("Remove")
+                                visible: packRow.isOn
+                                enabled: !packs.busy && !voiceKeyer.playing && !voiceKeyer.recording && !assistant.busy
+                                onClicked: packs.remove(packRow.modelData.key)
+                            }
+                        }
+                    }
+                    RowLayout {
+                        Layout.fillWidth: true
+                        visible: packs.busy
+                        ProgressBar { Layout.fillWidth: true; from: 0; to: 1; value: packs.progress }
+                        Button { text: qsTr("Cancel"); onClicked: packs.cancel() }
+                    }
+                    Label { text: packs.status; Layout.fillWidth: true; wrapMode: Text.WordWrap; color: "#a9bac9" }
+                }
+            }
+            GroupBox {
                 title: qsTr("PC microphone • voice processing"); Layout.fillWidth: true
                 ColumnLayout {
                     anchors.fill: parent
@@ -217,27 +268,6 @@ ApplicationWindow {
                         text: qsTr("Hold Record while speaking, release to save. Play sends the message on SSB; Esc stops.")
                         wrapMode: Text.WordWrap; Layout.fillWidth: true; color: "#a9bac9"
                     }
-                    RowLayout {
-                        Layout.fillWidth: true
-                        Label {
-                            text: voiceKeyer.voicePackStatus; Layout.fillWidth: true; wrapMode: Text.WordWrap
-                            color: voiceKeyer.voicePackInstalled ? "#77e7a9" : "#a9bac9"
-                        }
-                        Button {
-                            visible: !voiceKeyer.voicePackInstalled
-                            enabled: !voiceKeyer.voicePackBusy && !voiceKeyer.playing && !voiceKeyer.recording
-                            text: voiceKeyer.voicePackBusy ? qsTr("Downloading…") : qsTr("Install voice pack (about 150 MB)")
-                            onClicked: voiceKeyer.installVoicePack()
-                        }
-                        Button {
-                            visible: voiceKeyer.voicePackBusy
-                            text: qsTr("Cancel"); onClicked: voiceKeyer.cancelVoicePack()
-                        }
-                    }
-                    ProgressBar {
-                        visible: voiceKeyer.voicePackBusy; Layout.fillWidth: true
-                        from: 0; to: 1; value: voiceKeyer.voicePackProgress
-                    }
                     Repeater {
                         model: voiceKeyer.messages
                         delegate: RowLayout {
@@ -270,7 +300,7 @@ ApplicationWindow {
                             }
                             Button {
                                 text: qsTr("Play")
-                                enabled: (keyRow.modelData.hasAudio || (keyRow.modelData.text.length > 0 && voiceKeyer.voicePackInstalled))
+                                enabled: (keyRow.modelData.hasAudio || (keyRow.modelData.text.length > 0 && packs.voiceInstalled))
                                          && ready && controls.busy !== true
                                          && !voiceKeyer.playing && !voiceKeyer.recording && !voice.transmitting
                                 onClicked: voiceKeyer.play(keyRow.modelData.index)
@@ -309,6 +339,54 @@ ApplicationWindow {
                         }
                     }
                     Label { text: speech.status; Layout.fillWidth: true; wrapMode: Text.WordWrap; color: "#a9bac9" }
+                }
+            }
+            GroupBox {
+                title: qsTr("Assistant • local language model"); Layout.fillWidth: true
+                ColumnLayout {
+                    anchors.fill: parent
+                    Label {
+                        visible: !packs.assistantInstalled
+                        text: qsTr("Install the Assistant pack (above) to chat here. Nothing leaves this computer.")
+                        wrapMode: Text.WordWrap; Layout.fillWidth: true; color: "#ffa971"
+                    }
+                    TextArea {
+                        Layout.fillWidth: true; Layout.preferredHeight: 170
+                        readOnly: true; wrapMode: TextArea.Wrap
+                        text: assistant.transcript
+                        placeholderText: qsTr("The conversation appears here")
+                        color: "#eaf1f8"
+                        background: Rectangle { radius: 6; color: "#182632" }
+                        onTextChanged: cursorPosition = length
+                    }
+                    RowLayout {
+                        Layout.fillWidth: true
+                        TextField {
+                            id: askField
+                            Layout.fillWidth: true
+                            placeholderText: qsTr("Ask something…")
+                            enabled: packs.assistantInstalled && !assistant.busy
+                            onAccepted: if (text.length > 0) { assistant.ask(text); text = "" }
+                        }
+                        Button {
+                            text: qsTr("Ask")
+                            enabled: packs.assistantInstalled && !assistant.busy && askField.text.length > 0
+                            onClicked: { assistant.ask(askField.text); askField.text = "" }
+                        }
+                        Button { text: qsTr("Stop"); visible: assistant.busy; onClicked: assistant.cancel() }
+                        Button { text: qsTr("Clear"); enabled: !assistant.busy; onClicked: assistant.clear() }
+                    }
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Button {
+                            // Trasmette: la voce esce in aria, con il PTT. Per questo il nome lo dice.
+                            text: qsTr("Send last reply by voice (transmits)")
+                            enabled: assistant.lastReply.length > 0 && packs.voiceInstalled && ready
+                                     && !voiceKeyer.playing && !assistant.busy && controls.busy !== true
+                            onClicked: voiceKeyer.sayText(assistant.lastReply, keyLangBox.currentText)
+                        }
+                        Label { text: assistant.status; Layout.fillWidth: true; wrapMode: Text.WordWrap; color: "#a9bac9" }
+                    }
                 }
             }
             GroupBox {

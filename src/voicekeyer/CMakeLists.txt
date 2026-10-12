@@ -1,5 +1,5 @@
 set(CMAKE_AUTOMOC ON)
-add_library(decodium_voicekeyer STATIC VoiceKeyer.cpp VoiceKeyer.h VoicePack.cpp VoicePack.h PiperTts.cpp PiperTts.h SpeechToText.cpp SpeechToText.h)
+add_library(decodium_voicekeyer STATIC VoiceKeyer.cpp VoiceKeyer.h PackManager.cpp PackManager.h PiperTts.cpp PiperTts.h SpeechToText.cpp SpeechToText.h AssistantChat.cpp AssistantChat.h)
 target_include_directories(decodium_voicekeyer PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(decodium_voicekeyer PUBLIC Qt6::Core Qt6::Multimedia Qt6::Network)
 set_target_properties(decodium_voicekeyer PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)

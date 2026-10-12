@@ -1,14 +1,15 @@
-#include "VoiceKeyer.h"
+#include "AssistantChat.h"
+#include "PackManager.h"
 #include "PiperTts.h"
-#include "VoicePack.h"
 #include "SpeechToText.h"
-
-#include <QProcess>
+#include "VoiceKeyer.h"
 
 #include <QFileInfo>
-
+#include <QProcess>
 #include <QTemporaryDir>
 #include <QtTest>
+
+#include <cmath>
 
 using namespace decodium::voicekeyer;
 
@@ -53,8 +54,9 @@ private slots:
     void sendsPacedPacketsThenEnds()
     {
         QTemporaryDir dir;
-        VoiceKeyer keyer(dir.path(), dir.filePath(QStringLiteral("pack")));
-        QVector<short> msg(kRadioRate / 2, 3000);      // mezzo secondo
+        PackManager packs(dir.path());
+        VoiceKeyer keyer(dir.path(), &packs);
+        QVector<short> msg(kRadioRate / 2, 3000);
         QVERIFY(writeWav(QDir(dir.path()).filePath(QStringLiteral("slot1.wav")), msg, kRadioRate));
         int begun = 0, ended = 0, packets = 0;
         VoiceKeyer::Hooks h;
@@ -74,7 +76,8 @@ private slots:
     void refusesPlayWithoutRecording()
     {
         QTemporaryDir dir;
-        VoiceKeyer keyer(dir.path(), dir.filePath(QStringLiteral("pack")));
+        PackManager packs(dir.path());
+        VoiceKeyer keyer(dir.path(), &packs);
         int begun = 0;
         VoiceKeyer::Hooks h;
         h.begin = [&] { ++begun; return true; };
@@ -84,38 +87,23 @@ private slots:
         QVERIFY(!keyer.playing());
     }
 
-    void voicePackNotInstalledInEmptyDir()
+    void packsNotInstalledInEmptyDir()
     {
         QTemporaryDir dir;
-        VoicePack pack(dir.path());
-        QVERIFY(!pack.installed());
-        QVERIFY(!pack.busy());
+        PackManager packs(dir.path());
+        QVERIFY(!packs.installed(Pack::Voice));
+        QVERIFY(!packs.installed(Pack::Speech));
+        QVERIFY(!packs.installed(Pack::Assistant));
+        QVERIFY(!packs.busy());
     }
 
-    void piperSynthesisWhenEngineIsPresent()
+    void speechPackIsNotDownloadableYet()
     {
-        // Facoltativo: serve il pacchetto vocale gia' estratto.
-        const QString exe = qEnvironmentVariable("DECODIUM_TEST_PIPER_EXE");
-        const QString model = qEnvironmentVariable("DECODIUM_TEST_PIPER_MODEL");
-        if (exe.isEmpty() || model.isEmpty()) QSKIP("set DECODIUM_TEST_PIPER_EXE and DECODIUM_TEST_PIPER_MODEL");
-        QString error;
-        const auto pcm = PiperTts::synthesize(exe, QFileInfo(exe).absolutePath(), model,
-                                              QStringLiteral("Prova di sintesi vocale."), &error);
-        QVERIFY2(pcm.has_value(), qPrintable(error));
-        QVERIFY(pcm->size() > kRadioRate / 2);   // almeno mezzo secondo di parlato
-    }
-
-    void voicePackInstallsFromScratch()
-    {
-        // Lento (circa 150 MB): gira solo con DECODIUM_TEST_NET=1.
-        if (qEnvironmentVariable("DECODIUM_TEST_NET") != QStringLiteral("1"))
-            QSKIP("set DECODIUM_TEST_NET=1 to download the voice pack");
         QTemporaryDir dir;
-        VoicePack pack(dir.path());
-        pack.install();
-        QTRY_VERIFY_WITH_TIMEOUT(!pack.busy(), 900000);
-        QVERIFY2(pack.installed(), qPrintable(pack.status()));
-        QVERIFY(QFileInfo::exists(pack.voiceModel(QStringLiteral("en"))));
+        PackManager packs(dir.path());
+        packs.install(static_cast<int>(Pack::Speech));
+        QVERIFY(!packs.busy());
+        QVERIFY(packs.status().contains(QStringLiteral("not yet")));
     }
 
     void transcriptIsCleaned()
@@ -125,9 +113,62 @@ private slots:
         QVERIFY(cleanTranscript(QStringLiteral("[BLANK_AUDIO]")).isEmpty());
     }
 
+    void chatPromptKeepsRecentTurns()
+    {
+        QVector<ChatTurn> history;
+        for (int i = 0; i < 10; ++i) {
+            history.append({QStringLiteral("user"), QStringLiteral("domanda %1").arg(i)});
+            history.append({QStringLiteral("assistant"), QStringLiteral("risposta %1").arg(i)});
+        }
+        const QString p = buildChatPrompt(history, QStringLiteral("ultima"));
+        QVERIFY(p.startsWith(QStringLiteral("<|im_start|>system")));
+        QVERIFY(!p.contains(QStringLiteral("domanda 0")));       // le prime storie sono cadute
+        QVERIFY(p.contains(QStringLiteral("domanda 9")));
+        QVERIFY(p.endsWith(QStringLiteral("<|im_start|>assistant\n")));
+    }
+
+    void replyIsCleaned()
+    {
+        QCOMPARE(cleanReply(QStringLiteral("\x1b[33mCiao\x1b[0m, sono pronto.[end of text]\n")),
+                 QStringLiteral("Ciao, sono pronto."));
+    }
+
+    void assistantAnswersWhenEngineIsPresent()
+    {
+        // Facoltativo: serve llama-completion e il modello Qwen gia' installati.
+        const QString exe = qEnvironmentVariable("DECODIUM_TEST_LLAMA_EXE");
+        const QString model = qEnvironmentVariable("DECODIUM_TEST_LLAMA_MODEL");
+        if (exe.isEmpty() || model.isEmpty()) QSKIP("set DECODIUM_TEST_LLAMA_EXE and DECODIUM_TEST_LLAMA_MODEL");
+        QProcess p;
+        p.setWorkingDirectory(QFileInfo(exe).absolutePath());
+        p.start(exe, {QStringLiteral("-m"), model, QStringLiteral("-p"),
+                      buildChatPrompt({}, QStringLiteral("Ciao, chi sei?")),
+                      QStringLiteral("-n"), QStringLiteral("40"), QStringLiteral("-no-cnv"),
+                      QStringLiteral("--no-display-prompt"), QStringLiteral("--simple-io")});
+        p.closeWriteChannel();
+        QVERIFY2(p.waitForStarted(10000), qPrintable(p.errorString()));
+        QVERIFY(p.waitForFinished(240000));
+        QCOMPARE(p.exitCode(), 0);
+        const QByteArray out = p.readAllStandardOutput();
+        QVERIFY2(!cleanReply(QString::fromUtf8(out)).isEmpty(),
+                 qPrintable(QStringLiteral("exit=%1 status=%2 bytes=%3 err=%4").arg(p.exitCode()).arg(int(p.exitStatus()))
+                                .arg(out.size()).arg(QString::fromLocal8Bit(p.readAllStandardError().right(300)))));
+    }
+
+    void piperSynthesisWhenEngineIsPresent()
+    {
+        const QString exe = qEnvironmentVariable("DECODIUM_TEST_PIPER_EXE");
+        const QString model = qEnvironmentVariable("DECODIUM_TEST_PIPER_MODEL");
+        if (exe.isEmpty() || model.isEmpty()) QSKIP("set DECODIUM_TEST_PIPER_EXE and DECODIUM_TEST_PIPER_MODEL");
+        QString error;
+        const auto pcm = PiperTts::synthesize(exe, QFileInfo(exe).absolutePath(), model,
+                                              QStringLiteral("Prova di sintesi vocale."), &error);
+        QVERIFY2(pcm.has_value(), qPrintable(error));
+        QVERIFY(pcm->size() > kRadioRate / 2);
+    }
+
     void whisperRunsOnARecording()
     {
-        // Facoltativo: serve il motore whisper-cli e il modello.
         const QString exe = qEnvironmentVariable("DECODIUM_TEST_WHISPER_EXE");
         const QString model = qEnvironmentVariable("DECODIUM_TEST_WHISPER_MODEL");
         if (exe.isEmpty() || model.isEmpty()) QSKIP("set DECODIUM_TEST_WHISPER_EXE and DECODIUM_TEST_WHISPER_MODEL");
@@ -141,6 +182,20 @@ private slots:
         QVERIFY(p.waitForFinished(120000));
         QCOMPARE(p.exitCode(), 0);
         QVERIFY(cleanTranscript(QString::fromUtf8(p.readAllStandardOutput())).size() < 200);
+    }
+
+    void voicePackInstallsFromScratch()
+    {
+        // Lento (circa 150 MB): gira solo con DECODIUM_TEST_NET=1.
+        if (qEnvironmentVariable("DECODIUM_TEST_NET") != QStringLiteral("1"))
+            QSKIP("set DECODIUM_TEST_NET=1 to download the voice pack");
+        QTemporaryDir dir;
+        PackManager packs(dir.path());
+        packs.install(static_cast<int>(Pack::Voice));
+        QTRY_VERIFY_WITH_TIMEOUT(!packs.busy(), 900000);
+        QVERIFY2(packs.installed(Pack::Voice), qPrintable(packs.status()));
+        packs.remove(static_cast<int>(Pack::Voice));
+        QVERIFY(!packs.installed(Pack::Voice));
     }
 };
 

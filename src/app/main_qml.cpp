@@ -92,6 +92,8 @@ __declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance = 0x00000001;
 #include "SsbController.h"
 #include "VoiceKeyer.h"
 #include "SpeechToText.h"
+#include "AssistantChat.h"
+#include "PackManager.h"
 #include "RotorModule.h"
 #include "DecodiumDiagnostics.h"
 #include "DecodiumDxCluster.h"
@@ -4483,9 +4485,12 @@ int main(int argc, char* argv[])
         QObject::connect(&app,&QCoreApplication::aboutToQuit,&ssbModule,&decodium::ssb::SsbController::stop);
         engine.rootContext()->setContextProperty("ssbModule",&ssbModule);
         // Voice keyer: otto messaggi preregistrati sullo stesso percorso TX della finestra SSB.
+        // Pacchetti opzionali (voce, riconoscimento, assistente): ciascuno si installa o si rimuove a parte.
+        static decodium::voicekeyer::PackManager packs(
+            QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + QStringLiteral("/voicepack"));
         static decodium::voicekeyer::VoiceKeyer voiceKeyer(
             QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + QStringLiteral("/voicekeyer"),
-            QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + QStringLiteral("/voicepack"));
+            &packs);
         decodium::voicekeyer::VoiceKeyer::Hooks keyerHooks;
         keyerHooks.begin=[&bridge]{return bridge.ssbBegin();};
         keyerHooks.end=[&bridge]{bridge.ssbStop();};
@@ -4496,10 +4501,12 @@ int main(int argc, char* argv[])
         QObject::connect(&app,&QCoreApplication::aboutToQuit,&voiceKeyer,&decodium::voicekeyer::VoiceKeyer::stop);
         engine.rootContext()->setContextProperty("voiceKeyer",&voiceKeyer);
         // Riconoscimento vocale locale (whisper.cpp), stesso pacchetto vocale.
-        static decodium::voicekeyer::SpeechToText speech(
-            QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + QStringLiteral("/voicepack/whisper/whisper-cli.exe"),
-            QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + QStringLiteral("/voicepack/models/ggml-small.bin"));
+        static decodium::voicekeyer::SpeechToText speech(packs.whisperExecutable(), packs.speechModel());
         engine.rootContext()->setContextProperty("speech",&speech);
+        // Assistente: chat in testo con il modello locale del pacchetto Assistente.
+        static decodium::voicekeyer::AssistantChat assistant(packs.llamaExecutable(), packs.assistantModel());
+        engine.rootContext()->setContextProperty("assistant",&assistant);
+        engine.rootContext()->setContextProperty("packs",&packs);
     }
     {
         // Rotore: nominativo e locatore sono quelli di Decodium; ogni stazione

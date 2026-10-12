@@ -126,13 +126,12 @@ QVector<short> resampleLinear(const QVector<short>& in, int fromRate, int toRate
     return out;
 }
 
-VoiceKeyer::VoiceKeyer(const QString& directory, const QString& voicePackRoot, QObject* parent)
+VoiceKeyer::VoiceKeyer(const QString& directory, PackManager* packs, QObject* parent)
     : QObject(parent)
     , m_directory(directory)
-    , m_pack(new VoicePack(voicePackRoot, this))
+    , m_pack(packs)
     , m_slots(kSlots)
 {
-    connect(m_pack, &VoicePack::changed, this, &VoiceKeyer::changed);
     m_lead.setSingleShot(true);
     connect(&m_lead, &QTimer::timeout, this, [this] { m_pace.start(); });
     m_pace.setInterval(40);
@@ -224,15 +223,24 @@ void VoiceKeyer::setSlotLanguage(int index, const QString& lang)
     emit messagesChanged();
 }
 
-void VoiceKeyer::installVoicePack()
+void VoiceKeyer::sayText(const QString& text, const QString& lang)
 {
     if (m_playing || m_recording) return;
-    m_pack->install();
-}
-
-void VoiceKeyer::cancelVoicePack()
-{
-    m_pack->cancel();
+    if (text.trimmed().isEmpty()) return;
+    if (!m_pack->installed(Pack::Voice)) {
+        setStatus(tr("To read text aloud install the Voice pack first"));
+        return;
+    }
+    setStatus(tr("Synthesising…"));
+    QString error;
+    const auto pcm = PiperTts::synthesize(m_pack->piperExecutable(), m_pack->runtimeDirectory(),
+                                          m_pack->voiceModel(lang == QLatin1String("en") ? QStringLiteral("en") : QStringLiteral("it")),
+                                          text, &error);
+    if (!pcm) {
+        setStatus(tr("Voice synthesis failed: %1").arg(error));
+        return;
+    }
+    startPlayback(*pcm, tr("reply"));
 }
 
 void VoiceKeyer::play(int index)
@@ -256,7 +264,7 @@ void VoiceKeyer::play(int index)
         setStatus(tr("F%1 is empty: record it or write a text first").arg(index + 1));
         return;
     }
-    if (!m_pack->installed()) {
+    if (!m_pack->installed(Pack::Voice)) {
         setStatus(tr("To read text aloud install the voice pack first"));
         return;
     }
