@@ -22242,9 +22242,11 @@ void DecodiumBridge::setDecoPortUseRemote(bool on)
             startRx();
         }
         stopAudioCapture();
-        // Il codec USB deve stare dentro il modulatore, altrimenti la radio
-        // ascolta il microfono e noi non decodifichiamo niente.
-        link->setModeName(m_mode == QStringLiteral("SSB") ? m_ssbRadioMode : QStringLiteral("DIGU"));
+        // SSB usa il modo radio configurato; CW deve restare CW anche sul
+        // gateway remoto, mentre i modi digitali usano DIGU per il codec audio.
+        const QString remoteRigMode = m_mode == QStringLiteral("SSB") ? m_ssbRadioMode
+            : (m_mode == QStringLiteral("CW") ? QStringLiteral("CW") : QStringLiteral("DIGU"));
+        link->setModeName(remoteRigMode);
         onDecoPortRemoteState();
         setDecoPortMonitor(true);
         emit statusMessage(tr("Using the remote radio %1 — decoding its audio")
