@@ -1,7 +1,7 @@
 #pragma once
 namespace decodium::audio { class RttyRxRecovery; }
 #include <QObject>
-#include "SsbRxAgc.h"
+#include "../ssb/SsbRxAgc.h"
 #include "CwSidetone.h"
 #include <QStringList>
 #include <QVariantList>
