@@ -12,6 +12,8 @@
 #include <QVariantList>
 #include <QVector>
 
+#include "VoicePack.h"
+
 #include <functional>
 #include <optional>
 
@@ -34,10 +36,14 @@ QVector<short> resampleLinear(const QVector<short>& in, int fromRate, int toRate
 
 class VoiceKeyer : public QObject {
     Q_OBJECT
-    Q_PROPERTY(QVariantList messages READ messages NOTIFY changed)
+    Q_PROPERTY(QVariantList messages READ messages NOTIFY messagesChanged)
     Q_PROPERTY(bool playing READ playing NOTIFY changed)
     Q_PROPERTY(bool recording READ recording NOTIFY changed)
     Q_PROPERTY(QString status READ status NOTIFY changed)
+    Q_PROPERTY(bool voicePackInstalled READ voicePackInstalled NOTIFY changed)
+    Q_PROPERTY(bool voicePackBusy READ voicePackBusy NOTIFY changed)
+    Q_PROPERTY(double voicePackProgress READ voicePackProgress NOTIFY changed)
+    Q_PROPERTY(QString voicePackStatus READ voicePackStatus NOTIFY changed)
 
 public:
     struct Hooks {
@@ -48,7 +54,7 @@ public:
         std::function<int()> leadMs;                         // attesa prima dell'audio
     };
 
-    explicit VoiceKeyer(const QString& directory, QObject* parent = nullptr);
+    VoiceKeyer(const QString& directory, const QString& voicePackRoot, QObject* parent = nullptr);
     ~VoiceKeyer() override;
 
     void setHooks(Hooks h) { m_hooks = std::move(h); }
@@ -57,6 +63,10 @@ public:
     bool playing() const { return m_playing; }
     bool recording() const { return m_recording; }
     QString status() const { return m_status; }
+    bool voicePackInstalled() const { return m_pack->installed(); }
+    bool voicePackBusy() const { return m_pack->busy(); }
+    double voicePackProgress() const { return m_pack->progress(); }
+    QString voicePackStatus() const { return m_pack->status(); }
 
     Q_INVOKABLE void setSlotText(int index, const QString& label, const QString& text);
     Q_INVOKABLE void play(int index);
@@ -64,15 +74,23 @@ public:
     Q_INVOKABLE bool startRecording(int index);
     Q_INVOKABLE void stopRecording();
     Q_INVOKABLE void clearSlot(int index);
+    Q_INVOKABLE void setSlotLanguage(int index, const QString& lang);
+    Q_INVOKABLE void installVoicePack();
+    Q_INVOKABLE void cancelVoicePack();
 
 signals:
     void changed();
+    // Solo quando cambiano testi, lingue o registrazioni: le righe della QML non si ricreano
+    // a ogni passo del download.
+    void messagesChanged();
 
 private:
     struct Slot {
         QString label;
         QString text;
+        QString lang {QStringLiteral("it")};
     };
+    void startPlayback(const QVector<short>& pcm, const QString& name);
 
     QString wavPath(int index) const;
     void load();
@@ -84,6 +102,7 @@ private:
     void finishRecording();
 
     QString m_directory;
+    VoicePack* m_pack {nullptr};
     QVector<Slot> m_slots;
     Hooks m_hooks;
 

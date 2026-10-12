@@ -1,4 +1,5 @@
 #include "VoiceKeyer.h"
+#include "PiperTts.h"
 
 #include <QAudioDevice>
 #include <QAudioFormat>
@@ -125,11 +126,13 @@ QVector<short> resampleLinear(const QVector<short>& in, int fromRate, int toRate
     return out;
 }
 
-VoiceKeyer::VoiceKeyer(const QString& directory, QObject* parent)
+VoiceKeyer::VoiceKeyer(const QString& directory, const QString& voicePackRoot, QObject* parent)
     : QObject(parent)
     , m_directory(directory)
+    , m_pack(new VoicePack(voicePackRoot, this))
     , m_slots(kSlots)
 {
+    connect(m_pack, &VoicePack::changed, this, &VoiceKeyer::changed);
     m_lead.setSingleShot(true);
     connect(&m_lead, &QTimer::timeout, this, [this] { m_pace.start(); });
     m_pace.setInterval(40);
@@ -158,6 +161,8 @@ void VoiceKeyer::load()
         const QJsonObject o = arr.at(i).toObject();
         m_slots[i].label = o.value(QStringLiteral("label")).toString();
         m_slots[i].text = o.value(QStringLiteral("text")).toString();
+        const QString lang = o.value(QStringLiteral("lang")).toString();
+        if (lang == QLatin1String("en") || lang == QLatin1String("it")) m_slots[i].lang = lang;
     }
 }
 
@@ -165,7 +170,8 @@ void VoiceKeyer::save()
 {
     QJsonArray arr;
     for (const Slot& s : m_slots)
-        arr.append(QJsonObject{{QStringLiteral("label"), s.label}, {QStringLiteral("text"), s.text}});
+        arr.append(QJsonObject{{QStringLiteral("label"), s.label}, {QStringLiteral("text"), s.text},
+                               {QStringLiteral("lang"), s.lang}});
     QDir().mkpath(m_directory);
     QFile f(QDir(m_directory).absoluteFilePath(QStringLiteral("keyer.json")));
     if (f.open(QIODevice::WriteOnly))
@@ -182,6 +188,7 @@ QVariantList VoiceKeyer::messages() const
             {QStringLiteral("label"), m_slots[i].label.isEmpty() ? QStringLiteral("F%1").arg(i + 1) : m_slots[i].label},
             {QStringLiteral("text"), m_slots[i].text},
             {QStringLiteral("hasAudio"), hasAudio},
+            {QStringLiteral("lang"), m_slots[i].lang},
         });
     }
     return out;
@@ -199,35 +206,83 @@ void VoiceKeyer::setSlotText(int index, const QString& label, const QString& tex
     m_slots[index].label = label.trimmed().left(12);
     m_slots[index].text = text.left(200);
     save();
-    emit changed();
+    emit messagesChanged();
 }
 
 void VoiceKeyer::clearSlot(int index)
 {
     if (index < 0 || index >= kSlots || m_playing || m_recording) return;
     QFile::remove(wavPath(index));
-    emit changed();
+    emit messagesChanged();
+}
+
+void VoiceKeyer::setSlotLanguage(int index, const QString& lang)
+{
+    if (index < 0 || index >= kSlots || (lang != QLatin1String("it") && lang != QLatin1String("en"))) return;
+    m_slots[index].lang = lang;
+    save();
+    emit messagesChanged();
+}
+
+void VoiceKeyer::installVoicePack()
+{
+    if (m_playing || m_recording) return;
+    m_pack->install();
+}
+
+void VoiceKeyer::cancelVoicePack()
+{
+    m_pack->cancel();
 }
 
 void VoiceKeyer::play(int index)
 {
     if (m_playing || m_recording) return;
     if (index < 0 || index >= kSlots) return;
+    const QString name = m_slots[index].label.isEmpty() ? QStringLiteral("F%1").arg(index + 1) : m_slots[index].label;
+
+    // Prima la registrazione dell'operatore; se non c'e', il testo letto dalla voce.
     QString error;
-    const auto pcm = readWav(wavPath(index), &error);
-    if (!pcm || pcm->isEmpty()) {
-        setStatus(tr("F%1 has no recording: hold Record and speak first").arg(index + 1));
+    if (QFileInfo::exists(wavPath(index))) {
+        const auto pcm = readWav(wavPath(index), &error);
+        if (!pcm || pcm->isEmpty()) {
+            setStatus(tr("Cannot read the recording of %1: %2").arg(name, error));
+            return;
+        }
+        startPlayback(*pcm, name);
         return;
     }
+    if (m_slots[index].text.trimmed().isEmpty()) {
+        setStatus(tr("F%1 is empty: record it or write a text first").arg(index + 1));
+        return;
+    }
+    if (!m_pack->installed()) {
+        setStatus(tr("To read text aloud install the voice pack first"));
+        return;
+    }
+    const QString lang = m_slots[index].lang;
+    const QString model = m_pack->voiceModel(lang);
+    setStatus(tr("Synthesising %1…").arg(name));
+    const auto pcm = PiperTts::synthesize(m_pack->piperExecutable(), m_pack->runtimeDirectory(), model,
+                                          m_slots[index].text, &error);
+    if (!pcm) {
+        setStatus(tr("Voice synthesis failed: %1").arg(error));
+        return;
+    }
+    startPlayback(*pcm, name);
+}
+
+void VoiceKeyer::startPlayback(const QVector<short>& pcm, const QString& name)
+{
     if (m_hooks.begin && !m_hooks.begin()) {
         setStatus(tr("PTT refused: check CAT, SSB mode and the TX audio output"));
         return;
     }
-    m_pcm = *pcm;
+    m_pcm = pcm;
     m_pos = 0;
     m_tail = 0;
     m_playing = true;
-    setStatus(tr("Sending %1").arg(m_slots[index].label.isEmpty() ? QStringLiteral("F%1").arg(index + 1) : m_slots[index].label));
+    setStatus(tr("Sending %1").arg(name));
     const int lead = m_hooks.leadMs ? std::clamp(m_hooks.leadMs(), 0, 1500) : kLeadDefaultMs;
     m_lead.start(lead);
 }
@@ -337,6 +392,7 @@ void VoiceKeyer::finishRecording()
         return;
     }
     setStatus(tr("F%1 recorded (%2 s)").arg(m_recordIndex + 1).arg(radio.size() / kRadioRate));
+    emit messagesChanged();
 }
 
 }  // namespace decodium::voicekeyer

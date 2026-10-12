@@ -4483,7 +4483,8 @@ int main(int argc, char* argv[])
         engine.rootContext()->setContextProperty("ssbModule",&ssbModule);
         // Voice keyer: otto messaggi preregistrati sullo stesso percorso TX della finestra SSB.
         static decodium::voicekeyer::VoiceKeyer voiceKeyer(
-            QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + QStringLiteral("/voicekeyer"));
+            QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + QStringLiteral("/voicekeyer"),
+            QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + QStringLiteral("/voicepack"));
         decodium::voicekeyer::VoiceKeyer::Hooks keyerHooks;
         keyerHooks.begin=[&bridge]{return bridge.ssbBegin();};
         keyerHooks.end=[&bridge]{bridge.ssbStop();};

@@ -217,6 +217,27 @@ ApplicationWindow {
                         text: qsTr("Hold Record while speaking, release to save. Play sends the message on SSB; Esc stops.")
                         wrapMode: Text.WordWrap; Layout.fillWidth: true; color: "#a9bac9"
                     }
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Label {
+                            text: voiceKeyer.voicePackStatus; Layout.fillWidth: true; wrapMode: Text.WordWrap
+                            color: voiceKeyer.voicePackInstalled ? "#77e7a9" : "#a9bac9"
+                        }
+                        Button {
+                            visible: !voiceKeyer.voicePackInstalled
+                            enabled: !voiceKeyer.voicePackBusy && !voiceKeyer.playing && !voiceKeyer.recording
+                            text: voiceKeyer.voicePackBusy ? qsTr("Downloading…") : qsTr("Install voice pack (about 150 MB)")
+                            onClicked: voiceKeyer.installVoicePack()
+                        }
+                        Button {
+                            visible: voiceKeyer.voicePackBusy
+                            text: qsTr("Cancel"); onClicked: voiceKeyer.cancelVoicePack()
+                        }
+                    }
+                    ProgressBar {
+                        visible: voiceKeyer.voicePackBusy; Layout.fillWidth: true
+                        from: 0; to: 1; value: voiceKeyer.voicePackProgress
+                    }
                     Repeater {
                         model: voiceKeyer.messages
                         delegate: RowLayout {
@@ -228,6 +249,12 @@ ApplicationWindow {
                                 id: keyLabel
                                 text: keyRow.modelData.label; maxLength: 12; Layout.preferredWidth: 110
                                 onEditingFinished: voiceKeyer.setSlotText(keyRow.modelData.index, text, keyText.text)
+                            }
+                            ComboBox {
+                                Layout.preferredWidth: 72
+                                model: ["it", "en"]
+                                currentIndex: keyRow.modelData.lang === "en" ? 1 : 0
+                                onActivated: voiceKeyer.setSlotLanguage(keyRow.modelData.index, currentText)
                             }
                             TextField {
                                 id: keyText
@@ -243,7 +270,8 @@ ApplicationWindow {
                             }
                             Button {
                                 text: qsTr("Play")
-                                enabled: keyRow.modelData.hasAudio && ready && controls.busy !== true
+                                enabled: (keyRow.modelData.hasAudio || (keyRow.modelData.text.length > 0 && voiceKeyer.voicePackInstalled))
+                                         && ready && controls.busy !== true
                                          && !voiceKeyer.playing && !voiceKeyer.recording && !voice.transmitting
                                 onClicked: voiceKeyer.play(keyRow.modelData.index)
                             }

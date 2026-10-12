@@ -1,4 +1,8 @@
 #include "VoiceKeyer.h"
+#include "PiperTts.h"
+#include "VoicePack.h"
+
+#include <QFileInfo>
 
 #include <QTemporaryDir>
 #include <QtTest>
@@ -46,7 +50,7 @@ private slots:
     void sendsPacedPacketsThenEnds()
     {
         QTemporaryDir dir;
-        VoiceKeyer keyer(dir.path());
+        VoiceKeyer keyer(dir.path(), dir.filePath(QStringLiteral("pack")));
         QVector<short> msg(kRadioRate / 2, 3000);      // mezzo secondo
         QVERIFY(writeWav(QDir(dir.path()).filePath(QStringLiteral("slot1.wav")), msg, kRadioRate));
         int begun = 0, ended = 0, packets = 0;
@@ -67,7 +71,7 @@ private slots:
     void refusesPlayWithoutRecording()
     {
         QTemporaryDir dir;
-        VoiceKeyer keyer(dir.path());
+        VoiceKeyer keyer(dir.path(), dir.filePath(QStringLiteral("pack")));
         int begun = 0;
         VoiceKeyer::Hooks h;
         h.begin = [&] { ++begun; return true; };
@@ -75,6 +79,40 @@ private slots:
         keyer.play(2);
         QCOMPARE(begun, 0);
         QVERIFY(!keyer.playing());
+    }
+
+    void voicePackNotInstalledInEmptyDir()
+    {
+        QTemporaryDir dir;
+        VoicePack pack(dir.path());
+        QVERIFY(!pack.installed());
+        QVERIFY(!pack.busy());
+    }
+
+    void piperSynthesisWhenEngineIsPresent()
+    {
+        // Facoltativo: serve il pacchetto vocale gia' estratto.
+        const QString exe = qEnvironmentVariable("DECODIUM_TEST_PIPER_EXE");
+        const QString model = qEnvironmentVariable("DECODIUM_TEST_PIPER_MODEL");
+        if (exe.isEmpty() || model.isEmpty()) QSKIP("set DECODIUM_TEST_PIPER_EXE and DECODIUM_TEST_PIPER_MODEL");
+        QString error;
+        const auto pcm = PiperTts::synthesize(exe, QFileInfo(exe).absolutePath(), model,
+                                              QStringLiteral("Prova di sintesi vocale."), &error);
+        QVERIFY2(pcm.has_value(), qPrintable(error));
+        QVERIFY(pcm->size() > kRadioRate / 2);   // almeno mezzo secondo di parlato
+    }
+
+    void voicePackInstallsFromScratch()
+    {
+        // Lento (circa 150 MB): gira solo con DECODIUM_TEST_NET=1.
+        if (qEnvironmentVariable("DECODIUM_TEST_NET") != QStringLiteral("1"))
+            QSKIP("set DECODIUM_TEST_NET=1 to download the voice pack");
+        QTemporaryDir dir;
+        VoicePack pack(dir.path());
+        pack.install();
+        QTRY_VERIFY_WITH_TIMEOUT(!pack.busy(), 900000);
+        QVERIFY2(pack.installed(), qPrintable(pack.status()));
+        QVERIFY(QFileInfo::exists(pack.voiceModel(QStringLiteral("en"))));
     }
 };
 
