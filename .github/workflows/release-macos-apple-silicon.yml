@@ -128,6 +128,11 @@ jobs:
           echo "DYLD_FALLBACK_LIBRARY_PATH=${RTLSDR_PREFIX}/lib:${HAMLIB_PREFIX}/lib:${DYLD_FALLBACK_LIBRARY_PATH:-}" >> "$GITHUB_ENV"
 
       - name: Build release assets
+        env:
+          # Qt 6.11 marks the legacy Q_ENUMS/Q_FLAGS macros used by the
+          # bundled qcustomplot headers as deprecated.  They are third-party
+          # compatibility warnings, not release-build errors.
+          CXXFLAGS: -Wno-error=deprecated-pragma
         run: |
           scripts/release-macos.sh "${VERSION}" \
             --compat-macos "${{ matrix.compat_macos }}" \

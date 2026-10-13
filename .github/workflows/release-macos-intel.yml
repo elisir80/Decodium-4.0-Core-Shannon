@@ -346,7 +346,7 @@ jobs:
           # Boost 1.85 triggers deprecated-copy diagnostics with the newer
           # AppleClang installed on macos-15-intel. Keep project warnings as
           # errors while treating this third-party-header warning normally.
-          CXXFLAGS: -Wno-error=deprecated-copy
+          CXXFLAGS: -Wno-error=deprecated-copy -Wno-error=deprecated-pragma
         run: |
           scripts/release-macos.sh "${VERSION}" \
             --compat-macos "${{ matrix.compat_macos }}" \
