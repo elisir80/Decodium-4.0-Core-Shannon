@@ -44,15 +44,15 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - runner: macos-15-intel
+          - runner: macos-26-intel
             compat_macos: "13.0"
             asset_suffix: "macos-ventura-x86_64"
             source_deps: true
-          - runner: macos-15-intel
+          - runner: macos-26-intel
             compat_macos: "14.0"
             asset_suffix: "macos-sonoma-x86_64"
             source_deps: false
-          - runner: macos-15-intel
+          - runner: macos-26-intel
             compat_macos: "15.0"
             asset_suffix: "macos-sequoia-x86_64"
             source_deps: false
