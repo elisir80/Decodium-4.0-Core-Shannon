@@ -359,6 +359,7 @@ public:
     Q_INVOKABLE void setRosterCallWatched(const QString& call, bool watched);
     Q_INVOKABLE void setRosterCallIgnored(const QString& call, bool ignored);
     Q_INVOKABLE void setRosterDxccIgnored(const QString& dxcc, bool ignored);
+    Q_INVOKABLE void setRosterProviderIgnored(const QString& provider, bool ignored);
     Q_INVOKABLE void removeRosterPreference(const QString& type,
                                             const QString& value);
     Q_INVOKABLE void clearRosterPreferences();

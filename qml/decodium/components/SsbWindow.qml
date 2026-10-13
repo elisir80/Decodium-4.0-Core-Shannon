@@ -22,6 +22,11 @@ ApplicationWindow {
     property var voice: ssbModule
     property var controls: bridge.ssbControls
     property bool ready: bridge.mode === "SSB" && bridge.catConnected
+    readonly property bool directCatPowerOnAvailable: !!(bridge.hamlibCat
+        && (bridge.hamlibCat.portType === "serial" || bridge.hamlibCat.portType === "usb")
+        && String(bridge.hamlibCat.serialPort || "").trim().length > 0
+        && ["default", "auto", "predefinito"].indexOf(String(bridge.hamlibCat.serialPort || "").trim().toLower()) < 0
+        && !bridge.hamlibCat.connecting && !bridge.decoPortUseRemote)
     property string radioActionStatus: ""
     property bool syncingRadioMode: false
     // Slot per cui e' stato chiesto "AI help": la risposta dell'assistente ne sostituisce il testo.
@@ -593,8 +598,7 @@ ApplicationWindow {
                         text: qsTr("Power on radio")
                         Layout.columnSpan: 2
                         enabled: bridge.mode === "SSB" && controls.busy !== true && !voice.transmitting
-                                 && !bridge.decoPortUseRemote && bridge.hamlibCat
-                                 && !bridge.hamlibCat.connecting
+                                 && win.directCatPowerOnAvailable
                         ToolTip.visible: hovered
                         ToolTip.text: qsTr("Ask a supported radio to power on through direct Hamlib CAT. The selected CAT port must remain available while the radio is in standby.")
                         onClicked: bridge.hamlibCat.requestRadioPowerOn()

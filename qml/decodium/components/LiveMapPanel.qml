@@ -1853,6 +1853,21 @@ Rectangle {
                             ToolTip.text: qsTr("Center this grid")
                         }
                         ToolButton {
+                            Layout.preferredWidth: 42
+                            Layout.preferredHeight: 26
+                            text: qsTr("LOG")
+                            enabled: !!root.mapLayers && !!root.mapLayers.selectedGrid
+                                     && !!root.mapOperations
+                            onClicked: {
+                                if (!root.mapOperations)
+                                    return
+                                root.mapOperations.logbookSearch = root.mapLayers.selectedGrid
+                                root.mapOperations.dataViewMode = "Logbook"
+                            }
+                            ToolTip.visible: hovered
+                            ToolTip.text: qsTr("Open the logbook filtered to this grid/VUCC entity")
+                        }
+                        ToolButton {
                             Layout.preferredWidth: 30
                             Layout.preferredHeight: 26
                             text: "×"
@@ -4585,6 +4600,16 @@ Rectangle {
                                             ToolTip.visible: hovered
                                             ToolTip.text: qsTr("Ignore every station from %1")
                                                 .arg(modelData.dxcc || "")
+                                        }
+                                        ToolButton {
+                                            text: qsTr("SRC")
+                                            font.pixelSize: 8
+                                            enabled: !!modelData.provider
+                                            visible: !!modelData.provider
+                                            onClicked: root.mapLayers.setRosterProviderIgnored(
+                                                modelData.provider, true)
+                                            ToolTip.visible: hovered
+                                            ToolTip.text: qsTr("Ignore this feed/provider")
                                         }
                                         ToolButton {
                                             text: "QRZ"

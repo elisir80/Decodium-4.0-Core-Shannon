@@ -22,6 +22,12 @@ Popup {
     property var candidates: []
     // Testo che precede l'elenco: al primo avvio spiega perche' compare da solo.
     property string introText: ""
+    // La scansione passiva non deve contraddire una CAT gia' attiva. Questo
+    // stato viene impostato dal chiamante per distinguere "nessuna radio
+    // visibile al sistema" da "radio gia' collegata tramite CAT".
+    property bool activeCatConnected: false
+    property string activeCatLabel: ""
+    property string emptyStateText: ""
     // Emesso dopo che l'utente ha applicato una proposta, o ha chiuso senza
     // applicare: serve al primo avvio per non riproporsi piu'.
     signal dismissed()
@@ -39,6 +45,9 @@ Popup {
     // Esegue il rilevamento e mostra l'esito.
     function detectAndOpen(intro) {
         root.introText = intro || ""
+        root.activeCatConnected = false
+        root.activeCatLabel = ""
+        root.emptyStateText = ""
         root.candidates = bridge.detectConnectedRigs()
         root.open()
     }
@@ -115,7 +124,11 @@ Popup {
             font.pixelSize: 11
             text: root.candidates.length > 0
                   ? qsTr("Nothing has been changed yet. Check the proposal, then apply it.")
-                  : qsTr("No serial device found. Is the radio on and the USB cable connected?")
+                  : (root.emptyStateText.length > 0
+                     ? root.emptyStateText
+                     : (root.activeCatConnected
+                        ? qsTr("CAT is already connected. No passive USB detection is needed.")
+                        : qsTr("No serial device was found. Is the radio on and the USB cable connected?")))
         }
 
         ListView {
@@ -255,6 +268,28 @@ Popup {
                 }
             }
             Item { Layout.fillWidth: true }
+            Button {
+                id: setupButton
+                implicitHeight: 30
+                text: qsTr("Open setup")
+                onClicked: {
+                    root.close()
+                    if (bridge && bridge.openSetupSettings)
+                        bridge.openSetupSettings(0)
+                }
+                background: Rectangle {
+                    color: setupButton.hovered ? Qt.rgba(root.accentGreen.r, root.accentGreen.g, root.accentGreen.b, 0.18) : Qt.rgba(1, 1, 1, 0.05)
+                    border.color: root.accentGreen
+                    radius: 4
+                }
+                contentItem: Text {
+                    text: setupButton.text
+                    color: root.accentGreen
+                    font.pixelSize: 11
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+            }
             Button {
                 id: closeButton
                 implicitHeight: 30

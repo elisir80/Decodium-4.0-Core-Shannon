@@ -2261,6 +2261,8 @@ QStringList MapIntelligenceService::availableRosterStatuses() const
 {
     return {
         QStringLiteral("All"), QStringLiteral("New"),
+        QStringLiteral("New DXCC"), QStringLiteral("New on band"),
+        QStringLiteral("New on band + mode"),
         QStringLiteral("Unconfirmed"), QStringLiteral("Wanted"),
         QStringLiteral("Award"), QStringLiteral("Watched")
     };
@@ -3765,6 +3767,29 @@ void MapIntelligenceService::setRosterDxccIgnored(const QString& dxcc, bool igno
         }));
 }
 
+void MapIntelligenceService::setRosterProviderIgnored(const QString& provider, bool ignored)
+{
+    QString const normalizedProvider = provider.trimmed();
+    if (normalizedProvider.isEmpty()) return;
+    QString const database = m_databasePath;
+    QPointer<MapIntelligenceService> guard(this);
+    m_workerPool.start(QRunnable::create(
+        [guard, database, normalizedProvider, ignored] {
+            QString error;
+            updateRosterIgnore(database, QStringLiteral("PROVIDER"),
+                               normalizedProvider, ignored, &error);
+            if (!guard) return;
+            QMetaObject::invokeMethod(guard.data(), [guard, error] {
+                if (!guard) return;
+                if (!error.isEmpty()) {
+                    qWarning().noquote()
+                        << "[MAPINT] update ignored provider failed:" << error;
+                }
+                guard->scheduleQuery();
+            }, Qt::QueuedConnection);
+        }));
+}
+
 void MapIntelligenceService::removeRosterPreference(const QString& type,
                                                     const QString& value)
 {
@@ -5128,6 +5153,7 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
             "     AND (s.band='' OR lower(e.band)=lower(s.band))"
             "     AND (s.mode='' OR upper(e.mode)=upper(s.mode))"
             "     AND abs(e.observed_ms-s.observed_ms)<=300000), 0)) AS source_count")
+            + QStringLiteral(", COALESCE(s.provider, '') AS provider")
             + QStringLiteral(
             " FROM map_spot s"
             " LEFT JOIN map_roster_preference p ON upper(p.call)=upper(s.call)"
@@ -5136,6 +5162,10 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
             "   SELECT 1 FROM map_roster_ignore i"
             "   WHERE upper(i.ignore_type)='DXCC'"
             "     AND upper(i.ignore_value)=upper(s.dxcc))"
+            " AND NOT EXISTS("
+            "   SELECT 1 FROM map_roster_ignore i"
+            "   WHERE upper(i.ignore_type)='PROVIDER'"
+            "     AND upper(i.ignore_value)=upper(COALESCE(s.provider, '')))"
             " AND (:roster_all_band = 1 OR lower(s.band)=lower(:roster_band))"
             " AND (:roster_all_mode = 1 OR upper(s.mode)=upper(:roster_mode))"
             " AND (:roster_all_propagation = 1 OR upper(s.propagation_mode)=upper(:roster_propagation))"
@@ -5209,6 +5239,8 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
                 query.record().indexOf(QStringLiteral("source_summary"));
             int const rosterSourceCountIndex =
                 query.record().indexOf(QStringLiteral("source_count"));
+            int const rosterProviderIndex =
+                query.record().indexOf(QStringLiteral("provider"));
             QSqlQuery profileQuery(db);
             profileQuery.prepare(QStringLiteral(
                 "SELECT COALESCE(MAX(county), ''), COALESCE(MAX(pota_ref), ''),"
@@ -5546,7 +5578,11 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
                 if (wanted) ++snapshot.rosterWantedCount;
 
                 QString const statusFilter = options.rosterStatus.trimmed().toLower();
+                bool const newDxcFilter = statusFilter == QStringLiteral("new dxcc")
+                    || statusFilter == QStringLiteral("new on band")
+                    || statusFilter == QStringLiteral("new on band + mode");
                 if ((statusFilter == QStringLiteral("new") && !anyNew)
+                    || (newDxcFilter && (!hasDxcc || dxccWorked))
                     || (statusFilter == QStringLiteral("unconfirmed") && !anyUnconfirmed)
                     || (statusFilter == QStringLiteral("wanted") && !wanted)
                     || (statusFilter == QStringLiteral("award") && !awardWanted)
@@ -5585,6 +5621,8 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
                 row.insert(QStringLiteral("frequencyHz"), query.value(5).toLongLong());
                 row.insert(QStringLiteral("observedUtc"), query.value(6).toString());
                 row.insert(QStringLiteral("source"), query.value(7).toString());
+                row.insert(QStringLiteral("provider"), rosterProviderIndex >= 0
+                           ? query.value(rosterProviderIndex).toString() : QString());
                 row.insert(QStringLiteral("sourceSummary"), sourceSummary);
                 row.insert(QStringLiteral("sourceCount"), sourceCount);
                 row.insert(QStringLiteral("corroborationLevel"),
@@ -7786,10 +7824,19 @@ bool MapIntelligenceService::removeRosterRuleRow(const QString& databasePath,
 void MapIntelligenceService::queueSnapshotQuery(quint64 generation)
 {
     QString const database = m_databasePath;
+    QString rosterHuntScope = m_rosterHuntScope;
+    QString const rosterStatus = m_rosterStatusFilter.trimmed().toLower();
+    if (rosterStatus == QStringLiteral("new on band")) {
+        rosterHuntScope = QStringLiteral("Band");
+    } else if (rosterStatus == QStringLiteral("new on band + mode")) {
+        rosterHuntScope = QStringLiteral("Band + mode");
+    } else if (rosterStatus == QStringLiteral("new dxcc")) {
+        rosterHuntScope = QStringLiteral("All time");
+    }
     QueryOptions const options {
         m_bandFilter, m_modeFilter, m_periodFilter, m_continentFilter,
         m_dxccFilter, m_sourceFilter, m_propagationFilter, m_rosterSort, m_rosterStatusFilter,
-        m_rosterHuntScope, m_rosterScope, m_rosterDxccScope,
+        rosterHuntScope, m_rosterScope, m_rosterDxccScope,
         m_rosterMyCall, m_rosterMyDxcc, m_activeAwardProgram, m_awardGoal,
         m_rosterRetentionMinutes, m_gridPrecision, m_liveDecayMinutes,
         m_sourceDecayMinutes,

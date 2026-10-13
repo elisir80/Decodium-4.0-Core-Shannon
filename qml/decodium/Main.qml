@@ -37,6 +37,9 @@ ApplicationWindow {
     // backend will create a one-shot Hamlib connection with auto_power_on.
     // All other dashboard controls still require an existing CAT session.
     readonly property bool dashboardPowerOnEnabled: !!(bridge && bridge.hamlibCat
+        && (bridge.hamlibCat.portType === "serial" || bridge.hamlibCat.portType === "usb")
+        && String(bridge.hamlibCat.serialPort || "").trim().length > 0
+        && ["default", "auto", "predefinito"].indexOf(String(bridge.hamlibCat.serialPort || "").trim().toLower()) < 0
         && !bridge.hamlibCat.connecting && !bridge.decoPortUseRemote
         && !bridge.transmitting && !bridge.tuning)
     property string dashboardRadioActionStatus: ""
@@ -17538,7 +17541,10 @@ NumberAnimation {
     // porta aperta), e nulla cambia finche' non si preme Applica.
     RigDetectResults {
         id: firstRunRigDetect
-        onDismissed: bridge.setSetting("RigAutoDetectOffered", true)
+        onDismissed: {
+            bridge.setSetting("RigAutoDetectOffered", true)
+            bridge.setSetting("SetupWizardOnNextLaunch", false)
+        }
     }
 
     Timer {
@@ -17547,7 +17553,9 @@ NumberAnimation {
         running: true
         repeat: false
         onTriggered: {
-            if (String(bridge.getSetting("RigAutoDetectOffered", false)) === "true")
+            var forceSetup = bridge.getSetting("SetupWizardOnNextLaunch", false)
+            forceSetup = forceSetup === true || String(forceSetup).toLowerCase() === "true" || Number(forceSetup) === 1
+            if (!forceSetup && String(bridge.getSetting("RigAutoDetectOffered", false)) === "true")
                 return
             // Il nominativo e' il segnale piu' affidabile di prima esecuzione:
             // chi ha gia' usato il programma ce l'ha, e non dipende da quando
@@ -17555,12 +17563,43 @@ NumberAnimation {
             var callsign = String(bridge.callsign || "").trim()
             var cat = bridge.catManager
             var catPort = cat ? String(cat.serialPort || "").trim() : ""
-            if (callsign.length > 0 && catPort.length > 0) {
+            if (!forceSetup && callsign.length > 0 && catPort.length > 0) {
                 console.log("[RigDetect] gia' configurato (" + callsign + " su " + catPort
                             + "): nessuna proposta al primo avvio")
                 return
             }
-            console.log("[RigDetect] prima esecuzione: nominativo='" + callsign
+
+            // La rilevazione automatica e' volutamente passiva: legge le porte
+            // che il sistema espone ma non interroga una CAT gia' aperta. Se il
+            // backend e' gia' connesso, non e' corretto presentare il risultato
+            // della scansione USB come "radio non rilevata". In particolare
+            // vale per rigctld/TCI e per le porte seriali gia' riservate dal
+            // backend, che possono non risultare sondabili dal detector.
+            var activeCatConnected = bridge.catConnected === true
+            var activeCatLabel = String(bridge.catRigName || "").trim()
+            if (activeCatConnected) {
+                console.log("[RigDetect] CAT gia' connessa (" + (activeCatLabel || "radio configurata")
+                            + "): salto la scansione passiva")
+                bridge.setSetting("RigAutoDetectOffered", true)
+                if (!forceSetup)
+                    return
+
+                firstRunRigDetect.candidates = []
+                firstRunRigDetect.activeCatConnected = true
+                firstRunRigDetect.activeCatLabel = activeCatLabel
+                firstRunRigDetect.emptyStateText = qsTr("CAT is already connected to %1. The automatic USB scan was skipped; open Setup only if you want to review or change the current CAT and audio configuration.")
+                        .arg(activeCatLabel || qsTr("the configured radio"))
+                firstRunRigDetect.introText =
+                    qsTr("Decodium is already connected to the radio. The guided setup is being shown because it was requested for the next launch.")
+                firstRunRigDetect.open()
+                return
+            }
+
+            firstRunRigDetect.activeCatConnected = false
+            firstRunRigDetect.activeCatLabel = ""
+            firstRunRigDetect.emptyStateText = ""
+            console.log("[RigDetect] percorso guidato: forzato=" + (forceSetup ? "true" : "false")
+                        + " nominativo='" + callsign
                         + "' porta CAT='" + catPort + "'")
 
             var found = bridge.detectConnectedRigs()
@@ -17572,9 +17611,19 @@ NumberAnimation {
                 }
             }
             if (!worthShowing) {
-                // Nulla di riconoscibile: si segna comunque, per non riproporsi
-                // a ogni avvio a chi non ha una radio collegata via USB.
-                bridge.setSetting("RigAutoDetectOffered", true)
+                // Anche senza una radio collegata il primo avvio deve essere
+                // guidato: l'utente può aprire direttamente Setup e scegliere
+                // manualmente CAT e audio. La chiusura della proposta viene
+                // marcata come gestita da onDismissed, così non ricompare a
+                // ogni avvio.
+                console.log("[RigDetect] prima esecuzione: nessuna radio rilevata, apro il percorso guidato")
+                firstRunRigDetect.candidates = []
+                firstRunRigDetect.emptyStateText = found.length === 0
+                        ? qsTr("No serial device was found. Is the radio on and the USB cable connected?")
+                        : qsTr("Serial devices were found, but no radio model could be identified automatically. Open Setup to choose the CAT backend and radio profile.")
+                firstRunRigDetect.introText =
+                    qsTr("No radio was detected automatically. Open Setup to choose the CAT backend, radio profile and audio devices, or connect the radio and try again.")
+                firstRunRigDetect.open()
                 return
             }
             console.log("[RigDetect] proposta mostrata: " + found.length + " candidati, il primo e' "

@@ -1701,6 +1701,12 @@ public:
 
     // Audio
     Q_INVOKABLE void refreshAudioDevices();
+    // Safe recovery actions used by the setup workflow.  They never erase a
+    // user's device/profile data: audio recovery rebinds to the current
+    // system defaults, while CAT recovery releases every backend and retries
+    // the selected one through the normal connection path.
+    Q_INVOKABLE bool restoreAudioDefaults();
+    Q_INVOKABLE bool resetCatConnection();
     Q_INVOKABLE void setTxAudioFreqFromClick(int f) { setTxFrequency(f); }
     Q_INVOKABLE void setRxAudioFreqFromClick(int f) { setRxFrequency(f); }
     Q_INVOKABLE QVariantMap worldClockSnapshot(const QString& timeZoneId) const;
@@ -3398,6 +3404,7 @@ private:
     bool   m_cwRemoteKeying {false};
     // Il tono del CW a tasto remoto, sentito sulla scheda audio locale.
     decodium::cw::CwSidetone* m_cwSidetone {nullptr};
+    bool    m_cwToneTestPending {false};
     QString m_logModeOverride;
 
     DecodiumThemeManager* m_themeManager  {nullptr};

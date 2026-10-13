@@ -1400,6 +1400,21 @@ private slots:
         QTRY_COMPARE_WITH_TIMEOUT(service.rosterCount(), 1, 5000);
         QCOMPARE(service.roster().first().toMap().value(QStringLiteral("call")).toString(),
                  QStringLiteral("NEW1"));
+        QVERIFY(service.availableRosterStatuses().contains(QStringLiteral("New DXCC")));
+        QVERIFY(service.availableRosterStatuses().contains(QStringLiteral("New on band")));
+        QVERIFY(service.availableRosterStatuses().contains(QStringLiteral("New on band + mode")));
+        service.setRosterStatusFilter(QStringLiteral("New DXCC"));
+        QTRY_COMPARE_WITH_TIMEOUT(service.rosterCount(), 1, 5000);
+        QCOMPARE(service.roster().first().toMap().value(QStringLiteral("call")).toString(),
+                 QStringLiteral("NEW1"));
+        service.setRosterStatusFilter(QStringLiteral("New on band"));
+        QTRY_COMPARE_WITH_TIMEOUT(service.rosterCount(), 1, 5000);
+        QCOMPARE(service.roster().first().toMap().value(QStringLiteral("call")).toString(),
+                 QStringLiteral("NEW1"));
+        service.setRosterStatusFilter(QStringLiteral("New on band + mode"));
+        QTRY_COMPARE_WITH_TIMEOUT(service.rosterCount(), 1, 5000);
+        QCOMPARE(service.roster().first().toMap().value(QStringLiteral("call")).toString(),
+                 QStringLiteral("NEW1"));
         service.setRosterStatusFilter(QStringLiteral("Unconfirmed"));
         QTRY_COMPARE_WITH_TIMEOUT(
             service.roster().first().toMap().value(QStringLiteral("call")).toString(),

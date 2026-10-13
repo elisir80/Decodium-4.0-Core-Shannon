@@ -200,7 +200,7 @@ SettingsPageScroll {
                 }
 
                 Text {
-                    text: qsTr("Reset graphics on next launch:")
+                    text: qsTr("Reset graphics once on next launch (diagnostic):")
                     color: textSecondary
                     font.pixelSize: 12
                     elide: Text.ElideRight
@@ -214,9 +214,87 @@ SettingsPageScroll {
                     checked: bridge.resetSafeGraphicsNextLaunch
                     onToggled: bridge.resetSafeGraphicsNextLaunch = checked
                     ToolTip.visible: hovered
-                    ToolTip.text: qsTr("On the next launch, clears persistent graphics fallback settings and scene-graph caches, equivalent to --reset-safe-graphics. The option is one-shot and clears itself after startup.")
+                    ToolTip.text: qsTr("One-shot diagnostic action: clears automatic graphics fallback settings and scene-graph caches, then retries the normal graphics backend once. It clears itself after startup; do not use it as a permanent D3D11 selection.")
                     indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                     contentItem: Text { text: ""; leftPadding: 24 }
+                }
+
+                Text {
+                    text: qsTr("Safe recovery:")
+                    color: textSecondary
+                    font.pixelSize: 12
+                    font.bold: true
+                    elide: Text.ElideRight
+                    verticalAlignment: Text.AlignVCenter
+                    Layout.preferredWidth: advancedStartupGrid.labelWidth
+                    Layout.preferredHeight: controlHeight
+                }
+                RowLayout {
+                    Layout.columnSpan: Math.max(1, pageColumns - 1)
+                    Layout.fillWidth: true
+                    spacing: 8
+                    Button {
+                        id: restoreAudioDefaultsButton
+                        text: qsTr("Restore audio defaults")
+                        enabled: !!bridge && !bridge.transmitting && !bridge.tuning
+                        implicitHeight: controlHeight
+                        ToolTip.visible: hovered
+                        ToolTip.text: qsTr("Re-enumerate audio and bind RX/TX to the current system defaults. It does not delete profiles.")
+                        onClicked: bridge.restoreAudioDefaults()
+                    }
+                    Button {
+                        id: resetCatConnectionButton
+                        text: qsTr("Reconnect CAT")
+                        enabled: !!bridge && !bridge.transmitting && !bridge.tuning
+                        implicitHeight: controlHeight
+                        ToolTip.visible: hovered
+                        ToolTip.text: qsTr("Release every CAT backend, then reconnect the selected radio using the normal ownership rules.")
+                        onClicked: bridge.resetCatConnection()
+                    }
+                    Label {
+                        Layout.fillWidth: true
+                        text: (bridge && bridge.transmitting)
+                              ? qsTr("Unavailable during transmission")
+                              : (bridge && bridge.tuning)
+                                ? qsTr("Unavailable during tuning")
+                                : qsTr("Non-destructive: current profiles are kept")
+                        color: textSecondary
+                        font.pixelSize: 10
+                        elide: Text.ElideRight
+                    }
+                }
+
+                Text {
+                    text: qsTr("Guided setup:")
+                    color: textSecondary
+                    font.pixelSize: 12
+                    elide: Text.ElideRight
+                    verticalAlignment: Text.AlignVCenter
+                    Layout.preferredWidth: advancedStartupGrid.labelWidth
+                    Layout.preferredHeight: controlHeight
+                }
+                CheckBox {
+                    Layout.columnSpan: Math.max(1, pageColumns - 1)
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: controlHeight
+                    checked: {
+                        var value = bridge.getSetting("SetupWizardOnNextLaunch", false)
+                        return value === true || String(value).toLowerCase() === "true" || Number(value) === 1
+                    }
+                    enabled: !!bridge && !bridge.transmitting && !bridge.tuning
+                    onToggled: {
+                        bridge.setSetting("SetupWizardOnNextLaunch", checked)
+                        dialog.scheduleSettingsPersist()
+                    }
+                    ToolTip.visible: hovered
+                    ToolTip.text: qsTr("Show the guided radio/CAT/audio setup at the next launch, even if Decodium is already configured.")
+                    indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? accentGreen : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                    contentItem: Text {
+                        text: qsTr("Show guided setup on next launch")
+                        color: textPrimary
+                        leftPadding: 24
+                        verticalAlignment: Text.AlignVCenter
+                    }
                 }
 
                 Text { text: qsTr("Low CPU:"); color: textSecondary; font.pixelSize: 12; elide: Text.ElideRight; verticalAlignment: Text.AlignVCenter; Layout.preferredWidth: advancedStartupGrid.labelWidth; Layout.preferredHeight: controlHeight }

@@ -1669,6 +1669,41 @@ SettingsPageScroll {
         Text { text: qsTr("DIAGNOSTICS"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
         Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
+        // Compact operational panel: the same state is also included in bug
+        // reports, but it must be readable without opening a report dialog.
+        Rectangle {
+            id: audioCatDiagnosticPanel
+            property int diagnosticRevision: 0
+            Layout.fillWidth: true
+            Layout.columnSpan: pageColumns
+            implicitHeight: audioCatDiagnosticText.implicitHeight + 24
+            radius: 5
+            color: Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.06)
+            border.color: Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.35)
+            Text {
+                id: audioCatDiagnosticText
+                anchors { left: parent.left; right: parent.right; top: parent.top; margins: 10 }
+                wrapMode: Text.Wrap
+                color: textSecondary
+                font.pixelSize: 11
+                text: {
+                    audioCatDiagnosticPanel.diagnosticRevision
+                    var d = bridge && bridge.diagnostics ? bridge.diagnostics : null
+                    if (!d) return qsTr("Audio/CAT diagnostics unavailable")
+                    var audio = d.audioState && d.audioState.length
+                                 ? d.audioState : qsTr("Audio state not reported")
+                    var rig = d.rigState && d.rigState.length
+                              ? d.rigState : qsTr("CAT state not reported")
+                    return qsTr("Audio/CAT status") + "\n" + audio + "\n" + rig
+                }
+            }
+            Connections {
+                target: bridge && bridge.diagnostics ? bridge.diagnostics : null
+                ignoreUnknownSignals: true
+                function onDiagnosticsReady() { audioCatDiagnosticPanel.diagnosticRevision++ }
+            }
+        }
+
         Text { text: qsTr("Check SWR:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
             checked: dialog.supportsSwrTelemetry() ? dialog.boolSetting("CheckSWR", false) : false

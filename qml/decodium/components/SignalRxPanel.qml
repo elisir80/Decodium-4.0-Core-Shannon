@@ -47,6 +47,7 @@ Item {
     readonly property int rowH: tm ? tm.densityRowHeight() : 22
     readonly property int fSize: tm ? tm.densityFontSize() : 12
     property int decodeColorRevision: 0
+    property bool showDecodeProvenance: root.bridge ? !!root.bridge.getSetting("ShowDecodeProvenance", false) : false
     property bool highlight73: root.bridge ? root.bridge.getSetting("Highlight73", true) : true
     property bool highlightOrange: root.bridge ? root.bridge.getSetting("HighlightOrange", false) : false
     property bool highlightBlue: root.bridge ? root.bridge.getSetting("HighlightBlue", false) : false
@@ -58,6 +59,7 @@ Item {
     readonly property int wUtc:  compact ? 58 : 76
     readonly property int wDb:   34
     readonly property int wDt:   compact ? 40 : 46
+    readonly property int wSource: compact ? 64 : 92
     readonly property int gap:   8
 
     function usStateLabel(entry) {
@@ -85,6 +87,8 @@ Item {
                 root.highlightBlueCallsigns = String(value || "")
             else if (key === "uiDecodeColorBoost")
                 root.decodeColorBoost = Math.max(0, Math.min(100, Number(value)))
+            else if (key === "ShowDecodeProvenance")
+                root.showDecodeProvenance = !!value
             else
                 return
             root.refreshDecodeColors()
@@ -314,6 +318,8 @@ Item {
             Item { Layout.preferredWidth: root.gap }
             Text { text: "DT"; color: root.cBlue; font.pixelSize: 10; font.bold: true; font.family: decodiumMonoFontFamily; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: root.wDt }
             Item { Layout.preferredWidth: root.gap }
+            Text { visible: root.showDecodeProvenance; text: qsTr("SOURCE"); color: root.cBlue; font.pixelSize: 10; font.bold: true; font.family: decodiumMonoFontFamily; Layout.preferredWidth: root.wSource }
+            Item { visible: root.showDecodeProvenance; Layout.preferredWidth: root.gap }
             Text { text: "MESSAGE"; color: root.cBlue; font.pixelSize: 10; font.bold: true; font.family: decodiumMonoFontFamily; Layout.fillWidth: true }
         }
     }
@@ -459,6 +465,15 @@ Item {
                         font.family: decodiumMonoFontFamily
                     }
                 }
+                Text {
+                    visible: root.showDecodeProvenance
+                    text: !modelData ? "" : (del.entry.provenance || del.entry.source || qsTr("Unknown"))
+                    color: !modelData ? root.cTextDim : root.cCyan
+                    font.pixelSize: Math.max(8, root.fSize - 1); font.family: decodiumMonoFontFamily
+                    elide: Text.ElideRight
+                    Layout.preferredWidth: root.wSource
+                }
+                Item { visible: root.showDecodeProvenance; Layout.preferredWidth: root.gap }
                 Text {
                     text: !modelData ? "" : (del.entry.displayMessage || del.entry.message || "")
                     color: root.decodeMessageColor(del.entry)

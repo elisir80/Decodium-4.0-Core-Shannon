@@ -379,6 +379,10 @@ static QStringList catProfileSnapshotRootKeys()
         QStringLiteral("catBackend"),
         QStringLiteral("CATMode"),
         QStringLiteral("TXAudioSource"),
+        QStringLiteral("audioInputDevice"),
+        QStringLiteral("audioOutputDevice"),
+        QStringLiteral("audioInputChannel"),
+        QStringLiteral("audioOutputChannel"),
         QStringLiteral("CheckSWR"),
         QStringLiteral("PWRandSWR"),
         QStringLiteral("SWRStopThreshold")
@@ -11136,6 +11140,13 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
             bool c = catProp("connected").toBool();
             if (!c && m_q65Doppler) m_q65Doppler->disconnected();
             bridgeLog("CAT[" + backend + "] connectedChanged: " + QString::number(c));
+            if (m_diagnostics) {
+                const QString rig = c
+                    ? QStringLiteral("Connected · %1 · backend=%2")
+                          .arg(catProp("rigName").toString(), backend)
+                    : QStringLiteral("Disconnected · backend=%1").arg(backend);
+                m_diagnostics->setRigState(rig);
+            }
             if (m_catConnected != c) {
                 if (!c) m_rttyRigModeState.clear();
                 m_catConnected = c;
@@ -12333,6 +12344,37 @@ void DecodiumBridge::runPostQmlStartupServices()
         bridgeLog(QStringLiteral("startup auto-monitor: disabled autoStart=%1 mode=%2")
                       .arg(m_autoStartMonitorOnStartup ? 1 : 0)
                       .arg(m_mode));
+    }
+
+    // A suspend/resume cycle can invalidate CoreAudio/PipeWire handles and
+    // leave a USB CAT endpoint temporarily absent.  Treat resume as a
+    // lifecycle boundary: refresh audio after the device graph settles, then
+    // retry CAT only when the previous session was known-good.  This does not
+    // override an explicit user disconnect.
+    if (auto *guiApp = qobject_cast<QGuiApplication *>(QCoreApplication::instance())) {
+        connect(guiApp, &QGuiApplication::applicationStateChanged, this,
+                [this](Qt::ApplicationState state) {
+            if (m_shuttingDown) return;
+            if (state == Qt::ApplicationSuspended) {
+                bridgeLog(QStringLiteral("lifecycle: application suspended; preserving radio/audio state"));
+                if (m_diagnostics) {
+                    m_diagnostics->setAudioState(QStringLiteral("Suspended; audio devices will be refreshed on resume"));
+                }
+                return;
+            }
+            if (state != Qt::ApplicationActive) return;
+
+            bridgeLog(QStringLiteral("lifecycle: application resumed; scheduling audio/CAT recovery"));
+            scheduleAudioDeviceRefresh(1200, true);
+            QTimer::singleShot(1800, this, [this]() {
+                if (m_shuttingDown || m_catConnected || m_transmitting || m_tuning
+                    || !m_lastSuccessfulCatConnected) {
+                    return;
+                }
+                bridgeLog(QStringLiteral("lifecycle: CAT recovery retry after resume"));
+                retryRigConnection();
+            });
+        });
     }
 }
 
@@ -30066,6 +30108,72 @@ void DecodiumBridge::refreshAudioDevices()
                                 true);
 }
 
+bool DecodiumBridge::restoreAudioDefaults()
+{
+    if (m_transmitting || m_tuning) {
+        const QString message = QStringLiteral("Audio recovery postponed while the radio is transmitting or tuning.");
+        emit statusMessage(message);
+        return false;
+    }
+
+    // Force a fresh enumeration: after sleep/wake or a USB/Pulse route change
+    // the cached QAudioDevice objects can describe the old route.  Selecting
+    // the current system defaults also clears stale device identities through
+    // the normal setters, without deleting any other audio preferences.
+    refreshAudioDeviceCache(QStringLiteral("safe audio recovery"), false, true);
+    const QString input = m_cachedDefaultAudioInput.description().trimmed();
+    const QString output = m_cachedDefaultAudioOutput.description().trimmed();
+    if (input.isEmpty() && output.isEmpty()) {
+        const QString message = QStringLiteral("Audio recovery could not find a system input or output device.");
+        bridgeLog(message);
+        emit errorMessage(message);
+        return false;
+    }
+
+    if (!input.isEmpty()) {
+        setAudioInputDevice(input);
+    }
+    if (!output.isEmpty()) {
+        setAudioOutputDevice(output);
+    }
+    setAudioInputChannel(0);
+    setAudioOutputChannel(0);
+    refreshAudioDevicesInternal(QStringLiteral("safe audio recovery rebind"), false, false);
+
+    const QString message = QStringLiteral("Audio restored to the current system defaults.");
+    bridgeLog(message + QStringLiteral(" input=[%1] output=[%2]").arg(input, output));
+    emit statusMessage(message);
+    return true;
+}
+
+bool DecodiumBridge::resetCatConnection()
+{
+    if (m_transmitting || m_tuning) {
+        const QString message = QStringLiteral("CAT recovery postponed while the radio is transmitting or tuning.");
+        emit statusMessage(message);
+        return false;
+    }
+
+    bridgeLog(QStringLiteral("CAT safe recovery requested: releasing all CAT backends"));
+    if (m_cat4OmCat) {
+        m_cat4OmCat->disconnectRig();
+    }
+    if (m_omniRigCat) {
+        m_omniRigCat->disconnectRig();
+    }
+    if (m_hamlibCat) {
+        m_hamlibCat->disconnectRig();
+    }
+    QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+
+    // Keep the selected backend and its profile intact.  retryRigConnection()
+    // applies the same ownership rules used by the normal Connect button and
+    // therefore avoids opening a serial port twice.
+    retryRigConnection();
+    emit statusMessage(QStringLiteral("CAT recovery started: reconnecting the selected radio profile."));
+    return true;
+}
+
 void DecodiumBridge::refreshAudioDevicesInternal(const QString& reason,
                                                  bool forceEnumeration,
                                                  bool emitStatus)
@@ -30625,6 +30733,14 @@ bool DecodiumBridge::saveCatProfile(const QString& rawName)
             rootValues.insert(key, source.value(key, QStringLiteral("Data/Pkt")));
         } else if (key == QStringLiteral("TXAudioSource")) {
             rootValues.insert(key, source.value(key, QStringLiteral("Rear/Data")));
+        } else if (key == QStringLiteral("audioInputDevice")) {
+            rootValues.insert(key, source.value(key, m_audioInputDevice));
+        } else if (key == QStringLiteral("audioOutputDevice")) {
+            rootValues.insert(key, source.value(key, m_audioOutputDevice));
+        } else if (key == QStringLiteral("audioInputChannel")) {
+            rootValues.insert(key, source.value(key, m_audioInputChannel));
+        } else if (key == QStringLiteral("audioOutputChannel")) {
+            rootValues.insert(key, source.value(key, m_audioOutputChannel));
         } else if (key == QStringLiteral("CheckSWR") || key == QStringLiteral("PWRandSWR")) {
             rootValues.insert(key, source.value(key, false));
         } else if (key == QStringLiteral("SWRStopThreshold")) {
@@ -43237,14 +43353,29 @@ void DecodiumBridge::testCwMonitor() {
         emit statusMessage(tr("CW tone test skipped while the radio is transmitting or tuning."));
         return;
     }
+    if (m_cwToneTestPending) {
+        bridgeLog(QStringLiteral("CW sidetone test ignored: test already in progress"));
+        emit statusMessage(tr("CW tone test is already running."));
+        return;
+    }
     bridgeLog(QStringLiteral("CW sidetone test requested: output_id=%1 volume=%2 tone_hz=700 message=V")
                   .arg(cwMonitorDevice().isEmpty() ? QStringLiteral("default") : cwMonitorDevice())
                   .arg(cwMonitorVolume()));
     QVector<CwKeyEvent> events;
-    for (const auto& e : decodium::cw::timelineFor(QStringLiteral("V"), 20))
+    int durationMs = 0;
+    for (const auto& e : decodium::cw::timelineFor(QStringLiteral("V"), 20)) {
         events.append({e.deltaMs, e.down});
-    if (playCwMonitor(events, 700))
+        durationMs += static_cast<int>(e.deltaMs);
+    }
+    if (playCwMonitor(events, 700)) {
+        m_cwToneTestPending = true;
+        // The audio worker owns the sink; this timer only releases the UI-side
+        // admission guard and never waits for audio or touches QAudioSink.
+        QTimer::singleShot(qMax(250, durationMs + 200), this, [this]() {
+            m_cwToneTestPending = false;
+        });
         emit statusMessage(tr("CW tone test queued for the selected local audio output (V)."));
+    }
 }
 
 // SSB voice workspace.
@@ -47907,6 +48038,19 @@ void DecodiumBridge::enrichDecodeEntry(QVariantMap& entry, bool countAsReceived)
     }
     bool const localTxEntry = entry.value(QStringLiteral("isTx")).toBool()
         || entry.value(QStringLiteral("db")).toString().trimmed().compare(QStringLiteral("TX"), Qt::CaseInsensitive) == 0;
+    // Every decode must carry an explicit provenance.  Feed/map rows already
+    // provide source/provider; legacy decoder rows do not, so give them a
+    // stable, human-readable origin instead of leaving the UI ambiguous.
+    QString provenance = entry.value(QStringLiteral("provenance")).toString().trimmed();
+    if (provenance.isEmpty()) {
+        provenance = entry.value(QStringLiteral("source")).toString().trimmed();
+    }
+    if (provenance.isEmpty()) {
+        provenance = localTxEntry ? QStringLiteral("Local TX")
+                                  : QStringLiteral("Local decoder");
+    }
+    entry.insert(QStringLiteral("source"), provenance);
+    entry.insert(QStringLiteral("provenance"), provenance);
     entry[QStringLiteral("displayMessage")] =
         displayMessageWithCallsignsActorFirst(msg, localTxEntry, m_callsign);
     QString fromCall = entry.value("fromCall").toString().trimmed().toUpper();
@@ -56068,6 +56212,18 @@ void DecodiumBridge::refreshAudioDeviceCache(const QString& reason,
                         .arg(inputs.size())
                         .arg(outputs.size())
                         .arg(signatureChanged ? 1 : 0));
+
+    if (m_diagnostics) {
+        m_diagnostics->setAudioState(
+            QStringLiteral("Input: %1 · Output: %2 · devices=%3/%4 · refreshed=%5")
+                .arg(defaultInput.description().isEmpty()
+                         ? QStringLiteral("<none>") : defaultInput.description())
+                .arg(defaultOutput.description().isEmpty()
+                         ? QStringLiteral("<none>") : defaultOutput.description())
+                .arg(inputNames.size())
+                .arg(outputNames.size())
+                .arg(reason));
+    }
 
     if (emitSignals && inputListChanged) {
         emit audioInputDevicesChanged();
