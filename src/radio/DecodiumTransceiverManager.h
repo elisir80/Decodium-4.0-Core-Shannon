@@ -385,6 +385,10 @@ private:
     // during the bounded reconnect window; wait for the same endpoint to
     // enumerate again and reopen it normally.
     bool    m_coldStartPowerOnWakeSent {false};
+    // Set when the radio was powered off through CAT and the session was kept
+    // open. A later Power On cannot wake a CI-V radio over that live session:
+    // it must reopen the port so Hamlib sends the model's wake-up sequence.
+    bool    m_radioPoweredOffByUser {false};
     quint64 m_transientCatReconnectSerial {0};
     QElapsedTimer m_connectAttemptTimer;
 };

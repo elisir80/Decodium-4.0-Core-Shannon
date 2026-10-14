@@ -2201,6 +2201,8 @@ void DecodiumTransceiverManager::disconnectRig()
 
 void DecodiumTransceiverManager::disconnectRigInternal(bool reconnectAfterDisconnect)
 {
+    // La sessione si chiude: lo stato "spenta via CAT" non vale per la prossima.
+    m_radioPoweredOffByUser = false;
     ++m_transientCatReconnectSerial;
     m_transientCatReconnectPending = false;
     m_reconnectAfterDisconnect = reconnectAfterDisconnect;
@@ -2822,6 +2824,20 @@ void DecodiumTransceiverManager::setAtuState(bool valid, bool enabled)
 void DecodiumTransceiverManager::requestRadioPowerOn()
 {
     const QString action = QStringLiteral("Power on");
+    if (m_connected && d->transceiver && m_radioPoweredOffByUser) {
+        // Radio spenta via CAT con la sessione ancora aperta: il comando di
+        // accensione sulla sessione viva non la sveglia. Si chiude la porta e
+        // si riapre con il risveglio del modello (stesso percorso del cold start).
+        m_radioPoweredOffByUser = false;
+        m_coldStartPowerOnPending = true;
+        m_coldStartPowerOnWakeSent = false;
+        qInfo().noquote()
+            << "[CATDBG] Power On after power off: reopening CAT for the wake-up"
+            << "rig=" << m_rigName << "serial=" << m_serialPort;
+        emit statusUpdate(tr("Waking %1 through a new CAT session…").arg(m_rigName));
+        disconnectRigInternal(true);
+        return;
+    }
     if (!m_connected || !d->transceiver) {
         QString const transport = m_portType.trimmed().toLower();
         bool const directCat = transport == QStringLiteral("serial")
@@ -2922,8 +2938,10 @@ void DecodiumTransceiverManager::requestRadioPowerOff()
         bool const ok = hamlib && hamlib->request_power_off(&error);
         if (!hamlib) error = QStringLiteral("Power control is available only for Hamlib radios");
         if (owner) QMetaObject::invokeMethod(owner, [owner, xcv, action, ok, error]() {
-            if (owner && owner->m_connected && owner->d->transceiver == xcv)
+            if (owner && owner->m_connected && owner->d->transceiver == xcv) {
+                if (ok) owner->m_radioPoweredOffByUser = true;
                 emit owner->radioActionCompleted(action, ok, error);
+            }
         }, Qt::QueuedConnection);
     }, Qt::QueuedConnection);
 }
