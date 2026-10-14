@@ -95,9 +95,19 @@ in uso, e senza quel dettaglio si cerca il guasto altrove.
 | `S <0\|1> <vfo>` | imposta split | `RPRT 0` |
 | `i` | frequenza di trasmissione | `14074000` |
 | `I <hz>` | imposta frequenza TX | `RPRT 0` |
-| `q` | chiude | — |
+| `\get_lock_mode` | blocco del VFO | `0` poi `RPRT 0` |
+| `q` | chiude | `RPRT 0`, poi la connessione si chiude |
 
 Un comando non gestito si rifiuta con `RPRT -11`.
+
+⚠️ A `\get_lock_mode` **si risponde con due righe, `0` e `RPRT 0`.** Dalla 4.7
+il client Hamlib lo chiede prima di **ogni** cambio di modo, e dopo il valore
+legge una seconda riga (`netrigctl_get_lock_mode` in `rigs/dummy/netrigctl.c`):
+rigctld la manda perché il comando non ha `ARG_OUT` (`tests/rigctl_parse.c`).
+Con la sola riga `0` il client aspettava il timeout: misurato con il vero
+`DecodiumCatShare.cpp` e il client NET rigctl di Hamlib 4.7.0, ogni `set_mode`
+durava **20,03 s**; con le due righe 0,00 s. Anche a `q` rigctld risponde
+`RPRT 0`, e senza il client registra un errore di chiusura.
 
 ## Politica decisa
 

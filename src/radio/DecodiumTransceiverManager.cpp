@@ -1793,6 +1793,40 @@ void DecodiumTransceiverManager::connectRig()
     Transceiver* xcv = nullptr;
     try {
         params = buildParams(this, m_coldStartPowerOnPending && !m_coldStartPowerOnWakeSent);
+        // Condivisione nel protocollo della radio (DecoPort): la seriale la
+        // tiene il multiplexer e Hamlib gli parla da una presa locale, cosi'
+        // altri programmi usano la stessa radio da una COM virtuale. Se la
+        // condivisione non c'e' o non parte, si apre la COM come sempre.
+        if (m_catLineRedirect && lowerPortType == QStringLiteral("serial")
+            && !isHamRadioDeluxeRig(m_rigName)) {
+            DecoPortLineSettings line;
+            line.baud = params.baud;
+            line.dataBits = params.data_bits == TransceiverFactory::seven_data_bits ? 7
+                          : params.data_bits == TransceiverFactory::eight_data_bits ? 8 : 0;
+            line.stopBits = params.stop_bits == TransceiverFactory::one_stop_bit ? 1
+                          : params.stop_bits == TransceiverFactory::two_stop_bits ? 2 : 0;
+            line.handshake = params.handshake == TransceiverFactory::handshake_none ? QStringLiteral("none")
+                           : params.handshake == TransceiverFactory::handshake_XonXoff ? QStringLiteral("xonxoff")
+                           : params.handshake == TransceiverFactory::handshake_hardware ? QStringLiteral("hardware")
+                           : QString();
+            line.dtr = params.force_dtr ? (params.dtr_high ? 1 : 0) : -1;
+            line.rts = params.force_rts ? (params.rts_high ? 1 : 0) : -1;
+            bool const pttOnCatLines =
+                (params.ptt_type == TransceiverFactory::PTT_method_DTR
+                 || params.ptt_type == TransceiverFactory::PTT_method_RTS)
+                && pttPortSharesCatPort(params.serial_port, params.ptt_port);
+            QString why;
+            QString const shared = m_catLineRedirect(params.serial_port, params.rig_name, line,
+                                                     pttOnCatLines, &why);
+            if (!shared.isEmpty()) {
+                qInfo().noquote() << "[CATDBG] CAT shared in the radio's own protocol:"
+                                  << params.serial_port << "held by DecoPort, Hamlib via" << shared;
+                params.serial_port = shared;
+            } else if (!why.isEmpty()) {
+                qInfo().noquote() << "[CATDBG]" << why;
+                emit statusUpdate(why);
+            }
+        }
         if (params.auto_power_on) {
             // Mark it before handing the object to the worker: if the command
             // resets the USB bridge, the recovery connection must wait for
@@ -1919,6 +1953,10 @@ void DecodiumTransceiverManager::connectRig()
                             connectRig();
                         }
                     });
+                } else if (m_catLineRelease) {
+                    // Il CAT e' chiuso davvero: la seriale tenuta dal
+                    // multiplexer della condivisione torna libera.
+                    m_catLineRelease();
                 }
             },
             Qt::QueuedConnection);

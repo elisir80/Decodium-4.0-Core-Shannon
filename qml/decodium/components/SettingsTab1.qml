@@ -27,6 +27,16 @@ SettingsPageScroll {
                                  catShareControl.checked, catSharePtt.checked)
     }
 
+    // Condivisione nel protocollo della radio (DecoPort): COM virtuale e,
+    // facoltativa, presa TCP grezza. Stessa forma della CAT condivisa.
+    function applyNativeCatShare() {
+        if (!bridge) return
+        var raw = parseInt(nativeRawPort.text, 10)
+        if (isNaN(raw) || raw < 1024 || raw > 65535) raw = 0
+        bridge.configureNativeCatShare(nativeShareEnabled.checked,
+                                       nativeSharePtt.checked, raw)
+    }
+
     // Spot condivisi: come la CAT, ma per il cluster. Nessun permesso da
     // concedere, perche' non c'e' niente da comandare.
     function applySpotShare() {
@@ -1337,6 +1347,104 @@ SettingsPageScroll {
                        .arg(bridge.catShare.port).arg(bridge.catShare.clientCount)
                        + "  \u00b7  " + qsTr("in other programs choose \"Hamlib NET rigctl\"")
             }
+        }
+
+        // ── Condivisione nel protocollo della radio (DecoPort) ──
+        // La radio resta di Decodium; gli altri programmi la usano da una COM
+        // virtuale nel SUO protocollo, come se fosse la radio. Il programma
+        // non cambia configurazione: cambia solo la porta.
+        Text { text: qsTr("RADIO SHARING (DECOPORT)"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+
+        Text { text: qsTr("Share in radio protocol:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+        CheckBox {
+            id: nativeShareEnabled
+            checked: (bridge && bridge.nativeCatShare) ? (bridge && bridge.nativeCatShare).enabled : false
+            onToggled: applyNativeCatShare()
+            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+            contentItem: Text { text: ""; leftPadding: 24 }
+        }
+
+        Text { text: qsTr("Also raw TCP port:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+        DecoTextField {
+            id: nativeRawPort
+            text: (bridge && bridge.nativeCatShare) && (bridge && bridge.nativeCatShare).rawPort > 0 ? String((bridge && bridge.nativeCatShare).rawPort) : ""
+            placeholderText: qsTr("empty = off")
+            inputMethodHints: Qt.ImhDigitsOnly
+            Layout.fillWidth: true
+            implicitHeight: controlHeight
+            font.pixelSize: controlFontSize
+            onEditingFinished: applyNativeCatShare()
+        }
+
+        // La trasmissione ha un interruttore proprio, come nella CAT condivisa.
+        Text { text: qsTr("Allow transmit:"); color: "#ff6b6b"; font.pixelSize: 12; Layout.preferredWidth: 100 }
+        CheckBox {
+            id: nativeSharePtt
+            checked: (bridge && bridge.nativeCatShare) ? (bridge && bridge.nativeCatShare).allowPtt : false
+            enabled: nativeShareEnabled.checked
+            onToggled: applyNativeCatShare()
+            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? "#ff6b6b" : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+            contentItem: Text { text: ""; leftPadding: 24 }
+        }
+
+        Text {
+            Layout.columnSpan: pageColumns
+            Layout.fillWidth: true
+            wrapMode: Text.WordWrap
+            font.pixelSize: 11
+            color: ((bridge && bridge.nativeCatShare) && (bridge && bridge.nativeCatShare).active) ? accentGreen : textSecondary
+            text: {
+                if (!(bridge && bridge.nativeCatShare)) return ""
+                var s = (bridge && bridge.nativeCatShare).status
+                if ((bridge && bridge.nativeCatShare).traffic.length > 0) s += "  ·  " + (bridge && bridge.nativeCatShare).traffic
+                return s
+            }
+        }
+
+        Text { text: qsTr("Virtual port:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+        Text {
+            Layout.fillWidth: true
+            wrapMode: Text.WordWrap
+            font.pixelSize: 12
+            color: textPrimary
+            text: ((bridge && bridge.nativeCatShare) && (bridge && bridge.nativeCatShare).virtualPort.length > 0) ? (bridge && bridge.nativeCatShare).virtualPort : qsTr("none yet")
+        }
+        Text {
+            Layout.columnSpan: pageColumns
+            Layout.fillWidth: true
+            wrapMode: Text.WordWrap
+            font.pixelSize: 11
+            color: textSecondary
+            text: ((bridge && bridge.nativeCatShare) ? (bridge && bridge.nativeCatShare).virtualStatus : "")
+        }
+        Rectangle {
+            Layout.preferredWidth: 220
+            Layout.preferredHeight: controlHeight
+            radius: 4
+            color: createPortArea.containsMouse ? primaryBlue : bgMedium
+            border.color: glassBorder
+            Text {
+                anchors.centerIn: parent
+                text: ((bridge && bridge.nativeCatShare) && (bridge && bridge.nativeCatShare).busy) ? qsTr("Working...") : qsTr("Create virtual port")
+                color: textPrimary
+                font.pixelSize: 12
+            }
+            MouseArea {
+                id: createPortArea
+                anchors.fill: parent
+                hoverEnabled: true
+                enabled: !!((bridge && bridge.nativeCatShare) && !(bridge && bridge.nativeCatShare).busy)
+                onClicked: bridge.createNativeCatShareVirtualPort()
+            }
+        }
+        Text {
+            Layout.columnSpan: pageColumns
+            Layout.fillWidth: true
+            wrapMode: Text.WordWrap
+            font.pixelSize: 11
+            color: textSecondary
+            text: qsTr("Creating the port asks Windows for administrator rights. The virtual port is com0com, by Vyacheslav Frolov (GPL), bundled unchanged.")
         }
 
         // ── Spot condivisi ──

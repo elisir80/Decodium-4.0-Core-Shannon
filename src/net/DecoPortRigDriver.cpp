@@ -177,6 +177,49 @@ int DecoPortRigDriver::resolveModel(const QString& rigLabel,
     return 0;
 }
 
+bool DecoPortRigDriver::modelAvailable(int model)
+{
+    if (model <= 0)
+        return false;
+    for (const CatalogueEntry& e : catalogue())
+        if (e.model == model)
+            return true;
+    return false;
+}
+
+DecoPortLineSettings DecoPortRigDriver::serialSettings(int model, bool* known)
+{
+    DecoPortLineSettings s;
+    if (known)
+        *known = false;
+    if (!modelAvailable(model))
+        return s;
+    const struct rig_caps* caps = rig_get_caps(static_cast<rig_model_t>(model));
+    if (!caps || caps->port_type != RIG_PORT_SERIAL)
+        return s;
+    // Quelli che la versione installata di Hamlib dichiara: valgono piu' della
+    // libreria, che puo' essere stata generata da un'altra versione.
+    if (caps->serial_rate_max > 0)
+        s.baud = caps->serial_rate_max;
+    if (caps->serial_data_bits > 0)
+        s.dataBits = caps->serial_data_bits;
+    if (caps->serial_stop_bits > 0)
+        s.stopBits = caps->serial_stop_bits;
+    switch (caps->serial_parity) {
+    case RIG_PARITY_EVEN:  s.parity = QLatin1Char('E'); break;
+    case RIG_PARITY_ODD:   s.parity = QLatin1Char('O'); break;
+    case RIG_PARITY_MARK:  s.parity = QLatin1Char('M'); break;
+    case RIG_PARITY_SPACE: s.parity = QLatin1Char('S'); break;
+    default:               s.parity = QLatin1Char('N'); break;
+    }
+    s.handshake = caps->serial_handshake == RIG_HANDSHAKE_HARDWARE ? QStringLiteral("hardware")
+                : caps->serial_handshake == RIG_HANDSHAKE_XONXOFF  ? QStringLiteral("xonxoff")
+                                                                   : QStringLiteral("none");
+    if (known)
+        *known = true;
+    return s;
+}
+
 bool DecoPortRigDriver::open(const QString& port, int baudRate, int civAddress, int model)
 {
     if (model == 0 || port.trimmed().isEmpty())
@@ -237,7 +280,11 @@ void DecoPortRigDriver::doOpen(const QString& port, int baudRate, int civAddress
 
     int const rc = rig_open(d->rig);
     if (rc != RIG_OK) {
-        QString const why = QString::fromLatin1(rigerror(rc)).trimmed();
+        // Da Hamlib 4 rigerror() antepone al messaggio la traccia delle
+        // chiamate, su piu' righe: il messaggio e' l'ultima.
+        QStringList const lines = QString::fromLatin1(rigerror(rc))
+                                      .split(QLatin1Char('\n'), Qt::SkipEmptyParts);
+        QString const why = lines.isEmpty() ? QString() : lines.last().trimmed();
         rig_cleanup(d->rig);
         d->rig = nullptr;
         QString reason;

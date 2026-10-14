@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
+#include "DecoPortSerialLine.h"
+
 #include <QObject>
 #include <QString>
 #include <QVariantList>
@@ -47,9 +49,18 @@ public:
                             const QString& rigToken,
                             QString* matchedName = nullptr);
 
+    // Vero se la versione installata di Hamlib conosce quel modello.
+    static bool modelAvailable(int model);
+    // I parametri seriali che Hamlib dichiara per il modello: la velocita' e'
+    // la massima, il resto quello che la radio pretende. `known` dice se il
+    // modello c'e' ed e' una radio seriale.
+    static DecoPortLineSettings serialSettings(int model, bool* known = nullptr);
+
     // Accoda l'apertura della radio sul worker. Restituisce false solo se la
     // richiesta e' incompleta; l'esito reale arriva poi tramite opened/failed,
-    // senza trattenere il thread grafico durante il timeout seriale.
+    // senza trattenere il thread grafico durante il timeout seriale. `port`
+    // puo' essere anche "host:porta": Hamlib apre allora la radio in rete
+    // (ser2net, o il multiplexer CAT di DecoPort).
     bool open(const QString& port, int baudRate, int civAddress, int model);
     void close();
     bool isOpen() const;

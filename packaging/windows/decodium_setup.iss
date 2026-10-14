@@ -345,6 +345,13 @@ Source: "{#BuildDir}\translations\qt_*.qm"; DestDir: "{app}\translations"; Exclu
 ; File licenza fuori dal bundle
 Source: "{#SourceRoot}\COPYING"; DestDir: "{app}"; DestName: "COPYING.txt"; Flags: ignoreversion skipifsourcedoesntexist
 
+; DecoPort — com0com 3.0.0.0, il "Null-modem emulator" di Vyacheslav Frolov
+; (GPL 2 o successiva, https://com0com.sourceforge.net/), invariato, con i suoi
+; sorgenti e la sua licenza come chiede la GPL. Non si installa qui: lo installa
+; DecoPort quando l'utente chiede le porte COM virtuali, dopo averne controllato
+; l'impronta. Provenienza e impronte: third_party\com0com\NOTICE.md.
+Source: "{#SourceRoot}\third_party\com0com\*"; DestDir: "{app}\com0com"; Flags: ignoreversion
+
 [Icons]
 Name: "{group}\{#AppName}";              Filename: "{app}\{#AppExeName}"; IconFilename: "{app}\{#AppExeName}"
 Name: "{group}\Disinstalla {#AppName}";  Filename: "{uninstallexe}"

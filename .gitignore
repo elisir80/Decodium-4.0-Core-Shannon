@@ -48,6 +48,10 @@ local-release/
 *.exe
 !artwork/*.exe
 *.zip
+# com0com viaggia con DecoPort, invariato, con i suoi sorgenti come chiede la
+# GPL: vedi third_party/com0com/NOTICE.md
+!third_party/com0com/*.exe
+!third_party/com0com/*.zip
 *.rar
 *.pkg.tar.zst
 

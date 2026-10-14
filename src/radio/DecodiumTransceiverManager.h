@@ -12,6 +12,8 @@
 #include <memory>
 #include <functional>
 
+#include "DecoPortSerialLine.h"
+
 // Forward-declare per nascondere le dipendenze Boost/Hamlib dall'header
 struct DecodiumTransceiverManagerPrivate;
 class QThread;
@@ -97,6 +99,21 @@ class DecodiumTransceiverManager : public QObject
 public:
     explicit DecodiumTransceiverManager(QObject* parent = nullptr);
     ~DecodiumTransceiverManager();
+
+    // Condivisione nel protocollo della radio (DecoPort). Prima di aprire una
+    // radio seriale il CAT chiede qui la porta da dare a Hamlib: se torna un
+    // indirizzo, la seriale la tiene il multiplexer e Hamlib gli parla da una
+    // presa locale; se torna vuoto si apre la COM come sempre, e `why` dice
+    // perche' la condivisione non e' partita. `release` si chiama quando il
+    // CAT e' chiuso davvero, e la seriale deve tornare libera.
+    using CatLineRedirect = std::function<QString(const QString& port, const QString& rigName,
+                                                  const DecoPortLineSettings& settings,
+                                                  bool pttOnCatLines, QString* why)>;
+    void setCatLineRedirect(CatLineRedirect redirect, std::function<void()> release)
+    {
+        m_catLineRedirect = std::move(redirect);
+        m_catLineRelease = std::move(release);
+    }
 
     // ── Lettura proprietà ─────────────────────────────────────────────────
     bool    connected()    const { return m_connected; }
@@ -357,6 +374,8 @@ private:
     bool    m_transientCatReconnectPending {false};
     bool    m_reconnectAfterDisconnect {false};
     bool    m_disconnectInProgress {false};
+    CatLineRedirect       m_catLineRedirect;
+    std::function<void()> m_catLineRelease;
     // One-shot intent set only by the explicit dashboard Power On action
     // while CAT is disconnected. It becomes Hamlib's auto_power_on config
     // for the next direct CAT connection, never for ordinary startup.

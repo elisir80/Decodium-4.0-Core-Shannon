@@ -13,6 +13,7 @@
 #include "DecolinkLink.h"
 #include "DecoPortRigDriver.h"
 #include "DecodiumDecoPortGateway.h"
+#include "DecodiumNativeCatShare.h"
 #include "DecodeUiFilterPolicy.h"
 #include "MamTxPayloadPolicy.h"
 #include "RttyRxRecovery.h"
@@ -10293,6 +10294,26 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     m_omniRigCat      = new DecodiumOmniRigManager(this);
     m_hamlibCat       = new DecodiumTransceiverManager(this);
     m_catShare        = new DecodiumCatShare(m_hamlibCat, this);
+    // Condivisione nel protocollo della radio (DecoPort): prima di aprire la
+    // radio il CAT chiede qui quale porta dare a Hamlib, e quando chiude
+    // restituisce la seriale. A interruttore spento la risposta e' "la COM di
+    // sempre", e niente cambia.
+    m_nativeCatShare  = new DecodiumNativeCatShare(this);
+    m_hamlibCat->setCatLineRedirect(
+        [this](const QString& port, const QString& rigName, const DecoPortLineSettings& line,
+               bool pttOnCatLines, QString* why) {
+            return m_nativeCatShare
+                ? m_nativeCatShare->redirect(port, rigName, line, pttOnCatLines, why)
+                : QString();
+        },
+        [this]() {
+            if (m_nativeCatShare)
+                m_nativeCatShare->release();
+        });
+    connect(m_nativeCatShare, &DecodiumNativeCatShare::pairRemembered, this,
+            [this](const QString& pair) {
+                setSetting(QStringLiteral("NativeCatSharePair"), pair);
+            });
     m_amplifier       = new DecodiumAmplifier(this);
     noteActiveCatProfileAtStartup();
     migrateRemovedNativeCatBackend();
@@ -10311,6 +10332,16 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
             decodium::profiledSettingsValue({}, QStringLiteral("CatSharePort"), 4533).toInt(),
             decodium::profiledSettingsValue({}, QStringLiteral("CatShareAllowControl"), false).toBool(),
             decodium::profiledSettingsValue({}, QStringLiteral("CatShareAllowPtt"), false).toBool());
+    }
+    // Condivisione nel protocollo della radio: stessa lettura con ricaduta
+    // sulla radice. La coppia virtuale ricordata si riapre senza chiedere
+    // niente a nessuno; crearne una nuova parte solo dal pulsante.
+    if (m_nativeCatShare) {
+        m_nativeCatShare->configure(
+            decodium::profiledSettingsValue({}, QStringLiteral("NativeCatShareEnabled"), false).toBool(),
+            decodium::profiledSettingsValue({}, QStringLiteral("NativeCatShareAllowPtt"), false).toBool(),
+            decodium::profiledSettingsValue({}, QStringLiteral("NativeCatShareRawPort"), 0).toInt(),
+            decodium::profiledSettingsValue({}, QStringLiteral("NativeCatSharePair"), QString()).toString());
     }
     // Amplificatore: si apre solo se richiesto. Lettura con ricaduta sulla
     // radice, per la stessa ragione della CAT condivisa.
@@ -16066,9 +16097,24 @@ void DecodiumBridge::setLowEndMode(bool enabled)
         if (m_ftThreads > 4) setFtThreads(4);
         setProcessPriority(0);            // Normale: niente preempt su hw debole
         applyReadyProfile(QStringLiteral("cpu"));
+        // Le animazioni infinite dei LED/indicatori sono gia' condizionate a
+        // uiQuality != "Low": la Modalita' PC lento le spegne, e ricorda la scelta
+        // precedente per ripristinarla alla disattivazione.
+        if (m_uiQuality != QStringLiteral("Low")) {
+            QSettings().setValue(QStringLiteral("UI/QualityBeforeLowEnd"), m_uiQuality);
+        }
+        setUiQuality(QStringLiteral("Low"));
         emit statusMessage(QStringLiteral("Modalità PC lento attiva. Riavvia Decodium per applicare la grafica OpenGL (più stabile su GPU vecchie)."));
     } else {
         setLowCpuModeEnabled(false);
+        if (m_uiQuality == QStringLiteral("Low")) {
+            QSettings settings;
+            QString const previous = settings.value(QStringLiteral("UI/QualityBeforeLowEnd")).toString();
+            if (!previous.isEmpty()) {
+                setUiQuality(previous);
+                settings.remove(QStringLiteral("UI/QualityBeforeLowEnd"));
+            }
+        }
         emit statusMessage(QStringLiteral("Modalità PC lento disattivata. Riavvia per tornare alla grafica automatica."));
     }
 
@@ -21728,6 +21774,17 @@ void DecodiumBridge::decoPortEnsureRigDriver()
     if (model == 0)
         return;
 
+    // Si apre da soli solo cio' che il rilevatore riconosce come radio, per
+    // modello o firma USB. Un adattatore generico, o la porta di un altro
+    // apparato, risolto per caso a un modello dal confronto largo sul
+    // catalogo, riceverebbe comandi CAT che non capisce: li' si resta sui
+    // ganci. Le porte virtuali (com0com) il rilevatore non le propone affatto.
+    if (!best.value(QStringLiteral("isRadio")).toBool()) {
+        bridgeLog(QStringLiteral("DecoPort rig driver: [%1] on %2 is not recognised as a radio; "
+                                 "staying on the application hooks").arg(label, port));
+        return;
+    }
+
     if (!m_decoPortRig) {
         m_decoPortRig = new DecoPortRigDriver;
         connect(m_decoPortRig, &DecoPortRigDriver::opened, this, [](const QString& name) {
@@ -22567,6 +22624,41 @@ void DecodiumBridge::configureCatShare(bool enabled, int port,
     setSetting(QStringLiteral("CatShareAllowPtt"), allowPtt);
     if (m_catShare)
         m_catShare->configure(enabled, port, allowControl, allowPtt);
+}
+
+QObject* DecodiumBridge::nativeCatShareObject() const
+{
+    return m_nativeCatShare;
+}
+
+// Condivisione nel protocollo della radio. Stesso archivio della CAT condivisa.
+// Il percorso del CAT cambia solo riaprendolo: se Hamlib e' collegato si
+// riapre, cosi' la seriale passa al multiplexer, o torna a Decodium.
+void DecodiumBridge::configureNativeCatShare(bool enabled, bool allowPtt, int rawPort)
+{
+    if (rawPort != 0 && (rawPort < 1024 || rawPort > 65535))
+        rawPort = 0;
+    setSetting(QStringLiteral("NativeCatShareEnabled"), enabled);
+    setSetting(QStringLiteral("NativeCatShareAllowPtt"), allowPtt);
+    setSetting(QStringLiteral("NativeCatShareRawPort"), rawPort);
+    if (!m_nativeCatShare)
+        return;
+    bool const routingChanged = m_nativeCatShare->enabled() != enabled
+                                || m_nativeCatShare->rawPort() != rawPort;
+    m_nativeCatShare->configure(enabled, allowPtt, rawPort, QString());
+    if (routingChanged && m_hamlibCat && m_catBackend == QLatin1String("hamlib")
+        && (m_hamlibCat->connected() || m_hamlibCat->connecting())) {
+        bridgeLog(QStringLiteral("Radio-protocol sharing %1: reopening the CAT")
+                      .arg(enabled ? QStringLiteral("on") : QStringLiteral("off")));
+        // Con il CAT aperto, connectRig lo chiude e lo riapre.
+        m_hamlibCat->connectRig();
+    }
+}
+
+void DecodiumBridge::createNativeCatShareVirtualPort()
+{
+    if (m_nativeCatShare)
+        m_nativeCatShare->createVirtualPort();
 }
 
 // Spot condivisi. Stesso archivio e stessa forma della CAT condivisa, per la

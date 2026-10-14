@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <tuple>
 #include <QByteArray>
+#include <QRegularExpression>
 #include <QString>
 #include <QStandardPaths>
 #include <QFile>
@@ -45,6 +46,14 @@ namespace
         return trimmed;
       }
     if (trimmed.startsWith (QStringLiteral ("\\\\.\\")))
+      {
+        return trimmed;
+      }
+    // "host:porta" non e' un dispositivo: e' la presa locale del multiplexer
+    // CAT di DecoPort (o un ser2net), che Hamlib apre in rete da se'. Un nome
+    // COM non ha mai i due punti, quindi per le porte vere non cambia niente.
+    static QRegularExpression const network_path {QStringLiteral ("^[^:\\\\/]+:\\d+$")};
+    if (network_path.match (trimmed).hasMatch ())
       {
         return trimmed;
       }

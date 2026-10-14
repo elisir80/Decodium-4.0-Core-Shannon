@@ -601,6 +601,16 @@ set (wsjtx_CXXSRCS
   src/net/DecolinkLink.h
   src/net/DecodiumDecoPortGateway.cpp
   src/net/DecoPortRigDriver.cpp
+  src/net/DecoPortCatFraming.cpp
+  src/net/DecoPortCatFraming.h
+  src/net/DecoPortCatMux.cpp
+  src/net/DecoPortCatMux.h
+  src/net/DecoPortSerialLine.cpp
+  src/net/DecoPortSerialLine.h
+  src/net/DecoPortRadioLibrary.cpp
+  src/net/DecoPortRadioLibrary.h
+  src/net/DecoPortVirtualPorts.cpp
+  src/net/DecoPortVirtualPorts.h
   src/net/DecodiumDecoPortGateway.h
   src/bridge/DecodiumBridge.cpp
   src/bridge/AdifExportSanitizer.cpp
@@ -664,6 +674,8 @@ set (wsjtx_CXXSRCS
   src/radio/DecodiumTransceiverManager.cpp
   src/radio/DecodiumTransceiverManager.h
   src/radio/DecodiumCatShare.cpp
+  src/radio/DecodiumNativeCatShare.cpp
+  src/radio/DecodiumNativeCatShare.h
   src/radio/DecodiumCatShare.h
   src/radio/DecodiumAmplifier.cpp
   src/radio/StationTelemetryCodec.cpp
@@ -2074,6 +2086,16 @@ add_executable (decodium_qml
   src/net/DecolinkLink.h
   src/net/DecodiumDecoPortGateway.cpp
   src/net/DecoPortRigDriver.cpp
+  src/net/DecoPortCatFraming.cpp
+  src/net/DecoPortCatFraming.h
+  src/net/DecoPortCatMux.cpp
+  src/net/DecoPortCatMux.h
+  src/net/DecoPortSerialLine.cpp
+  src/net/DecoPortSerialLine.h
+  src/net/DecoPortRadioLibrary.cpp
+  src/net/DecoPortRadioLibrary.h
+  src/net/DecoPortVirtualPorts.cpp
+  src/net/DecoPortVirtualPorts.h
   src/net/DecodiumDecoPortGateway.h
   src/bridge/DecodiumBridge.cpp
   src/bridge/AdifExportSanitizer.cpp
@@ -2137,6 +2159,8 @@ add_executable (decodium_qml
   src/radio/DecodiumTransceiverManager.cpp
   src/radio/DecodiumTransceiverManager.h
   src/radio/DecodiumCatShare.cpp
+  src/radio/DecodiumNativeCatShare.cpp
+  src/radio/DecodiumNativeCatShare.h
   src/radio/DecodiumCatShare.h
   src/radio/DecodiumAmplifier.cpp
   src/radio/StationTelemetryCodec.cpp
@@ -2282,6 +2306,37 @@ if (TARGET Decodium::SstvIntegration)
   target_compile_definitions (decodium_qml PRIVATE DECODIUM_HAS_SSTV=1)
 else ()
   target_compile_definitions (decodium_qml PRIVATE DECODIUM_HAS_SSTV=0)
+endif ()
+
+# DecoPort: la libreria delle radio (data/decoport, ricavata da Hamlib piu' le
+# conoscenze di DecoPort) viaggia dentro il programma. Il rilevamento chiede le
+# porte al gestore dispositivi, e le porte COM virtuali usano com0com di
+# Vyacheslav Frolov (GPL 2 o successiva, https://com0com.sourceforge.net/),
+# distribuito invariato: vedi third_party/com0com/NOTICE.md.
+foreach (decoport_target decodium_qml wsjtx)
+  qt_add_resources (${decoport_target} "decoport_radio_library_${decoport_target}"
+    PREFIX "/decoport"
+    BASE data/decoport
+    FILES data/decoport/radios-hamlib.json data/decoport/radios-decoport.json)
+  if (WIN32)
+    target_link_libraries (${decoport_target} setupapi cfgmgr32 shell32)
+  endif ()
+endforeach ()
+if (WIN32)
+  set (DECOPORT_COM0COM_FILES
+    third_party/com0com/Setup_com0com_v3.0.0.0_W7_x64_signed.exe
+    third_party/com0com/Setup_com0com_v3.0.0.0_W7_x86_signed.exe
+    third_party/com0com/com0com-3.0.0.0.zip
+    third_party/com0com/license.txt
+    third_party/com0com/README-upstream.txt
+    third_party/com0com/NOTICE.md)
+  # Accanto all'eseguibile, dove DecoPortVirtualPorts cerca l'installatore.
+  foreach (f ${DECOPORT_COM0COM_FILES})
+    get_filename_component (name ${f} NAME)
+    configure_file (${f} ${CMAKE_BINARY_DIR}/com0com/${name} COPYONLY)
+  endforeach ()
+  install (FILES ${DECOPORT_COM0COM_FILES}
+    DESTINATION ${CMAKE_INSTALL_BINDIR}/com0com COMPONENT runtime)
 endif ()
 
 

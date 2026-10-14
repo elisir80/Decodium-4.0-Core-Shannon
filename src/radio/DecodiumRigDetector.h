@@ -17,6 +17,12 @@ namespace DecodiumRigDetector {
 
 // Restituisce l'elenco degli apparati candidati, dal piu' attendibile al meno.
 // Ogni elemento e' una mappa con queste chiavi:
+//   deviceKey    QString  identita' dell'apparato fisico, indipendente dal numero COM:
+//                         la stessa radio ritrovata dopo un distacco ha la stessa chiave.
+//                         Con numero di serie USB vale su qualunque presa dell'hub;
+//                         senza, Windows la ricava dalla presa, e cambia se cambia presa.
+//   isRadio      bool     vero se modello o firma dicono che e' una radio
+//   protocol     QString  dialetto CAT dichiarato dalla firma (newcat, civ, ...), vuoto se ignoto
 //   rigLabel     QString  nome leggibile da mostrare ("Yaesu FT-991 / FT-991A / FT-DX10")
 //   rigToken     QString  radice per cercare la voce giusta nella lista radio ("FT-991"),
 //                         vuota se il modello non e' deducibile

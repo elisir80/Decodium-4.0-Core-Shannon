@@ -2890,7 +2890,12 @@ int main(int argc, char* argv[])
     QDir tempDir{QStandardPaths::writableLocation(QStandardPaths::TempLocation)};
     QLockFile instanceLock{tempDir.absoluteFilePath(app.applicationName() + QStringLiteral("_qml.lock"))};
     instanceLock.setStaleLockTime(0);
-    if (!instanceLock.tryLock(500)) {
+    // Solo per le prove di build: DECODIUM_TEST_NO_INSTANCE_LOCK=1 salta il controllo,
+    // cosi' una copia di prova parte accanto a quella in uso. Da rimuovere prima
+    // di qualunque integrazione: non e' una funzione del programma.
+    bool const skipInstanceLock = qEnvironmentVariableIsSet("DECODIUM_TEST_NO_INSTANCE_LOCK");
+    L(skipInstanceLock ? "instance lock skipped (test hook)" : "instance lock active");
+    if (!skipInstanceLock && !instanceLock.tryLock(500)) {
         L("Another instance is already running - exiting");
         return -1;
     }
@@ -4894,6 +4899,55 @@ int main(int argc, char* argv[])
            + " QQuickWindow(s), RHI backend = "
            + rhiName.toLocal8Bit()).constData());
     }
+#ifdef Q_OS_WIN
+    // Piano "Lite", Fase 1: CPU del thread GUI e del processo, ogni 10 s, nel
+    // log diagnostico come [GUIMETRIC]. Opt-in con DECODIUM_GUI_METRICS=1:
+    // a riposo costa un controllo dell'ambiente all'avvio e nient'altro. Non
+    // si misura l'FPS da frameSwapped perche' con RHI on-demand non e'
+    // affidabile (vedi DevOverlay, 1.0.252); la CPU del thread GUI si'.
+    if (qEnvironmentVariableIntValue("DECODIUM_GUI_METRICS") > 0) {
+        struct GuiMetricState {
+            quint64 guiTicks = 0;
+            quint64 procTicks = 0;
+            qint64 wallMs = 0;
+            QElapsedTimer wall;
+        };
+        auto state = std::make_shared<GuiMetricState>();
+        auto const toTicks = [](FILETIME const& kernel, FILETIME const& user) {
+            return ((quint64(kernel.dwHighDateTime) << 32) | kernel.dwLowDateTime)
+                 + ((quint64(user.dwHighDateTime) << 32) | user.dwLowDateTime);
+        };
+        auto const sample = [toTicks](quint64& gui, quint64& proc) {
+            FILETIME creation {}, exitTime {}, kernel {}, user {};
+            gui = GetThreadTimes(GetCurrentThread(), &creation, &exitTime, &kernel, &user)
+                ? toTicks(kernel, user) : 0;
+            proc = GetProcessTimes(GetCurrentProcess(), &creation, &exitTime, &kernel, &user)
+                ? toTicks(kernel, user) : 0;
+        };
+        sample(state->guiTicks, state->procTicks);
+        state->wall.start();
+        auto* metricTimer = new QTimer(&app);
+        metricTimer->setInterval(10000);
+        QObject::connect(metricTimer, &QTimer::timeout, &app, [state, sample] {
+            quint64 gui = 0, proc = 0;
+            sample(gui, proc);
+            qint64 const wallMs = state->wall.restart();
+            if (wallMs <= 0) return;
+            // 1 tick = 100 ns; percentuali di UN core (il processo puo' superare 100).
+            double const wallTicks = double(wallMs) * 10000.0;
+            qInfo().noquote()
+                << "[GUIMETRIC] gui_thread_cpu_pct="
+                << QString::number(double(gui - state->guiTicks) * 100.0 / wallTicks, 'f', 1)
+                << "process_cpu_pct="
+                << QString::number(double(proc - state->procTicks) * 100.0 / wallTicks, 'f', 1)
+                << "window_ms=" << wallMs;
+            state->guiTicks = gui;
+            state->procTicks = proc;
+        });
+        metricTimer->start();
+        L("GUI metrics: [GUIMETRIC] ogni 10 s (DECODIUM_GUI_METRICS=1)");
+    }
+#endif
 #ifdef Q_OS_WIN
     QTimer::singleShot(8000, &app, [graphicsStartupPendingFlag,
                                     slowQmlStartupFlag,

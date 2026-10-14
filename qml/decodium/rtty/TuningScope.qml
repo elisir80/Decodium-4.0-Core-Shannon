@@ -101,7 +101,7 @@ GlassPanel {
     // the eye and costs a fraction of a frame.
     Timer {
         interval: 40
-        running: true
+        running: root.visible
         repeat: true
         onTriggered: scope.requestPaint()
     }

@@ -150,6 +150,9 @@ void DecodiumCatShare::onReadyRead()
             continue;
         QString const reply = handleLine(line);
         if (reply.isNull()) {          // comando di chiusura
+            // rigctld risponde RPRT 0 anche a "q", e il client di Hamlib lo
+            // aspetta: senza, registra un errore di chiusura che non c'e'.
+            s->write(kOk);
             s->disconnectFromHost();
             return;
         }
@@ -267,12 +270,15 @@ QString DecodiumCatShare::handleLine(const QString& line)
     if (cmd == QLatin1String("\\get_powerstat"))
         return QStringLiteral("1\n");
 
-    // Hamlib lo chiede all'apertura del collegamento. Non gestirlo lasciava
-    // una riga «comando non gestito» nel registro a ogni client che si
-    // collegava: la radio non ha un blocco del VFO, e dirlo e' piu' chiaro
-    // che tacere.
+    // Hamlib lo chiede all'apertura del collegamento e, dalla 4.7, prima di
+    // OGNI cambio di modo. La radio non ha un blocco del VFO: 0. Ma il client
+    // (netrigctl_get_lock_mode in rigs/dummy/netrigctl.c di Hamlib 4.7.0)
+    // dopo il valore legge una seconda riga, perche' rigctld fa seguire il
+    // valore da RPRT 0 (il comando non ha ARG_OUT, tests/rigctl_parse.c).
+    // Con la sola riga "0" il client aspettava fino al timeout a ogni set_mode
+    // di WSJT-X e degli altri: misurato col banco di prova, prima e dopo.
     if (cmd == QLatin1String("\\get_lock_mode"))
-        return QStringLiteral("0\n");
+        return QStringLiteral("0\nRPRT 0\n");
 
     bool const up = m_rig && m_rig->connected();
 

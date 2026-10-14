@@ -50,6 +50,7 @@ namespace decodium::audio { class RttyRxRecovery; }
 class ActiveStationsModel;
 class DecodiumAlertManager;
 class DecodiumDecoPortGateway;
+class DecodiumNativeCatShare;
 class DecoPortDiscovery;
 class DecoPortLink;
 class DecolinkLink;
@@ -368,6 +369,8 @@ class DecodiumBridge : public QObject
     // === CAT/TRANSCEIVER ===
     // CAT condivisa: il server rigctld esposto ai pannelli QML.
     Q_PROPERTY(QObject* catShare READ catShareObject CONSTANT)
+    // La stessa radio nel suo protocollo, da una COM virtuale (DecoPort).
+    Q_PROPERTY(QObject* nativeCatShare READ nativeCatShareObject CONSTANT)
     // DecoPort: la radio pubblicata in rete (gateway), l'ascolto degli annunci
     // (scoperta) e il collegamento a una radio altrui. Vedi
     // doc/DECOPORT_PROTOCOL.md. Creati alla prima richiesta: chi non li apre
@@ -1092,6 +1095,7 @@ public:
 
     // CAT
     QObject* catShareObject() const;
+    QObject* nativeCatShareObject() const;
     QObject* decoPortGatewayObject() const;
     QObject* decoPortDiscoveryObject() const;
     QObject* decoPortLinkObject() const;
@@ -1151,6 +1155,12 @@ public:
                                         int baud, bool passive, int pollMs);
     Q_INVOKABLE void configureCatShare(bool enabled, int port,
                                        bool allowControl, bool allowPtt);
+    // Condivisione nel protocollo della radio: COM virtuale e, se rawPort non
+    // e' 0, CAT grezzo su TCP. Cambiarla riapre il CAT, se e' aperto.
+    Q_INVOKABLE void configureNativeCatShare(bool enabled, bool allowPtt, int rawPort);
+    // Installa com0com (se manca) e crea la coppia di porte: Windows chiede
+    // l'amministratore, per questo parte solo dal pulsante.
+    Q_INVOKABLE void createNativeCatShareVirtualPort();
     // Spot condivisi in rete locale. Nessun permesso da concedere come per la
     // CAT: qui non c'e' niente da comandare, si legge e basta.
     Q_INVOKABLE void configureSpotShare(bool enabled, int port);
@@ -3422,6 +3432,7 @@ private:
     DecodiumOmniRigManager*       m_omniRigCat    {nullptr};
     DecodiumTransceiverManager*   m_hamlibCat     {nullptr};
     DecodiumCatShare*             m_catShare      {nullptr};
+    DecodiumNativeCatShare*       m_nativeCatShare {nullptr};
     QByteArray decoPortAuthKey() const;
     void onDecoPortRxAudio(const QVector<short>& samples, quint64 captureTsNs);
     void onDecoPortRemoteState();

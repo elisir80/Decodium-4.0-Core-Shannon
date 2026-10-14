@@ -1,16 +1,25 @@
 #include "DecodiumRigDetector.h"
 
+#include "DecoPortRadioLibrary.h"
+
 #include <QAudioDevice>
 #include <QMediaDevices>
 #include <QMap>
 #include <QRegularExpression>
 #include <QSerialPortInfo>
-#include <QSettings>
 #include <QString>
 #include <QStringList>
 #include <QVariantMap>
 
 #include <algorithm>
+
+#if defined(Q_OS_WIN)
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#include <setupapi.h>
+#endif
 
 namespace {
 
@@ -23,84 +32,29 @@ struct PortEntry
     QString manufacturer;
     QString serialNumber;  // uguale per tutte le porte dello stesso apparato
     QString friendlyName;  // solo Windows: e' QUI che compare "Enhanced"/"Standard"
+    // Solo Windows: l'apparato fisico a cui appartiene la porta, ricavato
+    // dall'istanza PnP ("USB\VID_10C4&PID_EA70\8&B523DD2&0"). Esiste anche
+    // quando il chip non ha numero di serie, ed e' cio' che tiene separate due
+    // radio identiche attaccate allo stesso hub.
+    QString physicalId;
+    // La funzione USB della porta ("VID_10C4&PID_EA70&MI_01"): distingue le
+    // porte di un adattatore multiplo senza dipendere dal numero COM.
+    QString interfaceTag;
+    // Porta creata da un driver di porte virtuali (com0com, VSPE...). Non e'
+    // una radio, e se la proponessimo come tale DecoPort finirebbe per
+    // condividere le proprie stesse porte.
+    bool    isVirtual {false};
     quint16 vid {0};
     quint16 pid {0};
     bool    hasIds {false};
 };
 
 // ── Firme note ───────────────────────────────────────────────────────────────
-// Volutamente poche e solide. Una firma sbagliata e' peggio di nessuna firma:
-// farebbe scegliere all'utente una radio che non ha. Quando non si puo' dire il
-// modello si dichiara solo cio' che si sa (l'interfaccia) con fiducia bassa.
-struct RigSignature
-{
-    quint16     vid;
-    quint16     pid;          // 0 = qualunque prodotto di quel costruttore
-    const char* rigLabel;
-    const char* rigToken;     // vuoto se il modello non e' deducibile dalla sola USB
-    const char* catPortHint;  // testo che nel nome di sistema marca la porta CAT
-    int         baudRate;
-    int         confidence;
-    const char* evidence;
-};
-
-const RigSignature kSignatures[] = {
-    // Yaesu FT-991/FT-991A/FT-DX10 espongono un CP2105 a DUE porte: la
-    // "Enhanced" e' il CAT, la "Standard" e' l'altra. E' proprio la scelta su
-    // cui sbaglia chi configura a mano.
-    { 0x10C4, 0xEA70,
-      "Yaesu FT-991 / FT-991A / FT-DX10", "FT-991", "enhanced", 38400, 75,
-      "CP2105 a doppia porta (VID 10C4, PID EA70): tipico di questi Yaesu" },
-
-    // Icom con interfaccia USB propria.
-    { 0x0C26, 0x0000,
-      "Icom (interfaccia USB propria)", "", "", 19200, 60,
-      "costruttore USB dichiarato Icom (VID 0C26)" },
-};
-
-// Modelli riconoscibili dal testo, quando il sistema lo espone davvero.
-// Il confronto avviene sul nome di sistema, non sul chip.
-struct ModelToken
-{
-    const char* token;
-    const char* rigLabel;
-    int         baudRate;
-    int         civAddress;
-};
-
-const ModelToken kModelTokens[] = {
-    { "IC-7300",  "Icom IC-7300",     19200, 0x94 },
-    { "IC-7610",  "Icom IC-7610",     19200, 0x98 },
-    { "IC-9700",  "Icom IC-9700",     19200, 0xA2 },
-    { "IC-705",   "Icom IC-705",      19200, 0xA4 },
-    { "IC-7600",  "Icom IC-7600",     19200, 0x7A },
-    { "FT-991",   "Yaesu FT-991",     38400, 0 },
-    { "FTDX10",   "Yaesu FT-DX10",    38400, 0 },
-    { "FT-DX10",  "Yaesu FT-DX10",    38400, 0 },
-    { "FTDX101",  "Yaesu FT-DX101D",  38400, 0 },
-    { "FT-DX101", "Yaesu FT-DX101D",  38400, 0 },
-    { "TS-590",   "Kenwood TS-590S",  57600, 0 },
-    { "TS-890",   "Kenwood TS-890S", 115200, 0 },
-    { "TS-2000",  "Kenwood TS-2000",  57600, 0 },
-};
-
-// Interfacce audio/CAT di terze parti diffuse: non dicono quale radio ci sia
-// dietro, ma riconoscerle evita di spacciarle per una radio.
-struct InterfaceToken
-{
-    const char* token;
-    const char* label;
-};
-
-const InterfaceToken kInterfaceTokens[] = {
-    { "digirig",    "Digirig" },
-    { "rigblaster", "RIGblaster" },
-    { "signalink",  "SignaLink" },
-    { "ch340",      "adattatore USB-seriale CH340" },
-    { "cp210",      "adattatore USB-seriale Silicon Labs" },
-    { "ft232",      "adattatore USB-seriale FTDI" },
-    { "prolific",   "adattatore USB-seriale Prolific" },
-};
+// Stanno nella libreria radio (data/radios-decoport.json), non qui: firme USB,
+// modelli riconoscibili dal nome, interfacce di terze parti. Volutamente poche
+// e solide. Una firma sbagliata e' peggio di nessuna firma: farebbe scegliere
+// all'utente una radio che non ha. Quando non si puo' dire il modello si
+// dichiara solo cio' che si sa (l'interfaccia) con fiducia bassa.
 
 // Schede audio integrate nelle radio o nelle interfacce.
 const char* const kAudioTokens[] = {
@@ -138,37 +92,111 @@ bool isVirtualAudio(const QString& description)
     return false;
 }
 
-// ── Windows: il nome che distingue le porte gemelle ──────────────────────────
+// ── Windows: cosa sa il sistema di ogni porta presente ───────────────────────
 // Qt riporta la stessa descrizione per entrambe le porte di un CP2105 ("CP2105
 // Dual USB to UART Bridge Controller"), quindi da sola non basta. Il nome che
-// contiene "Enhanced"/"Standard" sta nel registro, ed e' quello che serve.
-QMap<QString, QString> windowsFriendlyNamesByPort()
+// contiene "Enhanced"/"Standard" e l'istanza PnP li sa il gestore dispositivi.
+//
+// Si chiedono a SetupAPI e non al ramo Enum del registro: il registro ricorda
+// anche gli apparati che non ci sono piu', e su un hub ogni presa usata lascia
+// la sua voce fantasma con lo stesso nome COM di quella vera. DIGCF_PRESENT
+// risponde solo per cio' che e' attaccato adesso, su qualunque bus: USB,
+// FTDIBUS, PCI per le schede multiporta.
+struct SystemPort
 {
-    QMap<QString, QString> byPort;
+    QString friendlyName;
+    QString instanceId;   // USB\VID_10C4&PID_EA70&MI_00\8&B523DD2&0&0000
+};
+
 #if defined(Q_OS_WIN)
-    QSettings usbTree(QStringLiteral("HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Enum\\USB"),
-                      QSettings::NativeFormat);
-    const QStringList devices = usbTree.childGroups();
-    for (const QString& device : devices) {
-        usbTree.beginGroup(device);
-        const QStringList instances = usbTree.childGroups();
-        for (const QString& instance : instances) {
-            usbTree.beginGroup(instance);
-            const QString port = usbTree.value(QStringLiteral("Device Parameters/PortName")).toString().trimmed();
-            const QString friendly = usbTree.value(QStringLiteral("FriendlyName")).toString().trimmed();
-            if (!port.isEmpty() && !friendly.isEmpty())
-                byPort.insert(port.toUpper(), friendly);
-            usbTree.endGroup();
-        }
-        usbTree.endGroup();
+QString deviceText(HDEVINFO set, SP_DEVINFO_DATA& info, DWORD property)
+{
+    wchar_t buf[512] = {};
+    DWORD type = 0;
+    if (!SetupDiGetDeviceRegistryPropertyW(set, &info, property, &type,
+                                           reinterpret_cast<PBYTE>(buf),
+                                           sizeof(buf) - sizeof(wchar_t), nullptr)
+        || type != REG_SZ)
+        return {};
+    return QString::fromWCharArray(buf).trimmed();
+}
+#endif
+
+QMap<QString, SystemPort> windowsPresentPorts()
+{
+    QMap<QString, SystemPort> byPort;
+#if defined(Q_OS_WIN)
+    // Tutte le classi, non solo "Ports": una porta seriale e' qualunque
+    // dispositivo con un PortName. L'estremo nascosto di com0com sta nella sua
+    // classe CNCPorts, e alcune radio USB si registrano come modem; guardando
+    // solo "Ports" il primo passerebbe per una radio e le seconde non si
+    // vedrebbero.
+    HDEVINFO set = SetupDiGetClassDevsW(nullptr, nullptr, nullptr, DIGCF_ALLCLASSES | DIGCF_PRESENT);
+    if (set == INVALID_HANDLE_VALUE)
+        return byPort;
+
+    SP_DEVINFO_DATA info;
+    info.cbSize = sizeof(info);
+    for (DWORD i = 0; SetupDiEnumDeviceInfo(set, i, &info); ++i) {
+        HKEY key = SetupDiOpenDevRegKey(set, &info, DICS_FLAG_GLOBAL, 0, DIREG_DEV, KEY_READ);
+        if (key == INVALID_HANDLE_VALUE)
+            continue;
+        wchar_t name[64] = {};
+        DWORD size = sizeof(name) - sizeof(wchar_t);
+        DWORD type = 0;
+        const LONG rc = RegQueryValueExW(key, L"PortName", nullptr, &type,
+                                         reinterpret_cast<LPBYTE>(name), &size);
+        RegCloseKey(key);
+        if (rc != ERROR_SUCCESS || type != REG_SZ)
+            continue;
+        const QString port = QString::fromWCharArray(name).trimmed().toUpper();
+        // Anche le parallele hanno un PortName.
+        if (port.isEmpty() || port.startsWith(QLatin1String("LPT")))
+            continue;
+
+        SystemPort sp;
+        sp.friendlyName = deviceText(set, info, SPDRP_FRIENDLYNAME);
+        wchar_t instance[512] = {};
+        if (SetupDiGetDeviceInstanceIdW(set, &info, instance, 511, nullptr))
+            sp.instanceId = QString::fromWCharArray(instance);
+        byPort.insert(port, sp);
     }
+    SetupDiDestroyDeviceInfoList(set);
 #endif
     return byPort;
 }
 
+// L'apparato fisico di un'istanza PnP. Le funzioni di un chip composito
+// ("...&MI_00\8&B523DD2&0&0000", "...&MI_01\8&B523DD2&0&0001") hanno lo stesso
+// padre: si toglie l'interfaccia dall'identita' hardware e il numero di
+// funzione dall'istanza. Un dispositivo a funzione singola e' gia' se stesso.
+QString physicalIdOf(const QString& instanceId)
+{
+    QStringList parts = instanceId.split(QLatin1Char('\\'));
+    if (parts.size() != 3)
+        return instanceId;
+    static const QRegularExpression kInterface(QStringLiteral("&MI_[0-9A-F]{2}$"),
+                                               QRegularExpression::CaseInsensitiveOption);
+    if (!kInterface.match(parts[1]).hasMatch())
+        return instanceId;
+    parts[1].remove(kInterface);
+    const int amp = parts[2].lastIndexOf(QLatin1Char('&'));
+    if (amp > 0)
+        parts[2].truncate(amp);
+    return parts.join(QLatin1Char('\\'));
+}
+
+// Le porte dei driver virtuali stanno su enumeratori propri, non su un bus.
+bool isVirtualEnumerator(const QString& instanceId)
+{
+    const QString bus = instanceId.section(QLatin1Char('\\'), 0, 0).toUpper();
+    return bus == QLatin1String("ROOT") || bus == QLatin1String("COM0COM")
+        || bus.contains(QLatin1String("VSP")) || bus.contains(QLatin1String("VIRTUAL"));
+}
+
 QList<PortEntry> collectPorts()
 {
-    const QMap<QString, QString> friendlyNames = windowsFriendlyNamesByPort();
+    const QMap<QString, SystemPort> system = windowsPresentPorts();
 
     QList<PortEntry> entries;
     for (const QSerialPortInfo& info : QSerialPortInfo::availablePorts()) {
@@ -183,22 +211,43 @@ QList<PortEntry> collectPorts()
             entry.vid = info.vendorIdentifier();
             entry.pid = info.productIdentifier();
         }
-        entry.friendlyName = friendlyNames.value(entry.name.toUpper());
+        const SystemPort sp = system.value(entry.name.toUpper());
+        entry.friendlyName = sp.friendlyName;
+        if (!sp.instanceId.isEmpty()) {
+            entry.physicalId   = physicalIdOf(sp.instanceId);
+            entry.interfaceTag = sp.instanceId.section(QLatin1Char('\\'), 1, 1);
+            entry.isVirtual    = isVirtualEnumerator(sp.instanceId);
+        }
         entries.append(entry);
     }
     return entries;
 }
 
-// Tutto il testo con cui il sistema descrive la porta, per le ricerche.
+// Tutto il testo con cui il sistema descrive la porta, per le ricerche. C'e'
+// anche il numero di serie: gli Icom ci scrivono il modello ("IC-7300
+// 03001234"), ed e' spesso l'unico posto in cui la radio dice il proprio nome.
 QString searchableText(const PortEntry& entry)
 {
-    return QStringList{entry.friendlyName, entry.description, entry.manufacturer}
+    return QStringList{entry.friendlyName, entry.description, entry.manufacturer,
+                       entry.serialNumber}
         .join(QLatin1Char(' '));
 }
 
 // Le porte dello stesso apparato condividono numero di serie e identita' USB.
+// Un numero di serie vuoto non identifica niente: i CH340, molti PL2303 e i
+// CP2105 delle radio Yaesu non ne hanno, e raggruppare per VID:PID fonderebbe
+// in un solo apparato tutte le radio uguali attaccate allo stesso hub. Li'
+// decide l'istanza PnP, che Windows ricava dalla presa a cui sono attaccati.
 QString deviceKey(const PortEntry& entry)
 {
+    if (entry.hasIds && !entry.serialNumber.isEmpty()) {
+        return QStringLiteral("%1:%2:%3")
+            .arg(entry.vid, 4, 16, QLatin1Char('0'))
+            .arg(entry.pid, 4, 16, QLatin1Char('0'))
+            .arg(entry.serialNumber);
+    }
+    if (!entry.physicalId.isEmpty())
+        return QStringLiteral("pnp:") + entry.physicalId;
     if (entry.hasIds) {
         return QStringLiteral("%1:%2:%3")
             .arg(entry.vid, 4, 16, QLatin1Char('0'))
@@ -273,6 +322,8 @@ QVariantList detect()
     QStringList order;
     QMap<QString, QList<PortEntry>> groups;
     for (const PortEntry& entry : ports) {
+        if (entry.isVirtual)
+            continue;
         const QString key = deviceKey(entry);
         if (!groups.contains(key))
             order.append(key);
@@ -280,6 +331,7 @@ QVariantList detect()
     }
 
     const AudioPair audio = findRigAudio();
+    const DecoPortRadioLibrary& library = DecoPortRadioLibrary::instance();
 
     QVariantList candidates;
     for (const QString& key : order) {
@@ -296,33 +348,41 @@ QVariantList detect()
         int baudRate   = 0;
         int civAddress = 0;
         int confidence = 0;
+        // Vero quando sappiamo che le porte del gruppo sono UNA radio: modello o
+        // firma. Solo allora le porte restano insieme.
+        bool isRadio = false;
+        // Il dialetto CAT, quando la firma lo dice: serve a condividere la
+        // porta nativa prima ancora di aver risolto il modello.
+        QString protocol;
 
         // 1) Il modello scritto per esteso e' la prova piu' forte.
-        for (const ModelToken& model : kModelTokens) {
-            if (containsToken(text, model.token)) {
-                rigLabel   = QString::fromLatin1(model.rigLabel);
-                rigToken   = QString::fromLatin1(model.token);
-                baudRate   = model.baudRate;
-                civAddress = model.civAddress;
+        for (const auto& model : library.nameTokens()) {
+            if (text.contains(model.token, Qt::CaseInsensitive)) {
+                rigLabel   = model.label;
+                rigToken   = model.token;
+                baudRate   = model.baud;
+                civAddress = model.civ;
                 confidence = 90;
-                evidence   = QStringLiteral("il sistema nomina esplicitamente %1")
-                                 .arg(QString::fromLatin1(model.token));
+                evidence   = QStringLiteral("il sistema nomina esplicitamente %1").arg(model.token);
+                isRadio    = true;
                 break;
             }
         }
 
         // 2) Altrimenti la firma USB, che identifica la famiglia.
         if (rigLabel.isEmpty() && group.first().hasIds) {
-            for (const RigSignature& signature : kSignatures) {
+            for (const auto& signature : library.usbSignatures()) {
                 const bool vidHit = signature.vid == group.first().vid;
                 const bool pidHit = signature.pid == 0 || signature.pid == group.first().pid;
                 if (vidHit && pidHit) {
-                    rigLabel   = QString::fromLatin1(signature.rigLabel);
-                    rigToken   = QString::fromLatin1(signature.rigToken);
-                    catHint    = QString::fromLatin1(signature.catPortHint);
-                    baudRate   = signature.baudRate;
+                    rigLabel   = signature.label;
+                    rigToken   = signature.token;
+                    catHint    = signature.catHint;
+                    baudRate   = signature.baud;
                     confidence = signature.confidence;
-                    evidence   = QString::fromLatin1(signature.evidence);
+                    evidence   = signature.evidence;
+                    protocol   = signature.protocol;
+                    isRadio    = true;
                     break;
                 }
             }
@@ -331,9 +391,9 @@ QVariantList detect()
         // 3) Altrimenti almeno il tipo di interfaccia, dichiarandolo per quello
         //    che e': non sappiamo quale radio ci sia dietro.
         if (rigLabel.isEmpty()) {
-            for (const InterfaceToken& iface : kInterfaceTokens) {
-                if (containsToken(text, iface.token)) {
-                    rigLabel   = QString::fromLatin1(iface.label);
+            for (const auto& iface : library.interfaceTokens()) {
+                if (text.contains(iface.token, Qt::CaseInsensitive)) {
+                    rigLabel   = iface.label;
                     confidence = 35;
                     evidence   = QStringLiteral(
                         "riconosciuta l'interfaccia, non la radio: il modello va scelto a mano");
@@ -350,10 +410,6 @@ QVariantList detect()
 
         sortGroupByCatHint(group, catHint);
 
-        QStringList otherPorts;
-        for (int i = 1; i < group.size(); ++i)
-            otherPorts.append(group.at(i).name);
-
         // Quando la firma indica quale porta e' il CAT e la troviamo davvero,
         // il riconoscimento vale di piu': e' la scelta che l'utente sbaglia.
         if (!catHint.isEmpty()
@@ -363,21 +419,47 @@ QVariantList detect()
                             .arg(group.first().name);
         }
 
-        QVariantMap candidate;
-        candidate.insert(QStringLiteral("rigLabel"),    rigLabel);
-        candidate.insert(QStringLiteral("rigToken"),    rigToken);
-        candidate.insert(QStringLiteral("catPort"),     group.first().name);
-        candidate.insert(QStringLiteral("otherPorts"),  otherPorts);
-        candidate.insert(QStringLiteral("baudRate"),    baudRate);
-        candidate.insert(QStringLiteral("civAddress"),  civAddress);
-        candidate.insert(QStringLiteral("audioInput"),  audio.input);
-        candidate.insert(QStringLiteral("audioOutput"), audio.output);
-        candidate.insert(QStringLiteral("confidence"),  confidence);
-        candidate.insert(QStringLiteral("evidence"),    evidence);
-        candidate.insert(QStringLiteral("systemName"),
-                         group.first().friendlyName.isEmpty() ? group.first().description
-                                                              : group.first().friendlyName);
-        candidates.append(candidate);
+        auto emitCandidate = [&](const QList<PortEntry>& ports, const QString& id,
+                                 const QString& why) {
+            QStringList otherPorts;
+            for (int i = 1; i < ports.size(); ++i)
+                otherPorts.append(ports.at(i).name);
+
+            QVariantMap candidate;
+            // Chi deve ritrovare lo stesso apparato dopo averlo staccato usa
+            // questo, non il numero COM: Windows lo cambia a ogni presa.
+            candidate.insert(QStringLiteral("deviceKey"),   id);
+            candidate.insert(QStringLiteral("isRadio"),     isRadio);
+            candidate.insert(QStringLiteral("protocol"),    protocol);
+            candidate.insert(QStringLiteral("rigLabel"),    rigLabel);
+            candidate.insert(QStringLiteral("rigToken"),    rigToken);
+            candidate.insert(QStringLiteral("catPort"),     ports.first().name);
+            candidate.insert(QStringLiteral("otherPorts"),  otherPorts);
+            candidate.insert(QStringLiteral("baudRate"),    baudRate);
+            candidate.insert(QStringLiteral("civAddress"),  civAddress);
+            candidate.insert(QStringLiteral("audioInput"),  audio.input);
+            candidate.insert(QStringLiteral("audioOutput"), audio.output);
+            candidate.insert(QStringLiteral("confidence"),  confidence);
+            candidate.insert(QStringLiteral("evidence"),    evidence + why);
+            candidate.insert(QStringLiteral("systemName"),
+                             ports.first().friendlyName.isEmpty() ? ports.first().description
+                                                                  : ports.first().friendlyName);
+            candidates.append(candidate);
+        };
+
+        // Piu' porte che non sappiamo essere una radio sono un hub o un
+        // adattatore multiplo (CP2108, FT4232, schede PCI): ogni presa puo'
+        // avere dietro una radio diversa, quindi ognuna e' un apparato a se'.
+        if (isRadio || group.size() == 1) {
+            emitCandidate(group, key, QString());
+        } else {
+            for (const PortEntry& port : group) {
+                const QString tag = port.interfaceTag.isEmpty() ? port.name : port.interfaceTag;
+                emitCandidate({port}, key + QLatin1Char('|') + tag,
+                              QStringLiteral("; presa di un adattatore a %1 porte, trattata da sola")
+                                  .arg(group.size()));
+            }
+        }
     }
 
     std::stable_sort(candidates.begin(), candidates.end(),
