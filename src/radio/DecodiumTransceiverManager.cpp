@@ -2283,11 +2283,10 @@ void DecodiumTransceiverManager::disconnectRigInternal(bool reconnectAfterDiscon
                 << "[CATDBG] Rig disconnect: graceful stop timed out, terminating thread";
             watchedThread->requestInterruption();
             watchedThread->quit();
-            QTimer::singleShot(500, this, [watchedThread]() {
-                if (watchedThread && watchedThread->isRunning()) {
-                    watchedThread->terminate();
-                }
-            });
+            // Non si termina il thread: terminato a meta' lavoro, rig_close() non
+            // gira mai e la COM resta aperta, cosi' il Power on successivo la trova
+            // occupata. Il thread finisce da solo quando scade il timeout della
+            // seriale; la riconnessione aspetta comunque il segnale finished().
         });
     }
 
