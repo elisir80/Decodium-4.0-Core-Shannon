@@ -25,7 +25,7 @@ ApplicationWindow {
     readonly property bool directCatPowerOnAvailable: !!(bridge.hamlibCat
         && (bridge.hamlibCat.portType === "serial" || bridge.hamlibCat.portType === "usb")
         && String(bridge.hamlibCat.serialPort || "").trim().length > 0
-        && ["default", "auto", "predefinito"].indexOf(String(bridge.hamlibCat.serialPort || "").trim().toLower()) < 0
+        && ["default", "auto", "predefinito"].indexOf(String(bridge.hamlibCat.serialPort || "").trim().toLowerCase()) < 0
         && !bridge.hamlibCat.connecting && !bridge.decoPortUseRemote)
     property string radioActionStatus: ""
     property bool syncingRadioMode: false
