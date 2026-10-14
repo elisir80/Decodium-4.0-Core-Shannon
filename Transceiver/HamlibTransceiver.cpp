@@ -1246,7 +1246,10 @@ void HamlibTransceiver::do_stop ()
   // TX when the app is closed mid-transmission. rig_close() does NOT turn TX
   // off on Icom CI-V. Drop PTT here best-effort: no throw, a few retries,
   // independent of bus state.
-  if (m_->rig_ && !m_->is_dummy_
+  // Radio spenta via CAT: non risponde piu' e ogni tentativo di PTT scade dopo
+  // un timeout. Con tentativi in coda la chiusura supera la finestra di stop, il
+  // thread viene terminato prima di rig_close() e la COM resta aperta.
+  if (m_->rig_ && !m_->is_dummy_ && !rig_powered_off_
       && RIG_PTT_NONE != m_->rig_->state.pttport.type.ptt
       && (ptt_on_ || state ().ptt ()))
     {
