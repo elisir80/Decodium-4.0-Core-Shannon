@@ -785,7 +785,13 @@ int HamlibTransceiver::do_start ()
       rig_set_conf (m_->rig_.data (), token, "WSJTX");
     }
 
-  m_->error_check (rig_open (m_->rig_.data ()), tr ("opening connection to rig"));
+  // Hamlib puo' lasciare la COM aperta quando rig_open() fallisce dopo il primo
+  // contatto con la radio. Senza rig_close() il tentativo successivo trova la
+  // porta occupata ("already open", Access denied).
+  int const open_rc = rig_open (m_->rig_.data ());
+  if (RIG_OK != open_rc)
+    rig_close (m_->rig_.data ());
+  m_->error_check (open_rc, tr ("opening connection to rig"));
 
   // Hamlib 4.7.0 bug: kenwood_open (e altri) restituiscono 0 ("continuing anyway")
   // anche se il rig non risponde, lasciando caps/state in stato invalido.
