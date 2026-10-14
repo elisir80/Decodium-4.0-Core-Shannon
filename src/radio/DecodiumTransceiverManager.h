@@ -389,6 +389,11 @@ private:
     // open. A later Power On cannot wake a CI-V radio over that live session:
     // it must reopen the port so Hamlib sends the model's wake-up sequence.
     bool    m_radioPoweredOffByUser {false};
+    // Identita' fisica della radio sulla porta CAT (deviceKey del rilevatore):
+    // resta la stessa quando Windows cambia numero COM dopo uno spegnimento.
+    QString m_serialDeviceKey;
+    bool followRadioToNewPort();
+    void rememberSerialDevice();
     quint64 m_transientCatReconnectSerial {0};
     QElapsedTimer m_connectAttemptTimer;
 };

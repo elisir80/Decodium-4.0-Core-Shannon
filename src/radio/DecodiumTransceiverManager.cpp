@@ -5,6 +5,7 @@
 
 #include "DecodiumLogging.hpp"
 #include "DecodiumProfileSettings.h"
+#include "DecodiumRigDetector.h"
 #include "Transceiver/TransceiverFactory.hpp"
 #include "Transceiver/Transceiver.hpp"
 #include "Transceiver/TransceiverBase.hpp"
@@ -1102,6 +1103,7 @@ void DecodiumTransceiverManager::setSerialPort(const QString& v)
 {
     if (m_serialPort != v) {
         m_serialPort = v;
+        m_serialDeviceKey.clear();
         emit serialPortChanged();
     }
     enforceForceLineAvailability();
@@ -1752,6 +1754,11 @@ void DecodiumTransceiverManager::connectRig()
     bool const serialTransport =
         lowerPortType == QStringLiteral("serial")
         || lowerPortType == QStringLiteral("usb");
+    if (serialTransport && !isHamRadioDeluxeRig(m_rigName)) {
+        if (!serialPortCurrentlyAvailable(m_serialPort))
+            followRadioToNewPort();
+        rememberSerialDevice();
+    }
     if (serialTransport
         && !isHamRadioDeluxeRig(m_rigName)
         && !serialPortCurrentlyAvailable(m_serialPort)) {
@@ -2821,6 +2828,46 @@ void DecodiumTransceiverManager::setAtuState(bool valid, bool enabled)
     emit atuStateChanged();
 }
 
+// La porta CAT si segue per identita' fisica, non per numero COM. Dopo uno
+// spegnimento la radio torna spesso su un'altra COM: si cerca l'unica porta
+// disponibile con la stessa chiave del rilevatore. Con zero o piu' corrispondenze
+// non si indovina niente.
+bool DecodiumTransceiverManager::followRadioToNewPort()
+{
+    if (m_serialDeviceKey.isEmpty() || serialPortCurrentlyAvailable(m_serialPort))
+        return false;
+    QStringList matches;
+    for (QVariant const& item : DecodiumRigDetector::detect()) {
+        QVariantMap const candidate = item.toMap();
+        if (candidate.value(QStringLiteral("deviceKey")).toString() != m_serialDeviceKey)
+            continue;
+        QString const port = candidate.value(QStringLiteral("catPort")).toString().trimmed();
+        if (!port.isEmpty() && serialPortCurrentlyAvailable(port))
+            matches << port;
+    }
+    if (matches.size() != 1)
+        return false;
+    qInfo().noquote() << "[CATDBG] CAT port followed the radio:" << m_serialPort
+                      << "->" << matches.first();
+    m_serialPort = matches.first();
+    emit serialPortChanged();
+    return true;
+}
+
+void DecodiumTransceiverManager::rememberSerialDevice()
+{
+    if (!m_serialDeviceKey.isEmpty() || !serialPortCurrentlyAvailable(m_serialPort))
+        return;
+    for (QVariant const& item : DecodiumRigDetector::detect()) {
+        QVariantMap const candidate = item.toMap();
+        if (candidate.value(QStringLiteral("catPort")).toString()
+                .compare(m_serialPort.trimmed(), Qt::CaseInsensitive) == 0) {
+            m_serialDeviceKey = candidate.value(QStringLiteral("deviceKey")).toString();
+            return;
+        }
+    }
+}
+
 void DecodiumTransceiverManager::requestRadioPowerOn()
 {
     const QString action = QStringLiteral("Power on");
@@ -2858,6 +2905,7 @@ void DecodiumTransceiverManager::requestRadioPowerOn()
                 "Select the radio's CAT port before using Power On."));
             return;
         }
+        followRadioToNewPort();
         if (!serialPortCurrentlyAvailable(m_serialPort)) {
             refreshPorts();
             ++m_transientCatReconnectSerial;
