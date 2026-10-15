@@ -187,9 +187,12 @@ jobs:
           HAMLIB_PREFIX="$(cygpath -u "$GITHUB_WORKSPACE")/.ci/hamlib-mingw64"
           HAMLIB_INCLUDE_DIR="${HAMLIB_PREFIX}/include"
           HAMLIB_LIBRARY="$(find "${HAMLIB_PREFIX}/lib" -maxdepth 1 \( -name 'libhamlib*.dll.a' -o -name 'libhamlib*.a' -o -name 'libhamlib*.dll' \) | sort | head -n1)"
-          RIGCTL_EXE="${HAMLIB_PREFIX}/bin/rigctl"
-          RIGCTLD_EXE="${HAMLIB_PREFIX}/bin/rigctld"
-          RIGCTLCOM_EXE="${HAMLIB_PREFIX}/bin/rigctlcom"
+          # MSYS2 installs native Windows Hamlib tools with the .exe suffix.
+          # Keep the existing cache usable instead of rebuilding it when the
+          # executables are present but are addressed with their POSIX names.
+          RIGCTL_EXE="${HAMLIB_PREFIX}/bin/rigctl.exe"
+          RIGCTLD_EXE="${HAMLIB_PREFIX}/bin/rigctld.exe"
+          RIGCTLCOM_EXE="${HAMLIB_PREFIX}/bin/rigctlcom.exe"
 
           test -f "${HAMLIB_INCLUDE_DIR}/hamlib/rig.h"
           test -n "${HAMLIB_LIBRARY}"
@@ -203,7 +206,7 @@ jobs:
           echo "RIGCTLD_EXE=${RIGCTLD_EXE}" >> "${GITHUB_ENV}"
           echo "RIGCTLCOM_EXE=${RIGCTLCOM_EXE}" >> "${GITHUB_ENV}"
           echo "PKG_CONFIG_PATH=${HAMLIB_PREFIX}/lib/pkgconfig:/mingw64/lib/pkgconfig:/mingw64/share/pkgconfig" >> "${GITHUB_ENV}"
-          "${HAMLIB_PREFIX}/bin/rigctl" --version
+          "${RIGCTL_EXE}" --version
 
       - name: Build pinned RTL-SDR Blog driver
         run: |
