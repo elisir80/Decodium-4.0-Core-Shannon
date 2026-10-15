@@ -219,7 +219,6 @@ jobs:
           echo "RIGCTLD_EXE=${RIGCTLD_EXE}" >> "${GITHUB_ENV}"
           echo "RIGCTLCOM_EXE=${RIGCTLCOM_EXE}" >> "${GITHUB_ENV}"
           echo "PKG_CONFIG_PATH=${HAMLIB_PREFIX}/lib/pkgconfig:/mingw64/lib/pkgconfig:/mingw64/share/pkgconfig" >> "${GITHUB_ENV}"
-          "${RIGCTL_EXE}" --version
 
       - name: Build pinned RTL-SDR Blog driver
         run: |
