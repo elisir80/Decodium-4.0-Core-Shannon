@@ -29,8 +29,10 @@ namespace DecoPortVirtualPorts {
 
 namespace {
 
+#if defined(Q_OS_WIN)
 constexpr int kInstallTimeoutS = 300;
 constexpr int kCreateTimeoutS = 60;
+#endif
 
 // Gli installatori che DecoPort accetta di eseguire come amministratore: quelli
 // di com0com 3.0.0.0 firmati, come pubblicati su SourceForge. Un file diverso
