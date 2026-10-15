@@ -127,6 +127,7 @@
 #include <QUdpSocket>
 #include <QTcpSocket>
 #include <QSerialPortInfo>
+#include "DecoPortHubOwners.h"
 #include <QSslSocket>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -21802,16 +21803,7 @@ void DecodiumBridge::decoPortEnsureRigDriver()
 }
 
 namespace {
-// Un TCP locale si sonda con un connect breve: non invia nulla alla radio.
-bool localTcpAnswers(quint16 port)
-{
-    QTcpSocket socket;
-    socket.connectToHost(QHostAddress::LocalHost, port);
-    bool const ok = socket.waitForConnected(150);
-    socket.abort();
-    return ok;
-}
-
+// Riga del pannello: stato reale, programma che occupa la porta e il suo PID.
 QVariantMap hubRow(const QString& kind, const QString& name, const QString& label,
                    const QString& state, const QString& detail)
 {
@@ -21823,53 +21815,70 @@ QVariantMap hubRow(const QString& kind, const QString& name, const QString& labe
     row.insert(QStringLiteral("detail"), detail);
     return row;
 }
+
+// Presa TCP/UDP locale: chi la tiene. Se il proprietario e' questo processo,
+// e' di Decodium; se non si sa, resta "unknown".
+QVariantMap hubPortRow(const QString& kind, quint16 port, const QString& label,
+                       const decoport_hub::PortUse& use)
+{
+    QString const name = QStringLiteral("%1 %2").arg(kind == QLatin1String("udp") ? "UDP" : "TCP").arg(port);
+    if (!use.known)
+        return hubRow(kind, name, label, QStringLiteral("unknown"), QStringLiteral("non verificabile"));
+    if (!use.used)
+        return hubRow(kind, name, label, QStringLiteral("free"), QStringLiteral("libera"));
+    if (quint32(QCoreApplication::applicationPid()) == use.pid)
+        return hubRow(kind, name, label, QStringLiteral("decodium"),
+                      QStringLiteral("Decodium (PID %1), %2").arg(use.pid).arg(use.state));
+    return hubRow(kind, name, label, QStringLiteral("busy"),
+                  QStringLiteral("%1 (PID %2), %3").arg(use.program).arg(use.pid).arg(use.state));
+}
 } // namespace
 
-// Stato del hub, per il pannello DecoPort. Le porte seriali non vengono mai
-// aperte per sapere se sono libere: aprirle puo' muovere DTR/RTS sulla radio.
-// Dove lo stato non si puo' sapere, resta "unknown".
+// Stato reale del hub per il pannello DecoPort. Le porte seriali non vengono
+// mai aperte: aprirle puo' muovere DTR/RTS sulla radio. Per le COM si guarda
+// chi tiene un handle sul dispositivo tra i processi dello stesso utente.
 QVariantList DecodiumBridge::decoPortHubStatus() const
 {
     QVariantList rows;
     QString const catPort = m_hamlibCat
         ? m_hamlibCat->serialPort().trimmed().toUpper() : QString();
+    QHash<QString, decoport_hub::PortUse> const owners = decoport_hub::serialOwners();
     for (QSerialPortInfo const& info : QSerialPortInfo::availablePorts()) {
         QString const name = info.portName().toUpper();
-        QString state = QStringLiteral("unknown");
-        QString detail = tr("non verificabile senza aprirla");
+        bool const virt = info.description().contains(QStringLiteral("com0com"), Qt::CaseInsensitive);
+        QString const kind = virt ? QStringLiteral("virtual") : QStringLiteral("serial");
+        QString state = QStringLiteral("free");
+        QString detail = tr("nessun programma la usa");
+        auto const it = owners.constFind(name);
         if (!catPort.isEmpty() && name == catPort) {
             state = QStringLiteral("decodium");
-            detail = tr("CAT di Decodium");
-        } else if (info.description().contains(QStringLiteral("com0com"), Qt::CaseInsensitive)) {
-            state = QStringLiteral("virtual");
-            detail = tr("porta virtuale");
+            detail = tr("CAT di Decodium (questo programma)");
+        } else if (it != owners.constEnd() && it->used) {
+            state = QStringLiteral("busy");
+            detail = QStringLiteral("%1 (PID %2), %3").arg(it->program).arg(it->pid).arg(it->state);
+        } else if (virt) {
+            detail = tr("porta virtuale, nessun programma la usa");
         }
-        rows.append(hubRow(QStringLiteral("serial"), name, info.description(), state, detail));
+        rows.append(hubRow(kind, name, info.description(), state, detail));
     }
 
-    // Prese TCP: quella di Decodium la conosciamo; le altre si sondano solo se
-    // non sono nostre, cosi' non si collega mai il nostro server a se stesso.
-    bool const shareOwn = m_catShare && m_catShare->listening();
-    int const sharePort = m_catShare ? m_catShare->port() : 4533;
-    QString const shareName = QStringLiteral("127.0.0.1:%1").arg(sharePort);
-    if (shareOwn) {
-        rows.append(hubRow(QStringLiteral("tcp"), shareName, tr("Condivisione CAT (rigctl)"),
-                           QStringLiteral("decodium"), tr("presa di Decodium")));
-    } else {
-        bool const busy = localTcpAnswers(quint16(sharePort));
-        rows.append(hubRow(QStringLiteral("tcp"), shareName, tr("Condivisione CAT (rigctl)"),
-                           busy ? QStringLiteral("busy") : QStringLiteral("free"),
-                           busy ? tr("occupata da un altro programma") : tr("libera")));
-    }
-    bool const rigctldBusy = localTcpAnswers(4532);
-    rows.append(hubRow(QStringLiteral("tcp"), QStringLiteral("127.0.0.1:4532"), tr("rigctld Hamlib"),
-                       rigctldBusy ? QStringLiteral("busy") : QStringLiteral("free"),
-                       rigctldBusy ? tr("occupata da un altro programma") : tr("libera")));
-
-    bool const gatewayOn = m_decoPortGateway && m_decoPortGateway->running();
-    rows.append(hubRow(QStringLiteral("udp"), QStringLiteral("UDP 5559"), tr("Gateway DecoPort"),
-                       gatewayOn ? QStringLiteral("decodium") : QStringLiteral("free"),
-                       gatewayOn ? tr("pubblicata in rete") : tr("non avviato")));
+    // Prese TCP e UDP: il proprietario viene dal sistema, non da una prova.
+    rows.append(hubPortRow(QStringLiteral("tcp"), 4533, tr("Condivisione CAT (rigctl)"),
+                           decoport_hub::tcpOwner(quint16(m_catShare ? m_catShare->port() : 4533))));
+    rows.append(hubPortRow(QStringLiteral("tcp"), 4532, tr("rigctld Hamlib"),
+                           decoport_hub::tcpOwner(4532)));
+    rows.append(hubPortRow(QStringLiteral("tcp"), 4534, tr("Condivisione spot"),
+                           decoport_hub::tcpOwner(4534)));
+    rows.append(hubPortRow(QStringLiteral("tcp"), 8080, tr("Web server"),
+                           decoport_hub::tcpOwner(8080)));
+    rows.append(hubPortRow(QStringLiteral("tcp"), 8082, tr("Rotore (HTTP)"),
+                           decoport_hub::tcpOwner(8082)));
+    rows.append(hubPortRow(QStringLiteral("tcp"), 19090, tr("Controllo remoto (WS)"),
+                           decoport_hub::tcpOwner(19090)));
+    rows.append(hubPortRow(QStringLiteral("udp"), 5559, tr("Gateway DecoPort"),
+                           decoport_hub::udpOwner(5559)));
+    rows.append(hubPortRow(QStringLiteral("udp"), 2237, tr("Messaggi UDP (WSJT-X/JTDX)"),
+                           decoport_hub::udpOwner(2237)));
     return rows;
 }
 
