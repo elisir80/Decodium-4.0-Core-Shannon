@@ -176,6 +176,83 @@ Window {
             width: parent.width
             spacing: 12
 
+            // ── hub delle porte: cosa e' occupato e cosa e' libero ──
+            Section {
+                id: hubSec
+                title: qsTr("PORT HUB")
+
+                property var rows: []
+                function refreshHub() {
+                    rows = win.eng ? win.eng.decoPortHubStatus() : []
+                }
+                Component.onCompleted: refreshHub()
+
+                Timer {
+                    interval: 4000
+                    repeat: true
+                    running: win.visible
+                    triggeredOnStart: true
+                    onTriggered: hubSec.refreshHub()
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 8
+                    Text {
+                        Layout.fillWidth: true
+                        text: qsTr("Red: in use by a program. Green: free. Grey: cannot be checked without opening it.")
+                        color: win.cDim
+                        font.pixelSize: 11
+                        wrapMode: Text.WordWrap
+                    }
+                    Button {
+                        text: qsTr("Refresh")
+                        onClicked: hubSec.refreshHub()
+                    }
+                }
+
+                Repeater {
+                    model: hubSec.rows
+                    delegate: RowLayout {
+                        id: hubRow
+                        required property var modelData
+                        readonly property string st: modelData.state
+                        Layout.fillWidth: true
+                        spacing: 10
+                        Rectangle {
+                            width: 12
+                            height: 12
+                            radius: 6
+                            Layout.alignment: Qt.AlignVCenter
+                            color: hubRow.st === "decodium" || hubRow.st === "busy" ? "#ff5a5a"
+                                 : hubRow.st === "free" || hubRow.st === "virtual" ? "#5dff8a"
+                                 : "#7d8b96"
+                        }
+                        Text {
+                            text: hubRow.modelData.name
+                            color: win.cText
+                            font.pixelSize: 12
+                            font.bold: true
+                            Layout.preferredWidth: 110
+                        }
+                        Text {
+                            Layout.fillWidth: true
+                            text: hubRow.modelData.label
+                            color: win.cText
+                            font.pixelSize: 11
+                            elide: Text.ElideRight
+                        }
+                        Text {
+                            text: hubRow.modelData.detail
+                            color: win.cDim
+                            font.pixelSize: 11
+                            elide: Text.ElideRight
+                            Layout.preferredWidth: 260
+                        }
+                    }
+                }
+            }
+
             // ── la password ────────────────────────────────────────────────
             Section {
                 title: qsTr("SECURITY")

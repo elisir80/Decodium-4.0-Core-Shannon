@@ -1119,6 +1119,8 @@ public:
     Q_INVOKABLE bool startDecoPortGateway(int port = 5559);
     // Cosa il gateway e' riuscito ad aprire da solo, da mostrare nella finestra.
     Q_INVOKABLE QVariantMap decoPortRigDriverState() const;
+    // Stato del hub porte per il pannello DecoPort: porte seriali e prese TCP.
+    Q_INVOKABLE QVariantList decoPortHubStatus() const;
     Q_INVOKABLE void stopDecoPortGateway();
     // Un PC di stazione deve pubblicare la radio da solo all'avvio: la finestra
     // DecoPort serve a guardare, non a tenere acceso il servizio.

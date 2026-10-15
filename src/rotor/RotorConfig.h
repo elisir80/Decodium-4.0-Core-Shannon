@@ -47,7 +47,7 @@ struct Config {
     bool networkEnabled {false};
     QString bind {QStringLiteral("0.0.0.0")};
     int wsPort {8765};
-    int httpPort {8080};
+    int httpPort {8082};    // 8080 e' del web server di Decodium
     int rotctldPort {4535};      // la 4533 e' del CAT condiviso di Decodium
     QString token;
 
