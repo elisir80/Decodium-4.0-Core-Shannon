@@ -181,14 +181,13 @@ Window {
                 id: hubSec
                 title: qsTr("PORT HUB")
 
-                property var rows: []
                 function refreshHub() {
-                    rows = win.eng ? win.eng.decoPortHubStatus() : []
+                    if (win.eng) win.eng.refreshDecoPortHub()
                 }
                 Component.onCompleted: refreshHub()
 
                 Timer {
-                    interval: 4000
+                    interval: 10000
                     repeat: true
                     running: win.visible
                     triggeredOnStart: true
@@ -212,7 +211,7 @@ Window {
                 }
 
                 Repeater {
-                    model: hubSec.rows
+                    model: win.eng ? win.eng.decoPortHub : []
                     delegate: RowLayout {
                         id: hubRow
                         required property var modelData

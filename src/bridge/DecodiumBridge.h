@@ -1120,7 +1120,10 @@ public:
     // Cosa il gateway e' riuscito ad aprire da solo, da mostrare nella finestra.
     Q_INVOKABLE QVariantMap decoPortRigDriverState() const;
     // Stato del hub porte per il pannello DecoPort: porte seriali e prese TCP.
-    Q_INVOKABLE QVariantList decoPortHubStatus() const;
+    // Stato del hub, calcolato in un thread: il pannello non blocca la GUI.
+    Q_INVOKABLE void refreshDecoPortHub();
+    Q_PROPERTY(QVariantList decoPortHub READ decoPortHub NOTIFY decoPortHubChanged)
+    QVariantList decoPortHub() const { return m_decoPortHub; }
     Q_INVOKABLE void stopDecoPortGateway();
     // Un PC di stazione deve pubblicare la radio da solo all'avvio: la finestra
     // DecoPort serve a guardare, non a tenere acceso il servizio.
@@ -2097,6 +2100,7 @@ public:
     Q_INVOKABLE void testQrzLogbookApi();
 
 signals:
+    void decoPortHubChanged();
     void rttyModeLeaving();
     // Uscita da JTTY: il suo modem deve smettere di produrre audio prima che
     // l'uscita condivisa venga chiusa.
@@ -3473,6 +3477,8 @@ private:
     qint64     m_decoPortRemoteSamples {0};
     qint64     m_lastDecoPortAudioLogMs {0};
     mutable DecodiumDecoPortGateway* m_decoPortGateway {nullptr};
+    QVariantList m_decoPortHub;
+    bool         m_decoPortHubBusy {false};
     mutable DecoPortDiscovery*       m_decoPortDiscovery {nullptr};
     mutable DecoPortLink*            m_decoPortLink {nullptr};
     mutable DecolinkLink*            m_decolinkLink {nullptr};
