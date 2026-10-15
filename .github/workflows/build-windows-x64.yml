@@ -160,8 +160,21 @@ jobs:
           restore-keys: |
             windows-mingw64-hamlib-
 
+      - name: Check cached Hamlib tools
+        id: hamlib-tools
+        shell: msys2 {0}
+        run: |
+          HAMLIB_PREFIX="$(cygpath -u "$GITHUB_WORKSPACE")/.ci/hamlib-mingw64"
+          if [[ -x "${HAMLIB_PREFIX}/bin/rigctl.exe" \
+             && -x "${HAMLIB_PREFIX}/bin/rigctld.exe" \
+             && -x "${HAMLIB_PREFIX}/bin/rigctlcom.exe" ]]; then
+            echo "available=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "available=false" >> "${GITHUB_OUTPUT}"
+          fi
+
       - name: Build and install Hamlib
-        if: steps.hamlib-cache.outputs.cache-hit != 'true'
+        if: steps.hamlib-cache.outputs.cache-hit != 'true' || steps.hamlib-tools.outputs.available != 'true'
         run: |
           set -euo pipefail
           HAMLIB_PREFIX="$(cygpath -u "$GITHUB_WORKSPACE")/.ci/hamlib-mingw64"
