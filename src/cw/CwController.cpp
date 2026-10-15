@@ -12,6 +12,8 @@ namespace decodium::cw {
 namespace {
 constexpr int kMinWpm = 5;
 constexpr int kMaxWpm = 60;
+constexpr int kKeyerRetryIntervalMs = 250;
+constexpr int kKeyerRetryLimit = 120;
 const char kGroup[] = "CW";
 
 // A serial keyer and a K1EL WinKeyer are local devices opened through
@@ -50,6 +52,12 @@ CwController::CwController(QObject* parent)
 {
     m_audioDone.setSingleShot(true);
     m_keyTimer.setSingleShot(true);
+    m_keyerRetryTimer.setSingleShot(true);
+    connect(&m_keyerRetryTimer, &QTimer::timeout, this, [this] {
+        qInfo().noquote() << "[CW] queued keyer reopen attempt"
+                          << m_keyerRetryAttempts << "of" << kKeyerRetryLimit;
+        applyBackend();
+    });
     connect(&m_keyTimer, &QTimer::timeout, this, [this] {
         if (m_keyAllSent)
             finishRemoteKey(false);
@@ -462,11 +470,13 @@ void CwController::setWpm(int wpm)
 // hanno gia' scelto un'altra strada.
 void CwController::applyBackend()
 {
+    m_keyerRetryTimer.stop();
     m_keyer.close();
     m_winKeyer.close();
 
     const QString active = effectiveBackend();
     if (active != QLatin1String("serial") && active != QLatin1String("winkeyer")) {
+        m_keyerRetryAttempts = 0;
         // The selected local keyer is not the active transmit path (for
         // example a supported CAT keyer took over).  Do not keep a stale
         // port-conflict warning in front of a now-working transmit path.
@@ -476,24 +486,44 @@ void CwController::applyBackend()
     if (active == QLatin1String("serial") && !m_keyerPort.isEmpty()) {
         if (rejectNetworkKeyerPort(m_keyerPort, tr("serial keyer")))
             return;
-        if (rejectReservedKeyerPort(m_keyerPort, tr("serial keyer")))
+        if (rejectReservedKeyerPort(m_keyerPort, tr("serial keyer"))) {
+            scheduleKeyerReopen(tr("waiting for the owning CAT/DecoPort component"));
             return;
-        if (!m_keyer.open(m_keyerPort, m_keyerLine))
+        }
+        if (!m_keyer.open(m_keyerPort, m_keyerLine)) {
             emit message(tr("The keyer port %1 did not open").arg(m_keyerPort), QStringLiteral("warning"));
-        else
+            scheduleKeyerReopen(tr("serial keyer open failed"));
+        } else {
+            m_keyerRetryAttempts = 0;
             clearTxSetupError();
+        }
     } else if (active == QLatin1String("winkeyer") && !m_winKeyerPort.isEmpty()) {
         if (rejectNetworkKeyerPort(m_winKeyerPort, tr("WinKeyer")))
             return;
-        if (rejectReservedKeyerPort(m_winKeyerPort, tr("WinKeyer")))
+        if (rejectReservedKeyerPort(m_winKeyerPort, tr("WinKeyer"))) {
+            scheduleKeyerReopen(tr("waiting for the owning CAT/DecoPort component"));
             return;
-        if (!m_winKeyer.open(m_winKeyerPort))
+        }
+        if (!m_winKeyer.open(m_winKeyerPort)) {
             emit message(tr("The WinKeyer on %1 did not open").arg(m_winKeyerPort), QStringLiteral("warning"));
-        else {
+            scheduleKeyerReopen(tr("WinKeyer open failed"));
+        } else {
+            m_keyerRetryAttempts = 0;
             m_winKeyer.setSpeed(m_wpm);
             clearTxSetupError();
         }
     }
+}
+
+void CwController::scheduleKeyerReopen(const QString& reason)
+{
+    if (m_keyerRetryAttempts >= kKeyerRetryLimit || m_keyerRetryTimer.isActive())
+        return;
+    ++m_keyerRetryAttempts;
+    qInfo().noquote() << "[CW] keyer reopen queued"
+                      << "attempt=" << m_keyerRetryAttempts << "/" << kKeyerRetryLimit
+                      << "reason=" << reason;
+    m_keyerRetryTimer.start(kKeyerRetryIntervalMs);
 }
 
 bool CwController::rejectNetworkKeyerPort(const QString& port, const QString& keyerName)

@@ -1,5 +1,6 @@
 #include "CwKeyer.h"
 #include "CwSerialPorts.h"
+#include "../net/DecodiumSerialPortRegistry.h"
 
 #include <QElapsedTimer>
 #include <QSerialPort>
@@ -66,6 +67,15 @@ public slots:
     {
         closePort();
         m_line = line.trimmed().toUpper() == QLatin1String("RTS") ? Line::Rts : Line::Dtr;
+        QString conflictPort;
+        QString conflictOwner;
+        m_portLease = decodium::ports::SerialPortRegistry::acquire(
+            {name}, QStringLiteral("CW serial keyer"), &conflictPort, &conflictOwner);
+        if (!m_portLease.isValid()) {
+            emit failed(tr("Cannot open %1: it is already reserved inside Decodium by %2")
+                        .arg(name, conflictOwner.isEmpty() ? tr("another component") : conflictOwner));
+            return false;
+        }
         m_port = new QSerialPort(name);
         // Niente handshake: il piedino lo comandiamo noi, e se lo comanda anche
         // il driver si accavallano.
@@ -75,6 +85,7 @@ public slots:
             const QString why = m_port->errorString();
             delete m_port;
             m_port = nullptr;
+            m_portLease.release();
             emit failed(tr("Cannot open %1: %2").arg(name, why));
             return false;
         }
@@ -90,6 +101,7 @@ public slots:
         m_port->close();
         delete m_port;
         m_port = nullptr;
+        m_portLease.release();
     }
 
     void enqueue(const QString& text, int wpm, quint64 generation)
@@ -237,6 +249,7 @@ private:
     }
 
     QSerialPort* m_port{nullptr};
+    decodium::ports::SerialPortLease m_portLease;
     Line m_line{Line::Dtr};
     QQueue<Job> m_queue;
     QMutex m_mutex;

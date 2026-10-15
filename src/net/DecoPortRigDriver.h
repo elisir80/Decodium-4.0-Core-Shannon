@@ -94,6 +94,8 @@ private:
 
     void doOpen(const QString& port, int baudRate, int civAddress, int model);
     void doClose(bool clearOpening = true);
+    void scheduleReopen(const QString& port, int baudRate, int civAddress, int model,
+                        const QString& reason);
 
     mutable QMutex m_stateMutex;
     double  m_frequencyHz {0.0};
@@ -104,5 +106,12 @@ private:
     bool    m_open {false};
     bool    m_opening {false};
     QTimer* m_pollTimer {nullptr};
+    QTimer* m_reopenTimer {nullptr};
     QThread* m_thread {nullptr};
+    decodium::ports::SerialPortLease m_portLease;
+    QString m_reopenPort;
+    int m_reopenBaudRate {0};
+    int m_reopenCivAddress {0};
+    int m_reopenModel {0};
+    int m_reopenAttempts {0};
 };

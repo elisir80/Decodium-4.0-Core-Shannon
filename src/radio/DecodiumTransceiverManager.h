@@ -13,6 +13,7 @@
 #include <functional>
 
 #include "DecoPortSerialLine.h"
+#include "DecodiumSerialPortRegistry.h"
 
 // Forward-declare per nascondere le dipendenze Boost/Hamlib dall'header
 struct DecodiumTransceiverManagerPrivate;
@@ -376,6 +377,9 @@ private:
     bool    m_disconnectInProgress {false};
     CatLineRedirect       m_catLineRedirect;
     std::function<void()> m_catLineRelease;
+    // Process-local ownership of the physical CAT/PTT serial endpoints.  The
+    // lease is kept until the Hamlib worker has really finished rig_close().
+    decodium::ports::SerialPortLease m_catPortLease;
     // One-shot intent set only by the explicit dashboard Power On action
     // while CAT is disconnected. It becomes Hamlib's auto_power_on config
     // for the next direct CAT connection, never for ordinary startup.

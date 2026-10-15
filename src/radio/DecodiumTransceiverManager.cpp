@@ -1798,6 +1798,7 @@ void DecodiumTransceiverManager::connectRig()
 
     TransceiverFactory::ParameterPack params;
     Transceiver* xcv = nullptr;
+    bool catLineShared = false;
     try {
         params = buildParams(this, m_coldStartPowerOnPending && !m_coldStartPowerOnWakeSent);
         // Condivisione nel protocollo della radio (DecoPort): la seriale la
@@ -1826,12 +1827,66 @@ void DecodiumTransceiverManager::connectRig()
             QString const shared = m_catLineRedirect(params.serial_port, params.rig_name, line,
                                                      pttOnCatLines, &why);
             if (!shared.isEmpty()) {
+                catLineShared = true;
                 qInfo().noquote() << "[CATDBG] CAT shared in the radio's own protocol:"
                                   << params.serial_port << "held by DecoPort, Hamlib via" << shared;
                 params.serial_port = shared;
             } else if (!why.isEmpty()) {
                 qInfo().noquote() << "[CATDBG]" << why;
                 emit statusUpdate(why);
+            }
+        }
+
+        // Hamlib opens the CAT endpoint on its own worker thread.  Reserve the
+        // physical endpoints before creating that worker, otherwise CW and
+        // CAT can both pass their independent preflight checks and race in
+        // rig_open()/QSerialPort::open().  Native DecoPort sharing already
+        // owns the physical CAT line through DecoPortSerialLine; only reserve
+        // the remaining separate PTT line in that case.
+        const bool serialTransport = lowerPortType == QStringLiteral("serial")
+            || lowerPortType == QStringLiteral("usb");
+        QStringList portsToReserve;
+        if (serialTransport && !catLineShared)
+            portsToReserve << params.serial_port;
+        const bool separatePtt =
+            (params.ptt_type == TransceiverFactory::PTT_method_DTR
+             || params.ptt_type == TransceiverFactory::PTT_method_RTS)
+            && !pttPortSharesCatPort(params.serial_port, params.ptt_port);
+        if (serialTransport && separatePtt)
+            portsToReserve << params.ptt_port;
+        if (!portsToReserve.isEmpty()) {
+            QString conflictPort;
+            QString conflictOwner;
+            m_catPortLease = decodium::ports::SerialPortRegistry::acquire(
+                portsToReserve, QStringLiteral("Hamlib CAT (%1)").arg(params.rig_name),
+                &conflictPort, &conflictOwner);
+            if (!m_catPortLease.isValid()) {
+                const QString reason = tr("Serial port %1 is already reserved inside Decodium by %2.")
+                    .arg(conflictPort.isEmpty() ? portsToReserve.first() : conflictPort,
+                         conflictOwner.isEmpty() ? tr("another component") : conflictOwner);
+                qWarning().noquote() << "[CATDBG] CAT serial reservation denied"
+                                     << "ports=" << portsToReserve << "reason=" << reason;
+                if (m_catLineRelease)
+                    m_catLineRelease();
+                // A Decodium-owned conflict is transient: CAT/DecoPort/CW
+                // may be finishing its close path.  Keep the CAT request
+                // queued so the first owner can release the lease cleanly;
+                // only the bounded scheduler emits a terminal error.
+                emit statusUpdate(tr("CAT attende la porta %1, attualmente posseduta da %2.")
+                                  .arg(conflictPort, conflictOwner));
+                if (!conflictOwner.isEmpty()) {
+                    scheduleTransientReconnect(reason);
+                } else {
+                    emit errorOccurred(QStringLiteral("CAT failure: ") + reason);
+                    if (params.auto_power_on) {
+                        m_coldStartPowerOnPending = false;
+                        m_coldStartPowerOnWakeSent = false;
+                        emit radioActionCompleted(QStringLiteral("Power on"), false, reason);
+                    }
+                }
+                delete thread;
+                d->xcvThread = nullptr;
+                return;
             }
         }
         if (params.auto_power_on) {
@@ -1879,6 +1934,9 @@ void DecodiumTransceiverManager::connectRig()
                                       .arg(QString::fromLocal8Bit(e.what())));
         }
         emit errorOccurred(QString("Errore creazione transceiver: %1").arg(e.what()));
+        m_catPortLease.release();
+        if (catLineShared && m_catLineRelease)
+            m_catLineRelease();
         delete thread;
         d->xcvThread = nullptr;
         return;
@@ -1898,6 +1956,9 @@ void DecodiumTransceiverManager::connectRig()
                                       tr("Could not prepare the CAT power-on request"));
         }
         emit errorOccurred("Errore sconosciuto durante la creazione del transceiver");
+        m_catPortLease.release();
+        if (catLineShared && m_catLineRelease)
+            m_catLineRelease();
         delete thread;
         d->xcvThread = nullptr;
         return;
@@ -1954,6 +2015,9 @@ void DecodiumTransceiverManager::connectRig()
                     emit connectedChanged();
                 }
                 updateTelemetry(0.0, 0.0);
+                // Release the process-local lease only after the worker's
+                // finished signal has guaranteed that rig_close() completed.
+                m_catPortLease.release();
                 if (reconnect) {
                     QTimer::singleShot(0, this, [this]() {
                         if (!d->transceiver && !d->xcvThread) {

@@ -219,8 +219,8 @@ Window {
                         Layout.fillWidth: true
                         spacing: 10
                         Rectangle {
-                            width: 12
-                            height: 12
+                            Layout.preferredWidth: 12
+                            Layout.preferredHeight: 12
                             radius: 6
                             Layout.alignment: Qt.AlignVCenter
                             color: hubRow.st === "decodium" || hubRow.st === "busy" ? "#ff5a5a"
@@ -228,13 +228,17 @@ Window {
                                  : "#7d8b96"
                         }
                         Text {
+                            Layout.minimumWidth: 0
+                            Layout.preferredWidth: 245
                             text: hubRow.modelData.name
                             color: win.cText
                             font.pixelSize: 12
                             font.bold: true
-                            Layout.preferredWidth: 110
+                            elide: Text.ElideRight
+                            clip: true
                         }
                         Text {
+                            Layout.minimumWidth: 0
                             Layout.fillWidth: true
                             text: hubRow.modelData.label
                             color: win.cText
@@ -242,6 +246,7 @@ Window {
                             elide: Text.ElideRight
                         }
                         Text {
+                            Layout.minimumWidth: 0
                             text: hubRow.modelData.detail
                             color: win.cDim
                             font.pixelSize: 11

@@ -238,6 +238,7 @@ private:
     QSettings* m_deferredSettings {nullptr};
     bool m_started {false};
     void applyBackend();
+    void scheduleKeyerReopen(const QString& reason);
     bool rejectNetworkKeyerPort(const QString& port, const QString& keyerName);
     bool rejectReservedKeyerPort(const QString& port, const QString& keyerName);
     void clearTxSetupError();
@@ -276,6 +277,8 @@ private:
     QString m_winKeyerPort;
     QString m_txSetupError;
     int m_wpm {20};
+    QTimer m_keyerRetryTimer;
+    int m_keyerRetryAttempts {0};
 
     // CW a tasto verso la radio remota
     bool m_remoteKey {true};

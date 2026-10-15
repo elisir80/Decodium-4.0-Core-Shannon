@@ -11,6 +11,9 @@
 
 namespace {
 
+constexpr int kReopenIntervalMs = 500;
+constexpr int kReopenLimit = 60;
+
 // Confronto fra nomi di radio: "FT-991A", "FT991A" e "ft 991 a" sono la stessa
 // radio scritta da tre persone diverse. Si tiene solo cio' che identifica.
 QString normalised(const QString& s)
@@ -234,6 +237,9 @@ bool DecoPortRigDriver::open(const QString& port, int baudRate, int civAddress, 
         m_opening = true;
     }
     QMetaObject::invokeMethod(this, [this, port, baudRate, civAddress, model]() {
+        if (m_reopenTimer)
+            m_reopenTimer->stop();
+        m_reopenAttempts = 0;
         doOpen(port, baudRate, civAddress, model);
     }, Qt::QueuedConnection);
     return true;
@@ -249,6 +255,28 @@ void DecoPortRigDriver::doOpen(const QString& port, int baudRate, int civAddress
         return;
     }
 
+    // This driver is another in-process Hamlib opener.  Network endpoints do
+    // not need a serial lease; every physical COM/tty must be claimed before
+    // rig_open(), otherwise it can race with the main CAT or CW keyer.
+    if (!DecoPortSerialLine::isNetworkSpec(port) && !port.contains(QLatin1Char(':'))) {
+        QString conflictPort;
+        QString conflictOwner;
+        m_portLease = decodium::ports::SerialPortRegistry::acquire(
+            {port}, QStringLiteral("DecoPort rig driver"), &conflictPort, &conflictOwner);
+        if (!m_portLease.isValid()) {
+            const QString reason = tr("%1 is already reserved inside Decodium by %2")
+                .arg(conflictPort.isEmpty() ? port : conflictPort,
+                     conflictOwner.isEmpty() ? tr("another component") : conflictOwner);
+            {
+                QMutexLocker lock(&m_stateMutex);
+                m_lastError = reason;
+                m_opening = false;
+            }
+            scheduleReopen(port, baudRate, civAddress, model, reason);
+            return;
+        }
+    }
+
     silenceHamlibOnce();
     rig_load_all_backends();
     d->rig = rig_init(static_cast<rig_model_t>(model));
@@ -260,6 +288,7 @@ void DecoPortRigDriver::doOpen(const QString& port, int baudRate, int civAddress
             m_opening = false;
             reason = m_lastError;
         }
+        m_portLease.release();
         emit failed(reason);
         return;
     }
@@ -294,6 +323,7 @@ void DecoPortRigDriver::doOpen(const QString& port, int baudRate, int civAddress
             m_opening = false;
             reason = m_lastError;
         }
+        m_portLease.release();
         emit failed(reason);
         return;
     }
@@ -312,6 +342,8 @@ void DecoPortRigDriver::doOpen(const QString& port, int baudRate, int civAddress
         m_open = true;
         m_opening = false;
     }
+    m_reopenAttempts = 0;
+    m_reopenPort.clear();
 
     if (!m_pollTimer) {
         m_pollTimer = new QTimer(this);
@@ -323,6 +355,32 @@ void DecoPortRigDriver::doOpen(const QString& port, int baudRate, int civAddress
     emit opened(name);
 }
 
+void DecoPortRigDriver::scheduleReopen(const QString& port, int baudRate, int civAddress,
+                                       int model, const QString& reason)
+{
+    if (m_reopenAttempts >= kReopenLimit)
+    {
+        emit failed(reason);
+        return;
+    }
+    m_reopenPort = port;
+    m_reopenBaudRate = baudRate;
+    m_reopenCivAddress = civAddress;
+    m_reopenModel = model;
+    ++m_reopenAttempts;
+    qInfo().noquote() << "[PORTREG] DecoPort reopen queued"
+                      << "attempt=" << m_reopenAttempts << "/" << kReopenLimit
+                      << "owner=" << reason;
+    if (!m_reopenTimer) {
+        m_reopenTimer = new QTimer(this);
+        m_reopenTimer->setSingleShot(true);
+        connect(m_reopenTimer, &QTimer::timeout, this, [this] {
+            doOpen(m_reopenPort, m_reopenBaudRate, m_reopenCivAddress, m_reopenModel);
+        });
+    }
+    m_reopenTimer->start(kReopenIntervalMs);
+}
+
 void DecoPortRigDriver::close()
 {
     QMetaObject::invokeMethod(this, [this]() { doClose(); }, Qt::QueuedConnection);
@@ -330,9 +388,15 @@ void DecoPortRigDriver::close()
 
 void DecoPortRigDriver::doClose(bool clearOpening)
 {
+    if (clearOpening && m_reopenTimer) {
+        m_reopenTimer->stop();
+        m_reopenAttempts = 0;
+        m_reopenPort.clear();
+    }
     if (m_pollTimer)
         m_pollTimer->stop();
     if (!d->rig) {
+        m_portLease.release();
         if (clearOpening) {
             QMutexLocker lock(&m_stateMutex);
             m_opening = false;
@@ -344,6 +408,7 @@ void DecoPortRigDriver::doClose(bool clearOpening)
     rig_close(d->rig);
     rig_cleanup(d->rig);
     d->rig = nullptr;
+    m_portLease.release();
     {
         QMutexLocker lock(&m_stateMutex);
         m_frequencyHz = 0.0;

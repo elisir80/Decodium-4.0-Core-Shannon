@@ -20,7 +20,7 @@ bool DecoPortSerialLine::isNetworkSpec(const QString& spec)
 }
 
 bool DecoPortSerialLine::open(const QString& spec, const DecoPortLineSettings& s,
-                              int connectTimeoutMs)
+                              int connectTimeoutMs, const QString& owner)
 {
     close();
     m_spec = spec;
@@ -52,6 +52,18 @@ bool DecoPortSerialLine::open(const QString& spec, const DecoPortLineSettings& s
         return true;
     }
 
+    QString conflictPort;
+    QString conflictOwner;
+    const QString leaseOwner = owner.trimmed().isEmpty()
+        ? QStringLiteral("DecoPort serial line") : owner.trimmed();
+    m_serialLease = decodium::ports::SerialPortRegistry::acquire(
+        {spec}, leaseOwner, &conflictPort, &conflictOwner);
+    if (!m_serialLease.isValid()) {
+        m_error = tr("%1 is already reserved inside Decodium by %2")
+                      .arg(spec, conflictOwner.isEmpty() ? tr("another component") : conflictOwner);
+        return false;
+    }
+
     m_serial = new QSerialPort(this);
 #if defined(Q_OS_WIN)
     // Qt mette il prefisso dei dispositivi (\\.\) solo ai nomi che cominciano
@@ -69,6 +81,7 @@ bool DecoPortSerialLine::open(const QString& spec, const DecoPortLineSettings& s
         m_error = m_serial->errorString();
         delete m_serial;
         m_serial = nullptr;
+        m_serialLease.release();
         return false;
     }
     m_serial->setBaudRate(s.baud > 0 ? s.baud : 9600);
@@ -109,6 +122,7 @@ void DecoPortSerialLine::close()
         m_serial->close();
         m_serial->deleteLater();
         m_serial = nullptr;
+        m_serialLease.release();
     }
     if (m_tcp) {
         m_tcp->disconnect(this);

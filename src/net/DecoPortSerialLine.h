@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QString>
 
+#include "DecodiumSerialPortRegistry.h"
+
 class QIODevice;
 class QSerialPort;
 class QTcpSocket;
@@ -43,7 +45,8 @@ public:
 
     // Per una porta di rete aspetta la connessione fino a `connectTimeoutMs`.
     bool open(const QString& spec, const DecoPortLineSettings& settings,
-              int connectTimeoutMs = 3000);
+              int connectTimeoutMs = 3000,
+              const QString& owner = QString());
     void close();
     bool isOpen() const;
     bool isNetwork() const { return m_tcp != nullptr; }
@@ -70,4 +73,5 @@ private:
     QString      m_error;
     QSerialPort* m_serial {nullptr};
     QTcpSocket*  m_tcp {nullptr};
+    decodium::ports::SerialPortLease m_serialLease;
 };

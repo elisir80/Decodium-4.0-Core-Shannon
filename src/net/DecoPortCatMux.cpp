@@ -52,7 +52,7 @@ DecoPortCatMux::~DecoPortCatMux()
 bool DecoPortCatMux::open(const QString& physical, const DecoPortLineSettings& settings)
 {
     m_error.clear();
-    if (!m_line.open(physical, settings)) {
+    if (!m_line.open(physical, settings, 3000, QStringLiteral("DecoPort CAT physical"))) {
         m_error = m_line.errorString();
         return false;
     }
@@ -167,7 +167,7 @@ bool DecoPortCatMux::addSerialTap(const QString& portName, const QString& name, 
     s.baud = 9600;
     s.dtr = 1;
     s.rts = 1;
-    if (!line->open(portName, s)) {
+    if (!line->open(portName, s, 3000, QStringLiteral("DecoPort virtual CAT tap"))) {
         if (error)
             *error = QStringLiteral("%1: %2").arg(portName, line->errorString());
         line->deleteLater();

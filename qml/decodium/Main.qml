@@ -13009,7 +13009,19 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
 
         MenuItem {
             text: qsTr("SSB - PC microphone and radio controls...")
+            icon.source: ""
             onTriggered: mainWindow.openSsbWindow()
+
+            background: Rectangle {
+                color: parent.highlighted ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2) : "transparent"
+                radius: 6
+            }
+            contentItem: Text {
+                text: parent.text
+                font.pixelSize: 12
+                color: textPrimary
+                leftPadding: 10
+            }
         }
         MenuItem {
             // CW: decodificatore, macro e manipolatore (dal modulo CW di DecoDXLog).

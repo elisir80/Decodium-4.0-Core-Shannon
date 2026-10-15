@@ -1,4 +1,5 @@
 #include "WinKeyer.h"
+#include "../net/DecodiumSerialPortRegistry.h"
 
 #include <QCoreApplication>
 #include <QSerialPort>
@@ -45,6 +46,18 @@ bool WinKeyer::isOpen() const
 bool WinKeyer::open(const QString& portName)
 {
     close();
+    QString conflictPort;
+    QString conflictOwner;
+    auto lease = decodium::ports::SerialPortRegistry::acquire(
+        {portName}, QStringLiteral("CW WinKeyer"), &conflictPort, &conflictOwner);
+    if (!lease.isValid()) {
+        emit failed(QCoreApplication::translate("WinKeyer",
+            "WinKeyer: %1 is already reserved inside Decodium by %2")
+            .arg(portName, conflictOwner.isEmpty()
+                 ? QCoreApplication::translate("WinKeyer", "another component")
+                 : conflictOwner));
+        return false;
+    }
     m_port = new QSerialPort(this);
     m_port->setPortName(portName);
     m_port->setBaudRate(1200);
@@ -58,6 +71,7 @@ bool WinKeyer::open(const QString& portName)
         m_port = nullptr;
         return false;
     }
+    m_portLease = std::move(lease);
     // Il WinKeyer si alimenta dal DTR su molti modelli USB.
     m_port->setDataTerminalReady(true);
     m_port->setRequestToSend(false);
@@ -80,6 +94,7 @@ void WinKeyer::close()
         m_port->deleteLater();
         m_port = nullptr;
     }
+    m_portLease.release();
 }
 
 void WinKeyer::setSpeed(int wpm)

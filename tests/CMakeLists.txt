@@ -366,9 +366,13 @@ add_test (NAME test_cat_native_migration COMMAND $<TARGET_FILE:test_cat_native_m
 add_executable (test_decoport_rig_driver_thread
   test_decoport_rig_driver_thread.cpp
   ../src/net/DecoPortRigDriver.cpp
-  ../src/net/DecoPortRigDriver.h)
+  ../src/net/DecoPortRigDriver.h
+  ../src/net/DecoPortSerialLine.cpp
+  ../src/net/DecoPortSerialLine.h
+  ../src/net/DecodiumSerialPortRegistry.cpp
+  ../src/net/DecodiumSerialPortRegistry.h)
 target_link_libraries (test_decoport_rig_driver_thread
-  Qt6::Test Qt6::Core Hamlib::Hamlib)
+  Qt6::Test Qt6::Core Qt6::Network Qt6::SerialPort Hamlib::Hamlib)
 add_test (NAME test_decoport_rig_driver_thread
   COMMAND $<TARGET_FILE:test_decoport_rig_driver_thread>)
 

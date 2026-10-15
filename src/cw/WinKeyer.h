@@ -12,6 +12,8 @@
 #include <QObject>
 #include <QString>
 
+#include "../net/DecodiumSerialPortRegistry.h"
+
 class QSerialPort;
 
 namespace decodium::cw {
@@ -51,6 +53,7 @@ private:
     void onReadyRead();
 
     QSerialPort* m_port{nullptr};
+    decodium::ports::SerialPortLease m_portLease;
     int m_version{0};
     int m_wpm{0};
     bool m_busy{false};

@@ -14,6 +14,7 @@
 #include "DecoPortRigDriver.h"
 #include "DecodiumDecoPortGateway.h"
 #include "DecodiumNativeCatShare.h"
+#include "DecodiumSerialPortRegistry.h"
 #include "DecodeUiFilterPolicy.h"
 #include "MamTxPayloadPolicy.h"
 #include "RttyRxRecovery.h"
@@ -21852,9 +21853,17 @@ QVariantList buildDecoPortHubRows(QString const& catPort, int sharePort)
         QString state = QStringLiteral("free");
         QString detail = HUB_TR("nessun programma la usa");
         auto const it = owners.constFind(name);
-        if (!catPort.isEmpty() && name == catPort) {
+        const QString internalOwner = decodium::ports::SerialPortRegistry::ownerForPort(
+            info.systemLocation().isEmpty() ? name : info.systemLocation());
+        if (!internalOwner.isEmpty()) {
             state = QStringLiteral("decodium");
-            detail = HUB_TR("CAT di Decodium (questo programma)");
+            detail = HUB_TR("Decodium: %1").arg(internalOwner);
+        } else if (!catPort.isEmpty() && name == catPort) {
+            // Configuration fallback: before the first successful open CAT
+            // has no live lease yet, but the panel should still identify the
+            // selected endpoint as the CAT candidate.
+            state = QStringLiteral("decodium");
+            detail = HUB_TR("CAT configurato in Decodium (porta non ancora aperta)");
         } else if (it != owners.constEnd() && it->used) {
             state = QStringLiteral("busy");
             detail = QStringLiteral("%1 (PID %2), %3").arg(it->program).arg(it->pid).arg(it->state);
@@ -43641,6 +43650,15 @@ bool DecodiumBridge::cwRigKeyerAvailable() const
 
 QString DecodiumBridge::cwSerialKeyerPortReservation(const QString& port) const
 {
+    // The configured CAT path is not enough during asynchronous reconnects:
+    // another Decodium component may already own the same physical endpoint
+    // under an alias (COM5 vs \\.\\COM5, or /dev/by-id vs /dev/ttyUSB0).
+    // Consult the process-wide lease first so CW never passes a stale
+    // configuration check while CAT/DecoPort is opening or closing.
+    if (const QString internalOwner = decodium::ports::SerialPortRegistry::ownerForPort(port);
+        !internalOwner.isEmpty()) {
+        return tr("Decodium's %1").arg(internalOwner);
+    }
     if (!m_hamlibCat || m_catBackend != QLatin1String("hamlib"))
         return {};
 
