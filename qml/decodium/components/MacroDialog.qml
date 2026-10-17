@@ -74,9 +74,15 @@ Dialog {
     property color accentGreen: bridge.themeManager.accentColor
     property color textPrimary: bridge.themeManager.textPrimary
     property color textSecondary: bridge.themeManager.textSecondary
+    readonly property color dialogSurface: bridge.themeManager.isGlassTheme
+                                          && bridge.themeManager.glassTransparencySupported
+                                          ? Qt.rgba(bridge.themeManager.panelColor.r,
+                                                    bridge.themeManager.panelColor.g,
+                                                    bridge.themeManager.panelColor.b, 0.58)
+                                          : Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
 
     background: Rectangle {
-        color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
+        color: macroDialog.dialogSurface
         border.color: secondaryCyan
         border.width: 2
         radius: 12

@@ -52,11 +52,17 @@ Dialog {
     property color textPrimary:   bridge.themeManager.textPrimary
     property color textSecondary: bridge.themeManager.textSecondary
     property color glassBorder:   bridge.themeManager.glassBorder
+    readonly property color dialogSurface: bridge.themeManager.isGlassTheme
+                                          && bridge.themeManager.glassTransparencySupported
+                                          ? Qt.rgba(bridge.themeManager.panelColor.r,
+                                                    bridge.themeManager.panelColor.g,
+                                                    bridge.themeManager.panelColor.b, 0.58)
+                                          : Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
     readonly property int controlHeight: 38
     readonly property int controlFontSize: 13
 
     background: Rectangle {
-        color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
+        color: rigControlDialog.dialogSurface
         border.color: secondaryCyan; border.width: 2; radius: 12
 
         // Keep this dialog compatible with the Linux Qt 6.4 AppImage runtime.

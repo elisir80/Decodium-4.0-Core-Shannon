@@ -12,6 +12,14 @@ Dialog {
     property color accentColor: "#24c9ee"
     property color borderColor: "#273946"
     property color panelColor: "#0b131a"
+    readonly property bool glassSurfaceEnabled: root.engine && root.engine.themeManager
+                                                && root.engine.themeManager.isGlassTheme
+                                                && root.engine.themeManager.glassTransparencySupported
+    readonly property color dialogSurface: root.glassSurfaceEnabled
+                                           ? Qt.rgba(root.engine.themeManager.panelColor.r,
+                                                     root.engine.themeManager.panelColor.g,
+                                                     root.engine.themeManager.panelColor.b, 0.58)
+                                           : root.panelColor
 
     property string imageRecordId: ""
     property string imageMode: ""
@@ -197,7 +205,7 @@ Dialog {
     }
 
     background: Rectangle {
-        color: root.panelColor
+        color: root.dialogSurface
         border.color: root.borderColor
         border.width: 1
         radius: 9
@@ -205,7 +213,11 @@ Dialog {
 
     header: Rectangle {
         implicitHeight: 54
-        color: "#101d26"
+        color: root.glassSurfaceEnabled
+               ? Qt.rgba(root.engine.themeManager.bgMedium.r,
+                         root.engine.themeManager.bgMedium.g,
+                         root.engine.themeManager.bgMedium.b, 0.42)
+               : "#101d26"
         border.color: root.borderColor
         border.width: 1
         Label {
@@ -519,7 +531,11 @@ Dialog {
 
     footer: DialogButtonBox {
         background: Rectangle {
-            color: "#101d26"
+            color: root.glassSurfaceEnabled
+                   ? Qt.rgba(root.engine.themeManager.bgMedium.r,
+                             root.engine.themeManager.bgMedium.g,
+                             root.engine.themeManager.bgMedium.b, 0.42)
+                   : "#101d26"
             border.color: root.borderColor
             border.width: 1
         }

@@ -189,7 +189,7 @@ SettingsPageScroll {
             contentItem: Text { text: decodeDepthCombo.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; rightPadding: 42; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
             delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12 }
                 background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
-            popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
+            popup.background: Rectangle { color: dialog && dialog.dialogSurface ? dialog.dialogSurface : bgDeep; border.color: glassBorder; radius: 4 }
         }
         Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
 
@@ -293,7 +293,7 @@ SettingsPageScroll {
             contentItem: Text { text: sidelobeCombo.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter }
             delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12 }
                 background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
-            popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
+            popup.background: Rectangle { color: dialog && dialog.dialogSurface ? dialog.dialogSurface : bgDeep; border.color: glassBorder; radius: 4 }
         }
         Text { text: qsTr("Degrade S/N:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         SpinBox {

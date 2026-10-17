@@ -14,7 +14,12 @@ Dialog {
     anchors.centerIn: parent
 
     background: Rectangle {
-        color: Qt.rgba(18/255, 18/255, 28/255, 0.98)
+        color: bridge && bridge.themeManager && bridge.themeManager.isGlassTheme
+               && bridge.themeManager.glassTransparencySupported
+               ? Qt.rgba(bridge.themeManager.panelColor.r,
+                         bridge.themeManager.panelColor.g,
+                         bridge.themeManager.panelColor.b, 0.58)
+               : Qt.rgba(18/255, 18/255, 28/255, 0.98)
         border.color: "#00BCD4"
         border.width: 1
         radius: 10
@@ -156,7 +161,12 @@ Dialog {
         property string currentHex: "#FFFFFF"
 
         background: Rectangle {
-            color: Qt.rgba(18/255, 18/255, 28/255, 0.98)
+            color: bridge && bridge.themeManager && bridge.themeManager.isGlassTheme
+                   && bridge.themeManager.glassTransparencySupported
+                   ? Qt.rgba(bridge.themeManager.panelColor.r,
+                             bridge.themeManager.panelColor.g,
+                             bridge.themeManager.panelColor.b, 0.48)
+                   : Qt.rgba(18/255, 18/255, 28/255, 0.98)
             border.color: "#00BCD4"
             border.width: 1
             radius: 8

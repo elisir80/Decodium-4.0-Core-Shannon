@@ -8,7 +8,7 @@
 import QtQuick
 import QtQuick.Window
 
-Window {
+GlassWindow {
     id: win
 
     property string panelKey: ""
@@ -48,7 +48,7 @@ Window {
     height: 420
     minimumWidth: 280
     minimumHeight: 180
-    color: bgColor
+    color: transparentCorners ? "transparent" : glassSurfaceColor
     title: panelTitle.length > 0 ? panelTitle : qsTr("DX-Pedition panel")
 
     // Qt manda un `closing` spurio subito dopo aver mostrato una finestra
@@ -78,7 +78,9 @@ Window {
 
     Rectangle {
         anchors.fill: parent
-        color: win.bgColor
+        color: win.glassTheme && win.glassTransparencySupported
+               ? Qt.rgba(win.bgColor.r, win.bgColor.g, win.bgColor.b, 0.58)
+               : win.bgColor
         border.color: win.borderColor
         border.width: 1
 

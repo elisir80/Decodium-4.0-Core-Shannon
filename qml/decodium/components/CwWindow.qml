@@ -13,7 +13,7 @@ import QtQuick.Controls.Material
 import QtQuick.Layouts
 import QtQuick.Window
 
-Window {
+GlassWindow {
     id: win
 
     readonly property var eng: (typeof appEngine !== 'undefined' ? appEngine : null)
@@ -22,7 +22,9 @@ Window {
     Component.onCompleted: if (cw) cw.ensureStarted()
     readonly property var tm: eng ? eng.themeManager : null
     readonly property color cBg:     tm ? tm.bgDeep        : "#0a0f14"
-    readonly property color cPanel:  tm ? tm.panelColor    : "#111a22"
+    readonly property color cPanel:  tm && tm.isGlassTheme && tm.glassTransparencySupported
+                                      ? Qt.rgba(tm.panelColor.r, tm.panelColor.g, tm.panelColor.b, 0.58)
+                                      : (tm ? tm.panelColor : "#111a22")
     readonly property color cBorder: tm ? tm.borderColor   : "#22303c"
     readonly property color cText:   tm ? tm.textPrimary   : "#dbe4ea"
     readonly property color cDim:    tm ? tm.textSecondary : "#7d8b96"
@@ -46,7 +48,7 @@ Window {
     height: 760
     minimumWidth: 640
     minimumHeight: width < 820 ? 760 : 620
-    color: cBg
+    color: transparentCorners ? "transparent" : glassSurfaceColor
 
     // Le proprieta' Material si attaccano all'albero di UNA finestra: questa e'
     // una finestra a se', e senza queste righe ogni ComboBox e Slider resta col
@@ -938,25 +940,92 @@ Window {
             }
         }
 
-        // Il testo decodificato scorre in una misura sua, come in una telescrivente.
-        ScrollView {
-            id: decodedScroll
+        // RX e TX restano separati: il testo trasmesso comprende le macro
+        // gia' espanse, mentre il testo ricevuto continua a provenire dal
+        // decoder CW.  I due colori rendono immediata la distinzione.
+        RowLayout {
+            id: cwTraffic
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.minimumHeight: 80
-            clip: true
-            contentWidth: availableWidth
-            TextArea {
-                id: decoded
-                width: decodedScroll.availableWidth
-                readOnly: true
-                wrapMode: TextArea.WrapAnywhere
-                text: win.cw ? win.cw.decoderText : ""
-                color: win.cText
-                font.family: win.mono
-                font.pixelSize: 14
-                background: Rectangle { color: Qt.darker(win.cPanel, 1.2); border.color: win.cBorder; radius: 4 }
-                onTextChanged: cursorPosition = length
+            Layout.minimumHeight: 100
+            spacing: 8
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.minimumWidth: 0
+                spacing: 4
+                RowLayout {
+                    Layout.fillWidth: true
+                    Text {
+                        text: qsTr("RX / RECEIVED")
+                        color: win.cOk
+                        font.pixelSize: 11
+                        font.bold: true
+                        font.letterSpacing: 1.0
+                    }
+                    Item { Layout.fillWidth: true }
+                    Btn { label: qsTr("Clear RX"); onClicked: win.cw.clearDecoder() }
+                }
+                ScrollView {
+                    id: decodedScroll
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    Layout.minimumHeight: 70
+                    clip: true
+                    contentWidth: availableWidth
+                    TextArea {
+                        id: decoded
+                        width: decodedScroll.availableWidth
+                        readOnly: true
+                        wrapMode: TextArea.WrapAnywhere
+                        text: win.cw ? win.cw.decoderText : ""
+                        color: win.cOk
+                        font.family: win.mono
+                        font.pixelSize: 14
+                        background: Rectangle { color: Qt.darker(win.cPanel, 1.2); border.color: win.cBorder; radius: 4 }
+                        onTextChanged: cursorPosition = length
+                    }
+                }
+            }
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.minimumWidth: 0
+                spacing: 4
+                RowLayout {
+                    Layout.fillWidth: true
+                    Text {
+                        text: qsTr("TX / TRANSMITTED")
+                        color: win.cWarn
+                        font.pixelSize: 11
+                        font.bold: true
+                        font.letterSpacing: 1.0
+                    }
+                    Item { Layout.fillWidth: true }
+                    Btn { label: qsTr("Clear TX"); onClicked: win.cw.clearTxTranscript() }
+                }
+                ScrollView {
+                    id: txScroll
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    Layout.minimumHeight: 70
+                    clip: true
+                    contentWidth: availableWidth
+                    TextArea {
+                        id: transmitted
+                        width: txScroll.availableWidth
+                        readOnly: true
+                        wrapMode: TextArea.WrapAnywhere
+                        text: win.cw ? win.cw.txText : ""
+                        color: win.cWarn
+                        font.family: win.mono
+                        font.pixelSize: 14
+                        background: Rectangle { color: Qt.darker(win.cPanel, 1.2); border.color: win.cBorder; radius: 4 }
+                        onTextChanged: cursorPosition = length
+                    }
+                }
             }
         }
 

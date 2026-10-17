@@ -20,6 +20,9 @@ Item {
     property var ft2LinkToolPanel: null
     property bool handleLogPrompt: true
     property bool showAsyncIcon: true
+    // The dashboard instance is embedded and opaque.  Only the separate
+    // pop-out instance opts in to a translucent content surface.
+    property bool detachedSurface: false
     // 1.0.342 — nascondi la band-bar interna quando un'altra (es. DX-Pedition ROW2) e' gia' presente.
     property bool showBandBar: true
 
@@ -380,7 +383,13 @@ Item {
     }
 
     // Style properties
-    property color glassBg: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.85)
+    property color glassBg: txPanel.detachedSurface && engine
+                            && engine.themeManager.isGlassTheme
+                            && engine.themeManager.glassTransparencySupported
+                            ? Qt.rgba(engine.themeManager.panelColor.r,
+                                      engine.themeManager.panelColor.g,
+                                      engine.themeManager.panelColor.b, 0.30)
+                            : bgDeep
     property color glassBorder: bridge.themeManager.glassBorder
     property color primaryBlue: bridge.themeManager.primaryColor
     property color secondaryCyan: bridge.themeManager.secondaryColor
@@ -1518,7 +1527,7 @@ Item {
                                 function activate(mouse) {
                                     if (!engine) return
                                     if (!engine.txEnabled) {
-                                        engine.txEnabled = true
+                                        engine.requestManualTxEnable()
                                     } else if (engine.autoCqRepeat) {
                                         return
                                     } else {
@@ -2429,7 +2438,7 @@ Item {
         }
     }
 
-    Window {
+    GlassWindow {
         id: logConfirmPopup
         visible: false
         transientParent: txPanel.Window.window

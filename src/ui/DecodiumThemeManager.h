@@ -42,6 +42,10 @@ class DecodiumThemeManager : public QObject
     Q_PROPERTY(QString currentTheme  READ currentTheme   WRITE setCurrentTheme NOTIFY currentThemeChanged)
     Q_PROPERTY(bool   isLightTheme   READ isLightTheme   NOTIFY paletteChanged)
     Q_PROPERTY(bool   isGlassTheme   READ isGlassTheme   NOTIFY paletteChanged)
+    // True when Qt is running on a desktop platform that can present an
+    // alpha-capable top-level window.  Linux sessions without a compositor
+    // can opt into the opaque fallback through DECODIUM_FORCE_OPAQUE_GLASS.
+    Q_PROPERTY(bool   glassTransparencySupported READ glassTransparencySupported CONSTANT)
     // 1.0.305 (#6) — colori UI personalizzati (sfondo + testo) come in v3, sopra il tema.
     Q_PROPERTY(bool    customColorsEnabled READ customColorsEnabled WRITE setCustomColorsEnabled NOTIFY paletteChanged)
     Q_PROPERTY(QString customBgColor       READ customBgColor       WRITE setCustomBgColor       NOTIFY paletteChanged)
@@ -89,6 +93,7 @@ public:
     void setCurrentTheme(const QString& name);
     bool isLightTheme() const;
     bool isGlassTheme() const { return m_currentTheme == QStringLiteral("Liquid Glass"); }
+    bool glassTransparencySupported() const;
 
     // Decode colours intended for light surfaces.  The normal WSJT-X palette
     // is optimised for dark backgrounds and its lime/yellow values become

@@ -68,7 +68,12 @@ Dialog {
 
     // Colors
     property color bgDeep: engine ? engine.themeManager.bgDeep : "#0b1220"
-    property color bgPanel: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
+    property color bgPanel: engine && engine.themeManager.isGlassTheme
+                            && engine.themeManager.glassTransparencySupported
+                            ? Qt.rgba(engine.themeManager.panelColor.r,
+                                      engine.themeManager.panelColor.g,
+                                      engine.themeManager.panelColor.b, 0.58)
+                            : Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
     property color accentGreen: engine ? engine.themeManager.accentColor : "#2ecc71"
     property color secondaryCyan: engine ? engine.themeManager.secondaryColor : "#00d8ff"
     property color warningOrange: engine ? engine.themeManager.warningColor : "#ff9800"
@@ -237,7 +242,7 @@ Dialog {
 
     header: Rectangle {
         height: 50
-        color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.95)
+        color: mamWindow.bgPanel
         radius: 8
 
         MouseArea {

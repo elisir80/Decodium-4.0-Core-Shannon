@@ -638,7 +638,7 @@ SettingsPageScroll {
             contentItem: Text { text: contestCombo.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter }
             delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12 }
                 background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
-            popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
+            popup.background: Rectangle { color: dialog && dialog.dialogSurface ? dialog.dialogSurface : bgDeep; border.color: glassBorder; radius: 4 }
         }
 
         Text { text: qsTr("FD Exchange:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }

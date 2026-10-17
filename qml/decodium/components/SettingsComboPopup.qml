@@ -31,7 +31,12 @@ Popup {
     onOpened: comboPopupList.forceActiveFocus()
 
     background: Rectangle {
-        color: "#080b12"
+        color: bridge && bridge.themeManager && bridge.themeManager.isGlassTheme
+               && bridge.themeManager.glassTransparencySupported
+               ? Qt.rgba(bridge.themeManager.panelColor.r,
+                         bridge.themeManager.panelColor.g,
+                         bridge.themeManager.panelColor.b, 0.58)
+               : "#080b12"
         border.color: "#334455"
         radius: 4
     }

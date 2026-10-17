@@ -6,12 +6,14 @@ import QtQuick.Controls
 import QtQuick.Controls.Material
 import QtQuick.Layouts
 import QtQuick.Window
+import ".."
 
-Window {
+GlassWindow {
     id: win
 
     property var engine: null
     readonly property var theme: win.engine ? win.engine.themeManager : null
+    themeManagerOverride: win.theme
     readonly property color bg: theme ? theme.bgDeep : "#091118"
     readonly property color panel: theme ? theme.panelColor : "#111c25"
     readonly property color border: theme ? theme.borderColor : "#273946"
@@ -49,7 +51,7 @@ Window {
     height: 740
     minimumWidth: 1040
     minimumHeight: 700
-    color: bg
+    color: transparentCorners ? "transparent" : glassSurfaceColor
 
     onClosing: function(close) {
         // A requested session may be in Error and therefore not "active".
@@ -70,7 +72,12 @@ Window {
 
     Rectangle {
         anchors.fill: parent
-        color: win.bg
+        // Keep the workspace surface translucent in Liquid Glass mode.  The
+        // opaque fallback is retained for classic themes and Linux compositors
+        // that cannot expose a transparent top-level window.
+        color: win.theme && win.theme.isGlassTheme && win.theme.glassTransparencySupported
+               ? Qt.rgba(win.bg.r, win.bg.g, win.bg.b, 0.72)
+               : win.bg
 
         ColumnLayout {
             anchors.fill: parent

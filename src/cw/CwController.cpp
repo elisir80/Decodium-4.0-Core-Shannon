@@ -289,6 +289,14 @@ void CwController::clearDecoder()
     emit decoderChanged();
 }
 
+void CwController::clearTxTranscript()
+{
+    if (m_txText.isEmpty())
+        return;
+    m_txText.clear();
+    emit txTranscriptChanged();
+}
+
 void CwController::feedRxAudio(const QVector<short>& samples, int sampleRate)
 {
     if (!m_decoderOn || samples.isEmpty())
@@ -675,6 +683,11 @@ void CwController::sendExpanded(const QString& ready)
     // (non lo dice nessuno) e a non lasciare un tasto acceso per sempre.
     const int ms = CwKeyer::millisFor(ready, m_wpm);
     const QString backend = effectiveBackend();
+    // Keep the expanded text, rather than the macro template, so the
+    // operator can see exactly what was submitted to the active CW path.
+    // This is intentionally an in-memory transcript: it is not persisted in
+    // the settings file and is bounded just like the RX decoder text.
+    appendTxTranscript(ready);
     if (m_rigActive || backend == QLatin1String("rigkey")) {
         if (m_rigActive) {
             // Another macro must not overwrite the message memory in flight.
@@ -848,6 +861,24 @@ void CwController::setSending(bool on, int macroIndex)
     m_sending = on;
     m_activeMacro = on ? macroIndex : -1;
     emit sendingChanged();
+}
+
+void CwController::appendTxTranscript(const QString& text)
+{
+    QString clean = text;
+    clean.replace(QRegularExpression(QStringLiteral("[\\r\\n]+")), QStringLiteral(" "));
+    clean = clean.trimmed();
+    if (clean.isEmpty())
+        return;
+
+    const QString line = QStringLiteral("[%1] %2")
+                             .arg(QDateTime::currentDateTime().toString(QStringLiteral("HH:mm:ss")), clean);
+    if (!m_txText.isEmpty())
+        m_txText += QLatin1Char('\n');
+    m_txText += line;
+    if (m_txText.size() > 4000)
+        m_txText = m_txText.right(3000);
+    emit txTranscriptChanged();
 }
 
 // ── macro ──────────────────────────────────────────────────────────────────

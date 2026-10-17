@@ -139,7 +139,7 @@ SettingsPageScroll {
                         id: decodeColorPresetPop
                         width: 232
                         height: 88
-                        background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 6 }
+                        background: Rectangle { color: dialog && dialog.dialogSurface ? dialog.dialogSurface : bgDeep; border.color: glassBorder; radius: 6 }
                         Flow {
                             anchors.fill: parent
                             anchors.margins: 8
@@ -267,7 +267,7 @@ SettingsPageScroll {
                         id: decodeBgPresetPop
                         width: 232
                         height: 88
-                        background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 6 }
+                        background: Rectangle { color: dialog && dialog.dialogSurface ? dialog.dialogSurface : bgDeep; border.color: glassBorder; radius: 6 }
                         Flow {
                             anchors.fill: parent
                             anchors.margins: 8
@@ -486,7 +486,7 @@ SettingsPageScroll {
             contentItem: Text { text: paletteCombo.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter }
             delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12 }
                 background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
-            popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
+            popup.background: Rectangle { color: dialog && dialog.dialogSurface ? dialog.dialogSurface : bgDeep; border.color: glassBorder; radius: 4 }
         }
 
         Text { text: qsTr("Black Level:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }

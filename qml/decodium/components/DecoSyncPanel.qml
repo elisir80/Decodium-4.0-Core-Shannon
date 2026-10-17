@@ -14,7 +14,14 @@ import QtQuick.Layouts
 
 Rectangle {
     id: root
-    color: Qt.rgba(0.06, 0.07, 0.10, 0.98)
+    readonly property bool liquidGlassEnabled: typeof bridge !== "undefined"
+        && bridge && bridge.themeManager && bridge.themeManager.isGlassTheme
+        && bridge.themeManager.glassTransparencySupported
+    color: liquidGlassEnabled
+           ? Qt.rgba(bridge.themeManager.panelColor.r,
+                     bridge.themeManager.panelColor.g,
+                     bridge.themeManager.panelColor.b, 0.42)
+           : Qt.rgba(0.06, 0.07, 0.10, 0.98)
     border.color: Qt.rgba(0.2, 0.55, 0.85, 0.55)
     border.width: 1
     radius: 6

@@ -111,6 +111,12 @@ Dialog {
     property color textPrimary: bridge.themeManager.textPrimary
     property color textSecondary: bridge.themeManager.textSecondary
     property color glassBorder: bridge.themeManager.glassBorder
+    readonly property color dialogSurface: bridge.themeManager.isGlassTheme
+                                          && bridge.themeManager.glassTransparencySupported
+                                          ? Qt.rgba(bridge.themeManager.panelColor.r,
+                                                    bridge.themeManager.panelColor.g,
+                                                    bridge.themeManager.panelColor.b, 0.58)
+                                          : Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
 
     // A Dialog hosted by a separate QQuickWindow does not inherit the
     // ApplicationWindow's attached Material palette on every platform.
@@ -119,7 +125,7 @@ Dialog {
     Material.primary: bridge.themeManager.secondaryColor
 
     background: Rectangle {
-        color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
+        color: astroWindow.dialogSurface
         border.color: secondaryCyan
         border.width: 2
         radius: 12

@@ -37,7 +37,12 @@ Dialog {
     }
 
     background: Rectangle {
-        color: bgDeep
+        color: bridge && bridge.themeManager && bridge.themeManager.isGlassTheme
+               && bridge.themeManager.glassTransparencySupported
+               ? Qt.rgba(bridge.themeManager.panelColor.r,
+                         bridge.themeManager.panelColor.g,
+                         bridge.themeManager.panelColor.b, 0.58)
+               : bgDeep
         border.color: secondaryCyan
         border.width: 1
         radius: 8

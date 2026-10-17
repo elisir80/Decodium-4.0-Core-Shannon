@@ -10,7 +10,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Window
 
-Window {
+GlassWindow {
     id: win
 
     readonly property var eng: (typeof appEngine !== 'undefined' ? appEngine : null)
@@ -40,7 +40,9 @@ Window {
     }
     readonly property var tm: eng ? eng.themeManager : null
     readonly property color cBg:      tm ? tm.bgDeep        : "#0a0f14"
-    readonly property color cPanel:   tm ? tm.panelColor    : "#111a22"
+    readonly property color cPanel:   tm && tm.isGlassTheme && tm.glassTransparencySupported
+                                       ? Qt.rgba(tm.panelColor.r, tm.panelColor.g, tm.panelColor.b, 0.58)
+                                       : (tm ? tm.panelColor : "#111a22")
     readonly property color cBorder:  tm ? tm.borderColor   : "#22303c"
     readonly property color cText:    tm ? tm.textPrimary   : "#dbe4ea"
     readonly property color cDim:     tm ? tm.textSecondary : "#7d8b96"
@@ -53,7 +55,7 @@ Window {
     height: 620
     minimumWidth: 520
     minimumHeight: 420
-    color: cBg
+    color: transparentCorners ? "transparent" : glassSurfaceColor
 
     // hasDecoPortPassword() e' un metodo: in un binding non si aggiornerebbe da
     // solo, quindi lo stato lo teniamo qui e lo rileggiamo dopo ogni azione.
@@ -143,7 +145,9 @@ Window {
         Layout.fillWidth: true
         implicitHeight: secCol.implicitHeight + 34
         radius: 8
-        color: win.cPanel
+        color: win.tm && win.tm.isGlassTheme && win.tm.glassTransparencySupported
+               ? Qt.rgba(win.cPanel.r, win.cPanel.g, win.cPanel.b, 0.58)
+               : win.cPanel
         border.color: win.cBorder
         border.width: 1
         ColumnLayout {

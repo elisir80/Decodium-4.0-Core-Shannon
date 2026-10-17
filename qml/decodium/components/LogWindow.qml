@@ -74,6 +74,12 @@ Popup {
     property color textSecondary: bridge.themeManager.textSecondary
     property color glassBorder: bridge.themeManager.glassBorder
     property color glassOverlay: bridge.themeManager.glassOverlay
+    readonly property color dialogSurface: bridge.themeManager.isGlassTheme
+                                          && bridge.themeManager.glassTransparencySupported
+                                          ? Qt.rgba(bridge.themeManager.panelColor.r,
+                                                    bridge.themeManager.panelColor.g,
+                                                    bridge.themeManager.panelColor.b, 0.58)
+                                          : Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
 
     // Layout constants
     readonly property int outerMargin: 10
@@ -364,7 +370,7 @@ Popup {
     Overlay.modal: Rectangle { color: "transparent" }
 
     background: Rectangle {
-        color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
+        color: logWindow.dialogSurface
         border.color: secondaryCyan
         border.width: 2
         radius: 10
@@ -397,6 +403,12 @@ Popup {
         anchors.centerIn: parent
         modal: true
         standardButtons: Dialog.Ok | Dialog.Cancel
+        background: Rectangle {
+            color: logWindow.dialogSurface
+            border.color: glassBorder
+            border.width: 1
+            radius: 8
+        }
 
         ColumnLayout {
             width: 300
@@ -441,6 +453,12 @@ Popup {
         modal: true
         standardButtons: Dialog.Yes | Dialog.No
         property var profile: ({})
+        background: Rectangle {
+            color: logWindow.dialogSurface
+            border.color: glassBorder
+            border.width: 1
+            radius: 8
+        }
 
         ColumnLayout {
             width: 430
@@ -496,6 +514,12 @@ Popup {
         anchors.centerIn: parent
         modal: true
         standardButtons: Dialog.Yes | Dialog.No
+        background: Rectangle {
+            color: logWindow.dialogSurface
+            border.color: glassBorder
+            border.width: 1
+            radius: 8
+        }
 
         property string deleteCall: ""
         property string deleteDateTime: ""
@@ -521,7 +545,7 @@ Popup {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 42
-            color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.95)
+            color: logWindow.dialogSurface
             radius: 10
 
             MouseArea {
@@ -1052,7 +1076,7 @@ Popup {
                         }
                         background: Rectangle {
                             implicitWidth: 150
-                            color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
+                            color: logWindow.dialogSurface
                             border.color: glassBorder
                             radius: 6
                         }

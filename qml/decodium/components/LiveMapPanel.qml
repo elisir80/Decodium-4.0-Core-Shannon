@@ -9,9 +9,14 @@ Rectangle {
     id: root
     required property var engine
 
-    color: "transparent"
+    // Only the detached GlassWindow may reveal the desktop.  The embedded
+    // dashboard panel must remain an opaque, readable surface.
+    color: root.detached ? "transparent" : root.bgDeep
     property bool detachable: false
     property bool detached: false
+    // Set by the detached host so the visible Live Map header can start a
+    // native system move after the host becomes frameless for real alpha.
+    property var detachedWindow: null
     signal detachRequested()
 
     property color bgDeep: engine ? engine.themeManager.bgDeep : "#0b1220"
@@ -28,6 +33,14 @@ Rectangle {
     property var baseMapService: mapLayers ? mapLayers.baseMapService : null
     property var externalOverlays: mapLayers ? mapLayers.externalOverlayService : null
     property var mapOperations: mapLayers ? mapLayers.operationsService : null
+    readonly property bool liquidGlassTheme: root.detached && !!(engine && engine.themeManager
+                                                && engine.themeManager.isGlassTheme
+                                                && engine.themeManager.glassTransparencySupported)
+    // The map renderer owns an opaque-looking scene of its own.  In Liquid
+    // Glass it must participate in the window translucency as well, otherwise
+    // only the shell around the map is translucent and the effect disappears
+    // in the Live Map pop-out.  Classic themes retain full opacity.
+    readonly property real mapSurfaceOpacity: root.liquidGlassTheme ? 0.30 : 1.0
     // Values from older INI files can arrive as strings (for example
     // "false" on some Linux installations).  !! would turn any non-empty
     // string into true, so use the same strict conversion as other settings.
@@ -842,7 +855,9 @@ Rectangle {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 28
-            color: Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.16)
+            color: root.liquidGlassTheme
+                   ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.10)
+                   : root.bgDeep
             radius: 4
             border.color: Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.35)
             border.width: 1
@@ -1086,12 +1101,32 @@ Rectangle {
                     color: textSecondary
                 }
             }
+
+            // Frameless detached windows do not have an OS title bar. Keep a
+            // small, non-invasive drag area over the title only; the zoom and
+            // layer controls remain fully interactive. This MouseArea is kept
+            // outside the RowLayout so Qt does not report undefined anchors.
+            MouseArea {
+                visible: root.detached && !!root.detachedWindow
+                width: 170
+                height: parent.height
+                anchors.left: parent.left
+                anchors.verticalCenter: parent.verticalCenter
+                cursorShape: Qt.OpenHandCursor
+                onPressed: {
+                    if (root.detachedWindow
+                            && typeof root.detachedWindow.startSystemMove === "function")
+                        root.detachedWindow.startSystemMove()
+                }
+            }
         }
 
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 32
-            color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.78)
+            color: root.liquidGlassTheme
+                   ? Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.24)
+                   : root.bgDeep
             border.color: Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.22)
             border.width: 1
             radius: 4
@@ -1283,7 +1318,9 @@ Rectangle {
         Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.5)
+            color: root.liquidGlassTheme
+                   ? Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.16)
+                   : root.bgDeep
             border.color: Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.35)
             border.width: 1
             radius: 4
@@ -1301,6 +1338,7 @@ Rectangle {
                 anchors.rightMargin: intelligencePanel.visible && !root.compactIntelligencePanel
                     ? intelligencePanel.width + 8 : 2
                 active: root.visible
+                opacity: root.mapSurfaceOpacity
                 sourceComponent: root.gpuLiveMapEnabled ? gpuWorldMapComponent : painterWorldMapComponent
                 onLoaded: {
                     // A custom build may not contain the QSB greyline shader.
@@ -1326,6 +1364,7 @@ Rectangle {
                 Component {
                     id: painterWorldMapComponent
                     WorldMapItem {
+                        opacity: root.mapSurfaceOpacity
                         onContactClicked: function(call, grid) {
                             if (root.engine)
                                 root.engine.processMapContactClick(call, grid)
@@ -1356,6 +1395,7 @@ Rectangle {
                 Component {
                     id: gpuWorldMapComponent
                     WorldMapGpuItem {
+                        opacity: root.mapSurfaceOpacity
                         onContactClicked: function(call, grid) {
                             if (root.engine)
                                 root.engine.processMapContactClick(call, grid)
@@ -1395,7 +1435,8 @@ Rectangle {
                 width: Math.min(330, parent.width - 16)
                 height: 214
                 radius: 4
-                color: Qt.rgba(root.bgDeep.r, root.bgDeep.g, root.bgDeep.b, 0.97)
+                color: Qt.rgba(root.bgDeep.r, root.bgDeep.g, root.bgDeep.b,
+                               root.liquidGlassTheme ? 0.48 : 0.97)
                 border.width: 1
                 border.color: root.operationalValue("color")
                     || root.secondaryCyan
@@ -1586,7 +1627,8 @@ Rectangle {
                 width: Math.min(280, parent.width - 16)
                 height: root.selectedGeographicDetails.type === "earthquake" ? 156 : 104
                 radius: 4
-                color: Qt.rgba(root.bgDeep.r, root.bgDeep.g, root.bgDeep.b, 0.97)
+                color: Qt.rgba(root.bgDeep.r, root.bgDeep.g, root.bgDeep.b,
+                               root.liquidGlassTheme ? 0.48 : 0.97)
                 border.width: 1
                 border.color: root.selectedGeographicDetails.color
                     || root.secondaryCyan
@@ -1672,7 +1714,8 @@ Rectangle {
                 width: Math.min(272, parent.width - 16)
                 height: 94
                 radius: 4
-                color: Qt.rgba(root.bgDeep.r, root.bgDeep.g, root.bgDeep.b, 0.97)
+                color: Qt.rgba(root.bgDeep.r, root.bgDeep.g, root.bgDeep.b,
+                               root.liquidGlassTheme ? 0.48 : 0.97)
                 border.width: 1
                 border.color: root.hoveredGeographicDetails.color || "#ff9b4b"
 
@@ -1723,7 +1766,8 @@ Rectangle {
                 width: 232
                 height: root.hoveredGridDetails.split ? 108 : 94
                 radius: 4
-                color: Qt.rgba(root.bgDeep.r, root.bgDeep.g, root.bgDeep.b, 0.96)
+                color: Qt.rgba(root.bgDeep.r, root.bgDeep.g, root.bgDeep.b,
+                               root.liquidGlassTheme ? 0.48 : 0.96)
                 border.width: 1
                 border.color: root.secondaryCyan
 
@@ -1794,7 +1838,8 @@ Rectangle {
                 height: Math.max(190, Math.min(520, parent.height - 24))
                 radius: 4
                 clip: true
-                color: Qt.rgba(root.bgDeep.r, root.bgDeep.g, root.bgDeep.b, 0.97)
+                color: Qt.rgba(root.bgDeep.r, root.bgDeep.g, root.bgDeep.b,
+                               root.liquidGlassTheme ? 0.48 : 0.97)
                 border.width: 1
                 border.color: root.secondaryCyan
                 Material.theme: Material.Dark
@@ -1916,7 +1961,10 @@ Rectangle {
                                     width: gridLiveList.width
                                     height: 62
                                     radius: 3
-                                    color: index % 2 ? "#101a28" : "#0d2430"
+                                    color: root.liquidGlassTheme
+                                           ? Qt.rgba(root.bgDeep.r, root.bgDeep.g,
+                                                     root.bgDeep.b, index % 2 ? 0.30 : 0.40)
+                                           : (index % 2 ? "#101a28" : "#0d2430")
                                     border.width: modelData.isCq ? 1 : 0
                                     border.color: modelData.isCq
                                         ? root.accentGreen : "transparent"
@@ -2119,7 +2167,9 @@ Rectangle {
                 visible: root.intelligencePanelRequested
                 z: 4
                 color: Qt.rgba(root.bgDeep.r, root.bgDeep.g, root.bgDeep.b,
-                               root.compactIntelligencePanel ? 0.97 : 0.92)
+                               root.liquidGlassTheme
+                               ? (root.compactIntelligencePanel ? 0.56 : 0.48)
+                               : 1.0)
                 border.color: Qt.rgba(root.secondaryCyan.r, root.secondaryCyan.g,
                                       root.secondaryCyan.b, 0.48)
                 border.width: 1
@@ -4106,7 +4156,9 @@ Rectangle {
                                 Layout.preferredHeight: visible ? 96 : 0
                                 visible: root.showRosterColumns && !!root.mapLayers
                                 clip: true
-                                color: "#101a28"
+                                color: root.liquidGlassTheme
+                                       ? Qt.rgba(root.bgDeep.r, root.bgDeep.g, root.bgDeep.b, 0.34)
+                                       : "#101a28"
                                 border.width: 1
                                 border.color: root.glassBorder
                                 radius: 3
@@ -4154,7 +4206,9 @@ Rectangle {
                                 Layout.preferredHeight: visible ? 176 : 0
                                 visible: root.showRosterMatrix && !!root.mapLayers
                                 clip: true
-                                color: "#101a28"
+                                color: root.liquidGlassTheme
+                                       ? Qt.rgba(root.bgDeep.r, root.bgDeep.g, root.bgDeep.b, 0.34)
+                                       : "#101a28"
                                 border.width: 1
                                 border.color: root.glassBorder
                                 radius: 3
@@ -4265,7 +4319,9 @@ Rectangle {
                                 Layout.preferredHeight: visible ? 156 : 0
                                 visible: root.showRosterRules && !!root.mapLayers
                                 clip: true
-                                color: "#101a28"
+                                color: root.liquidGlassTheme
+                                       ? Qt.rgba(root.bgDeep.r, root.bgDeep.g, root.bgDeep.b, 0.34)
+                                       : "#101a28"
                                 border.width: 1
                                 border.color: root.glassBorder
                                 radius: 3

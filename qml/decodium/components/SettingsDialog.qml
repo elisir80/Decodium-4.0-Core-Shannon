@@ -1368,6 +1368,12 @@ Dialog {
     property color textSecondary: bridge.themeManager.textSecondary
     property color textDim:       Qt.rgba(textSecondary.r, textSecondary.g, textSecondary.b, 0.55)
     property color glassBorder:   bridge.themeManager.glassBorder
+    readonly property color dialogSurface: bridge.themeManager.isGlassTheme
+                                          && bridge.themeManager.glassTransparencySupported
+                                          ? Qt.rgba(bridge.themeManager.panelColor.r,
+                                                    bridge.themeManager.panelColor.g,
+                                                    bridge.themeManager.panelColor.b, 0.58)
+                                          : Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
     readonly property int controlHeight: Qt.platform.os === "linux" ? 36 : 32
     readonly property int controlFontSize: 12
     readonly property int controlVerticalPadding: Qt.platform.os === "linux" ? 1 : 0
@@ -1413,7 +1419,7 @@ Dialog {
         onOpened: fontSearchField.forceActiveFocus()
 
         background: Rectangle {
-            color: bgDeep
+            color: settingsDialog.dialogSurface
             border.color: secondaryCyan
             border.width: 1
             radius: 8
@@ -1595,7 +1601,7 @@ Dialog {
     }
 
     background: Rectangle {
-        color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
+        color: settingsDialog.dialogSurface
         border.color: secondaryCyan; border.width: 2; radius: 12
 
         // Keep this dialog compatible with the Linux Qt 6.4 AppImage runtime.

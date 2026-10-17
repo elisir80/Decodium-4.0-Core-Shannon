@@ -159,7 +159,7 @@ SettingsPageScroll {
             delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12; elide: Text.ElideRight }
                 background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
             popup.width: Math.max(audioInDevCombo.width, 560)
-            popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
+            popup.background: Rectangle { color: dialog && dialog.dialogSurface ? dialog.dialogSurface : bgDeep; border.color: glassBorder; radius: 4 }
             hoverEnabled: true
             ToolTip.visible: hovered && Qt.platform.os === "linux"
             ToolTip.delay: 600
@@ -179,7 +179,7 @@ SettingsPageScroll {
             contentItem: Text { text: audioInChCombo.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter }
             delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12 }
                 background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
-            popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
+            popup.background: Rectangle { color: dialog && dialog.dialogSurface ? dialog.dialogSurface : bgDeep; border.color: glassBorder; radius: 4 }
         }
         Item { Layout.columnSpan: 2 }
 
@@ -201,7 +201,7 @@ SettingsPageScroll {
             delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12; elide: Text.ElideRight }
                 background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
             popup.width: Math.max(audioOutDevCombo.width, 560)
-            popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
+            popup.background: Rectangle { color: dialog && dialog.dialogSurface ? dialog.dialogSurface : bgDeep; border.color: glassBorder; radius: 4 }
         }
         Text { text: qsTr("Output Channel:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
         DecoComboBox {
@@ -217,7 +217,7 @@ SettingsPageScroll {
             contentItem: Text { text: audioOutChCombo.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter }
             delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12 }
                 background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
-            popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
+            popup.background: Rectangle { color: dialog && dialog.dialogSurface ? dialog.dialogSurface : bgDeep; border.color: glassBorder; radius: 4 }
         }
         Item { Layout.columnSpan: 2 }
 
@@ -289,7 +289,7 @@ SettingsPageScroll {
             delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12; elide: Text.ElideRight }
                 background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
             popup.width: Math.max(rtlDeviceCombo.width, 500)
-            popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
+            popup.background: Rectangle { color: dialog && dialog.dialogSurface ? dialog.dialogSurface : bgDeep; border.color: glassBorder; radius: 4 }
         }
 
         Text { text: qsTr("Input mode:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
@@ -328,7 +328,7 @@ SettingsPageScroll {
                 opacity: enabled ? 1.0 : 0.45
                 contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12 }
                 background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
-            popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
+            popup.background: Rectangle { color: dialog && dialog.dialogSurface ? dialog.dialogSurface : bgDeep; border.color: glassBorder; radius: 4 }
             ToolTip.visible: hovered
             ToolTip.text: !directSamplingAvailable
                           ? qsTr("Uses the tuner path. RTL-SDR Blog V4 handles its HF upconverter automatically.")
@@ -373,7 +373,7 @@ SettingsPageScroll {
             contentItem: Text { text: rtlDemodCombo.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
             delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12; elide: Text.ElideRight }
                 background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
-            popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
+            popup.background: Rectangle { color: dialog && dialog.dialogSurface ? dialog.dialogSurface : bgDeep; border.color: glassBorder; radius: 4 }
             ToolTip.visible: hovered
             ToolTip.text: currentIndex === 0
                           ? qsTr("Sends decoder PCM only to Decodium's weak-signal modes; the RF panadapter remains IQ-based.")
@@ -474,7 +474,7 @@ SettingsPageScroll {
                     contentItem: Text { text: rtlIfSidebandCombo.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter }
                     delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12 }
                         background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
-                    popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
+                    popup.background: Rectangle { color: dialog && dialog.dialogSurface ? dialog.dialogSurface : bgDeep; border.color: glassBorder; radius: 4 }
                     ToolTip.visible: hovered
                     ToolTip.text: qsTr("Automatic uses LSB only with the LSB demodulator; weak-signal modes such as FT8 use USB.")
                 }
@@ -574,7 +574,7 @@ SettingsPageScroll {
             delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12; elide: Text.ElideRight }
                 background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
             popup.width: Math.max(rtlAudioOutputCombo.width, 560)
-            popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
+            popup.background: Rectangle { color: dialog && dialog.dialogSurface ? dialog.dialogSurface : bgDeep; border.color: glassBorder; radius: 4 }
             ToolTip.visible: hovered
             ToolTip.text: qsTr("System default normally selects the computer speakers and is independent from Decodium's TX audio output.")
         }
@@ -620,7 +620,7 @@ SettingsPageScroll {
             contentItem: Text { text: rtlSampleRateCombo.displayText + " sps"; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter }
             delegate: ItemDelegate { contentItem: Text { text: modelData + " sps"; color: textPrimary; font.pixelSize: 12 }
                 background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
-            popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
+            popup.background: Rectangle { color: dialog && dialog.dialogSurface ? dialog.dialogSurface : bgDeep; border.color: glassBorder; radius: 4 }
         }
 
         Text {
@@ -750,7 +750,7 @@ SettingsPageScroll {
             contentItem: Text { text: rtlSsbBandwidthCombo.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter }
             delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12 }
                 background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
-            popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
+            popup.background: Rectangle { color: dialog && dialog.dialogSurface ? dialog.dialogSurface : bgDeep; border.color: glassBorder; radius: 4 }
             ToolTip.visible: hovered
             ToolTip.text: qsTr("Post-demodulation audio filter only. It does not change the radio dial or RTL-SDR tuning.")
         }
@@ -783,7 +783,7 @@ SettingsPageScroll {
             contentItem: Text { text: rtlSsbAgcCombo.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter }
             delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12 }
                 background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
-            popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
+            popup.background: Rectangle { color: dialog && dialog.dialogSurface ? dialog.dialogSurface : bgDeep; border.color: glassBorder; radius: 4 }
             ToolTip.visible: hovered
             ToolTip.text: qsTr("Adjusts listening level after SSB demodulation. Off preserves the raw receiver level.")
         }
@@ -847,7 +847,7 @@ SettingsPageScroll {
             contentItem: Text { text: rtlSsbNoiseReductionCombo.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter }
             delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12 }
                 background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
-            popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
+            popup.background: Rectangle { color: dialog && dialog.dialogSurface ? dialog.dialogSurface : bgDeep; border.color: glassBorder; radius: 4 }
             ToolTip.visible: hovered
             ToolTip.text: qsTr("Adaptive speech gate for background noise in pauses. It never affects digital-mode decoder audio.")
         }

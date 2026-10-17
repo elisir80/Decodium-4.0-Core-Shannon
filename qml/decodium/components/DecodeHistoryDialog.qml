@@ -13,7 +13,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Window
 
-Window {
+GlassWindow {
     id: historyDialog
     title: qsTr("Decode History (DB)")
     width: 1100
@@ -26,7 +26,7 @@ Window {
     flags: Qt.Window | Qt.WindowTitleHint | Qt.WindowSystemMenuHint
          | Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint
          | Qt.WindowCloseButtonHint
-    color: "#1a1a2e"
+    color: transparentCorners ? "transparent" : glassSurfaceColor
 
     readonly property color cAccent:  "#3a9dff"
     readonly property color cGreen:   "#3acb6c"
@@ -100,7 +100,8 @@ Window {
 
     Rectangle {
         anchors.fill: parent
-        color: historyDialog.color
+        color: historyDialog.glassTheme && historyDialog.glassTransparencySupported
+               ? historyDialog.glassSurfaceColor : historyDialog.color
 
         ColumnLayout {
             anchors.fill: parent

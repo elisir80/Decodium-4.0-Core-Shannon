@@ -33,8 +33,20 @@ Rectangle {
     property color textSecondary: bridge.themeManager.textSecondary
     property color glassBorder:   bridge.themeManager.glassBorder
     property color warningOrange: bridge.themeManager.warningColor
+    readonly property bool glassSurfaceEnabled: !root.embedded && bridge.themeManager
+                                                && bridge.themeManager.isGlassTheme
+                                                && bridge.themeManager.glassTransparencySupported
 
-    color:         Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.93)
+    // The window shell can be transparent while this panel is still opaque.
+    // Keep the content surface translucent as well, otherwise DX Cluster
+    // visually masks the spectrum behind it.
+    color:         root.embedded
+                   ? root.bgDeep
+                   : root.glassSurfaceEnabled
+                   ? Qt.rgba(bridge.themeManager.panelColor.r,
+                             bridge.themeManager.panelColor.g,
+                             bridge.themeManager.panelColor.b, 0.30)
+                   : Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.93)
     border.color:  glassBorder
     border.width:  1
     radius:        8
@@ -297,7 +309,11 @@ Rectangle {
                     wrapMode: Text.WordWrap
                 }
                 background: Rectangle {
-                    color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.95)
+                    color: root.glassTheme && root.glassTransparencySupported
+                           ? Qt.rgba(root.bridge.themeManager.panelColor.r,
+                                     root.bridge.themeManager.panelColor.g,
+                                     root.bridge.themeManager.panelColor.b, 0.48)
+                           : Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.95)
                     border.color: secondaryCyan; radius: 4
                 }
             }

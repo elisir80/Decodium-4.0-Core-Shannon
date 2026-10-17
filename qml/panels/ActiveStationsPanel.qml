@@ -7,7 +7,14 @@ Rectangle {
     id: activePanel
     signal closeRequested()
     property var nativeHostWindow: null
-    color: Qt.rgba(0, 0, 0, 0.75)
+    readonly property bool liquidGlassEnabled: typeof bridge !== "undefined"
+        && bridge && bridge.themeManager && bridge.themeManager.isGlassTheme
+        && bridge.themeManager.glassTransparencySupported
+    color: liquidGlassEnabled
+           ? Qt.rgba(bridge.themeManager.panelColor.r,
+                     bridge.themeManager.panelColor.g,
+                     bridge.themeManager.panelColor.b, 0.42)
+           : Qt.rgba(0, 0, 0, 0.75)
     border.color: Qt.rgba(0, 188, 212, 0.4)
     border.width: 1
     radius: 6

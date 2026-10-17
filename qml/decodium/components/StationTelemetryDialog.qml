@@ -22,12 +22,19 @@ Dialog {
     property color bgDeep: "#1a1a2e"
     property color accentCyan: "#00d9ff"
     property color textSecondary: "#9aa6b8"
+    readonly property color dialogSurface: bridge && bridge.themeManager
+                                           && bridge.themeManager.isGlassTheme
+                                           && bridge.themeManager.glassTransparencySupported
+                                           ? Qt.rgba(bridge.themeManager.panelColor.r,
+                                                     bridge.themeManager.panelColor.g,
+                                                     bridge.themeManager.panelColor.b, 0.58)
+                                           : bgDeep
 
     // Impostata da chi apre il dialog prima di chiamare open().
     property var fields: ({})
 
     background: Rectangle {
-        color: telemetryDialog.bgDeep
+        color: telemetryDialog.dialogSurface
         radius: 12
         border.color: telemetryDialog.accentCyan
         border.width: 1

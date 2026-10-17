@@ -18,6 +18,9 @@ Item {
 
     // The host owns desktop geometry; this item only fills its content area.
     property var nativeHostWindow: null
+    readonly property bool liquidGlassEnabled: typeof bridge !== "undefined"
+        && bridge && bridge.themeManager && bridge.themeManager.isGlassTheme
+        && bridge.themeManager.glassTransparencySupported
 
     readonly property int faceWidth: 900
     readonly property int faceHeight: 420
@@ -74,7 +77,11 @@ Item {
     readonly property color colLabel:    "#8A939C"
     readonly property color colDim:      "#4E5A63"
     readonly property color colEdge:     "#262D34"
-    readonly property color colPanel:    "#14181D"
+    readonly property color colPanel:    liquidGlassEnabled
+                                         ? Qt.rgba(bridge.themeManager.panelColor.r,
+                                                   bridge.themeManager.panelColor.g,
+                                                   bridge.themeManager.panelColor.b, 0.40)
+                                         : "#14181D"
 
     // ---------------------------------------------------------------- misure
     // Sorgenti reali. Nessun valore viene inventato: se il rig non fornisce
@@ -461,9 +468,9 @@ Item {
                 border.color: "#23292F"
                 border.width: 1
                 gradient: Gradient {
-                    GradientStop { position: 0.0;  color: "#171B21" }
-                    GradientStop { position: 0.55; color: "#12161B" }
-                    GradientStop { position: 1.0;  color: "#101418" }
+                    GradientStop { position: 0.0;  color: decometerWindow.liquidGlassEnabled ? Qt.rgba(0.09, 0.11, 0.14, 0.40) : "#171B21" }
+                    GradientStop { position: 0.55; color: decometerWindow.liquidGlassEnabled ? Qt.rgba(0.07, 0.09, 0.11, 0.36) : "#12161B" }
+                    GradientStop { position: 1.0;  color: decometerWindow.liquidGlassEnabled ? Qt.rgba(0.06, 0.08, 0.10, 0.40) : "#101418" }
                 }
             }
 

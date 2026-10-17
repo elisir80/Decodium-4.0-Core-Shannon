@@ -41,6 +41,12 @@ Dialog {
     property color textPrimary: theme ? theme.textPrimary : "#e6edf3"
     property color textSecondary: theme ? theme.textSecondary : "#8b949e"
     property color glassBorder: theme ? theme.glassBorder : Qt.rgba(1, 1, 1, 0.12)
+    readonly property color dialogSurface: theme && theme.isGlassTheme
+                                           && theme.glassTransparencySupported
+                                           ? Qt.rgba(theme.panelColor.r,
+                                                     theme.panelColor.g,
+                                                     theme.panelColor.b, 0.58)
+                                           : bgDeep
 
     Material.theme: theme && theme.isLightTheme ? Material.Light : Material.Dark
     Material.accent: primaryBlue
@@ -54,7 +60,7 @@ Dialog {
     height: Math.max(320, Math.min(560, spazioAltezza - 48))
 
     background: Rectangle {
-        color: bgDeep
+        color: updateDialog.dialogSurface
         radius: 12
         border.color: glassBorder
         border.width: 1

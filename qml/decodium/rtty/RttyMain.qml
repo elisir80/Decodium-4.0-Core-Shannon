@@ -3,10 +3,11 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Controls.Material
 import QtQuick.Layouts
+import "../components"
 
 import "."
 
-ApplicationWindow {
+GlassApplicationWindow {
     id: window
 
     // Sized against the screen rather than assumed: on a 200% display the
@@ -20,7 +21,10 @@ ApplicationWindow {
     minimumHeight: 440
     visible: false
     title: qsTr("RTTY") + " — " + (radio.connected ? radio.radioName : qsTr("Audio only — no CAT"))
-    color: Theme.bgDeep
+    themeManagerOverride: tm
+    color: transparentCorners ? "transparent" : (tm && tm.isGlassTheme && tm.glassTransparencySupported
+                                                    ? Qt.rgba(tm.panelColor.r, tm.panelColor.g, tm.panelColor.b, 0.58)
+                                                    : Theme.bgDeep)
 
     // Il tema dei controlli va rimesso qui. Le proprieta' Material si
     // attaccano all'albero di UNA finestra e non passano a un'altra: Decodium
@@ -75,9 +79,24 @@ ApplicationWindow {
     Rectangle {
         anchors.fill: parent
         gradient: Gradient {
-            GradientStop { position: 0.0; color: Theme.bgDeep }
-            GradientStop { position: 0.55; color: Qt.darker(Theme.bgMedium, 1.25) }
-            GradientStop { position: 1.0; color: Theme.bgDeep }
+            GradientStop {
+                position: 0.0
+                color: tm && tm.isGlassTheme
+                       ? Qt.rgba(Theme.bgDeep.r, Theme.bgDeep.g, Theme.bgDeep.b, 0.72)
+                       : Theme.bgDeep
+            }
+            GradientStop {
+                position: 0.55
+                color: tm && tm.isGlassTheme
+                       ? Qt.rgba(Theme.bgMedium.r, Theme.bgMedium.g, Theme.bgMedium.b, 0.62)
+                       : Qt.darker(Theme.bgMedium, 1.25)
+            }
+            GradientStop {
+                position: 1.0
+                color: tm && tm.isGlassTheme
+                       ? Qt.rgba(Theme.bgDeep.r, Theme.bgDeep.g, Theme.bgDeep.b, 0.72)
+                       : Theme.bgDeep
+            }
         }
     }
 

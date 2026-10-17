@@ -91,7 +91,7 @@ Item {
         if (!bridge.mamMultiStream)
             bridge.mamMultiStream = true
         if (!bridge.txEnabled)
-            bridge.txEnabled = true
+            bridge.requestManualTxEnable()
         if (!bridge.multiAnswerMode)
             bridge.multiAnswerMode = true
         if (!bridge.autoCqRepeat)

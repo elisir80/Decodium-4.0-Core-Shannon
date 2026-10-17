@@ -47,7 +47,7 @@ Item {
         return String(row.grid) + (row.gridMarker ? " " + row.gridMarker : "")
     }
 
-    Window {
+    GlassWindow {
         id: rosterWindow
         width: 620
         height: 680
@@ -55,7 +55,10 @@ Item {
         minimumHeight: 360
         visible: false
         title: qsTr("Map Roster - Decodium")
-        color: root.backgroundColor
+        color: rosterWindow.glassTheme && rosterWindow.glassTransparencySupported
+               ? Qt.rgba(root.backgroundColor.r, root.backgroundColor.g,
+                         root.backgroundColor.b, 0.58)
+               : root.backgroundColor
 
         ColumnLayout {
             anchors.fill: parent
@@ -145,7 +148,7 @@ Item {
         }
     }
 
-    Window {
+    GlassWindow {
         id: statisticsWindow
         width: 620
         height: 720
@@ -153,7 +156,10 @@ Item {
         minimumHeight: 360
         visible: false
         title: qsTr("Map Statistics - Decodium")
-        color: root.backgroundColor
+        color: statisticsWindow.glassTheme && statisticsWindow.glassTransparencySupported
+               ? Qt.rgba(root.backgroundColor.r, root.backgroundColor.g,
+                         root.backgroundColor.b, 0.58)
+               : root.backgroundColor
         MapStatisticsPanel {
             anchors.fill: parent
             anchors.margins: 10
@@ -168,7 +174,7 @@ Item {
         }
     }
 
-    Window {
+    GlassWindow {
         id: conditionsWindow
         width: 620
         height: 600
@@ -176,7 +182,10 @@ Item {
         minimumHeight: 320
         visible: false
         title: qsTr("Radio Conditions - Decodium")
-        color: root.backgroundColor
+        color: conditionsWindow.glassTheme && conditionsWindow.glassTransparencySupported
+               ? Qt.rgba(root.backgroundColor.r, root.backgroundColor.g,
+                         root.backgroundColor.b, 0.58)
+               : root.backgroundColor
 
         ColumnLayout {
             anchors.fill: parent

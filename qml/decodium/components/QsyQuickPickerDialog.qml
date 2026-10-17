@@ -13,7 +13,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Window
 
-Window {
+GlassWindow {
     id: qsyPickerDialog
     title: qsTr("QSY Quick Picker")
     width: 580
@@ -21,7 +21,7 @@ Window {
     minimumWidth: 420
     minimumHeight: 360
     flags: Qt.Dialog | Qt.WindowCloseButtonHint
-    color: "#1a1a2e"
+    color: transparentCorners ? "transparent" : glassSurfaceColor
 
     property var allRows: []
     property bool preferredOnly: true
@@ -67,7 +67,8 @@ Window {
 
     Rectangle {
         anchors.fill: parent
-        color: "#1a1a2e"
+        color: qsyPickerDialog.glassTheme && qsyPickerDialog.glassTransparencySupported
+               ? qsyPickerDialog.glassSurfaceColor : "#1a1a2e"
 
         ColumnLayout {
             anchors.fill: parent

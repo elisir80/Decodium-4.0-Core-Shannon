@@ -173,7 +173,19 @@ Rectangle {
     readonly property var cqTypeOptions: ["CQ", "CHAT", "NET", "EMCOMM", "TEST", "QSY"]
     readonly property var emailGatewaySecurityOptions: ["STARTTLS", "TLS", "NONE"]
 
-    readonly property color panelBg: Qt.rgba(0.025, 0.035, 0.045, 0.94)
+    // The same panel is used both in the dashboard and in the detachable
+    // FT2-Link window.  Keep the embedded instance opaque; otherwise the
+    // dashboard background bleeds through and the controls become difficult
+    // to read.  Only the pop-out instance opts into Liquid Glass.
+    readonly property bool liquidGlassEnabled: poppedOut
+        && typeof bridge !== "undefined"
+        && bridge && bridge.themeManager && bridge.themeManager.isGlassTheme
+        && bridge.themeManager.glassTransparencySupported
+    readonly property color panelBg: liquidGlassEnabled
+        ? Qt.rgba(bridge.themeManager.panelColor.r,
+                  bridge.themeManager.panelColor.g,
+                  bridge.themeManager.panelColor.b, 0.42)
+        : Qt.rgba(0.025, 0.035, 0.045, 0.94)
     readonly property color railBg: Qt.rgba(0.055, 0.070, 0.085, 0.96)
     readonly property color rowHover: Qt.rgba(0.18, 0.62, 0.72, 0.16)
     readonly property color rowSelect: Qt.rgba(0.10, 0.42, 0.50, 0.36)

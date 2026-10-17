@@ -14,6 +14,13 @@ ComboBox {
     property color textColor: textPrimary
     property color bgColor: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.9)
     property color borderColor: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.2)
+    readonly property color popupSurface: bridge && bridge.themeManager
+        && bridge.themeManager.isGlassTheme
+        && bridge.themeManager.glassTransparencySupported
+        ? Qt.rgba(bridge.themeManager.panelColor.r,
+                  bridge.themeManager.panelColor.g,
+                  bridge.themeManager.panelColor.b, 0.48)
+        : Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
     property int effectiveFontPixelSize: Math.max(font.pixelSize, 14)
     property int itemHeight: Math.max(42, effectiveFontPixelSize + 22)
     property int popupMinWidth: 180
@@ -114,7 +121,7 @@ ComboBox {
         onOpened: controlPopupList.forceActiveFocus()
 
         background: Rectangle {
-            color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
+            color: control.popupSurface
             border.color: control.accentColor
             border.width: 1
             radius: 6

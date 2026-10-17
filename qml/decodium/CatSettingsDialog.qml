@@ -18,16 +18,28 @@ Dialog {
     property color textSec:      (bridge && bridge.themeManager) ? bridge.themeManager.textSecondary : "#89B4D0"
     property color accent:       (bridge && bridge.themeManager) ? bridge.themeManager.primaryColor  : "#4A90E2"
     property color accentGreen:  (bridge && bridge.themeManager) ? bridge.themeManager.accentColor   : "#00FF88"
+    readonly property color dialogSurface: bridge && bridge.themeManager
+                                           && bridge.themeManager.isGlassTheme
+                                           && bridge.themeManager.glassTransparencySupported
+                                           ? Qt.rgba(bridge.themeManager.panelColor.r,
+                                                     bridge.themeManager.panelColor.g,
+                                                     bridge.themeManager.panelColor.b, 0.58)
+                                           : bgColor
 
     background: Rectangle {
-        color: bgColor
+        color: catDialog.dialogSurface
         border.color: accent
         border.width: 1
         radius: 8
     }
 
     header: Rectangle {
-        color: bgLight
+        color: bridge && bridge.themeManager && bridge.themeManager.isGlassTheme
+               && bridge.themeManager.glassTransparencySupported
+               ? Qt.rgba(bridge.themeManager.bgLight.r,
+                         bridge.themeManager.bgLight.g,
+                         bridge.themeManager.bgLight.b, 0.42)
+               : bgLight
         height: 40
         radius: 8
         Label {
@@ -158,7 +170,7 @@ Dialog {
                             ScrollBar.vertical: ScrollBar { policy: ScrollBar.AlwaysOn }
                         }
                     }
-                    background: Rectangle { color: bgColor; border.color: accent; radius: 4 }
+                    background: Rectangle { color: catDialog.dialogSurface; border.color: accent; radius: 4 }
                 }
             }
         }
@@ -205,7 +217,7 @@ Dialog {
                         model: portCombo.delegateModel
                         ScrollBar.vertical: ScrollBar {}
                     }
-                    background: Rectangle { color: bgColor; border.color: accent; radius: 4 }
+                    background: Rectangle { color: catDialog.dialogSurface; border.color: accent; radius: 4 }
                 }
                 Button {
                     anchors.right: parent.right

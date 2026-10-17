@@ -17,6 +17,13 @@ Dialog {
 
     property color bgDeep: "#1a1a2e"
     property color accentOrange: "#ff7814"
+    readonly property color dialogSurface: bridge && bridge.themeManager
+                                           && bridge.themeManager.isGlassTheme
+                                           && bridge.themeManager.glassTransparencySupported
+                                           ? Qt.rgba(bridge.themeManager.panelColor.r,
+                                                     bridge.themeManager.panelColor.g,
+                                                     bridge.themeManager.panelColor.b, 0.58)
+                                           : bgDeep
 
     // IU8LMC — Autodiagnosi. Lo storico dice che la grande maggioranza delle
     // segnalazioni NON sono bug (versione vecchia, orologio fuori sync, MAM
@@ -98,7 +105,7 @@ Dialog {
     }
 
     background: Rectangle {
-        color: bgDeep
+        color: bugDialog.dialogSurface
         radius: 12
         border.color: accentOrange
         border.width: 1

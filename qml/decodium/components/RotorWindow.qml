@@ -11,7 +11,7 @@ import QtQuick.Layouts
 import QtQuick.Window
 import "../rotor"
 
-ApplicationWindow {
+GlassApplicationWindow {
     id: window
 
     // Lo shack puo' avere un ultrawide scalato o un portatile: la finestra
@@ -21,7 +21,7 @@ ApplicationWindow {
     minimumWidth: 940
     minimumHeight: 600
     title: qsTr("Rotator - PRO.SIS.TEL control")
-    color: RotorTheme.bgDeep
+    color: transparentCorners ? "transparent" : glassSurfaceColor
 
     header: TopBar {}
     footer: StatusStrip {}

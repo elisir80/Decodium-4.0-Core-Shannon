@@ -1,6 +1,7 @@
 #include "DecodiumThemeManager.h"
 #include "DecodiumProfileSettings.h"
 
+#include <QGuiApplication>
 #include <QSettings>
 
 namespace
@@ -43,6 +44,35 @@ void setProfiledThemeValue(const QString& key,
     legacy.setValue(key, value);
     legacy.sync();
 }
+}
+
+bool DecodiumThemeManager::glassTransparencySupported() const
+{
+    // A deployment or a user can force the deterministic opaque fallback.
+    // This is useful for X11 sessions started without a compositor and for
+    // remote/virtual desktops that advertise alpha windows but render them
+    // as black surfaces.
+    if (qEnvironmentVariableIsSet("DECODIUM_FORCE_OPAQUE_GLASS"))
+        return false;
+
+    const QString platform = QGuiApplication::platformName().toLower();
+    if (platform.isEmpty() || platform == QStringLiteral("minimal")
+        || platform == QStringLiteral("offscreen")
+        || platform == QStringLiteral("minimalegl")) {
+        return false;
+    }
+
+#if defined(Q_OS_WIN) || defined(Q_OS_MACOS)
+    return true;
+#elif defined(Q_OS_LINUX)
+    // Wayland compositors are required to composite client surfaces.  X11
+    // is supported when a compositor is present; users of an uncomposited
+    // X11 desktop can use DECODIUM_FORCE_OPAQUE_GLASS.
+    return platform.startsWith(QStringLiteral("wayland"))
+        || platform.startsWith(QStringLiteral("xcb"));
+#else
+    return false;
+#endif
 }
 
 const DecodiumThemeManager::ThemePalette DecodiumThemeManager::s_oceanBlue {

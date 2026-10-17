@@ -25,7 +25,7 @@ Dialog {
     height: Math.min(520, Overlay.overlay ? Overlay.overlay.height - 24 : 520)
     padding: 0
 
-    background: GlassPanel { tintOpacity: 0.97 }
+    background: GlassPanel { tintOpacity: 0.58 }
 
     // Il contenuto scorre. Con un'altezza fissa quello che non entrava
     // spariva e basta: su uno schermo con la scalatura di Windows al 150% i

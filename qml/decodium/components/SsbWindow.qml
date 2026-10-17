@@ -4,7 +4,7 @@ import QtQuick.Controls.Material
 import QtQuick.Layouts
 import QtQuick.Window
 
-ApplicationWindow {
+GlassApplicationWindow {
     id: win
     readonly property var bridge: appEngine
     Material.theme: Material.Dark
@@ -12,7 +12,7 @@ ApplicationWindow {
     Material.primary: "#182632"
     title: qsTr("SSB — PC microphone")
     width: 1200; height: 820; minimumWidth: 760; minimumHeight: 560
-    color: "#101923"
+    color: transparentCorners ? "transparent" : glassSurfaceColor
     palette.windowText: "#eaf1f8"
     palette.text: "#eaf1f8"
     palette.buttonText: "#eaf1f8"
@@ -161,7 +161,13 @@ ApplicationWindow {
         }
     }
     footer: Frame {
-        background: Rectangle { color: "#101923" }
+        background: Rectangle {
+            color: win.glassTheme && win.glassTransparencySupported
+                   ? Qt.rgba(bridge.themeManager.bgMedium.r,
+                             bridge.themeManager.bgMedium.g,
+                             bridge.themeManager.bgMedium.b, 0.42)
+                   : "#101923"
+        }
         padding: 14
         ColumnLayout {
             anchors.fill: parent

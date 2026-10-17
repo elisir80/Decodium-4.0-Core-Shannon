@@ -11,7 +11,7 @@ import QtQuick.Window
 // import Qt.labs.settings 1.1  // non disponibile in questa build Qt
 import "components"
 
-ApplicationWindow {
+GlassApplicationWindow {
     id: mainWindow
     font.family: bridge ? bridge.fontSettingFamily("Font", Qt.platform.os === "windows" ? "Segoe UI" : (Qt.platform.os === "osx" ? "Helvetica Neue" : ""), 10)
                         : (Qt.platform.os === "windows" ? "Segoe UI" : (Qt.platform.os === "osx" ? "Helvetica Neue" : ""))
@@ -49,6 +49,12 @@ ApplicationWindow {
         modal: true
         standardButtons: Dialog.Yes | Dialog.No
         anchors.centerIn: parent
+        background: Rectangle {
+            color: mainWindow.glassDialogSurface(0.98)
+            border.color: accentOrange
+            border.width: 1
+            radius: 8
+        }
         Label {
             text: qsTr("Switch off the radio connected through Hamlib CAT?")
             wrapMode: Text.WordWrap
@@ -115,6 +121,10 @@ ApplicationWindow {
         + (dxpeditionModeLabel ? " [" + dxpeditionModeLabel + "]" : "")
         + " — " + (bridge ? bridge.callsign : "")
     property bool windowStateRestoreInProgress: true
+    // Do not present restored child windows while the startup splash is above
+    // the main scene.  A QWindow's explicit show() breaks its visible binding,
+    // so the guard is also used by the DX Cluster synchroniser below.
+    property bool startupPresentationFinished: false
     // Persist the native maximised state separately from the last usable
     // windowed geometry.  On Windows QWindow reports the maximised dimensions
     // through width/height; saving those as normal geometry reopens an
@@ -952,7 +962,8 @@ ApplicationWindow {
             settings.persistSettingsNow()
     }
 
-    function restoreFloatingWindowState(windowRef, key, detachedPropName, minimizedPropName) {
+    function restoreFloatingWindowState(windowRef, key, detachedPropName, minimizedPropName,
+                                        suppressVisibleRestore) {
         if (!windowRef)
             return {}
         var state = safeWindowState(key)
@@ -992,11 +1003,38 @@ ApplicationWindow {
             if (minimizedPropName) {
                 mainWindow[minimizedPropName] = minimized
             }
-            if (detached && !minimized) {
+            if (detached && !minimized && !suppressVisibleRestore) {
                 windowRef.visible = true
             }
         }
         return state
+    }
+
+    // Keep the Liquid Glass treatment consistent for detached surfaces.  The
+    // classic themes deliberately retain their previous opaque colours.
+    function glassWindowSurface(fallbackAlpha) {
+        if (bridge && bridge.themeManager && bridge.themeManager.isGlassTheme
+                && bridge.themeManager.glassTransparencySupported) {
+            var panel = bridge.themeManager.panelColor
+            // Detached wrappers used to be 96--98% opaque, which hid the
+            // alpha window completely (most noticeably in Live Map).  Keep
+            // enough contrast for controls while allowing the desktop/glass
+            // backdrop to remain visible.
+            var alpha = Math.min(0.30, panel.a)
+            return Qt.rgba(panel.r, panel.g, panel.b, alpha)
+        }
+        return Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, fallbackAlpha)
+    }
+
+    // Dialogs and popups are child surfaces. A solid child rectangle would
+    // hide the translucent native shell even when the window supports alpha.
+    function glassDialogSurface(fallbackAlpha) {
+        if (bridge && bridge.themeManager && bridge.themeManager.isGlassTheme
+                && bridge.themeManager.glassTransparencySupported) {
+            var panel = bridge.themeManager.panelColor
+            return Qt.rgba(panel.r, panel.g, panel.b, Math.min(0.30, panel.a))
+        }
+        return Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, fallbackAlpha)
     }
 
     function minimizeFloatingWindow(windowRef, minimizedPropName) {
@@ -1164,7 +1202,6 @@ ApplicationWindow {
         if (mamFloatingWindow) mamFloatingWindow.close()
         if (decometerFloatingWindow) decometerFloatingWindow.close()
         if (activeStationsFloatingWindow) activeStationsFloatingWindow.close()
-        if (logWindowLoader.item) logWindowLoader.item.close()
         closeLoaded(astroWindowLoader)
         closeLoaded(macroDialogLoader)
         if (txPanelFloatingWindow) txPanelFloatingWindow.close()
@@ -1816,8 +1853,6 @@ ApplicationWindow {
             shutdownLoader(settingsDialogLoader)
         if (typeof callsignLookupWindowLoader !== "undefined")
             shutdownLoader(callsignLookupWindowLoader)
-        if (typeof logWindowLoader !== "undefined")
-            shutdownLoader(logWindowLoader)
         if (typeof mamWindowLoader !== "undefined")
             shutdownLoader(mamWindowLoader)
         if (typeof infoDialogLoader !== "undefined")
@@ -2839,11 +2874,39 @@ ApplicationWindow {
     function raiseDxClusterPanel() {
         if (typeof dxClusterFloatingWindow === 'undefined' || !dxClusterFloatingWindow)
             return
+        if (!startupPresentationFinished) {
+            dxClusterFloatingWindow.hide()
+            return
+        }
         dxClusterMinimized = false
         dxClusterFloatingWindow.visibility = Window.Windowed
         dxClusterFloatingWindow.show()
         dxClusterFloatingWindow.raise()
         dxClusterFloatingWindow.requestActivate()
+    }
+    function syncDxClusterFloatingVisibility(activate) {
+        if (typeof dxClusterFloatingWindow === 'undefined' || !dxClusterFloatingWindow)
+            return
+        if (!startupPresentationFinished
+                || !dxClusterPanelVisible
+                || !dxClusterDetached
+                || dxClusterMinimized) {
+            dxClusterFloatingWindow.hide()
+            return
+        }
+        dxClusterFloatingWindow.visibility = Window.Windowed
+        dxClusterFloatingWindow.show()
+        if (activate) {
+            dxClusterFloatingWindow.raise()
+            dxClusterFloatingWindow.requestActivate()
+        }
+    }
+    function finishStartupPresentation() {
+        if (startupPresentationFinished)
+            return
+        startupPresentationFinished = true
+        syncDxClusterFloatingVisibility(false)
+        applyWorldClockSlot()
     }
     function openDxClusterPanel() {
         mainWindow.dxClusterPanelVisible = true
@@ -2882,7 +2945,7 @@ ApplicationWindow {
             // 1.0.385 — la finestra flottante si mostra solo se il Cluster è STACCATO;
             // se è dockato (4ª colonna) la finestra resta nascosta e mostra l'inline.
             if (dxClusterPanelVisible && dxClusterDetached) {
-                raiseDxClusterPanel()
+                syncDxClusterFloatingVisibility(true)
             } else {
                 dxClusterFloatingWindow.hide()
             }
@@ -4352,7 +4415,9 @@ ApplicationWindow {
     Material.primary: bridge.themeManager.secondaryColor
     Material.foreground: bridge.themeManager.textPrimary
     Material.background: bridge.themeManager.bgDeep
-    color: bridge.themeManager.bgDeep
+    color: transparentCorners ? "transparent"
+                               : (glassTheme && glassTransparencySupported
+                                  ? glassSurfaceColor : bridge.themeManager.bgDeep)
 
     Dialog {
         id: ft2LinkAccessDialog
@@ -4370,7 +4435,7 @@ ApplicationWindow {
         }
 
         background: Rectangle {
-            color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
+            color: mainWindow.glassDialogSurface(0.98)
             border.color: secondaryCyan
             border.width: 1
             radius: 8
@@ -4460,18 +4525,6 @@ ApplicationWindow {
     property color statusToastColor: secondaryCyan
     property bool statusToastVisible: false
 
-    // Main background gradient (flat in light themes per design mockup)
-    background: Rectangle {
-        color: bgDeep
-        gradient: Gradient {
-            GradientStop { position: 0.0; color: bgDeep }
-            GradientStop { position: 0.5; color: bridge.themeManager.isGlassTheme
-                                  ? Qt.rgba(bgMedium.r, bgMedium.g, bgMedium.b, 0.82)
-                                  : (bridge.themeManager.isLightTheme ? bgDeep : bgMedium) }
-            GradientStop { position: 1.0; color: bgDeep }
-        }
-    }
-
     // 1.0.182 — UI Visual Boost: gradient sottile theme-aware sul background
     // ApplicationWindow root. Gated su bridge.uiQuality !== "Low" per
     // risparmiare GPU su PC modesti. Effetto "vetro" coerente con i Glass
@@ -4482,9 +4535,25 @@ ApplicationWindow {
         z: -100  // sotto a TUTTO
         visible: bridge && bridge.uiQuality !== "Low"
         gradient: Gradient {
-            GradientStop { position: 0.0; color: (bridge && bridge.themeManager && bridge.themeManager.isLightTheme) ? Qt.lighter(bgDeep, 1.08) : Qt.darker(bgDeep, 1.20) }
-            GradientStop { position: 0.5; color: bgDeep }
-            GradientStop { position: 1.0; color: (bridge && bridge.themeManager && bridge.themeManager.isLightTheme) ? Qt.darker(bgDeep, 1.05) : Qt.darker(bgDeep, 1.10) }
+            GradientStop {
+                position: 0.0
+                color: bridge && bridge.themeManager && bridge.themeManager.isGlassTheme
+                       ? Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.72)
+                       : ((bridge && bridge.themeManager && bridge.themeManager.isLightTheme)
+                          ? Qt.lighter(bgDeep, 1.08) : Qt.darker(bgDeep, 1.20))
+            }
+            GradientStop {
+                position: 0.5
+                color: bridge && bridge.themeManager && bridge.themeManager.isGlassTheme
+                       ? Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.62) : bgDeep
+            }
+            GradientStop {
+                position: 1.0
+                color: bridge && bridge.themeManager && bridge.themeManager.isGlassTheme
+                       ? Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.82)
+                       : ((bridge && bridge.themeManager && bridge.themeManager.isLightTheme)
+                          ? Qt.darker(bgDeep, 1.05) : Qt.darker(bgDeep, 1.10))
+            }
         }
     }
 
@@ -4494,13 +4563,15 @@ ApplicationWindow {
         anchors.fill: parent
         z: 9999
         visible: splashVisible
-        color: bgDeep
+        color: mainWindow.transparentCorners
+               ? Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.56)
+               : bgDeep
 
         gradient: Gradient {
-            GradientStop { position: 0.0; color: Qt.darker(bgDeep, 1.3) }
-            GradientStop { position: 0.4; color: bgDeep }
-            GradientStop { position: 0.6; color: bgDeep }
-            GradientStop { position: 1.0; color: Qt.darker(bgDeep, 1.3) }
+            GradientStop { position: 0.0; color: mainWindow.transparentCorners ? Qt.rgba(0.02, 0.05, 0.11, 0.50) : Qt.darker(bgDeep, 1.3) }
+            GradientStop { position: 0.4; color: mainWindow.transparentCorners ? Qt.rgba(0.06, 0.12, 0.22, 0.42) : bgDeep }
+            GradientStop { position: 0.6; color: mainWindow.transparentCorners ? Qt.rgba(0.06, 0.12, 0.22, 0.42) : bgDeep }
+            GradientStop { position: 1.0; color: mainWindow.transparentCorners ? Qt.rgba(0.02, 0.05, 0.11, 0.50) : Qt.darker(bgDeep, 1.3) }
         }
 
         Column {
@@ -4615,7 +4686,7 @@ ApplicationWindow {
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
         background: Rectangle {
-            color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.95)
+            color: mainWindow.glassDialogSurface(0.58)
             border.color: bridge.pskSearchFound ? accentGreen : bridge.themeManager.ledRed
             border.width: 2
             radius: 12
@@ -4787,7 +4858,7 @@ ApplicationWindow {
         width: 360
         height: 156
         background: Rectangle {
-            color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.95)
+            color: mainWindow.glassDialogSurface(0.58)
             border.color: glassBorder
             radius: 10
         }
@@ -6357,8 +6428,10 @@ ApplicationWindow {
 	                    // 1.0.569 — in DX-Pedition il workspace occupa tutto lo
 	                    // schermo e l'orologio draggabile ci finiva sopra: qui la
 	                    // barra tattica ha gia' il suo orologio UTC.
-	                    visible: showWorldClock && !mainWindow.dxPeditionMode
-	                    width: (showWorldClock && !mainWindow.dxPeditionMode) ? compactWidth : 0
+                    visible: mainWindow.startupPresentationFinished
+                             && showWorldClock && !mainWindow.dxPeditionMode
+                    width: (mainWindow.startupPresentationFinished
+                            && showWorldClock && !mainWindow.dxPeditionMode) ? compactWidth : 0
 	                    height: 80
 	                    readonly property int analogClockWidth: 60
 	                    readonly property int cardMargins: 10
@@ -6749,7 +6822,7 @@ ApplicationWindow {
                                             }
 
 	                                background: Rectangle {
-	                                    color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
+	                                    color: mainWindow.glassDialogSurface(0.58)
 	                                    border.color: secondaryCyan
 	                                    border.width: 1
 	                                    radius: 8
@@ -6900,7 +6973,7 @@ ApplicationWindow {
 	                            width: 230
 	                            background: Rectangle {
 	                                implicitWidth: 230
-	                                color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
+	                                color: mainWindow.glassDialogSurface(0.58)
 	                                border.color: secondaryCyan
 	                                border.width: 1
 	                                radius: 8
@@ -8101,7 +8174,9 @@ ApplicationWindow {
                     SplitView.minimumHeight: mainWindow.classicIdInSlot(5) === "txpanel" && !txPanelDetached
                         ? txPanelContainer.txPanelAutoHeight
                         : !hostsWaterfall ? 0 : (!mainWindow.waterfallPanelVisible ? 0 : (waterfallDetached ? 40 : 0))
-                    color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.6)
+                    // The docked host is deliberately opaque. Translucency
+                    // belongs to the detached GlassWindow only.
+                    color: bgDeep
                     radius: 8
                     border.color: isDockHighlighted ? secondaryCyan : glassBorder
                     border.width: isDockHighlighted ? 3 : 1
@@ -9324,7 +9399,7 @@ ApplicationWindow {
                             // Stadio 1: questo pannello riempie il suo slot-host (colSlot0 di
                             // default; spostabile via mappa). La larghezza-valore e il
                             // centro-split sono ora su colSlot0; qui resta solo il contenuto.
-                            color: "transparent"
+                            color: mainWindow.period1Detached ? "transparent" : bgDeep
 
                             // Placeholder when detached - magnetic dock zone
                             Rectangle {
@@ -9755,7 +9830,7 @@ ApplicationWindow {
                                 Rectangle {
                                     Layout.fillWidth: true
                                     Layout.fillHeight: true
-                                    color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.5)
+                                    color: bgDeep
                                     border.color: Qt.rgba(76/255, 175/255, 80/255, 0.3)
                                     border.width: 1
                                     radius: 4
@@ -10221,7 +10296,7 @@ NumberAnimation {
                             readonly property int azColumnWidth: mainWindow.signalRxShowAzColumn && !compactColumns ? 42 : 0
                             // Stadio 1: riempie il suo slot-host (colSlot1 di default). La
                             // larghezza-valore è ora su colSlot1; qui resta solo il contenuto.
-                            color: "transparent"
+                            color: mainWindow.rxFreqDetached ? "transparent" : bgDeep
 
                             // Placeholder when detached - magnetic dock zone
                             Rectangle {
@@ -10310,7 +10385,7 @@ NumberAnimation {
                                 Rectangle {
                                     Layout.fillWidth: true
                                     Layout.preferredHeight: 28
-                                    color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.9)
+                                    color: bgDeep
                                     radius: 4
 
                                     RowLayout {
@@ -10465,7 +10540,7 @@ NumberAnimation {
                                 Rectangle {
                                     Layout.fillWidth: true
                                     Layout.fillHeight: true
-                                    color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.5)
+                                    color: bgDeep
                                     border.color: Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.4)
                                     border.width: 1
                                     radius: 4
@@ -10788,7 +10863,9 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                             // collasso quando la mappa è nascosta/staccata è gestito dallo slot
                             // (classicSlotCollapsed) -> segue il pannello in qualunque slot.
                             visible: mainWindow.liveMapPanelVisible && !mainWindow.liveMapDetached
-                            color: "transparent"
+                            // Keep the docked Live Map host opaque; the
+                            // floating copy has its own translucent shell.
+                            color: bgDeep
 
                             Loader {
                                 id: liveMapEmbeddedLoader
@@ -10854,7 +10931,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                                 id: dxClusterPanelHost
                                 anchors.fill: parent
                                 visible: mainWindow.dxClusterPanelVisible && !mainWindow.dxClusterDetached
-                                color: "transparent"
+                                color: bgDeep
 
                                 DxClusterPanel {
                                     anchors.fill: parent
@@ -11177,7 +11254,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
             } // End mainVerticalSplit (Waterfall top, Decode panels bottom)
 
             // Resize handle between decode panels and TX panel
-            Rectangle {
+                Rectangle {
                 id: verticalResizeHandle
                 anchors.left: parent.left
                 anchors.right: parent.right
@@ -11226,7 +11303,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
             // QueuePanel { id: queuePanelComponent; visible: false }
 
             // TX Panel Container (resizable at bottom) - delegates to HvTxW via bridge
-            Rectangle {
+	            Rectangle {
 	                id: txPanelContainer
 	                anchors.left: parent.left
 	                anchors.right: parent.right
@@ -11234,7 +11311,9 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
 	                height: mainWindow.ft2LinkModeActive && !txPanelDetached
 	                        ? Math.max(minHeight, Math.min(maxHeight, txPanelAutoHeight))
 	                        : Math.max(minHeight, Math.min(maxHeight, savedHeight))
-	                color: "transparent"
+	                // The docked TX host is opaque; the floating copy has its
+	                // own translucent GlassWindow surface.
+	                color: bgDeep
                     property real savedHeight: Number(bridge.getSetting("uiBottomPanelHeight", 160))
 
 	                readonly property int txPanelAutoHeight: Math.ceil((txPanelComponent ? txPanelComponent.implicitHeight : 92) + 2)
@@ -11533,7 +11612,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         standardButtons: Dialog.Yes | Dialog.No
 
         background: Rectangle {
-            color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
+            color: mainWindow.glassDialogSurface(0.98)
             border.color: accentOrange
             border.width: 1
             radius: 8
@@ -11583,7 +11662,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         standardButtons: Dialog.Yes | Dialog.No
 
         background: Rectangle {
-            color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
+            color: mainWindow.glassDialogSurface(0.98)
             border.color: primaryBlue
             border.width: 1
             radius: 8
@@ -11623,7 +11702,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         title: rigErrorDialogTitle
 
         background: Rectangle {
-            color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
+            color: mainWindow.glassDialogSurface(0.98)
             border.color: accentOrange
             border.width: 1
             radius: 14
@@ -11631,7 +11710,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
 
         header: Rectangle {
             height: 62
-            color: Qt.rgba(bgMedium.r, bgMedium.g, bgMedium.b, 0.96)
+            color: mainWindow.glassDialogSurface(0.48)
             radius: 14
 
             Row {
@@ -11926,23 +12005,6 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
     }
 
     Loader {
-        id: logWindowLoader
-        anchors.fill: parent
-        active: false
-        asynchronous: true
-        source: "components/LogWindow.qml"
-        property var pendingAction: null
-        onLoaded: {
-            console.log("Lazy component loaded: LogWindow")
-            if (pendingAction) {
-                var action = pendingAction
-                pendingAction = null
-                action(item)
-            }
-        }
-    }
-
-    Loader {
         id: macroDialogLoader
         anchors.fill: parent
         active: false
@@ -12007,7 +12069,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
     // Setup is hosted by a real top-level window.  Popup coordinates are local
     // to Main.qml and cannot cross a monitor boundary on macOS; this host uses
     // desktop-global coordinates while preserving the existing themed dialog.
-    Window {
+    GlassWindow {
         id: settingsFloatingWindow
         property int requestedTab: -1
         property bool desktopMoveActive: false
@@ -12447,7 +12509,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         }
 
         background: Rectangle {
-            color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
+            color: mainWindow.glassDialogSurface(0.98)
             border.color: accentOrange
             border.width: 1
             radius: 8
@@ -12455,7 +12517,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
 
         header: Rectangle {
             height: 58
-            color: Qt.rgba(bgMedium.r, bgMedium.g, bgMedium.b, 0.96)
+            color: mainWindow.glassDialogSurface(0.48)
             radius: 8
 
             Row {
@@ -12624,7 +12686,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
 
     // MAM Window - Multi-Answer Mode.  Use a desktop Window so its position is
     // global and it can be moved to any monitor on every supported platform.
-    Window {
+    GlassWindow {
         id: mamFloatingWindow
         width: 700
         height: 450
@@ -12730,7 +12792,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
 
     // DECOMETER uses a real desktop window so its RF face can be placed on a
     // dedicated external display without changing the CAT/telemetry path.
-    Window {
+    GlassWindow {
         id: decometerFloatingWindow
         property bool contentRequested: false
         property bool showPending: false
@@ -12969,7 +13031,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         implicitHeight: Math.min(contentItem.implicitHeight + topPadding + bottomPadding, maxVisibleHeight)
         background: Rectangle {
             implicitWidth: 230
-            color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
+            color: mainWindow.glassDialogSurface(0.58)
             border.color: secondaryCyan
             border.width: 1
             radius: 10
@@ -13698,9 +13760,9 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
 		            title: mainWindow.uiLanguageLabel(mainWindow.uiLanguage) + ": " + mainWindow.uiLanguageName(mainWindow.uiLanguage)
 		            padding: 6
 		            width: 205
-		            background: Rectangle {
-		                implicitWidth: 205
-		                color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
+                    background: Rectangle {
+                        implicitWidth: 205
+                        color: mainWindow.glassDialogSurface(0.58)
 		                border.color: secondaryCyan
 		                border.width: 1
 		                radius: 10
@@ -13941,7 +14003,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         modal: true
 
         background: Rectangle {
-            color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
+            color: mainWindow.glassDialogSurface(0.98)
             border.color: secondaryCyan; border.width: 1; radius: 10
         }
 
@@ -13988,7 +14050,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         modal: true
 
         background: Rectangle {
-            color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
+            color: mainWindow.glassDialogSurface(0.98)
             border.color: secondaryCyan
             border.width: 2
             radius: 12
@@ -14065,7 +14127,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         modal: true
 
         background: Rectangle {
-            color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
+            color: mainWindow.glassDialogSurface(0.98)
             border.color: secondaryCyan
             border.width: 2
             radius: 12
@@ -14143,7 +14205,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         modal: true
 
         background: Rectangle {
-            color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
+            color: mainWindow.glassDialogSurface(0.98)
             border.color: secondaryCyan
             border.width: 2
             radius: 12
@@ -14197,7 +14259,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
     }
 
     // ========== DETACHABLE WATERFALL WINDOW ==========
-    Window {
+    GlassWindow {
         id: waterfallWindow
         width: 900
         height: 450
@@ -14256,7 +14318,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
 
         Rectangle {
             anchors.fill: parent
-            color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
+            color: mainWindow.glassWindowSurface(0.98)
             radius: 10
             border.color: secondaryCyan
             border.width: 2
@@ -14283,7 +14345,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 36
-                    color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.95)
+                    color: mainWindow.glassDialogSurface(0.95)
                     radius: 6
 
                     // Drag area for moving window with magnetic dock
@@ -14553,7 +14615,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 28
-                    color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.8)
+                    color: mainWindow.glassDialogSurface(0.8)
                     radius: 4
 
                     RowLayout {
@@ -14603,9 +14665,15 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
     }
 
     // ========== DETACHABLE LOG WINDOW ==========
-    Window {
+    GlassWindow {
         id: logFloatingWindow
         property bool contentRequested: false
+        // Closing a Popup can be animated and therefore outlive the native
+        // host by a few event-loop turns.  Keep the close operation idempotent
+        // and tear down the hosted Loader in the same turn as the host hide.
+        // This prevents a stale second Log surface from appearing briefly
+        // after the visible log has been closed.
+        property bool closeInProgress: false
         width: 960
         height: 720
         minimumWidth: 600
@@ -14623,6 +14691,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         onHeightChanged: mainWindow.scheduleWindowStateSave()
         onVisibleChanged: {
             if (visible) {
+                closeInProgress = false
                 contentRequested = true
                 if (logNativePopupLoader.item && !logNativePopupLoader.item.visible)
                     logNativePopupLoader.item.open()
@@ -14634,6 +14703,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         }
 
         function showHostedWindow() {
+            closeInProgress = false
             contentRequested = true
             show()
             raise()
@@ -14643,18 +14713,31 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         }
 
         function hideAfterDialogClosed() {
+            if (closeInProgress)
+                return
+            closeInProgress = true
             logWindowDetached = false
             logWindowMinimized = false
+            contentRequested = false
             hide()
             mainWindow.scheduleWindowStateSave()
         }
 
         function hideHostedWindow() {
-            if (logNativePopupLoader.item && logNativePopupLoader.item.visible) {
-                logNativePopupLoader.item.close()
+            if (closeInProgress)
                 return
-            }
-            hideAfterDialogClosed()
+            closeInProgress = true
+            var popup = logNativePopupLoader.item
+            if (popup && popup.visible)
+                popup.close()
+            // Hide the native host immediately.  Popup.close() may have an
+            // exit transition; keeping the host visible during that
+            // transition is the source of the short-lived duplicate shell.
+            logWindowDetached = false
+            logWindowMinimized = false
+            contentRequested = false
+            hide()
+            mainWindow.scheduleWindowStateSave()
         }
 
         function minimizeHostedWindow() {
@@ -14670,111 +14753,6 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                 return
             }
             close.accepted = true
-        }
-
-        Rectangle {
-            // Legacy duplicate shell retained inert during the transition to
-            // the complete LogWindow popup hosted below.
-            visible: false
-            anchors.fill: parent
-            color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
-            radius: 10
-            border.color: secondaryCyan
-            border.width: 2
-
-            ColumnLayout {
-                anchors.fill: parent
-                anchors.margins: 8
-                spacing: 6
-
-                // Header - DRAGGABLE
-                Rectangle {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 40
-                    color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.95)
-                    radius: 6
-
-                    MouseArea {
-                        id: logDragArea
-                        z: 2
-                        anchors.left: parent.left
-                        anchors.top: parent.top
-                        anchors.bottom: parent.bottom
-                        anchors.right: parent.right
-                        anchors.rightMargin: 88
-                        acceptedButtons: Qt.LeftButton
-                        preventStealing: true
-                        property point pressGlobalPos: Qt.point(0, 0)
-                        property point pressWindowPos: Qt.point(0, 0)
-                        property bool nativeMoveActive: false
-                        cursorShape: Qt.SizeAllCursor
-                        onPressed: function(mouse) {
-                            pressGlobalPos = mapToGlobal(mouse.x, mouse.y)
-                            pressWindowPos = Qt.point(logFloatingWindow.x, logFloatingWindow.y)
-                            nativeMoveActive = mainWindow.startNativeFloatingWindowMove(logFloatingWindow)
-                            mouse.accepted = true
-                        }
-                        onPositionChanged: function(mouse) {
-                            if (!pressed || nativeMoveActive)
-                                return
-                            mainWindow.dragFloatingWindowToGlobal(logFloatingWindow,
-                                                                  pressWindowPos,
-                                                                  pressGlobalPos,
-                                                                  mapToGlobal(mouse.x, mouse.y))
-                            mouse.accepted = true
-                        }
-                        onReleased: {
-                            nativeMoveActive = false
-                            mainWindow.finishFloatingWindowDrag(logFloatingWindow)
-                        }
-                        onCanceled: {
-                            nativeMoveActive = false
-                            mainWindow.finishFloatingWindowDrag(logFloatingWindow)
-                        }
-                    }
-
-                    RowLayout {
-                        anchors.fill: parent
-                        anchors.margins: 10
-                        spacing: 12
-
-                        Text { text: "⋮⋮"; font.pixelSize: 14; color: textSecondary }
-                        Text { text: qsTr("📋 QSO Log"); font.pixelSize: 16; font.bold: true; color: secondaryCyan }
-                        Item { Layout.fillWidth: true }
-
-                        // Minimize button
-                        Rectangle {
-                            width: 28; height: 28; radius: 4
-                            color: logFloatMinMA.containsMouse ? Qt.rgba(255/255, 193/255, 7/255, 0.3) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b,0.1)
-                            border.color: logFloatMinMA.containsMouse ? "#ffc107" : glassBorder
-                            Text { anchors.centerIn: parent; text: "−"; font.pixelSize: 18; font.bold: true; color: logFloatMinMA.containsMouse ? "#ffc107" : textPrimary }
-                            MouseArea { id: logFloatMinMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                                onClicked: { logWindowMinimized = true; logFloatingWindow.hide() }
-                            }
-                        }
-
-                        // Close button
-                        Rectangle {
-                            width: 28; height: 28; radius: 4
-                            color: logFloatCloseMA.containsMouse ? Qt.rgba(244/255, 67/255, 54/255, 0.3) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b,0.1)
-                            border.color: logFloatCloseMA.containsMouse ? bridge.themeManager.ledRed : glassBorder
-                            Text { anchors.centerIn: parent; text: "✕"; font.pixelSize: 12; font.bold: true; color: logFloatCloseMA.containsMouse ? bridge.themeManager.ledRed : textPrimary }
-                            MouseArea { id: logFloatCloseMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                                onClicked: { logWindowDetached = false; logWindowMinimized = false; logFloatingWindow.close() }
-                            }
-                        }
-                    }
-                }
-
-                // Log Content - Loader
-                Loader {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    active: false
-                    asynchronous: true
-                    sourceComponent: logContentComponent
-                }
-            }
         }
 
         Loader {
@@ -14811,19 +14789,11 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         }
     }
 
-    // Log content component (shared)
-    Component {
-        id: logContentComponent
-        LogWindowContent {
-            refreshActive: logFloatingWindow.visible
-        }
-    }
-
     // ========== NATIVE ASTRONOMICAL DATA WINDOW ==========
     // The complete Astro dialog is hosted by a real top-level Window.  Its
     // coordinates are desktop-global, so the system move operation can cross
     // monitor boundaries and WindowState can restore the same display later.
-    Window {
+    GlassWindow {
         id: astroFloatingWindow
         property bool contentRequested: false
         width: 680
@@ -14917,7 +14887,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
     }
 
     // ========== NATIVE SATELLITE TRACKING WINDOW ==========
-    Window {
+    GlassWindow {
         id: satelliteFloatingWindow
         property bool contentRequested: false
         width: 880
@@ -15001,7 +14971,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
     }
 
     // ========== DETACHABLE MACRO WINDOW ==========
-    Window {
+    GlassWindow {
         id: macroFloatingWindow
         property bool contentRequested: false
         width: 700
@@ -15076,7 +15046,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
             // MacroDialog is hosted below so no functionality is lost.
             visible: false
             anchors.fill: parent
-            color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
+            color: mainWindow.glassWindowSurface(0.98)
             radius: 10
             border.color: secondaryCyan
             border.width: 2
@@ -15089,7 +15059,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 40
-                    color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.95)
+                    color: mainWindow.glassDialogSurface(0.95)
                     radius: 6
 
                     MouseArea {
@@ -15214,7 +15184,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
     }
 
     // ========== DETACHABLE RIG CONTROL WINDOW ==========
-    Window {
+    GlassWindow {
         id: rigFloatingWindow
         width: 600
         height: 550
@@ -15240,7 +15210,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
 
         Rectangle {
             anchors.fill: parent
-            color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
+            color: mainWindow.glassWindowSurface(0.98)
             radius: 10
             border.color: secondaryCyan
             border.width: 2
@@ -15253,7 +15223,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 40
-                    color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.95)
+                    color: mainWindow.glassDialogSurface(0.95)
                     radius: 6
 
                     MouseArea {
@@ -15318,17 +15288,20 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
     }
 
     // ========== DETACHABLE LIVE MAP WINDOW ==========
-    Window {
+    GlassWindow {
         id: liveMapFloatingWindow
         width: 900
         height: 560
         minimumWidth: 480
         minimumHeight: 320
         visible: false
-        flags: Qt.Window | Qt.WindowTitleHint | Qt.WindowSystemMenuHint
-             | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint
+        // A decorated native window is opaque on several Qt/macOS combinations
+        // even when its QML colour contains alpha.  Liquid Glass therefore uses
+        // a frameless top-level surface; the Live Map header remains the visible
+        // title/toolbar and also supplies the drag target.
+        flags: Qt.Window | Qt.FramelessWindowHint
         title: qsTr("Live Map - Decodium")
-        color: bgDeep
+        color: transparentCorners ? "transparent" : glassSurfaceColor
 
         x: mainWindow.x + 80
         y: mainWindow.y + 80
@@ -15367,7 +15340,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
 
         Rectangle {
             anchors.fill: parent
-            color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
+            color: mainWindow.glassWindowSurface(0.98)
             border.color: Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.45)
             border.width: 1
 
@@ -15387,6 +15360,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                     engine: bridge
                     detachable: true
                     detached: true
+                    detachedWindow: liveMapFloatingWindow
                     onDetachRequested: mainWindow.dockLiveMapPanel()
                 }
             }
@@ -15394,7 +15368,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
     }
 
 	    // ========== DETACHABLE FULL SPECTRUM WINDOW ==========
-    Window {
+    GlassWindow {
 	        id: period1FloatingWindow
         width: 680
         height: 400
@@ -15477,7 +15451,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
 
         Rectangle {
             anchors.fill: parent
-            color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
+            color: mainWindow.glassWindowSurface(0.98)
             radius: 10
             border.color: bridge.themeManager.successColor
             border.width: 2
@@ -16165,7 +16139,7 @@ NumberAnimation {
     }
 
     // ========== DETACHABLE PERIOD 2 WINDOW (placeholder) ==========
-    Window {
+    GlassWindow {
         id: period2FloatingWindow
         width: 500
         height: 400
@@ -16188,7 +16162,7 @@ NumberAnimation {
         }
         Rectangle {
             anchors.fill: parent
-            color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.95)
+            color: mainWindow.glassWindowSurface(0.58)
             radius: 8
             Text {
                 anchors.centerIn: parent
@@ -16200,7 +16174,7 @@ NumberAnimation {
     }
 
     // ========== DETACHABLE RX FREQUENCY WINDOW ==========
-    Window {
+    GlassWindow {
         id: rxFreqFloatingWindow
         width: 450
         height: 350
@@ -16247,7 +16221,7 @@ NumberAnimation {
 
         Rectangle {
             anchors.fill: parent
-            color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
+            color: mainWindow.glassWindowSurface(0.98)
             radius: 10
             border.color: primaryBlue
             border.width: 2
@@ -16721,7 +16695,7 @@ NumberAnimation {
     }
 
     // ========== DETACHABLE TX PANEL WINDOW ==========
-    Window {
+    GlassWindow {
         id: txPanelFloatingWindow
         width: 700
         height: 280
@@ -16747,7 +16721,7 @@ NumberAnimation {
 
         Rectangle {
             anchors.fill: parent
-            color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
+            color: mainWindow.glassWindowSurface(0.98)
             radius: 12
             border.color: bridge.themeManager.ledRed
             border.width: 2
@@ -17035,6 +17009,7 @@ NumberAnimation {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
 	                    engine: bridge
+	                    detachedSurface: true
 	                    ft2LinkToolPanel: mainWindow.ft2LinkPanelDetached
 	                                      ? ft2LinkFloatingLoader.item
 	                                      : ft2LinkInlineLoader.item
@@ -17049,7 +17024,7 @@ NumberAnimation {
 	    }
 
 	    // ========== DETACHABLE FT2-LINK PANEL WINDOW ==========
-	    Window {
+	    GlassWindow {
 	        id: ft2LinkFloatingWindow
 	        width: 1180
 	        height: 620
@@ -17057,7 +17032,7 @@ NumberAnimation {
 	        minimumHeight: 360
 	        visible: mainWindow.ft2LinkModeActive && mainWindow.ft2LinkPanelDetached
 	        title: qsTr("FT2-Link - Decodium")
-	        color: bgDeep
+        color: transparentCorners ? "transparent" : glassSurfaceColor
 
 	        x: mainWindow.x + 80
 	        y: mainWindow.y + 120
@@ -17265,7 +17240,7 @@ NumberAnimation {
 
     // Active Stations is a desktop window rather than a Main.qml overlay.
     // Its x/y values are therefore global and remain valid on external screens.
-    Window {
+    GlassWindow {
         id: activeStationsFloatingWindow
         width: 360
         height: 300
@@ -17463,35 +17438,33 @@ NumberAnimation {
     // spostabile ovunque sul monitor (anche fuori dalla mainWindow). Integrata
     // con il Reset Layout via property dxClusterDetached/Minimized e persistence
     // standard WindowState/dxClusterFloatingWindow.
-    Window {
+    GlassWindow {
         id: dxClusterFloatingWindow
         title: qsTr("DX Cluster - Decodium")
         width: Math.max(500, Number(bridge.getSetting("uiDxClusterPanelWidth", 560)))
         height: Math.max(300, Number(bridge.getSetting("uiDxClusterPanelHeight", 360)))
         minimumWidth: 500
         minimumHeight: 300
-        visible: mainWindow.dxClusterPanelVisible && mainWindow.dxClusterDetached   // 1.0.385 — solo se staccato
-        flags: Qt.Window | Qt.WindowTitleHint | Qt.WindowSystemMenuHint
-             | Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint
-             | Qt.WindowCloseButtonHint
-        color: "#1a1a2e"
+        visible: mainWindow.startupPresentationFinished
+                 && mainWindow.dxClusterPanelVisible && mainWindow.dxClusterDetached
+                 && !mainWindow.dxClusterMinimized   // 1.0.385 — solo se staccato
+        // The native macOS/Windows title bar is an opaque OS surface and
+        // therefore defeats Liquid Glass.  Use the same frameless shell as
+        // the other Decodium pop-outs and provide a small QML title bar.
+        flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
+        color: glassTheme && glassTransparencySupported ? "transparent" : "#1a1a2e"
 
         x: mainWindow.x + Math.max(0, mainWindow.width - width - 60)
         y: mainWindow.y + 80
 
         Component.onCompleted: {
             mainWindow.restoreFloatingWindowState(
-                dxClusterFloatingWindow, "dxClusterFloatingWindow", "dxClusterDetached", "dxClusterMinimized")
+                dxClusterFloatingWindow, "dxClusterFloatingWindow", "dxClusterDetached", "dxClusterMinimized", true)
             // La geometria del DX Cluster va ripristinata, ma la finestra non
             // deve aprirsi da sola solo perche' e' floating/detached. La scelta
             // dell'utente e' `uiDxClusterPanelVisible`: se e' false o assente
             // resta chiusa anche quando esiste una vecchia WindowState salvata.
-            if (!mainWindow.dxClusterPanelVisible || !mainWindow.dxClusterDetached) {
-                dxClusterFloatingWindow.hide()   // 1.0.385 — dockato o spento → niente finestra
-            } else if (!mainWindow.dxClusterMinimized) {
-                dxClusterFloatingWindow.show()
-                dxClusterFloatingWindow.raise()
-            }
+            mainWindow.syncDxClusterFloatingVisibility(false)
         }
         onXChanged: mainWindow.scheduleWindowStateSave()
         onYChanged: mainWindow.scheduleWindowStateSave()
@@ -17510,8 +17483,67 @@ NumberAnimation {
             close.accepted = true
         }
 
+        Rectangle {
+            id: dxcTitleBar
+            anchors { left: parent.left; right: parent.right; top: parent.top }
+            height: 34
+            color: bridge.themeManager.isGlassTheme
+                   ? Qt.rgba(bridge.themeManager.bgMedium.r,
+                             bridge.themeManager.bgMedium.g,
+                             bridge.themeManager.bgMedium.b, 0.46)
+                   : "#2a2a2a"
+            border.color: glassBorder
+            border.width: 1
+
+            MouseArea {
+                anchors { left: parent.left; right: parent.right; top: parent.top; bottom: parent.bottom; rightMargin: 42 }
+                property bool nativeMoveActive: false
+                onPressed: nativeMoveActive = mainWindow.startNativeFloatingWindowMove(dxClusterFloatingWindow)
+                onReleased: {
+                    nativeMoveActive = false
+                    mainWindow.finishFloatingWindowDrag(dxClusterFloatingWindow)
+                }
+                onCanceled: {
+                    nativeMoveActive = false
+                    mainWindow.finishFloatingWindowDrag(dxClusterFloatingWindow)
+                }
+            }
+
+            RowLayout {
+                anchors.fill: parent
+                anchors.leftMargin: 12
+                anchors.rightMargin: 6
+                spacing: 8
+                Text {
+                    text: qsTr("DX Cluster - Decodium")
+                    color: textPrimary
+                    font.pixelSize: 13
+                    font.bold: true
+                    Layout.fillWidth: true
+                    elide: Text.ElideRight
+                }
+                Rectangle {
+                    Layout.preferredWidth: 26
+                    Layout.preferredHeight: 24
+                    radius: 4
+                    color: dxcTitleCloseMA.containsMouse
+                           ? Qt.rgba(1, 0.25, 0.35, 0.38) : "transparent"
+                    border.color: dxcTitleCloseMA.containsMouse
+                                  ? bridge.themeManager.ledRed : "transparent"
+                    Text { anchors.centerIn: parent; text: "✕"; color: textPrimary; font.pixelSize: 11 }
+                    MouseArea {
+                        id: dxcTitleCloseMA
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: mainWindow.dxClusterPanelVisible = false
+                    }
+                }
+            }
+        }
+
         Item {
-            anchors.fill: parent
+            anchors { left: parent.left; right: parent.right; top: dxcTitleBar.bottom; bottom: parent.bottom }
 
             // 1.0.386 — barra "Inserisci nel layout": aggancia il Cluster come 4ª colonna
             // accanto a Full Spectrum o a Signal RX (l'inserimento è esplicito; staccato
@@ -17522,7 +17554,11 @@ NumberAnimation {
                 anchors.right: parent.right
                 anchors.top: parent.top
                 height: 30
-                color: "#16213e"
+                color: bridge.themeManager.isGlassTheme
+                       ? Qt.rgba(bridge.themeManager.bgMedium.r,
+                                 bridge.themeManager.bgMedium.g,
+                                 bridge.themeManager.bgMedium.b, 0.48)
+                       : "#16213e"
                 border.color: glassBorder
                 Row {
                     anchors.left: parent.left
@@ -17579,11 +17615,18 @@ NumberAnimation {
                 // positionCommitted non piu' usato: la Window OS gestisce drag/resize nativi
             }
         }
+
+        FloatingResizeHandles {
+            z: 100
+            targetWindow: dxClusterFloatingWindow
+            maxWidth: 1800
+            maxHeight: 1200
+        }
     }
 
     // ── DecoSyncTime Monitor floating window ─────────────────────────────
     // 1.0.164 fase 5: pannello monitoring per tutti i source time sync.
-    Window {
+    GlassWindow {
         id: decoSyncMonitorWindow
         width: 480
         height: 380
@@ -17631,7 +17674,10 @@ NumberAnimation {
         id: splash
         anchors.fill: parent
         visible: true
-        onFinished: splash.visible = false
+        onFinished: {
+            splash.visible = false
+            mainWindow.finishStartupPresentation()
+        }
     }
 
     // ── Proposta di rilevamento radio al primo avvio ─────────────────────────

@@ -34,6 +34,12 @@ Dialog {
     property color accent: bridge ? bridge.themeManager.secondaryColor : "#00d8ff"
     property color green: bridge ? bridge.themeManager.accentColor : "#2ecc71"
     property color amber: bridge ? bridge.themeManager.warningColor : "#f6c344"
+    readonly property color dialogSurface: bridge && bridge.themeManager.isGlassTheme
+                                          && bridge.themeManager.glassTransparencySupported
+                                          ? Qt.rgba(bridge.themeManager.panelColor.r,
+                                                    bridge.themeManager.panelColor.g,
+                                                    bridge.themeManager.panelColor.b, 0.58)
+                                          : Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
 
     // Native tool windows are separate QQuickWindows, therefore Controls
     // need an explicit attached Material palette instead of relying on the
@@ -191,7 +197,7 @@ Dialog {
     }
 
     background: Rectangle {
-        color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
+        color: satelliteWindow.dialogSurface
         border.color: accent
         border.width: 2
         radius: 12

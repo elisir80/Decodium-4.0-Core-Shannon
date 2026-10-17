@@ -47,6 +47,10 @@ class CwController : public QObject {
     Q_PROPERTY(bool tuningLowerSideband READ tuningLowerSideband WRITE setTuningLowerSideband NOTIFY txChanged)
     Q_PROPERTY(bool decoderOn READ decoderOn WRITE setDecoderOn NOTIFY decoderChanged)
     Q_PROPERTY(QString decoderText READ decoderText NOTIFY decoderChanged)
+    // Expanded CW text submitted to the active transmitter.  This is kept
+    // separate from decoderText so RX and TX can be shown with different
+    // colours without mixing operator input with received decoding.
+    Q_PROPERTY(QString txText READ txText NOTIFY txTranscriptChanged)
     Q_PROPERTY(int decoderWpm READ decoderWpm NOTIFY decoderChanged)
     Q_PROPERTY(int decoderTone READ decoderTone NOTIFY decoderChanged)
     Q_PROPERTY(int decoderToneLock READ decoderToneLock WRITE setDecoderToneLock NOTIFY decoderChanged)
@@ -150,6 +154,7 @@ public:
     bool decoderOn() const { return m_decoderOn; }
     void setDecoderOn(bool on);
     QString decoderText() const { return m_decoderText; }
+    QString txText() const { return m_txText; }
     int decoderWpm() const { return m_decoder.wpm(); }
     int decoderTone() const { return static_cast<int>(m_decoder.toneHz()); }
     int decoderToneLock() const { return m_decoderToneLock; }
@@ -158,6 +163,7 @@ public:
     void setDecoderSpeedLock(int wpm);
     QVariantMap decoderScope() const { return m_scope; }
     Q_INVOKABLE void clearDecoder();
+    Q_INVOKABLE void clearTxTranscript();
     Q_INVOKABLE bool tuneTo(double hz);
     Q_INVOKABLE bool tuneBy(int hz);
     Q_INVOKABLE bool centerSignal();
@@ -228,6 +234,7 @@ public:
 signals:
     void decoderChanged();
     void decoderScopeChanged();
+    void txTranscriptChanged();
     void txChanged();
     void sendingChanged();
     void macrosChanged();
@@ -249,6 +256,7 @@ private:
     void pumpRemoteKey();
     void finishRemoteKey(bool immediate);
     void setSending(bool on, int macroIndex);
+    void appendTxTranscript(const QString& text);
     void publishScope(bool force = false);
     void save();
     Context contextFrom(const QVariantMap& map) const;
@@ -258,6 +266,7 @@ private:
 
     CwDecoder m_decoder {12000};
     QString m_decoderText;
+    QString m_txText;
     bool m_decoderOn {true};
     int m_decoderToneLock {0};
     int m_decoderSpeedLock {0};

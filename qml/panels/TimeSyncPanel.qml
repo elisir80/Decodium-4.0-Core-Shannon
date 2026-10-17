@@ -4,7 +4,14 @@ import QtQuick.Layouts
 // TimeSyncPanel — adattato per bridge.* (bridge è il context object principale)
 Rectangle {
     id: timeSyncPanel
-    color: Qt.rgba(0, 0, 0, 0.7)
+    readonly property bool liquidGlassEnabled: typeof bridge !== "undefined"
+        && bridge && bridge.themeManager && bridge.themeManager.isGlassTheme
+        && bridge.themeManager.glassTransparencySupported
+    color: liquidGlassEnabled
+           ? Qt.rgba(bridge.themeManager.panelColor.r,
+                     bridge.themeManager.panelColor.g,
+                     bridge.themeManager.panelColor.b, 0.42)
+           : Qt.rgba(0, 0, 0, 0.7)
     border.color: Qt.rgba(0, 188, 212, 0.4)
     border.width: 1
     radius: 6

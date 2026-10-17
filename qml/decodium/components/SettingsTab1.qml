@@ -473,7 +473,7 @@ SettingsPageScroll {
                     rigCombo.filterText = ""
                     rigSearchField.forceActiveFocus()
                 }
-                background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
+                background: Rectangle { color: dialog && dialog.dialogSurface ? dialog.dialogSurface : bgDeep; border.color: glassBorder; radius: 4 }
                 contentItem: Column {
                     width: rigComboPopup.width
                     spacing: 6

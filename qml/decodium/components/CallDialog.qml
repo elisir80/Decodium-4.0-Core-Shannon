@@ -23,7 +23,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Window
 
-Window {
+GlassWindow {
     id: callDialog
     title: qsTr("Chiamate (CALL)")
     readonly property int screenAvailableWidth: (Screen.desktopAvailableWidth > 0
@@ -39,7 +39,7 @@ Window {
     // Use a normal native window on Windows too. Qt.Dialog with only a close
     // hint can produce a non-movable tool/dialog frame on some Windows themes.
     flags: Qt.Window | Qt.WindowTitleHint | Qt.WindowSystemMenuHint | Qt.WindowCloseButtonHint
-    color: "#1a1a2e"
+    color: transparentCorners ? "transparent" : glassSurfaceColor
 
     readonly property color cAccent:     "#3a9dff"  // primaryBlue
     readonly property color cGreen:      "#3acb6c"  // successGreen

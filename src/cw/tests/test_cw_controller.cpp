@@ -446,6 +446,30 @@ private slots:
         QCOMPARE(c.effectiveBackend(), QString("audio"));
     }
 
+    void txTranscriptShowsExpandedTextAndCanBeCleared()
+    {
+        QSettings s(iniPath(), QSettings::IniFormat);
+        CwController c;
+        QString sent;
+        CwController::Hooks h;
+        h.canTransmit = [] { return true; };
+        h.remoteRadio = [] { return false; };
+        h.myCall = [] { return QStringLiteral("IU8LMC"); };
+        h.rigKeyerAvailable = [] { return true; };
+        h.sendRigMorse = [&](const QString& text, int) { sent = text; return true; };
+        c.setHooks(h);
+        c.start(&s);
+        c.setMacro(0, QStringLiteral("F1 CQ"), QStringLiteral("CQ {MYCALL}"));
+
+        c.sendMacro(0, {});
+
+        QCOMPARE(sent, QStringLiteral("CQ IU8LMC"));
+        QVERIFY(c.txText().contains(QStringLiteral("CQ IU8LMC")));
+        QVERIFY(!c.txText().contains(QStringLiteral("{MYCALL}")));
+        c.clearTxTranscript();
+        QVERIFY(c.txText().isEmpty());
+    }
+
     void explicitHardwareBackendIsNotOverriddenByCat()
     {
         QSettings s(iniPath(), QSettings::IniFormat);

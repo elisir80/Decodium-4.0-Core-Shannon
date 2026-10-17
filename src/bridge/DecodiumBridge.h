@@ -954,6 +954,7 @@ public:
     void setWaitPounceActive(bool v);
     bool txEnabled()         const { return m_txEnabled; }
     void setTxEnabled(bool v);
+    Q_INVOKABLE void requestManualTxEnable();
     bool holdTxFreq()        const { return m_holdTxFreq; }
     void setHoldTxFreq(bool v);
     bool autoCqRepeat()      const { return m_autoCqRepeat; }
@@ -1448,6 +1449,10 @@ public:
     bool   rttyTxActive() const { return m_rttyTxActive; }
     void   rttyMandaAudioTx(const QVector<short>& campioni12k);
     void   setSpectrumVisible(bool v);
+    // Re-arm only the visual spectrum producer after a QSO log. Logging may
+    // resize/repaint the QML scene while the native confirmation window is
+    // closing; this must never restart RX audio or CAT.
+    Q_INVOKABLE void rearmSpectrumAfterQsoLog();
     void   setRttyInAscolto(bool v);
 
     // B6 — cty.dat
@@ -2363,6 +2368,9 @@ signals:
     void timeSyncSettingsRequested();
     void catSettingsRequested();
     void logQsoPromptRequested();
+    // Emitted after a QSO has been committed so the persistent waterfall item
+    // can recover its QSG history without being destroyed and recreated.
+    void qsoLogCompleted(const QString& call);
     // Un decode e' stato riconosciuto come telemetria stazione+meteo
     // Decodium (firma valida): fields ha grid4, tempC, windSpeedKmh,
     // windDirLabel, sky, powerWatts, radioModel, antennaType, likelyCall
@@ -2762,6 +2770,14 @@ private:
     bool shouldDeferManualSyncTxStart() const;
     bool tryStartDeferredManualSyncTx();
     void clearDeferredManualSyncTx(const QString& reason);
+    // Every automatic/deferred TX request belongs to the current lifecycle
+    // generation.  HALT and QSO completion advance it so queued callbacks
+    // cannot resurrect a stale TX slot.  A manual TX button/double-click is
+    // tracked separately and is the only non-AutoCQ authority allowed to
+    // start TX6.
+    void invalidateDeferredTxRequests(const QString& reason);
+    bool txDispatchGuardAllows(const QString& reason);
+    void armExplicitManualTxRequest(int txNumber, const QString& reason);
     void scheduleSyncTxAtNextValidSlot(const QString& reason,
                                        int elapsedMs = -1,
                                        int latestStartMs = -1);
@@ -3094,6 +3110,8 @@ private:
     bool m_periodicTxCheckScheduled {false};
     bool m_syncTxRetryScheduled {false};
     quint64 m_syncTxRetrySerial {0};
+    quint64 m_txRequestGeneration {0};
+    int m_explicitManualTxRequest {0};
     // A roster CALL prepares the QSO immediately but synchronized waveforms
     // must not be dispatched in the middle of an already-running slot.
     bool m_suppressImmediateTxEnableDispatch {false};

@@ -2273,6 +2273,23 @@ Item {
     Connections {
         target: bridge
 
+        // Logging a QSO closes a native confirmation window and clears the
+        // completed TX state. Keep the long-lived PanadapterItem alive, but
+        // explicitly refresh its QSG waterfall history after the layout has
+        // settled. The bridge re-arm touches only the spectrum timer; it does
+        // not stop/reopen audio capture, the decoder or CAT.
+        function onQsoLogCompleted(call) {
+            if (!waterfallPanel.visible || !bridge.monitoring)
+                return
+            if (bridge.rearmSpectrumAfterQsoLog)
+                bridge.rearmSpectrumAfterQsoLog()
+            Qt.callLater(function() {
+                if (waterfallPanel.visible && bridge.monitoring
+                        && waterfallDisplay && waterfallDisplay.resetWaterfall)
+                    waterfallDisplay.resetWaterfall()
+            })
+        }
+
         // Alta risoluzione FFTW 4096 bin — include range frequenze esatto
         function onPanadapterDataReady(dbValues, minDb, maxDb, freqMinHz, freqMaxHz) {
             if (!waterfallPanel.visible) return

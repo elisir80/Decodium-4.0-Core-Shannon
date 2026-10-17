@@ -92,7 +92,12 @@ Popup {
     }
 
     background: Rectangle {
-        color: root.bgDeep
+        color: bridge && bridge.themeManager && bridge.themeManager.isGlassTheme
+               && bridge.themeManager.glassTransparencySupported
+               ? Qt.rgba(bridge.themeManager.panelColor.r,
+                         bridge.themeManager.panelColor.g,
+                         bridge.themeManager.panelColor.b, 0.58)
+               : root.bgDeep
         border.color: root.accentGreen
         border.width: 1
         radius: 8

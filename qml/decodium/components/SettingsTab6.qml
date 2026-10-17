@@ -714,7 +714,7 @@ SettingsPageScroll {
             contentItem: Text { text: udpClientIdPreset.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
             delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12; elide: Text.ElideRight }
                 background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
-            popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
+            popup.background: Rectangle { color: dialog && dialog.dialogSurface ? dialog.dialogSurface : bgDeep; border.color: glassBorder; radius: 4 }
         }
 
         Text { text: qsTr("Server Name:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
@@ -769,7 +769,7 @@ SettingsPageScroll {
             contentItem: Text { text: udpInterfaceCombo.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
             delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12; elide: Text.ElideRight }
                 background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
-            popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
+            popup.background: Rectangle { color: dialog && dialog.dialogSurface ? dialog.dialogSurface : bgDeep; border.color: glassBorder; radius: 4 }
         }
         Text { text: qsTr("Primary traffic:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
         Flow {
@@ -840,7 +840,7 @@ SettingsPageScroll {
             contentItem: Text { text: udpSecondaryIdPreset.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
             delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12; elide: Text.ElideRight }
                 background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
-            popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
+            popup.background: Rectangle { color: dialog && dialog.dialogSurface ? dialog.dialogSurface : bgDeep; border.color: glassBorder; radius: 4 }
         }
         Text { text: qsTr("Secondary Port:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
         SpinBox {
@@ -877,7 +877,7 @@ SettingsPageScroll {
             contentItem: Text { text: udpSecondaryInterfaceCombo.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
             delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12; elide: Text.ElideRight }
                 background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
-            popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
+            popup.background: Rectangle { color: dialog && dialog.dialogSurface ? dialog.dialogSurface : bgDeep; border.color: glassBorder; radius: 4 }
         }
         Text { text: qsTr("Secondary traffic:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
         Flow {
@@ -951,7 +951,7 @@ SettingsPageScroll {
             contentItem: Text { text: udpTertiaryIdPreset.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
             delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12; elide: Text.ElideRight }
                 background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
-            popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
+            popup.background: Rectangle { color: dialog && dialog.dialogSurface ? dialog.dialogSurface : bgDeep; border.color: glassBorder; radius: 4 }
         }
         Text { text: qsTr("Tertiary Port:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
         SpinBox {
@@ -994,7 +994,7 @@ SettingsPageScroll {
             contentItem: Text { text: udpTertiaryInterfaceCombo.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
             delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12; elide: Text.ElideRight }
                 background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
-            popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
+            popup.background: Rectangle { color: dialog && dialog.dialogSurface ? dialog.dialogSurface : bgDeep; border.color: glassBorder; radius: 4 }
         }
 
         Text { text: qsTr("Tertiary traffic:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }

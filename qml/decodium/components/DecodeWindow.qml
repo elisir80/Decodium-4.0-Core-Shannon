@@ -11,13 +11,13 @@ import QtQuick.Layouts
 import QtQuick.Window
 // import Qt.labs.settings 1.1  // non disponibile in questa build Qt
 
-Window {
+GlassWindow {
     id: decodeWindow
     title: "Decodium - Decoded Messages - " + appEngine.mode
     minimumWidth: 800
     minimumHeight: 400
     visible: true
-    color: bgDeep
+    color: transparentCorners ? "transparent" : glassSurfaceColor
 
     // Carica posizione/dimensioni da bridge
     Component.onCompleted: {

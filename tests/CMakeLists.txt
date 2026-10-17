@@ -16,6 +16,22 @@ endif ()
 
 # Tell CMake to run moc when necessary
 set (CMAKE_AUTOMOC ON)
+
+add_executable (test_qso_waterfall_recovery test_qso_waterfall_recovery.cpp)
+target_compile_definitions (test_qso_waterfall_recovery PRIVATE DECODIUM_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+target_link_libraries (test_qso_waterfall_recovery Qt6::Test Qt6::Core)
+add_test (NAME test_qso_waterfall_recovery COMMAND $<TARGET_FILE:test_qso_waterfall_recovery>)
+
+add_executable (test_liquid_glass_windows test_liquid_glass_windows.cpp)
+target_compile_definitions (test_liquid_glass_windows PRIVATE DECODIUM_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+target_link_libraries (test_liquid_glass_windows Qt6::Test Qt6::Core)
+add_test (NAME test_liquid_glass_windows COMMAND $<TARGET_FILE:test_liquid_glass_windows>)
+
+add_executable (test_tx_dispatch_guard test_tx_dispatch_guard.cpp)
+target_compile_definitions (test_tx_dispatch_guard PRIVATE DECODIUM_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+target_link_libraries (test_tx_dispatch_guard Qt6::Test Qt6::Core)
+add_test (NAME test_tx_dispatch_guard COMMAND $<TARGET_FILE:test_tx_dispatch_guard>)
+
 include_directories (
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_SOURCE_DIR}

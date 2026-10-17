@@ -21,6 +21,12 @@ Rectangle {
     property color textSecondary: bridge.themeManager.textSecondary
     property color glassBorder: bridge.themeManager.glassBorder
     property color glassOverlay: bridge.themeManager.glassOverlay
+    readonly property color dialogSurface: bridge.themeManager.isGlassTheme
+                                          && bridge.themeManager.glassTransparencySupported
+                                          ? Qt.rgba(bridge.themeManager.panelColor.r,
+                                                    bridge.themeManager.panelColor.g,
+                                                    bridge.themeManager.panelColor.b, 0.58)
+                                          : Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
 
     property var qsoList: []
     property var stats: ({})
@@ -283,6 +289,12 @@ Rectangle {
         anchors.centerIn: parent
         modal: true
         standardButtons: Dialog.Ok | Dialog.Cancel
+        background: Rectangle {
+            color: logContent.dialogSurface
+            border.color: logContent.glassBorder
+            border.width: 1
+            radius: 8
+        }
 
         ColumnLayout {
             width: 300
@@ -327,6 +339,12 @@ Rectangle {
         modal: true
         standardButtons: Dialog.Yes | Dialog.No
         property var profile: ({})
+        background: Rectangle {
+            color: logContent.dialogSurface
+            border.color: logContent.glassBorder
+            border.width: 1
+            radius: 8
+        }
 
         ColumnLayout {
             width: 380
@@ -382,6 +400,12 @@ Rectangle {
         anchors.centerIn: parent
         modal: true
         standardButtons: Dialog.Yes | Dialog.No
+        background: Rectangle {
+            color: logContent.dialogSurface
+            border.color: logContent.glassBorder
+            border.width: 1
+            radius: 8
+        }
 
         property string deleteCall: ""
         property string deleteDateTime: ""

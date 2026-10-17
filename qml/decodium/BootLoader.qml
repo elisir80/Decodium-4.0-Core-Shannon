@@ -5,8 +5,9 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Window
+import "components"
 
-ApplicationWindow {
+GlassApplicationWindow {
     id: bootWindow
     font.family: Qt.platform.os === "windows" ? "Segoe UI" : (Qt.platform.os === "osx" ? "Helvetica Neue" : "")
     visible: true
@@ -19,7 +20,12 @@ ApplicationWindow {
     x: centeredBootX()
     y: centeredBootY()
     title: qsTr("Decodium 4.0 — Loading...")
-    color: "#1a1a2e"
+    // The splash is a real top-level Decodium window too.  Keep it on the
+    // same Liquid Glass path so users never see an opaque intermediate window
+    // during startup.
+    color: bootWindow.transparentCorners
+           ? "transparent"
+           : (bootWindow.glassTheme ? bootWindow.surfaceColor : "#1a1a2e")
     property int mainLoadElapsedSeconds: 0
     property double mainLoadStartedMs: 0
     property double bootStartedMs: Date.now()
