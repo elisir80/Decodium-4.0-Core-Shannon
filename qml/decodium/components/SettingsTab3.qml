@@ -330,6 +330,30 @@ SettingsPageScroll {
                 Text { text: qsTr("FT2 UTILITY"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 2; Layout.topMargin: 10 }
                 Rectangle { Layout.fillWidth: true; Layout.columnSpan: 2; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
+                // FT2: ricerca della deriva (satelliti, QO-100). Acceso di default.
+                Text {
+                    text: qsTr("FT2 drift search (satellites, QO-100):")
+                    color: textSecondary
+                    font.pixelSize: 12
+                    elide: Text.ElideRight
+                    verticalAlignment: Text.AlignVCenter
+                    Layout.preferredWidth: autoSequenceGrid.labelWidth
+                    Layout.preferredHeight: controlHeight
+                }
+                CheckBox {
+                    id: ft2DriftSearchCheck
+                    Layout.preferredWidth: autoSequenceGrid.checkWidth
+                    Layout.preferredHeight: controlHeight
+                    checked: bridge ? bridge.ft2DriftSearchEnabled() : true
+                    onToggled: if (bridge) bridge.setFt2DriftSearchEnabled(checked)
+                    indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                    contentItem: Text { text: ""; leftPadding: 24 }
+                    hoverEnabled: true
+                    ToolTip.visible: hovered
+                    ToolTip.delay: 400
+                    ToolTip.text: qsTr("When ON, FT2 also tries to recover signals whose frequency drifts during the slot, as on satellites such as QO-100.\n\nDefault: ON. Takes effect the next time Decodium starts.")
+                }
+
                 // 1.0.311 — FT2: ripetizioni del 73/RR73 finale regolabili (era fisso 8)
                 Text {
                     text: qsTr("FT2: signoff retries (73/RR73):")

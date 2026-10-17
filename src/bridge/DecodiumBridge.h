@@ -1144,6 +1144,10 @@ public:
     Q_INVOKABLE void clearDecoPortPassword();
     Q_INVOKABLE bool decoPortAutoStart() const;
     Q_INVOKABLE void setDecoPortAutoStart(bool on);
+    // Ricerca della deriva FT2 (satelliti, QO-100): acceso di default, vale al
+    // prossimo avvio.
+    Q_INVOKABLE bool ft2DriftSearchEnabled() const;
+    Q_INVOKABLE void setFt2DriftSearchEnabled(bool on);
     Q_INVOKABLE int  decoPortConfiguredPort() const;
     QObject* spotShareObject() const;
     QObject* amplifierObject() const;
@@ -3159,6 +3163,11 @@ private:
     bool m_ft2NarrowAsyncDecode {false};
     int  m_ft2NarrowPassCounter {0};
     qint64 m_ft2NarrowLogMs {0};
+    // Frequenza (Hz audio) da cui il corrispondente attivo ha risposto, per
+    // puntare AP e ricerca della risposta attesa sul suo segnale e non sulla
+    // frequenza di ricezione impostata. 0 = non nota.
+    int    m_qsoPartnerFreqHz {0};
+    qint64 m_qsoPartnerFreqMs {0};
     // Sprint2-2: gate RX-health sul rearm AutoCQ (default ON).
     bool m_autoCqRxHealthGate {true};
     qint64 m_autoCqRxHealthLogMs {0};

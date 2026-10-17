@@ -10341,6 +10341,12 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     // Condivisione nel protocollo della radio: stessa lettura con ricaduta
     // sulla radice. La coppia virtuale ricordata si riapre senza chiedere
     // niente a nessuno; crearne una nuova parte solo dal pulsante.
+    // FT2: la ricerca della deriva (satelliti, QO-100) e' accesa di default; una
+    // variabile d'ambiente impostata a mano ha la precedenza.
+    if (qEnvironmentVariableIsEmpty("DECODIUM_FT2_DRIFT_SEARCH")
+        && ft2DriftSearchEnabled()) {
+        qputenv("DECODIUM_FT2_DRIFT_SEARCH", "1");
+    }
     if (m_nativeCatShare) {
         m_nativeCatShare->configure(
             decodium::profiledSettingsValue({}, QStringLiteral("NativeCatShareEnabled"), false).toBool(),
@@ -20211,6 +20217,7 @@ void DecodiumBridge::setDxCall(const QString& v) {
         next.clear();
     }
     if (m_dxCall != next) {
+        m_qsoPartnerFreqHz = 0;
         QString const previousDx = m_dxCall.trimmed();
         QString const previousBase = Radio::base_callsign(previousDx).trimmed().toUpper();
         QString const nextBase = Radio::base_callsign(next).trimmed().toUpper();
@@ -22611,6 +22618,28 @@ bool DecodiumBridge::decoPortAutoStart() const
     return decodium::profiledSettingsValue(QString(),
                                            QStringLiteral("DecoPortAutoStart"),
                                            false).toBool();
+}
+
+bool DecodiumBridge::ft2DriftSearchEnabled() const
+{
+    return decodium::profiledSettingsValue(QString(),
+                                           QStringLiteral("Ft2DriftSearch"),
+                                           true).toBool();
+}
+
+void DecodiumBridge::setFt2DriftSearchEnabled(bool on)
+{
+    QSettings s(QSettings::IniFormat, QSettings::UserScope,
+                QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    if (decodium::beginActiveSettingsProfile(s)) {
+        s.setValue(QStringLiteral("Ft2DriftSearch"), on);
+        s.endGroup();
+        s.endGroup();
+    } else {
+        s.setValue(QStringLiteral("Ft2DriftSearch"), on);
+    }
+    s.sync();
+    bridgeLog(QStringLiteral("FT2 drift search set: %1 (applies at next start)").arg(on ? 1 : 0));
 }
 
 void DecodiumBridge::setDecoPortAutoStart(bool on)
@@ -40741,6 +40770,20 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
         && shouldSuppressDirectedGhostDecode(f, QStringLiteral("auto-seq"))) {
         return;
     }
+    // FT2: l'AP e la ricerca della risposta attesa devono puntare sul segnale del
+    // corrispondente, che in AutoCQ risponde a una frequenza diversa dalla
+    // nostra ricezione. Si tiene la frequenza dell'ultimo suo messaggio per noi.
+    if (m_mode == QStringLiteral("FT2") && directedToMe && parts.size() > 1
+        && !m_dxCall.trimmed().isEmpty()) {
+        QString const dxUpper = m_dxCall.trimmed().toUpper();
+        bool dfOk = false;
+        int const df = f.value(3).toInt(&dfOk);
+        if (dfOk && df > 0
+            && tokenMatchesCall(parts.at(1), dxUpper, normalizedBaseCall(dxUpper))) {
+            m_qsoPartnerFreqHz = df;
+            m_qsoPartnerFreqMs = QDateTime::currentMSecsSinceEpoch();
+        }
+    }
 
     // Gate self-echo. Con nominativi speciali/non standard la forma corretta
     // puo' mantenere lo stesso ordine dei primi due token tra TX e RX
@@ -50425,7 +50468,12 @@ void DecodiumBridge::onAsyncDecodeTimer()
     // ritrovare nella finestra i segnali decodificati nei giri precedenti.
     req.audioEnd = static_cast<qint64>(pos);
 
-    int const nfqso = qBound(m_nfa, m_rxFrequency, m_nfb);
+    int nfqsoTarget = qBound(m_nfa, m_rxFrequency, m_nfb);
+    if (m_qsoPartnerFreqHz > 0 && !m_dxCall.trimmed().isEmpty()
+        && QDateTime::currentMSecsSinceEpoch() - m_qsoPartnerFreqMs < 120000) {
+        nfqsoTarget = qBound(m_nfa, m_qsoPartnerFreqHz, m_nfb);
+    }
+    int const nfqso = nfqsoTarget;
     int const decodePeriodMs = periodMsForMode(QStringLiteral("FT2"));
     if (decodePeriodMs > 0) {
         qint64 const windowStartMs = nowMs - static_cast<qint64>(decodePeriodMs);
