@@ -2,7 +2,7 @@
 
 ## English (British)
 
-Decodium 4 v1.0.696 is a stability and usability release following v1.0.695. It improves Q65 operation, CW mode transitions, remote DecoPort reception, light-theme readability and TX audio/ALC calibration safety.
+Decodium 4 v1.0.696 is a stability and usability release following v1.0.695. It improves Q65 operation, CW mode transitions, remote DecoPort reception, light-theme readability, the selectable Apple Liquid Glass presentation and TX audio/ALC calibration safety.
 
 ### Changes since 1.0.695
 
@@ -15,6 +15,7 @@ Decodium 4 v1.0.696 is a stability and usability release following v1.0.695. It 
 - **CW and CAT transitions:** the physical CAT mode is captured on CW entry and restored when leaving the CW workspace, including a delayed reassertion after CAT/QSY settling where required by the radio.
 - **Audio recovery:** mode-change audio reopening is queued after the old Qt audio source has been torn down. Superseded reopen requests are discarded, reducing race conditions and crash risk when switching between CW and digital modes.
 - **Light-theme readability:** improved accessible decode colours and contrast for Stellar Light, including message, SNR, DXCC and LoTW-related text. Panadapter/waterfall and top-dashboard typography were also made more legible at compact sizes.
+- **Apple Liquid Glass theme:** added the selectable Apple-style Liquid Glass presentation with rounded translucent surfaces and a controlled opaque fallback on systems without native material support; the classic themes remain available.
 - **CW interface clarity:** labelled the CW receive-sideband selector and clarified that `CW-U/CW-L` controls decoder polarity and centring, not the CAT mode sent to the radio.
 - **Settings recovery:** added owner-permission repair for user settings files that remain readable but cannot be saved after being copied or created with unsuitable permissions.
 - **LiveMap/roster consistency:** kept digital-mode filtering aligned with the supported mode vocabulary used by the map intelligence and roster queries.
@@ -29,7 +30,7 @@ Decodium 4 v1.0.696 is a stability and usability release following v1.0.695. It 
 
 ## Italiano
 
-Decodium 4 v1.0.696 è una release di stabilità e usabilità successiva alla v1.0.695. Migliora il funzionamento Q65, le transizioni tra CW e CAT, la ricezione remota DecoPort, la leggibilità del tema chiaro e la sicurezza della calibrazione TX audio/ALC.
+Decodium 4 v1.0.696 è una release di stabilità e usabilità successiva alla v1.0.695. Migliora il funzionamento Q65, le transizioni tra CW e CAT, la ricezione remota DecoPort, la leggibilità del tema chiaro, la nuova presentazione Apple Liquid Glass e la sicurezza della calibrazione TX audio/ALC.
 
 ### Modifiche dalla 1.0.695
 
@@ -42,6 +43,7 @@ Decodium 4 v1.0.696 è una release di stabilità e usabilità successiva alla v1
 - **Transizioni CW e CAT:** il modo fisico CAT viene salvato entrando nell’ambiente CW e ripristinato uscendo dal CW, con una nuova riaffermazione ritardata dopo l’assestamento CAT/QSY quando richiesta dalla radio.
 - **Recupero audio:** la riapertura dell’audio dopo un cambio modo viene accodata dopo la chiusura della vecchia sorgente Qt. Le richieste superate vengono scartate, riducendo race condition e rischio di crash passando da CW ai modi digitali.
 - **Leggibilità tema chiaro:** migliorati colori accessibili e contrasto dei decode in Stellar Light, inclusi testo messaggi, SNR, DXCC e LoTW. Migliorata anche la leggibilità di panadapter/waterfall e della dashboard superiore alle dimensioni compatte.
+- **Tema Apple Liquid Glass:** aggiunta la presentazione selezionabile in stile Apple Liquid Glass, con superfici arrotondate e traslucenza controllata e un fallback opaco sui sistemi senza supporto nativo ai materiali; i temi classici restano disponibili.
 - **Chiarezza interfaccia CW:** il selettore della sideband di ricezione CW ora è etichettato e chiarisce che `CW-U/CW-L` regola polarità e centratura del decoder, non il modo CAT inviato alla radio.
 - **Recupero impostazioni:** aggiunta la riparazione dei permessi del proprietario per i file di configurazione leggibili ma non più salvabili dopo copia o creazione con permessi inadatti.
 - **Coerenza LiveMap/roster:** mantenuti coerenti i filtri dei modi digitali con il vocabolario supportato dalle query di map intelligence e roster.
