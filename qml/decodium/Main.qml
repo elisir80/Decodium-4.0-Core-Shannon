@@ -3320,8 +3320,18 @@ ApplicationWindow {
     property color accentGreen: bridge.themeManager.accentColor
     property color accentOrange: bridge.themeManager.warningColor
     property color warningOrange: accentOrange
-    property color textPrimary: bridge.themeManager.textPrimary
-    property color textSecondary: bridge.themeManager.textSecondary
+    // Keep the light theme readable even when an old/custom text colour was
+    // saved with insufficient contrast.  This is deliberately resolved at
+    // the root so every header, toolbar and dialog using these tokens gets
+    // the same accessibility guard.
+    property color textPrimary: bridge.themeManager.isLightTheme
+                              ? contrastSafeUiColor(bridge.themeManager.textPrimary,
+                                                    "#0E1A22", bgDeep, 4.5)
+                              : bridge.themeManager.textPrimary
+    property color textSecondary: bridge.themeManager.isLightTheme
+                                ? contrastSafeUiColor(bridge.themeManager.textSecondary,
+                                                      "#3C4D5B", bgDeep, 4.5)
+                                : bridge.themeManager.textSecondary
     property color successGreen: bridge.themeManager.successColor
     property color glassOverlay: bridge.themeManager.glassOverlay
     property color glassBorder: bridge.themeManager.glassBorder
@@ -3332,6 +3342,20 @@ ApplicationWindow {
     property color gridColor: bridge.themeManager.gridColor
     property color txColor: bridge.themeManager.txColor
     property color rxColor: bridge.themeManager.rxColor
+
+    // Stellar Light is normally viewed on high-resolution, very wide
+    // displays. Keep the dark themes pixel-identical, while lifting only the
+    // small labels in the light header enough to remain readable.
+    readonly property real headerReadabilityScale: bridge.themeManager.isLightTheme ? 1.18 : 1.0
+    readonly property color headerLayoutColor: bridge.themeManager.isLightTheme ? "#8A4B00" : "#FFAF58"
+    readonly property color headerDxPedColor: bridge.themeManager.isLightTheme ? "#006B52" : "#19FF88"
+    readonly property color headerHistoryColor: bridge.themeManager.isLightTheme ? "#185A90" : "#58AFFF"
+
+    function headerFontSize(baseSize, minimumSize) {
+        var base = Number(baseSize)
+        var minimum = minimumSize === undefined ? base : Number(minimumSize)
+        return Math.max(minimum, Math.round(base * headerReadabilityScale))
+    }
     // DX-Pedition Fase 2a — opt-in 3-column tactical workspace (default OFF)
     property bool dxPeditionMode: false
     property bool showDxccInfo: bridge.getSetting("ShowDXCC", true)
@@ -3499,6 +3523,33 @@ ApplicationWindow {
         return Math.max(0, Math.min(1, Number(value)))
     }
 
+    function luminanceChannel(value) {
+        var channel = Math.max(0, Math.min(1, Number(value)))
+        return channel <= 0.03928
+                ? channel / 12.92
+                : Math.pow((channel + 0.055) / 1.055, 2.4)
+    }
+
+    function relativeLuminance(colorValue) {
+        return 0.2126 * luminanceChannel(colorValue.r)
+             + 0.7152 * luminanceChannel(colorValue.g)
+             + 0.0722 * luminanceChannel(colorValue.b)
+    }
+
+    function contrastSafeUiColor(candidate, fallback, background, minimumRatio) {
+        var candidateColor = decodeColorObject(candidate)
+        var fallbackColor = decodeColorObject(fallback)
+        var backgroundColor = decodeColorObject(background)
+        if (!candidateColor || !fallbackColor || !backgroundColor)
+            return fallback
+
+        var candidateLum = relativeLuminance(candidateColor)
+        var backgroundLum = relativeLuminance(backgroundColor)
+        var candidateRatio = (Math.max(candidateLum, backgroundLum) + 0.05)
+                           / (Math.min(candidateLum, backgroundLum) + 0.05)
+        return candidateRatio >= Number(minimumRatio) ? candidateColor : fallbackColor
+    }
+
     function decodeColorObject(value) {
         if (value === undefined || value === null)
             return null
@@ -3516,6 +3567,11 @@ ApplicationWindow {
 
     function boostedDecodeTextColor(value) {
         mainWindow.decodeColorRevision
+        // Stellar Light already supplies dark, contrast-safe text tokens.
+        // The historical boost raises luminance for dark themes and would
+        // turn those tokens pale again on the light decode rows.
+        if (bridge && bridge.themeManager && bridge.themeManager.isLightTheme)
+            return value
         var boost = Math.max(0, Math.min(100, Number(mainWindow.decodeColorBoost))) / 100.0
         if (boost <= 0)
             return value
@@ -3614,6 +3670,12 @@ ApplicationWindow {
         return bridge.effectiveDecodeColor(prop)
     }
 
+    function accessibleDecodeColor(prop) {
+        if (!bridge || !bridge.themeManager)
+            return ""
+        return String(bridge.themeManager.accessibleDecodeColor(prop) || "")
+    }
+
     function decodeColorBoldEnabled(prop) {
         mainWindow.decodeColorRevision
         return !!(bridge.decodeColorEnabled(prop) && bridge.decodeColorBold(prop))
@@ -3670,13 +3732,17 @@ ApplicationWindow {
     }
 
     function lotwMarkerColor() {
-        return boostedDecodeTextColor(effectiveDecodeColor("colorLotwUser"))
+        var light = accessibleDecodeColor("colorLotwUser")
+        return light.length > 0 ? light : boostedDecodeTextColor(effectiveDecodeColor("colorLotwUser"))
     }
 
 	    // Shannon-compatible color function (allineato a DecodeWindow.qml)
     function getDxccColor(modelData) {
         if (!modelData)
             return boostedDecodeTextColor(textPrimary)
+        var light = accessibleDecodeColor(decodeTextColorProp(modelData))
+        if (light.length > 0)
+            return light
         var customColor = customHighlightColor(modelData)
         if (customColor !== "") return boostedDecodeTextColor(customColor)
         return boostedDecodeTextColor(effectiveDecodeColor(decodeTextColorProp(modelData)))
@@ -3740,6 +3806,10 @@ ApplicationWindow {
         var rowHex = decodeRowHighlightHex(modelData)
         if (rowHex.length > 0)
             return readableTextOnHighlight(rowHex)
+
+        var light = accessibleDecodeColor(decodeTextColorProp(modelData))
+        if (light.length > 0)
+            return light
 
         var customColor = customHighlightColor(modelData)
         if (customColor !== "")
@@ -4248,13 +4318,18 @@ ApplicationWindow {
         if (!entry) return boostedDecodeTextColor(textSecondary)
         switch (id) {
         case "msg":  return fullSpectrumTextColor(entry)
-        case "freq": return boostedDecodeTextColor(entry.isTx ? "#f1c40f" : secondaryCyan)
+        case "freq": return boostedDecodeTextColor(entry.isTx ? accentOrange : secondaryCyan)
         case "drift": return boostedDecodeTextColor(textSecondary)
-        case "db":   return boostedDecodeTextColor(entry.snrColor || (entry.isTx ? "#f1c40f" : textSecondary))
-        case "dxcc": return boostedDecodeTextColor((entry.dxCountry || entry.usState) && decodeColorCategoryEnabled("colorDXEntity") ? effectiveDecodeColor("colorDXEntity") : textSecondary)
+        case "db":   return boostedDecodeTextColor(entry.snrColor || (entry.isTx ? accentOrange : textSecondary))
+        case "dxcc": {
+            var lightEntity = accessibleDecodeColor("colorDXEntity")
+            return (entry.dxCountry || entry.usState) && decodeColorCategoryEnabled("colorDXEntity")
+                ? (lightEntity || boostedDecodeTextColor(effectiveDecodeColor("colorDXEntity")))
+                : boostedDecodeTextColor(textSecondary)
+        }
         case "az":   return boostedDecodeTextColor(secondaryCyan)
         }
-        return boostedDecodeTextColor(entry.isTx ? "#f1c40f" : textSecondary)
+        return boostedDecodeTextColor(entry.isTx ? accentOrange : textSecondary)
     }
     function fsCellBold(entry, id) {
         if (!entry) return false
@@ -4390,7 +4465,9 @@ ApplicationWindow {
         color: bgDeep
         gradient: Gradient {
             GradientStop { position: 0.0; color: bgDeep }
-            GradientStop { position: 0.5; color: bridge.themeManager.isLightTheme ? bgDeep : bgMedium }
+            GradientStop { position: 0.5; color: bridge.themeManager.isGlassTheme
+                                  ? Qt.rgba(bgMedium.r, bgMedium.g, bgMedium.b, 0.82)
+                                  : (bridge.themeManager.isLightTheme ? bgDeep : bgMedium) }
             GradientStop { position: 1.0; color: bgDeep }
         }
     }
@@ -4924,16 +5001,16 @@ ApplicationWindow {
                         anchors.centerIn: parent
                         Text {
                             text: "DECODIUM"
-                            font.pixelSize: 14
+                            font.pixelSize: mainWindow.headerFontSize(14, 14)
                             font.bold: true
                             font.letterSpacing: 1
                             color: secondaryCyan
                         }
                         Text {
                             text: "v" + bridge.version()
-                            font.pixelSize: 12
+                            font.pixelSize: mainWindow.headerFontSize(12, 13)
                             font.bold: true
-                            color: "#ffffff"
+                            color: textPrimary
                         }
                     }
                 }
@@ -5075,7 +5152,7 @@ ApplicationWindow {
 
                             Text {
                                 text: "MHz"
-                                font.pixelSize: 11
+                                font.pixelSize: mainWindow.headerFontSize(11, 12)
                                 color: textSecondary
                             }
 
@@ -5091,7 +5168,7 @@ ApplicationWindow {
                                 Text {
                                     anchors.centerIn: parent
                                     text: bridge.catMode || "---"
-                                    font.pixelSize: 11
+                                    font.pixelSize: mainWindow.headerFontSize(11, 12)
                                     font.bold: true
                                     color: secondaryCyan
                                 }
@@ -5105,7 +5182,7 @@ ApplicationWindow {
 
                             Text {
                                 text: "TX:"
-                                font.pixelSize: 10
+                                font.pixelSize: mainWindow.headerFontSize(10, 11)
                                 font.bold: true
                                 color: mainWindow.txVisualActive ? bridge.themeManager.ledRed
                                        : (mainWindow.txPttPending ? bridge.themeManager.warningColor : textSecondary)
@@ -5117,7 +5194,7 @@ ApplicationWindow {
                                 Text {
                                     id: txFreqText; anchors.centerIn: parent
                                     text: bridge.txFrequency + " Hz"
-                                    font.pixelSize: 10; font.family: decodiumMonoFontFamily
+                                    font.pixelSize: mainWindow.headerFontSize(10, 11); font.family: decodiumMonoFontFamily
                                     color: bridge.txFrequency === bridge.rxFrequency ? accentGreen : bridge.themeManager.ledRed
                                 }
                                 MouseArea {
@@ -5131,7 +5208,7 @@ ApplicationWindow {
 
                             Text {
                                 text: "RX:"
-                                font.pixelSize: 10
+                                font.pixelSize: mainWindow.headerFontSize(10, 11)
                                 font.bold: true
                                 color: textSecondary
                             }
@@ -5142,7 +5219,7 @@ ApplicationWindow {
                                 Text {
                                     id: rxFreqText; anchors.centerIn: parent
                                     text: bridge.rxFrequency + " Hz"
-                                    font.pixelSize: 10; font.family: decodiumMonoFontFamily
+                                    font.pixelSize: mainWindow.headerFontSize(10, 11); font.family: decodiumMonoFontFamily
                                     color: accentGreen
                                 }
                                 MouseArea {
@@ -5165,7 +5242,7 @@ ApplicationWindow {
                                 Text {
                                     anchors.centerIn: parent
                                     text: "TX=RX"
-                                    font.pixelSize: 8
+                                    font.pixelSize: mainWindow.headerFontSize(8, 9)
                                     font.bold: true
                                     color: bridge.txFrequency === bridge.rxFrequency ? accentGreen : bridge.themeManager.ledRed
                                 }
@@ -5188,11 +5265,11 @@ ApplicationWindow {
 
                         Text {
                             text: "ADV"
-                            font.pixelSize: 8
+                            font.pixelSize: mainWindow.headerFontSize(8, 9)
                             font.bold: true
                             color: ((bridge.coherentAvgEnabled && bridge.ledCoherentAveraging)
                                  || (bridge.neuralSyncEnabled && bridge.ledNeuralSync)
-                                 || (bridge.turboFeedbackEnabled && bridge.ledTurboFeedback)) ? accentGreen : "#555"
+                                 || (bridge.turboFeedbackEnabled && bridge.ledTurboFeedback)) ? accentGreen : textSecondary
                         }
 
                         // LED 1: Coherent Averaging (Blue)
@@ -5322,7 +5399,7 @@ ApplicationWindow {
                         Text {
                             id: utcTimeLabel
                             text: bridge.utcTime
-                            font.pixelSize: 8
+                            font.pixelSize: mainWindow.headerFontSize(8, 9)
                             font.family: decodiumMonoFontFamily
                             font.bold: true
                             color: clockMouseArea.containsMouse
@@ -5404,7 +5481,7 @@ ApplicationWindow {
 
 	                                RowLayout {
 	                                    spacing: 2
-	                                    Text { text: "RX"; color: secondaryCyan; font.pixelSize: 8; font.bold: true; Layout.preferredWidth: 16 }
+	                                    Text { text: "RX"; color: secondaryCyan; font.pixelSize: mainWindow.headerFontSize(8, 9); font.bold: true; Layout.preferredWidth: 16 }
 	                                    Rectangle {
 	                                        id: rxAutoLevelToggle
 	                                        Layout.preferredWidth: 30
@@ -5419,7 +5496,7 @@ ApplicationWindow {
 	                                            anchors.centerIn: parent
 	                                            text: "AUTO"
 	                                            color: bridge && bridge.autoRxInputLevel ? secondaryCyan : textSecondary
-	                                            font.pixelSize: 7
+	                                            font.pixelSize: mainWindow.headerFontSize(7, 9)
 	                                            font.bold: true
 	                                        }
 	                                        MouseArea {
@@ -5463,12 +5540,12 @@ ApplicationWindow {
                                             width: 8; height: 8; radius: 4; color: secondaryCyan
                                         }
                                     }
-                                    Text { text: Math.round(bridge.rxInputLevel); color: secondaryCyan; font.pixelSize: 8; font.family: decodiumMonoFontFamily; Layout.preferredWidth: 18 }
+                                    Text { text: Math.round(bridge.rxInputLevel); color: secondaryCyan; font.pixelSize: mainWindow.headerFontSize(8, 9); font.family: decodiumMonoFontFamily; Layout.preferredWidth: 18 }
                                 }
 
                                 RowLayout {
                                     spacing: 2
-                                    Text { text: "TX"; color: accentGreen; font.pixelSize: 8; font.bold: true; Layout.preferredWidth: 16 }
+	                                    Text { text: "TX"; color: accentGreen; font.pixelSize: mainWindow.headerFontSize(8, 9); font.bold: true; Layout.preferredWidth: 16 }
                                     Slider {
                                         id: txSliderHeader
                                         Layout.fillWidth: true
@@ -5490,7 +5567,7 @@ ApplicationWindow {
                                     Text {
                                         text: bridge.txOutputLevel > 0 ? ("-" + (bridge.txOutputLevel / 10).toFixed(1)) : "0.0"
                                         color: accentGreen
-                                        font.pixelSize: 8
+                                        font.pixelSize: mainWindow.headerFontSize(8, 9)
                                         font.family: decodiumMonoFontFamily
                                         Layout.preferredWidth: 28
                                     }
@@ -5517,7 +5594,7 @@ ApplicationWindow {
 
                                     Text {
                                         text: bridge.monitoring ? "⏹" : "▶"
-                                        font.pixelSize: 9
+                                        font.pixelSize: mainWindow.headerFontSize(9, 10)
                                         color: bridge.monitoring ? accentGreen : secondaryCyan
                                         anchors.verticalCenter: parent.verticalCenter
 
@@ -5531,7 +5608,7 @@ ApplicationWindow {
 
                                     Text {
                                         text: bridge.monitoring ? "STOP" : "MON"
-                                        font.pixelSize: 7
+                                        font.pixelSize: mainWindow.headerFontSize(7, 9)
                                         font.bold: true
                                         color: bridge.monitoring ? accentGreen : textPrimary
                                         anchors.verticalCenter: parent.verticalCenter
@@ -5564,13 +5641,13 @@ ApplicationWindow {
                                     spacing: 2
                                     Text {
                                         text: "◆"
-                                        font.pixelSize: 8
+                                        font.pixelSize: mainWindow.headerFontSize(8, 9)
                                         color: bridge.ft8SubpassHarvest ? "#bda9ff" : secondaryCyan
                                         anchors.verticalCenter: parent.verticalCenter
                                     }
                                     Text {
                                         text: "GAL"
-                                        font.pixelSize: 7
+                                        font.pixelSize: mainWindow.headerFontSize(7, 9)
                                         font.bold: true
                                         color: bridge.ft8SubpassHarvest ? "#bda9ff" : textPrimary
                                         anchors.verticalCenter: parent.verticalCenter
@@ -5609,7 +5686,7 @@ ApplicationWindow {
                                     }
                                     Text {
                                         text: "LDPC"
-                                        font.pixelSize: 7
+                                        font.pixelSize: mainWindow.headerFontSize(7, 9)
                                         font.bold: true
                                         color: bridge.fastLdpcEnabled ? "#ffd48a" : textPrimary
                                         anchors.verticalCenter: parent.verticalCenter
@@ -5646,7 +5723,7 @@ ApplicationWindow {
                             Layout.fillWidth: true
                             Layout.preferredHeight: visible ? 12 : 0
                             Layout.minimumHeight: 0
-                            font.pixelSize: 7
+                            font.pixelSize: mainWindow.headerFontSize(7, 9)
                             color: text.toLowerCase().indexOf("failed") >= 0 ? bridge.themeManager.warningColor : accentGreen
                             elide: Text.ElideRight
                         }
@@ -5941,7 +6018,7 @@ ApplicationWindow {
                                 anchors.centerIn: parent
                                 spacing: 2
                                 Text { text: "⚙"; font.pixelSize: 14; anchors.verticalCenter: parent.verticalCenter }
-                                Text { text: qsTr("Setup"); font.pixelSize: 9; color: textPrimary; anchors.verticalCenter: parent.verticalCenter }
+                                Text { text: qsTr("Setup"); font.pixelSize: mainWindow.headerFontSize(9, 10); color: textPrimary; anchors.verticalCenter: parent.verticalCenter }
                             }
                         }
                     }
@@ -5972,7 +6049,7 @@ ApplicationWindow {
                                 }
                                 Text {
                                     text: "REC"
-                                    font.pixelSize: 9
+                                    font.pixelSize: mainWindow.headerFontSize(9, 10)
                                     color: bridge.recordRxEnabled ? bridge.themeManager.ledRed : textPrimary
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
@@ -6000,7 +6077,7 @@ ApplicationWindow {
                                 anchors.centerIn: parent
                                 spacing: 2
                                 Text { text: "📂"; font.pixelSize: 12; anchors.verticalCenter: parent.verticalCenter }
-                                Text { text: "WAV"; font.pixelSize: 9; color: textPrimary; anchors.verticalCenter: parent.verticalCenter }
+                                Text { text: "WAV"; font.pixelSize: mainWindow.headerFontSize(9, 10); color: textPrimary; anchors.verticalCenter: parent.verticalCenter }
                             }
                         }
                     }
@@ -6020,7 +6097,7 @@ ApplicationWindow {
                                 anchors.centerIn: parent
                                 spacing: 2
                                 Text { text: "📋"; font.pixelSize: 12; anchors.verticalCenter: parent.verticalCenter }
-                                Text { text: "Log"; font.pixelSize: 9; color: secondaryCyan; anchors.verticalCenter: parent.verticalCenter }
+                                Text { text: "Log"; font.pixelSize: mainWindow.headerFontSize(9, 10); color: secondaryCyan; anchors.verticalCenter: parent.verticalCenter }
                             }
                         }
                     }
@@ -6052,7 +6129,7 @@ ApplicationWindow {
                                 }
                                 Text {
                                     text: "Macro"
-                                    font.pixelSize: 9
+                                    font.pixelSize: mainWindow.headerFontSize(9, 10)
                                     color: bridge.macroManager && bridge.macroManager.contestMode ? accentGreen : textPrimary
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
@@ -6075,7 +6152,7 @@ ApplicationWindow {
                                 anchors.centerIn: parent
                                 spacing: 2
                                 Text { text: "🌙"; font.pixelSize: 12; anchors.verticalCenter: parent.verticalCenter }
-                                Text { text: "Astro"; font.pixelSize: 9; color: textPrimary; anchors.verticalCenter: parent.verticalCenter }
+                                Text { text: "Astro"; font.pixelSize: mainWindow.headerFontSize(9, 10); color: textPrimary; anchors.verticalCenter: parent.verticalCenter }
                             }
                         }
                     }
@@ -6098,14 +6175,14 @@ ApplicationWindow {
                                     text: "☰"
                                     font.pixelSize: 12
                                     font.bold: true
-                                    color: Qt.rgba(255/255, 175/255, 88/255, 1.0)
+                                    color: headerLayoutColor
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
                                 Text {
                                     text: qsTr("Layout")
-                                    font.pixelSize: 9
+                                    font.pixelSize: mainWindow.headerFontSize(9, 10)
                                     font.bold: true
-                                    color: Qt.rgba(255/255, 175/255, 88/255, 1.0)
+                                    color: headerLayoutColor
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
                             }
@@ -6134,14 +6211,14 @@ ApplicationWindow {
                                     text: "◤"
                                     font.pixelSize: 12
                                     font.bold: true
-                                    color: Qt.rgba(25/255, 255/255, 136/255, 1.0)
+                                    color: headerDxPedColor
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
                                 Text {
                                     text: qsTr("DX-Ped")
-                                    font.pixelSize: 9
+                                    font.pixelSize: mainWindow.headerFontSize(9, 10)
                                     font.bold: true
-                                    color: Qt.rgba(25/255, 255/255, 136/255, 1.0)
+                                    color: headerDxPedColor
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
                             }
@@ -6168,14 +6245,14 @@ ApplicationWindow {
                                     text: "▤"
                                     font.pixelSize: 12
                                     font.bold: true
-                                    color: Qt.rgba(88/255, 175/255, 255/255, 1.0)
+                                    color: headerHistoryColor
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
                                 Text {
                                     text: qsTr("History")
-                                    font.pixelSize: 9
+                                    font.pixelSize: mainWindow.headerFontSize(9, 10)
                                     font.bold: true
-                                    color: Qt.rgba(88/255, 175/255, 255/255, 1.0)
+                                    color: headerHistoryColor
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
                             }
@@ -6206,7 +6283,7 @@ ApplicationWindow {
                                 }
                                 Text {
                                     text: "CAT"
-                                    font.pixelSize: 9
+                                    font.pixelSize: mainWindow.headerFontSize(9, 10)
                                     font.bold: true
                                     color: bridge.catConnected ? accentGreen : textPrimary
                                     anchors.verticalCenter: parent.verticalCenter
@@ -8316,7 +8393,18 @@ ApplicationWindow {
                             return 7.5
                         if (normalizedMode === "WSPR")
                             return 120
-                        if (normalizedMode.indexOf("Q65") === 0)
+                        if (normalizedMode.indexOf("Q65-") === 0) {
+                            var q65End = 4
+                            while (q65End < normalizedMode.length
+                                   && normalizedMode.charAt(q65End) >= "0"
+                                   && normalizedMode.charAt(q65End) <= "9") {
+                                q65End++
+                            }
+                            var q65Period = Number(normalizedMode.substring(4, q65End))
+                            if ([15, 30, 60, 120, 300].indexOf(q65Period) >= 0)
+                                return q65Period
+                        }
+                        if (normalizedMode === "Q65")
                             return 60
                         return 15
                     }

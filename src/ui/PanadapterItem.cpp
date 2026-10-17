@@ -2217,7 +2217,12 @@ QRgb PanadapterItem::wfColor(float pct) const
 
 void PanadapterItem::setPaletteIndex(int v)
 {
-    v = qBound(0, v, 11);
+    // 11 was an experimental light palette that is no longer exposed.  Keep
+    // old QML/configuration values readable by mapping them to SmartSDR,
+    // rather than rendering a pale plot on a pale background.
+    if (v == 11)
+        v = 3;
+    v = qBound(0, v, 10);
     if (m_paletteIndex==v) return;
     m_paletteIndex=v;
     buildPalette(v);

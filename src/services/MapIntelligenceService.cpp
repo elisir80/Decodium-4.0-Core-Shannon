@@ -648,7 +648,9 @@ bool isDigitalAwardMode(const QString& mode)
         QStringLiteral("DOMINO"), QStringLiteral("PSK"), QStringLiteral("JS8"),
         QStringLiteral("MFSK"), QStringLiteral("PKT")
     };
-    return digitalModes.contains(mode.trimmed().toUpper());
+    QString const normalized = mode.trimmed().toUpper();
+    return digitalModes.contains(normalized)
+        || normalized.startsWith(QStringLiteral("Q65-"));
 }
 
 bool isPhoneAwardMode(const QString& mode)
@@ -5169,8 +5171,8 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
             " AND (:roster_all_band = 1 OR lower(s.band)=lower(:roster_band))"
             " AND (:roster_all_mode = 1 OR upper(s.mode)=upper(:roster_mode))"
             " AND (:roster_all_propagation = 1 OR upper(s.propagation_mode)=upper(:roster_propagation))"
-            " AND (:roster_digital = 0 OR upper(s.mode) IN ") + digitalModeSql
-            + QStringLiteral(")"
+            " AND (:roster_digital = 0 OR (upper(s.mode) IN ") + digitalModeSql
+            + QStringLiteral(" OR upper(s.mode) LIKE 'Q65-%'))"
             " AND (:roster_min_snr_enabled = 0 OR s.snr >= :roster_min_snr)"
             " AND (:roster_max_dt_enabled = 0 OR ABS(COALESCE(s.dt, 0)) <= :roster_max_dt)"
             " AND (:roster_dxcc_scope = 'all'"
@@ -5191,8 +5193,8 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
             "     AND (:roster_all_band = 1 OR lower(recent.band)=lower(:roster_band))"
             "     AND (:roster_all_mode = 1 OR upper(recent.mode)=upper(:roster_mode))"
             "     AND (:roster_all_propagation = 1 OR upper(recent.propagation_mode)=upper(:roster_propagation))"
-            "     AND (:roster_digital = 0 OR upper(recent.mode) IN ") + digitalModeSql
-            + QStringLiteral(")"
+            "     AND (:roster_digital = 0 OR (upper(recent.mode) IN ") + digitalModeSql
+            + QStringLiteral(" OR upper(recent.mode) LIKE 'Q65-%'))"
             "     AND (:roster_min_snr_enabled = 0 OR recent.snr >= :roster_min_snr)"
             "     AND (:roster_max_dt_enabled = 0 OR ABS(COALESCE(recent.dt, 0)) <= :roster_max_dt)"
             "     AND (:roster_dxcc_scope = 'all'"

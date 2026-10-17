@@ -1,4 +1,5 @@
 #include "DecodiumBridge.h"
+#include "AlcCalibrationMath.h"
 #include "AdifExportSanitizer.h"
 #include "Network/AdifUdpPayload.hpp"
 #include "Sequencer/AutoCqCallPolicy.hpp"
@@ -5661,6 +5662,28 @@ static int q65PeriodSecondsFromModeLabel(QString const& mode)
     return 60;
 }
 
+static int q65SubmodeIndexFromModeLabel(QString const& mode)
+{
+    QString const normalized = mode.trimmed().toUpper();
+    if (!normalized.startsWith(QStringLiteral("Q65-"))) {
+        return 0;
+    }
+
+    int end = 4;
+    while (end < normalized.size() && normalized.at(end).isDigit()) {
+        ++end;
+    }
+    if (end >= normalized.size()) {
+        return 0;
+    }
+
+    QChar const submode = normalized.at(end);
+    if (submode < QLatin1Char('A') || submode > QLatin1Char('E')) {
+        return 0;
+    }
+    return submode.unicode() - QLatin1Char('A').unicode();
+}
+
 static int q65SamplesPerSymbolAt48k(QString const& mode)
 {
     switch (q65PeriodSecondsFromModeLabel(mode)) {
@@ -5842,7 +5865,9 @@ static QVector<float> buildTxWaveformForMessage(QString const& mode,
         }
         static constexpr int kQ65Symbols = 85;
         int const q65SamplesPerSymbol = q65SamplesPerSymbolAt48k(normalizedMode);
-        float const q65ToneSpacing = 48000.0f / static_cast<float>(q65SamplesPerSymbol);
+        float const q65ToneSpacing =
+            (48000.0f / static_cast<float>(q65SamplesPerSymbol))
+            * static_cast<float>(1 << q65SubmodeIndexFromModeLabel(normalizedMode));
         wave = decodium::txwave::generateToneWave(enc.tones.constData(),
                                                   kQ65Symbols,
                                                   q65SamplesPerSymbol,
@@ -11845,6 +11870,13 @@ bool DecodiumBridge::usingLegacyBackendForTx() const
         return false;
     }
     QString const normalizedMode = m_mode.trimmed().toUpper();
+    // The embedded WSJT-X backend understands the base Q65 mode but not the
+    // explicit period/submode labels.  Keep Q65-* on the bridge-owned path so
+    // the native decoder and TX waveform receive both the period and A-E
+    // submode instead of silently falling back to the legacy FT8 path.
+    if (normalizedMode.startsWith(QStringLiteral("Q65-"))) {
+        return false;
+    }
     if (isFt2LinkApplicationMode(m_mode)
         || bridgeOwnsFst4Audio(m_mode)
         // RTTY has its own QML/native modem.  The embedded legacy backend
@@ -11859,6 +11891,15 @@ bool DecodiumBridge::usingLegacyBackendForTx() const
 
 bool DecodiumBridge::usingLegacyBackendForRx() const
 {
+    // DecoPort injects the remote PCM stream into DecodiumAudioSink.  The
+    // embedded legacy backend owns its own local audio capture and cannot
+    // consume that injected buffer, so leaving it selected here produces the
+    // misleading combination of audible remote audio with no decodes and a
+    // stale/empty local waterfall.  Remote radio use must therefore stay on
+    // the bridge-owned decoder path on every platform.
+    if (m_decoPortUseRemote) {
+        return false;
+    }
     // RTL-SDR is a complete RX source. It must win before the embedded legacy
     // backend is selected, otherwise startup opens the saved sound card and
     // the dongle never receives a start request.
@@ -18515,6 +18556,21 @@ void DecodiumBridge::setMode(const QString& v) {
         if (m_decodeReleaseTimer) m_decodeReleaseTimer->stop();
         m_pendingDecodeReleaseQueue.clear();
         QString const previousMode = m_mode;
+        bool const enteringCw = normalizedMode == QStringLiteral("CW")
+            && previousMode != QStringLiteral("CW");
+        bool const leavingCw = previousMode == QStringLiteral("CW")
+            && normalizedMode != QStringLiteral("CW");
+        if (enteringCw) {
+            QString const previousCatMode = m_catMode.trimmed().toUpper();
+            m_catModeBeforeCw = (previousCatMode != QStringLiteral("CW")
+                                  && previousCatMode != QStringLiteral("CW-R"))
+                ? previousCatMode
+                : QString();
+            bridgeLog(QStringLiteral("CW entry CAT snapshot: reported=%1 restore=%2")
+                          .arg(previousCatMode,
+                               m_catModeBeforeCw.isEmpty()
+                                   ? QStringLiteral("none") : m_catModeBeforeCw));
+        }
         bool const monitorWasActive = m_monitoring;
         bool const monitorShouldStayActive = monitorWasActive || m_monitorRequested;
         bool const enteringRtty = isStreamingKeyboardMode(normalizedMode);
@@ -18697,9 +18753,14 @@ void DecodiumBridge::setMode(const QString& v) {
             // Uscendo da FT2, forza async decode OFF (mainwindow: cbAsyncDecode->setChecked(false))
             if (m_asyncDecodeEnabled)  { m_asyncDecodeEnabled = false; emit asyncDecodeEnabledChanged(); }
         }
-        QString const bandMode = isFt2LinkApplicationMode(normalizedMode)
+        QString bandMode = isFt2LinkApplicationMode(normalizedMode)
             ? QStringLiteral("FT2")
             : normalizedMode;
+        // Q65 period/submode variants share the same band-plan frequency;
+        // only decoder timing and TX tone spacing differ.
+        if (bandMode.startsWith(QStringLiteral("Q65-"))) {
+            bandMode = QStringLiteral("Q65");
+        }
         m_bandManager->setCurrentMode(bandMode);
         if (m_preserveFrequencyOnModeChange || normalizedMode == QStringLiteral("SSB")) {
             m_bandManager->updateFromFrequency(m_frequency);
@@ -18743,9 +18804,12 @@ void DecodiumBridge::setMode(const QString& v) {
             // that call, even if an earlier state sync has not run yet.
             m_legacyBackend->setStationIdentity(m_callsign, m_grid);
             m_legacyBackend->setFt2DecodeEnabled(normalizedMode == QStringLiteral("FT2"));
-            m_legacyBackend->setMode(normalizedMode);
+            QString const legacyMode = normalizedMode.startsWith(QStringLiteral("Q65-"))
+                ? QStringLiteral("Q65")
+                : normalizedMode;
+            m_legacyBackend->setMode(legacyMode);
             applyAutoCqBurstCadenceToLegacyBackend();
-            m_legacyStartupModeGuard = normalizedMode.trimmed();
+            m_legacyStartupModeGuard = legacyMode.trimmed();
             m_legacyStartupModeGuardUntilMs = QDateTime::currentMSecsSinceEpoch() + 6000;
         } else if (legacyBackendAvailable() && !isStreamingKeyboardMode(normalizedMode)) {
             m_legacyBackend->setStationIdentity(m_callsign, m_grid);
@@ -18761,7 +18825,21 @@ void DecodiumBridge::setMode(const QString& v) {
         QString const configuredRigMode = configuredCatRigMode();
         QString const rttyRestoreMode = m_rttyRigModeState.restoreTarget(
             rttyCatContext(), configuredRigMode, QDateTime::currentMSecsSinceEpoch());
-        if (normalizedMode == QStringLiteral("SSB")
+        QString cwExitRestoreMode;
+        if (leavingCw) {
+            cwExitRestoreMode = m_catModeBeforeCw.trimmed().toUpper();
+            if (cwExitRestoreMode.isEmpty())
+                cwExitRestoreMode = configuredRigMode;
+            m_catModeBeforeCw.clear();
+            bridgeLog(QStringLiteral("CW exit CAT restore: target=%1 applicationMode=%2")
+                          .arg(cwExitRestoreMode.isEmpty()
+                                   ? QStringLiteral("none") : cwExitRestoreMode,
+                               normalizedMode));
+        }
+        if (!cwExitRestoreMode.isEmpty()) {
+            applyConfiguredCatRigMode(QStringLiteral("mode-change/cw-exit"),
+                                       cwExitRestoreMode);
+        } else if (normalizedMode == QStringLiteral("SSB")
             || normalizedMode == QStringLiteral("CW")
             || !configuredRigMode.isEmpty() || !rttyRestoreMode.isEmpty()) {
             applyConfiguredCatRigMode(QStringLiteral("mode-change"));
@@ -18771,6 +18849,20 @@ void DecodiumBridge::setMode(const QString& v) {
             && !isFt2LinkApplicationMode(normalizedMode)
             && !canonicalApplicationDecodeMode(normalizedMode).isEmpty()) {
             m_hamlibCat->setRigMode(normalizedMode);
+        }
+        if (!cwExitRestoreMode.isEmpty() && monitorShouldStayActive) {
+            // Some radios apply the mode after the preceding QSY/backend
+            // hand-off. Reassert once after CAT settles without disturbing a
+            // newer mode change.
+            QTimer::singleShot(900, this, [this, rttyRigGeneration, cwExitRestoreMode]() {
+                if (rttyRigGeneration != m_rttyRigModeGeneration
+                    || m_mode == QStringLiteral("CW")
+                    || m_transmitting || m_tuning) {
+                    return;
+                }
+                applyConfiguredCatRigMode(QStringLiteral("mode-change/cw-exit-settled"),
+                                           cwExitRestoreMode);
+            });
         }
         syncActiveCatTxSplitFrequency(QStringLiteral("mode-change"));
         scheduleModeChangeMonitorRecovery(previousMode, m_mode, monitorSessionId, monitorShouldStayActive);
@@ -21416,7 +21508,13 @@ QObject* DecodiumBridge::decoPortGatewayObject() const
         };
         hooks.setFrequencyHz = [self, rigOpen](double hz) {
             if (auto* r = rigOpen()) { r->setFrequencyHz(hz); return; }
-            self->setFrequency(hz);
+            // If the direct DecoPort Hamlib driver could not claim the port
+            // because this application's CAT already owns it, updating only
+            // the bridge property is not enough: the real radio would stay at
+            // the old frequency.  Reuse the normal CAT QSY path so Hamlib,
+            // TCI, OmniRig and legacy fallbacks all receive the command.
+            self->requestRigFrequencyFromBridge(hz,
+                                                QStringLiteral("DecoPort remote client"));
         };
         hooks.setModeName    = [self, rigOpen](const QString& m) {
             if (auto* r = rigOpen()) { r->setModeName(m); return; }
@@ -22457,6 +22555,19 @@ void DecodiumBridge::setDecoPortUseRemote(bool on)
     if (on && (!link || !link->isLinked())) {
         bridgeLog(QStringLiteral("DecoPort remote source refused: not linked to a radio"));
         return;
+    }
+
+    // A legacy RX session captures from its own local audio backend.  Stop it
+    // before selecting the remote source; after m_decoPortUseRemote is set,
+    // startRx() will choose the bridge-owned decoder that consumes the injected
+    // DecoPort samples instead.  Without this hand-off the remote monitor can
+    // be audible while the decoder keeps receiving silence/local audio.
+    bool const handoffFromLegacyRx = on
+        && usingLegacyBackendForRx()
+        && (m_monitoring || m_monitorRequested);
+    if (handoffFromLegacyRx) {
+        bridgeLog(QStringLiteral("DecoPort remote source: handing RX from legacy audio backend to remote PCM"));
+        stopRx();
     }
 
     m_decoPortUseRemote = on;
@@ -30159,12 +30270,6 @@ void DecodiumBridge::onAlcCalibrationTick()
     // EMA smussante (alpha=0.4 nuovo dato)
     m_alcEma = (m_alcEma <= 0.0) ? alc : (0.6 * m_alcEma + 0.4 * alc);
 
-    // Se dopo >= 3 tick l'ALC è ancora ~0, la radio potrebbe non essere in TX
-    if ((now - m_alcCalStartMs) > 1500 && m_alcEma <= 0.5) {
-        bridgeLog(QStringLiteral("[ALC] tick: ALC ~0, waiting for TX"));
-        return;
-    }
-
     double const err = m_alcEma - static_cast<double>(m_alcTarget);
 
     // Deadband ±5
@@ -30178,12 +30283,8 @@ void DecodiumBridge::onAlcCalibrationTick()
 
     m_alcConvergeCount = 0;
 
-    // Step proporzionale cappato ±20
-    // err > 0 → ALC troppo alto → abbassa drive (step > 0 → sottrai)
-    // err < 0 → ALC troppo basso → alza drive (step < 0 → sottrai un negativo = somma)
-    double const step     = qBound(-20.0, err * 2.0, 20.0);
     double const oldLevel = m_txOutputLevel;
-    double const newLevel = qBound(5.0, oldLevel - step, 450.0);
+    double const newLevel = decodium::alc::adjustedAttenuation(oldLevel, err);
 
     bridgeLog(QStringLiteral("[ALC] tick alc=%1 ema=%2 target=%3 err=%4 level=%5->%6")
                   .arg(alc,     0, 'f', 1)
@@ -30193,17 +30294,18 @@ void DecodiumBridge::onAlcCalibrationTick()
                   .arg(oldLevel, 0, 'f', 1)
                   .arg(newLevel, 0, 'f', 1));
 
-    // 1.0.325 — rilevamento saturazione: il clamp ha bloccato newLevel = oldLevel
-    // ma siamo fuori deadband → drive fisicamente al limite, non convergerà mai
-    if (qFuzzyCompare(newLevel, oldLevel) && qAbs(err) > 5.0) {
+    // Rilevamento saturazione: il clamp ha bloccato newLevel = oldLevel
+    // ma siamo fuori deadband → drive fisicamente al limite, non convergerà mai.
+    decodium::alc::DriveLimit const limit =
+        decodium::alc::limitReached(oldLevel, newLevel, err);
+    if (limit != decodium::alc::DriveLimit::None) {
         m_alcStuckCount++;
         if (m_alcStuckCount >= 3) {
-            // Distingui saturazione alta (maxDrive) da bassa (minDrive)
-            if (oldLevel >= 449.0) {
-                finishAlcCalibration(false, QStringLiteral("max-drive"));
-            } else {
-                finishAlcCalibration(false, QStringLiteral("min-drive"));
-            }
+            finishAlcCalibration(
+                false,
+                limit == decodium::alc::DriveLimit::MaxDrive
+                    ? QStringLiteral("max-drive")
+                    : QStringLiteral("min-drive"));
             return;
         }
     } else {
@@ -31423,13 +31525,32 @@ void DecodiumBridge::applyRttyRigMode(const QString& reason)
     }
 }
 
-void DecodiumBridge::applyConfiguredCatRigMode(const QString& reason)
+void DecodiumBridge::applyConfiguredCatRigMode(const QString& reason,
+                                               const QString& explicitMode)
 {
     // CW is a radio mode, not a digital audio mode. DATA-U/DIGU remains the
     // configured path for digital application modes; the CW workspace asks
     // the local rig or remote gateway for CW so its carrier stays on the dial.
-    QString rigMode = m_mode == QStringLiteral("SSB") ? m_ssbRadioMode
-        : (m_mode == QStringLiteral("CW") ? QStringLiteral("CW") : configuredCatRigMode());
+    QString rigMode = explicitMode.trimmed();
+    if (rigMode.isEmpty()) {
+        rigMode = m_mode == QStringLiteral("SSB") ? m_ssbRadioMode
+            : (m_mode == QStringLiteral("CW") ? QStringLiteral("CW") : configuredCatRigMode());
+    }
+    const QString upperRigMode = rigMode.toUpper();
+    if (upperRigMode == QStringLiteral("DATA/PACKET")
+        || upperRigMode == QStringLiteral("DATA/PKT")
+        || upperRigMode == QStringLiteral("DATA-USB")
+        || upperRigMode == QStringLiteral("USB-D")
+        || upperRigMode == QStringLiteral("DIGU")
+        || upperRigMode == QStringLiteral("PKTUSB")
+        || upperRigMode == QStringLiteral("PKT-U")) {
+        rigMode = QStringLiteral("DATA-U");
+    } else if (upperRigMode == QStringLiteral("DATA-LSB")
+               || upperRigMode == QStringLiteral("DIGL")
+               || upperRigMode == QStringLiteral("PKTLSB")
+               || upperRigMode == QStringLiteral("PKT-L")) {
+        rigMode = QStringLiteral("DATA-L");
+    }
     if (rigMode.isEmpty() && m_mode != QStringLiteral("RTTY")) {
         rigMode = m_rttyRigModeState.restoreTarget(
             rttyCatContext(), rigMode, QDateTime::currentMSecsSinceEpoch());
@@ -33294,6 +33415,9 @@ double DecodiumBridge::workingFrequencyForBandMode(const QString& bandLambda, co
     }
     if (targetMode.isEmpty()) {
         return 0.0;
+    }
+    if (targetMode.startsWith(QStringLiteral("Q65-"))) {
+        targetMode = QStringLiteral("Q65");
     }
 
     WorkingFrequencyItems items =
@@ -53700,7 +53824,23 @@ void DecodiumBridge::restartAudioCaptureForModeChange(const QString& previousMod
             m_soundInput->setInputGain(rxInputGainFromLevel(m_rxInputLevel));
         }
     } else {
-        startAudioCapture();
+        // SoundInput lives on its own thread.  stopAudioCapture() therefore
+        // queues the teardown; starting it again immediately in this call can
+        // overlap with the old QAudioSource callbacks on Qt Multimedia.  In
+        // particular this is reproducible as a crash-prone CW -> FT mode
+        // transition on Windows/WASAPI.  Let the queued stop drain first and
+        // invalidate the callback if another mode change supersedes it.
+        const quint64 recoverySerial = ++m_modeChangeAudioRecoverySerial;
+        QTimer::singleShot(0, this, [this, recoverySerial]() {
+            if (recoverySerial != m_modeChangeAudioRecoverySerial
+                || !m_monitoring || m_transmitting || m_tuning
+                || usingLegacyBackendForRx()) {
+                bridgeLog(QStringLiteral("setMode: stale audio reopen skipped serial=%1 current=%2")
+                              .arg(recoverySerial).arg(m_modeChangeAudioRecoverySerial));
+                return;
+            }
+            startAudioCapture();
+        });
     }
 }
 

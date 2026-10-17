@@ -349,6 +349,44 @@ Window {
         return bridge.effectiveDecodeColor(prop)
     }
 
+    // Stellar Light must not reuse the very bright WSJT-X palette designed
+    // for dark backgrounds.  Those colours (lime, pale green and yellow) have
+    // insufficient contrast on the light zebra rows and are especially hard
+    // to distinguish for colour-blind users.  Use a high-contrast,
+    // hue-separated palette only for the built-in light theme.
+    function accessibleLightDecodeColor(prop) {
+        if (bridge && bridge.themeManager) {
+            var central = String(bridge.themeManager.accessibleDecodeColor(prop) || "")
+            if (central.length > 0)
+                return central
+        }
+        if (!bridge || !bridge.themeManager || !bridge.themeManager.isLightTheme)
+            return ""
+        var colours = {
+            "colorDecodeText": "#243746",
+            "colorCQ": "#006B52",
+            "colorDXEntity": "#8A4B00",
+            "colorNewDxcc": "#7A174E",
+            "colorNewDxccBand": "#8A2F62",
+            "colorNewContinent": "#8A1F3D",
+            "colorNewContinentBand": "#7A3150",
+            "colorNewCqZone": "#8A4700",
+            "colorNewCqZoneBand": "#7A4A16",
+            "colorNewItuZone": "#426B00",
+            "colorNewItuZoneBand": "#4C6413",
+            "colorNewGrid": "#8A3D00",
+            "colorNewGridBand": "#7A4315",
+            "colorNewCall": "#006078",
+            "colorNewCallBand": "#176073",
+            "color73": "#1456A0",
+            "colorB4": "#4A5560",
+            "colorLotwUser": "#4A207A",
+            "colorTxMessage": "#8A4B00",
+            "colorMyCall": "#9B1C1C"
+        }
+        return colours[prop] || ""
+    }
+
     // 1.0.416 — sfondo riga scelto dall'utente per categoria (opt-in). null se non abilitato.
     function decodeUserBgFill(modelData) {
         decodeWindow.decodeColorRevision
@@ -405,6 +443,8 @@ Window {
     }
 
     function boostedDecodeTextColor(value) {
+        if (bridge && bridge.themeManager && bridge.themeManager.isLightTheme)
+            return value
         var boost = Math.max(0, Math.min(100, Number(decodeWindow.decodeColorBoost))) / 100.0
         if (boost <= 0)
             return value
@@ -487,6 +527,10 @@ Window {
         var rowHex = wsjtxRowHighlightHex(modelData)
         if (rowHex.length > 0)
             return readableTextOnHighlight(rowHex)
+
+        var lightColour = accessibleLightDecodeColor(decodeTextColorProp(modelData))
+        if (lightColour !== "")
+            return lightColour
 
         var customColor = customHighlightColor(modelData)
         if (customColor !== "") return boostedDecodeTextColor(customColor)
@@ -1502,7 +1546,13 @@ Component.onCompleted: {
                                             text: decodeWindow.dxccDisplayText(modelData)
                                             font.family: decodiumMonoFontFamily
                                             font.pixelSize: 11
-	                                            color: decodeWindow.boostedDecodeTextColor((modelData.dxCountry || modelData.usState) && decodeWindow.decodeColorCategoryEnabled("colorDXEntity") ? decodeWindow.effectiveDecodeColor("colorDXEntity") : textSecondary)
+                                            color: {
+                                                var accessible = decodeWindow.accessibleLightDecodeColor("colorDXEntity")
+                                                return (modelData.dxCountry || modelData.usState)
+                                                        && decodeWindow.decodeColorCategoryEnabled("colorDXEntity")
+                                                    ? (accessible || decodeWindow.boostedDecodeTextColor(decodeWindow.effectiveDecodeColor("colorDXEntity")))
+                                                    : textSecondary
+                                            }
                                             horizontalAlignment: Text.AlignRight
                                             verticalAlignment: Text.AlignVCenter
                                             elide: Text.ElideNone

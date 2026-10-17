@@ -87,13 +87,13 @@ const DecodiumThemeManager::ThemePalette DecodiumThemeManager::s_stellarLight {
     /* bgMedium       */ QColor("#E1E9F1"),   // fasce e barre
     /* bgLight        */ QColor("#FFFFFF"),   // schede
     /* primaryColor   */ QColor("#1F76D2"),   // blu dei comandi attivi
-    /* secondaryColor */ QColor("#0E9AAE"),   // teal di supporto
-    /* accentColor    */ QColor("#0E8C6A"),   // verde-teal: la nostra firma
-    /* warningColor   */ QColor("#B5741A"),
+    /* secondaryColor */ QColor("#006B7A"),   // teal scuro, leggibile su chiaro
+    /* accentColor    */ QColor("#006B52"),   // verde-teal ad alto contrasto
+    /* warningColor   */ QColor("#8A4B00"),
     /* errorColor     */ QColor("#CE4038"),
     /* textPrimary    */ QColor("#0E1A22"),   // ardesia quasi nera
-    /* textSecondary  */ QColor("#5C6E7E"),
-    /* successColor   */ QColor("#0E8C6A"),
+    /* textSecondary  */ QColor("#3C4D5B"),   // testo secondario leggibile
+    /* successColor   */ QColor("#006B52"),
     /* glassOverlay   */ QColor(255, 255, 255, 214),
     /* glassBorder    */ QColor("#CBD8E3"),   // filetti sottili
     /* borderColor    */ QColor("#C3D2DF"),
@@ -101,10 +101,10 @@ const DecodiumThemeManager::ThemePalette DecodiumThemeManager::s_stellarLight {
     /* panelColor     */ QColor("#FFFFFF"),
     /* panelHeader    */ QColor("#EAF1F7"),
     /* rowMatchBg     */ QColor(14, 140, 106, 36),
-    /* rowMatchBorder */ QColor("#0E8C6A"),
+    /* rowMatchBorder */ QColor("#006B52"),
     /* ledRed         */ QColor("#CE4038"),
     /* ledBlue        */ QColor("#1F76D2"),
-    /* ledYellow      */ QColor("#B5741A"),
+    /* ledYellow      */ QColor("#8A4B00"),
     /* ledMagenta     */ QColor("#9B5FBF"),
     /* accentDim      */ QColor(),
     /* accentDeep     */ QColor(),
@@ -150,6 +150,43 @@ const DecodiumThemeManager::ThemePalette DecodiumThemeManager::s_dxPedition {
     /* isLight        */ false
 };
 
+// Liquid Glass uses translucent panel tokens over an opaque fallback
+// gradient. This keeps the appearance stable on compositors without native
+// backdrop/material support while still giving rounded/glass panels a layered
+// look where the QML surface supports it.
+const DecodiumThemeManager::ThemePalette DecodiumThemeManager::s_liquidGlass {
+    /* bgDeep         */ QColor("#0A1020"),
+    /* bgMedium       */ QColor("#14223A"),
+    /* bgLight        */ QColor("#233B60"),
+    /* primaryColor   */ QColor("#EAF6FF"),
+    /* secondaryColor */ QColor("#A8C7E8"),
+    /* accentColor    */ QColor("#8DEBFF"),
+    /* warningColor   */ QColor("#FFD18A"),
+    /* errorColor     */ QColor("#FF8296"),
+    /* textPrimary    */ QColor("#F5FAFF"),
+    /* textSecondary  */ QColor("#AFC6DF"),
+    /* successColor   */ QColor("#7CF4C8"),
+    /* glassOverlay   */ QColor(235, 247, 255, 38),
+    /* glassBorder    */ QColor(220, 242, 255, 112),
+    /* borderColor    */ QColor(220, 242, 255, 82),
+    /* borderSoft     */ QColor(220, 242, 255, 42),
+    /* panelColor     */ QColor(25, 43, 72, 176),
+    /* panelHeader    */ QColor(38, 62, 98, 208),
+    /* rowMatchBg     */ QColor(141, 235, 255, 42),
+    /* rowMatchBorder */ QColor("#8DEBFF"),
+    /* ledRed         */ QColor("#FF8296"),
+    /* ledBlue        */ QColor("#A8C7E8"),
+    /* ledYellow      */ QColor("#FFD18A"),
+    /* ledMagenta     */ QColor("#FF9CCB"),
+    /* accentDim      */ QColor("#4E9CB4"),
+    /* accentDeep     */ QColor("#123A4A"),
+    /* pileColor      */ QColor("#A8C7E8"),
+    /* gridColor      */ QColor("#8DEBFF"),
+    /* txColor        */ QColor("#FF9CCB"),
+    /* rxColor        */ QColor("#7CF4C8"),
+    /* isLight        */ false
+};
+
 DecodiumThemeManager::DecodiumThemeManager(QObject* parent)
     : QObject(parent)
 {
@@ -185,7 +222,8 @@ DecodiumThemeManager::DecodiumThemeManager(QObject* parent)
         setProfiledThemeValue(QStringLiteral("theme/current"), stored,
                               QStringLiteral("Decodium"));
     }
-    if (stored != "Ocean Blue" && stored != "Stellar Light" && stored != "Darkcodium")
+    if (stored != "Ocean Blue" && stored != "Stellar Light" && stored != "Darkcodium"
+        && stored != "Liquid Glass")
         stored = startupTheme;
     m_currentTheme = stored;
     // DX-Pedition Fase 1 — accent variant + densità (store Decodium3 esplicito, opt-in)
@@ -211,6 +249,38 @@ DecodiumThemeManager::DecodiumThemeManager(QObject* parent)
     m_customTextColor =
         profiledThemeValue(QStringLiteral("theme/customText"), QString(),
                            QStringLiteral("Decodium")).toString();
+}
+
+QString DecodiumThemeManager::accessibleDecodeColor(const QString& prop) const
+{
+    if (!isLightTheme())
+        return {};
+
+    // These colours are deliberately dark, sufficiently separated by hue,
+    // and readable on the light decode rows, including for common colour-
+    // vision deficiencies. Keep this mapping central so the classic decode
+    // window and the DX-Pedition panels cannot drift apart again.
+    if (prop == QStringLiteral("colorDecodeText")) return QStringLiteral("#243746");
+    if (prop == QStringLiteral("colorCQ")) return QStringLiteral("#006B52");
+    if (prop == QStringLiteral("colorDXEntity")) return QStringLiteral("#8A4B00");
+    if (prop == QStringLiteral("colorNewDxcc")) return QStringLiteral("#7A174E");
+    if (prop == QStringLiteral("colorNewDxccBand")) return QStringLiteral("#8A2F62");
+    if (prop == QStringLiteral("colorNewContinent")) return QStringLiteral("#8A1F3D");
+    if (prop == QStringLiteral("colorNewContinentBand")) return QStringLiteral("#7A3150");
+    if (prop == QStringLiteral("colorNewCqZone")) return QStringLiteral("#8A4700");
+    if (prop == QStringLiteral("colorNewCqZoneBand")) return QStringLiteral("#7A4A16");
+    if (prop == QStringLiteral("colorNewItuZone")) return QStringLiteral("#426B00");
+    if (prop == QStringLiteral("colorNewItuZoneBand")) return QStringLiteral("#4C6413");
+    if (prop == QStringLiteral("colorNewGrid")) return QStringLiteral("#8A3D00");
+    if (prop == QStringLiteral("colorNewGridBand")) return QStringLiteral("#7A4315");
+    if (prop == QStringLiteral("colorNewCall")) return QStringLiteral("#006078");
+    if (prop == QStringLiteral("colorNewCallBand")) return QStringLiteral("#176073");
+    if (prop == QStringLiteral("color73")) return QStringLiteral("#1456A0");
+    if (prop == QStringLiteral("colorB4")) return QStringLiteral("#4A5560");
+    if (prop == QStringLiteral("colorLotwUser")) return QStringLiteral("#4A207A");
+    if (prop == QStringLiteral("colorTxMessage")) return QStringLiteral("#8A4B00");
+    if (prop == QStringLiteral("colorMyCall")) return QStringLiteral("#9B1C1C");
+    return {};
 }
 
 // 1.0.305 (#6) — override colori UI ----------------------------------------
@@ -271,13 +341,15 @@ const DecodiumThemeManager::ThemePalette& DecodiumThemeManager::currentPalette()
 {
     if (m_currentTheme == "Stellar Light") return s_stellarLight;
     if (m_currentTheme == "Darkcodium")   return s_dxPedition;
+    if (m_currentTheme == "Liquid Glass") return s_liquidGlass;
     return s_oceanBlue;
 }
 
 void DecodiumThemeManager::setCurrentTheme(const QString& name)
 {
     if (m_currentTheme == name) return;
-    if (name != "Ocean Blue" && name != "Stellar Light" && name != "Darkcodium") return;
+    if (name != "Ocean Blue" && name != "Stellar Light" && name != "Darkcodium"
+        && name != "Liquid Glass") return;
     m_currentTheme = name;
     setProfiledThemeValue(QStringLiteral("theme/current"), name,
                           QStringLiteral("Decodium"));

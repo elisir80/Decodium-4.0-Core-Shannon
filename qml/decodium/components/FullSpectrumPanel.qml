@@ -50,8 +50,8 @@ Item {
     readonly property color cCyan:     tm ? tm.secondaryColor : "#66e6ff"
     readonly property color cGrid:     tm ? tm.gridColor      : "#00d4b4"
     readonly property color cTx:       tm ? tm.txColor        : "#ff7a5c"
-    readonly property color cLotw:     root.bridge ? root.bridge.effectiveDecodeColor("colorLotwUser") : "#ffffff"
-    readonly property color cCq:       root.bridge ? root.bridge.effectiveDecodeColor("colorCQ") : root.cAccent
+    readonly property color cLotw:     root.bridge ? (root.tm ? (root.tm.accessibleDecodeColor("colorLotwUser") || root.bridge.effectiveDecodeColor("colorLotwUser")) : root.bridge.effectiveDecodeColor("colorLotwUser")) : "#ffffff"
+    readonly property color cCq:       root.bridge ? (root.tm ? (root.tm.accessibleDecodeColor("colorCQ") || root.bridge.effectiveDecodeColor("colorCQ")) : root.bridge.effectiveDecodeColor("colorCQ")) : root.cAccent
 
     readonly property int rowH: tm ? tm.densityRowHeight() : 22
     readonly property int fSize: tm ? tm.densityFontSize() : 12
@@ -92,6 +92,20 @@ Item {
 
     function refreshDecodeColors() {
         decodeColorRevision = (decodeColorRevision + 1) % 1000000
+    }
+
+    function accessibleDecodeColor(prop) {
+        return root.tm ? String(root.tm.accessibleDecodeColor(prop) || "") : ""
+    }
+
+    function decodeEntityTextColor(entry) {
+        if (entry && (entry.dxCountry || entry.usState)
+                && root.bridge && root.bridge.decodeColorEnabled("colorDXEntity")) {
+            var light = accessibleDecodeColor("colorDXEntity")
+            if (light.length > 0)
+                return light
+        }
+        return root.cTextDim
     }
 
     Connections {
@@ -210,6 +224,8 @@ Item {
 
     function boostedDecodeTextColor(value) {
         root.decodeColorRevision
+        if (root.tm && root.tm.isLightTheme)
+            return value
         var boost = Math.max(0, Math.min(100, Number(root.decodeColorBoost))) / 100.0
         if (boost <= 0)
             return value
@@ -261,7 +277,10 @@ Item {
             return boostedDecodeTextColor("#E14B00")
         if (root.highlightBlue && highlightListMatches(message, root.highlightBlueCallsigns))
             return boostedDecodeTextColor("#0064FF")
-        return root.bridge ? boostedDecodeTextColor(root.bridge.effectiveDecodeColor(decodeMessageColorProp(entry))) : root.cText
+        var light = accessibleDecodeColor(decodeMessageColorProp(entry))
+        return light.length > 0
+                ? light
+                : (root.bridge ? boostedDecodeTextColor(root.bridge.effectiveDecodeColor(decodeMessageColorProp(entry))) : root.cText)
     }
 
     function decodeMessageBold(entry) {
@@ -394,13 +413,13 @@ Item {
                 clip: true
                 Text {
                     text: !modelData ? "" : (del.entry.formattedTime || del.entry.time || "")
-                    color: !modelData ? root.cTextDim : (del.entry.isTx ? "#f1c40f" : root.cTextDim)
+                    color: !modelData ? root.cTextDim : (del.entry.isTx ? root.cTx : root.cTextDim)
                     font.pixelSize: root.fSize; font.family: decodiumMonoFontFamily
                     Layout.preferredWidth: root.wUtc
                 }
                 Text {
                     text: !modelData ? "" : (del.entry.db || "")
-                    color: !modelData ? root.cTextDim : (del.entry.snrColor || (del.entry.isTx ? "#f1c40f" : root.cTextDim))
+                    color: !modelData ? root.cTextDim : (del.entry.snrColor || (del.entry.isTx ? root.cTx : root.cTextDim))
                     font.pixelSize: root.fSize; font.family: decodiumMonoFontFamily
                     font.bold: !!modelData && del.entry.isTx === true
                     horizontalAlignment: Text.AlignRight
@@ -409,7 +428,7 @@ Item {
                 Item { Layout.preferredWidth: root.gap }
                 Text {
                     text: !modelData ? "" : (del.entry.dt || "")
-                    color: !modelData ? root.cTextDim : (del.entry.isTx ? "#f1c40f" : root.cTextDim)
+                    color: !modelData ? root.cTextDim : (del.entry.isTx ? root.cTx : root.cTextDim)
                     font.pixelSize: root.fSize; font.family: decodiumMonoFontFamily
                     horizontalAlignment: Text.AlignRight
                     Layout.preferredWidth: root.wDt
@@ -417,7 +436,7 @@ Item {
                 Item { Layout.preferredWidth: root.gap }
                 Text {
                     text: !modelData ? "" : (del.entry.freq || "")
-                    color: !modelData ? root.cTextDim : (del.entry.isTx ? "#f1c40f" : root.cCyan)
+                    color: !modelData ? root.cTextDim : (del.entry.isTx ? root.cTx : root.cCyan)
                     font.pixelSize: root.fSize; font.family: decodiumMonoFontFamily
                     font.bold: !!modelData && del.entry.isTx === true
                     horizontalAlignment: Text.AlignRight
@@ -455,7 +474,7 @@ Item {
                         anchors.fill: parent
                         anchors.rightMargin: del.entry.isLotw === true ? 11 : 0
                         text: !modelData ? "" : root.dxccDisplayText(del.entry)
-                        color: root.cTextDim
+                        color: root.decodeEntityTextColor(del.entry)
                         font.pixelSize: root.fSize; font.family: decodiumMonoFontFamily
                         horizontalAlignment: Text.AlignRight
                         verticalAlignment: Text.AlignVCenter

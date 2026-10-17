@@ -278,7 +278,7 @@ double tx_duration(QString mode, double trPeriod, int nsps, bool bFast9)
   if(mode=="JT4")  txt=1.0 + 207.0*2520/11025.0;   // JT4
   if(mode=="JT9")  txt=1.0 + 85.0*nsps/12000.0;  // JT9
   if(mode=="JT65") txt=1.0 + 126*4096/11025.0;     // JT65
-  if(mode=="Q65")  {                                      // Q65
+  if(mode=="Q65" or mode.startsWith("Q65-"))  {            // Q65 and explicit period/submode variants
     if(trPeriod==15) txt=0.5 + 85*1800/12000.0;
     if(trPeriod==30) txt=0.5 + 85*3600/12000.0;
     if(trPeriod==60) txt=1.0 + 85*7200/12000.0;

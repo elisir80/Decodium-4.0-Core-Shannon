@@ -223,6 +223,11 @@ add_executable (test_audio_sink_tx_gate
 target_link_libraries (test_audio_sink_tx_gate Qt6::Test Qt6::Core)
 add_test (NAME test_audio_sink_tx_gate COMMAND $<TARGET_FILE:test_audio_sink_tx_gate>)
 
+add_executable (test_alc_calibration test_alc_calibration.cpp
+  ../src/bridge/AlcCalibrationMath.h)
+target_link_libraries (test_alc_calibration Qt6::Test Qt6::Core)
+add_test (NAME test_alc_calibration COMMAND $<TARGET_FILE:test_alc_calibration>)
+
 add_executable (test_rtty_rx_recovery test_rtty_rx_recovery.cpp)
 target_link_libraries (test_rtty_rx_recovery Qt6::Test Qt6::Core)
 add_test (NAME test_rtty_rx_recovery COMMAND $<TARGET_FILE:test_rtty_rx_recovery>)

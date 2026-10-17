@@ -41,6 +41,7 @@ class DecodiumThemeManager : public QObject
     Q_PROPERTY(QStringList availableThemes READ availableThemes CONSTANT)
     Q_PROPERTY(QString currentTheme  READ currentTheme   WRITE setCurrentTheme NOTIFY currentThemeChanged)
     Q_PROPERTY(bool   isLightTheme   READ isLightTheme   NOTIFY paletteChanged)
+    Q_PROPERTY(bool   isGlassTheme   READ isGlassTheme   NOTIFY paletteChanged)
     // 1.0.305 (#6) — colori UI personalizzati (sfondo + testo) come in v3, sopra il tema.
     Q_PROPERTY(bool    customColorsEnabled READ customColorsEnabled WRITE setCustomColorsEnabled NOTIFY paletteChanged)
     Q_PROPERTY(QString customBgColor       READ customBgColor       WRITE setCustomBgColor       NOTIFY paletteChanged)
@@ -83,10 +84,17 @@ public:
     QColor txColor()        const;
     QColor rxColor()        const;
 
-    QStringList availableThemes() const { return {"Ocean Blue", "Stellar Light", "Darkcodium"}; }
+    QStringList availableThemes() const { return {"Ocean Blue", "Stellar Light", "Darkcodium", "Liquid Glass"}; }
     QString currentTheme() const { return m_currentTheme; }
     void setCurrentTheme(const QString& name);
     bool isLightTheme() const;
+    bool isGlassTheme() const { return m_currentTheme == QStringLiteral("Liquid Glass"); }
+
+    // Decode colours intended for light surfaces.  The normal WSJT-X palette
+    // is optimised for dark backgrounds and its lime/yellow values become
+    // unreadable in Stellar Light.  Returning an empty string keeps the
+    // caller's normal palette path for dark/custom themes.
+    Q_INVOKABLE QString accessibleDecodeColor(const QString& prop) const;
 
     // 1.0.305 (#6) — override colori UI (sfondo+testo). Stringhe hex "#RRGGBB" (vuote = tema).
     bool    customColorsEnabled() const { return m_customColorsEnabled; }
@@ -152,6 +160,7 @@ private:
     static const ThemePalette s_oceanBlue;
     static const ThemePalette s_stellarLight;
     static const ThemePalette s_dxPedition;
+    static const ThemePalette s_liquidGlass;
 
     const ThemePalette& currentPalette() const;
     // DX-Pedition Fase 1 — tripletta accent del variant scelto (solo tema DX-Pedition)

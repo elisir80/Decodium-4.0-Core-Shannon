@@ -50,7 +50,12 @@ Item {
     property color accentCyan:  bridge.themeManager.secondaryColor
     property color accentGreen: bridge.themeManager.accentColor
     property color textPrimary: bridge.themeManager.textPrimary
-    property color textSec:     Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.6)
+    // Do not fade inactive labels on the light surface: blending the dark
+    // token with the background made Auto/Bold/Cluster and similar controls
+    // look almost washed out, especially on high-resolution displays.
+    property color textSec:     bridge.themeManager.isLightTheme
+                                ? bridge.themeManager.textSecondary
+                                : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.6)
     property color borderColor: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.15)
     // Theme-aware toolbar palette (was hardcoded dark before).
     property color wfText:        bridge.themeManager.isLightTheme ? bridge.themeManager.textPrimary    : "#FFFFFF"
@@ -113,7 +118,14 @@ Item {
             count = paletteCombo.count
         if ((!count || count < 1) && waterfallDisplay && waterfallDisplay.paletteNames)
             count = waterfallDisplay.paletteNames.length
-        return clampIndex(value, Math.max(1, count), 0)
+        var requested = Number(value)
+        // Index 11 was a temporary Stellar Light palette.  It is not part of
+        // PanadapterItem.paletteNames and produced a white plot while the
+        // combo box still displayed SmartSDR.  Map old persisted values to
+        // the readable, dark SmartSDR palette instead of showing a mismatch.
+        if (!isFinite(requested) || Math.round(requested) === 11)
+            requested = 3
+        return clampIndex(requested, Math.max(1, count), 3)
     }
 
     function scheduleGraphSave() {
@@ -138,7 +150,7 @@ Item {
         var next = clampPaletteIndex(index)
         if (paletteCombo.currentIndex !== next)
             paletteCombo.currentIndex = next
-        if (!bridge.themeManager.isLightTheme && waterfallDisplay.paletteIndex !== next)
+        if (waterfallDisplay.paletteIndex !== next)
             waterfallDisplay.paletteIndex = next
         if (bridge.uiPaletteIndex !== next)
             bridge.uiPaletteIndex = next
@@ -183,7 +195,9 @@ Item {
         noiseCutSlider.value = bridge.getSetting("uiNoiseFloorPercentile", 10)
         waterfallDisplay.noiseFloorPercentile = noiseCutSlider.value
 
-        // In light theme la palette è forzata a 11 (mockup pastello). Non sovrascrivere col valore Settings.
+        // The plot palette is independent from the surrounding UI theme.  In
+        // particular, do not force the obsolete light index 11: it made the
+        // panadapter and waterfall almost white and unreadable.
         waterfallDisplay.autoRange = autoRangeCheck.checked
         waterfallDisplay.showTxBrackets = txBracketsCheck.checked
         waterfallDisplay.peakHold = peakHoldCheck.checked
@@ -556,7 +570,13 @@ Item {
                         Text { anchors.centerIn: parent; text: "B"; color: "black"; font.pixelSize: 9; font.bold: true; visible: labelBoldCheck.checked }
                     }
                 }
-                Text { text: qsTr("Bold"); color: labelBoldCheck.checked ? "#FFFFFF" : textSec; font.pixelSize: 10 }
+                Text {
+                    text: qsTr("Bold")
+                    color: labelBoldCheck.checked
+                           ? (bridge.themeManager.isLightTheme ? accentGreen : "#FFFFFF")
+                           : textSec
+                    font.pixelSize: 10
+                }
 
                 Rectangle { width:1; height:14; color:"#333" }
 
@@ -1200,18 +1220,9 @@ Item {
                                 ? (bridge.lowCpuModeEnabled ? 200 : 80)
                                 : (bridge.lowCpuModeEnabled ? 250 : 100)
             // Carica valori da Settings al primo avvio.
-            paletteIndex:   0
+            paletteIndex:   3
             contrastLevel:  contrastSlider.value
 
-            // In light theme forza la palette pastello chiara (indice 11) per coerenza visiva col mockup.
-            // Binding esplicito: ha priorità sopra qualsiasi assegnazione procedurale finché when=true.
-            Binding {
-                target: waterfallDisplay
-                property: "paletteIndex"
-                value: 11
-                when: bridge.themeManager.isLightTheme
-                restoreMode: Binding.RestoreBindingOrValue
-            }
             Component.onCompleted: {
                 console.log("[Waterfall] theme=" + bridge.themeManager.currentTheme
                     + " isLight=" + bridge.themeManager.isLightTheme

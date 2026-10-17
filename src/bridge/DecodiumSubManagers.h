@@ -380,7 +380,12 @@ public:
     // Ritorna la frequenza per una banda e un modo
     double freqForMode(const Band& b, const QString& mode) const
     {
-        QString const normalized = mode.trimmed().toUpper();
+        QString normalized = mode.trimmed().toUpper();
+        // Q65 period/submode labels (for example Q65-30A) share the
+        // frequency plan of the base Q65 mode.
+        if (normalized.startsWith(QLatin1String("Q65-"))) {
+            normalized = QStringLiteral("Q65");
+        }
         double const configured = configuredFreqForMode(b, normalized);
         if (configured > 0.0) return configured;
         if (normalized == "FT8" && b.ft8Freq > 0.0) return b.ft8Freq;

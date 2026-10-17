@@ -775,14 +775,18 @@ Window {
                 ToolTip.visible: hovered
                 ToolTip.text: qsTr("Match the radio's CW pitch / sidetone.")
             }
-            ComboBox {
-                implicitHeight: 36
-                implicitWidth: 96
-                model: ["CW-U", "CW-L"]
-                currentIndex: win.cw && win.cw.tuningLowerSideband ? 1 : 0
-                onActivated: (i) => win.cw.tuningLowerSideband = i === 1
-                ToolTip.visible: hovered
-                ToolTip.text: qsTr("Match the radio's receive sideband: upper or lower (also in CW-R).")
+            ColumnLayout {
+                spacing: 1
+                Lbl { text: qsTr("CW receive sideband") }
+                ComboBox {
+                    implicitHeight: 36
+                    implicitWidth: 96
+                    model: ["CW-U", "CW-L"]
+                    currentIndex: win.cw && win.cw.tuningLowerSideband ? 1 : 0
+                    onActivated: (i) => win.cw.tuningLowerSideband = i === 1
+                    ToolTip.visible: hovered
+                    ToolTip.text: qsTr("Decoder/centering polarity only. It does not change the radio CAT mode; select the same sideband shown by the rig.")
+                }
             }
             ColumnLayout {
                 spacing: 1

@@ -2604,7 +2604,8 @@ private:
     void clearRemoteActivityCache(bool notifyRemote);
     QString configuredCatRigMode() const;
     bool configuredCatRigModeRequestsDataPacket() const;
-    void applyConfiguredCatRigMode(const QString& reason);
+    void applyConfiguredCatRigMode(const QString& reason,
+                                   const QString& explicitMode = QString());
 
     // Il modo in cui va messa la radio quando si lavora in RTTY. Non e' quello
     // dei modi digitali: su una FT-991A i dati stanno in DATA-U, ma l'RTTY vero
@@ -3306,6 +3307,9 @@ private:
     bool    m_omniRigReconnectInProgress {false};
     bool    m_catTelemetryReconnectPending {false};
     QString m_catMode;
+    // Physical rig mode captured before entering the CW workspace.  CW is an
+    // application mode, but temporarily changes the radio mode as well.
+    QString m_catModeBeforeCw;
     double m_rigPowerWatts {0.0};
     double m_rigSwr {0.0};
     double m_rigAlc {0.0};  // 1.0.323 — ALC meter 0..100
@@ -3680,6 +3684,11 @@ private:
     bool               m_rtlSdrDiscoveryPending {false};
     QString            m_lastAudioCaptureStartKey;
     qint64             m_lastAudioCaptureStartMs {0};
+    // Serialises the asynchronous stop/start hand-off used when leaving
+    // native CW/JTTY audio.  A newer mode change invalidates an older
+    // queued reopen, preventing a stale QAudioSource from being recreated
+    // after the next mode has already taken ownership of the audio path.
+    quint64            m_modeChangeAudioRecoverySerial {0};
     QAudioSink*        m_txAudioSink  {nullptr};
     bool               m_rxAudioSuspendedForTx {false};
     bool               m_rxAudioKeptOpenForTx {false};

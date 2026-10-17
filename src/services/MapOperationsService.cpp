@@ -1118,6 +1118,7 @@ QVariantMap MapOperationsService::preparePotaAction(
         || mode == QStringLiteral("JT9")
         || mode == QStringLiteral("JT65")
         || mode == QStringLiteral("Q65")
+        || mode.startsWith(QStringLiteral("Q65-"))
         || mode == QStringLiteral("MSK144")
         || mode == QStringLiteral("FST4")
         || mode == QStringLiteral("FST4W")

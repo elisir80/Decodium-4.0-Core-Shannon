@@ -392,6 +392,16 @@ Item {
     property color textSecondary: bridge.themeManager.textSecondary
     property color bgDeep: bridge.themeManager.bgDeep
     readonly property var supportedModes: engine ? engine.availableModes() : ["FT8", "FT2", "FT2-Link", "FT4", "Q65", "MSK144", "JT65", "JT9", "JT4", "FST4", "FST4W", "WSPR"]
+    // Q65 is represented internally as Q65-period-letter, for example
+    // Q65-30A or Q65-60B. Keep the complete standard matrix in one place so
+    // the GUI never silently falls back to Q65-60A after a mode change.
+    readonly property var q65SubmodeOptions: [
+        "Q65-15A", "Q65-15B", "Q65-15C", "Q65-15D", "Q65-15E",
+        "Q65-30A", "Q65-30B", "Q65-30C", "Q65-30D", "Q65-30E",
+        "Q65-60A", "Q65-60B", "Q65-60C", "Q65-60D", "Q65-60E",
+        "Q65-120A", "Q65-120B", "Q65-120C", "Q65-120D", "Q65-120E",
+        "Q65-300A", "Q65-300B", "Q65-300C", "Q65-300D", "Q65-300E"
+    ]
     readonly property real toolbarScale: Math.max(0.9, Math.min(1.12, bridge ? bridge.fontScale : 1.0))
     readonly property int toolbarSpacing: showBandBar ? 3 : 2
     readonly property int toolbarButtonHeight: 32
@@ -406,6 +416,7 @@ Item {
     readonly property int toolbarModeWidth: isFt2LinkMode
                                             ? Math.max(132, toolbarMeasuredWidth("FT2-Link", "\u25BE") + 24)
                                             : toolbarMeasuredWidth("FT2-Link", "\u25BE")
+    readonly property int toolbarQ65SubmodeWidth: Math.max(104, Math.round(112 * toolbarScale))
     readonly property int toolbarLabelSize: Math.max(9, Math.round(9 * toolbarScale))
     readonly property int toolbarGlyphSize: Math.max(12, Math.round(13 * toolbarScale))
     readonly property int qsoInfoControlHeight: 30
@@ -443,11 +454,15 @@ Item {
         var upper = text.toUpperCase()
         if (upper === "FT2-LINK" || upper === "FT2LINK" || upper === "D4LINK" || upper === "D4 LINK")
             return "FT2-Link"
+        if (upper === "Q65" || upper.indexOf("Q65-") === 0)
+            return "Q65"
         return text.length > 0 ? text : "FT8"
     }
 
     readonly property bool isFt2LinkMode: displayModeName(engine ? engine.mode : "") === "FT2-Link"
     readonly property string normalizedOperatingMode: String(engine ? engine.mode : "").trim().toUpperCase()
+    readonly property bool isQ65Mode: normalizedOperatingMode === "Q65"
+                                      || normalizedOperatingMode.indexOf("Q65-") === 0
     property var workingFrequencyOptions: []
     readonly property int toolbarFrequencyWidth: Math.max(84, Math.round(88 * toolbarScale))
     readonly property bool isWsprBeaconMode: normalizedOperatingMode === "WSPR"
@@ -483,12 +498,24 @@ Item {
         var mode = displayModeName(engine ? engine.mode : "FT8")
         var idx = modeSelector.model.indexOf(mode)
         modeSelector.currentIndex = idx >= 0 ? idx : 0
+        syncQ65SubmodeSelector()
+    }
+
+    function syncQ65SubmodeSelector() {
+        if (typeof q65SubmodeSelector === "undefined" || !q65SubmodeSelector)
+            return
+        var mode = normalizedOperatingMode
+        var target = mode.indexOf("Q65-") === 0 ? mode : "Q65-60A"
+        var idx = q65SubmodeOptions.indexOf(target)
+        q65SubmodeSelector.currentIndex = idx >= 0 ? idx : q65SubmodeOptions.indexOf("Q65-60A")
     }
 
     function canonicalWorkingFrequencyMode(mode) {
         var normalized = String(mode || "").trim().toUpperCase()
         if (normalized.indexOf("FST4W-") === 0)
             return "FST4W"
+        if (normalized.indexOf("Q65-") === 0)
+            return "Q65"
         if (normalized === "FT2-LINK" || normalized === "FT2LINK")
             return "FT2"
         return normalized
@@ -840,6 +867,8 @@ Item {
                                         Qt.callLater(txPanel.syncModeSelector)
                                         return
                                     }
+                                    if (selectedMode.toUpperCase() === "Q65")
+                                        selectedMode = "Q65-60A"
                                     if (selectedMode.length > 0)
                                         engine.mode = selectedMode
                                 }
@@ -847,6 +876,7 @@ Item {
                                     target: engine
                                     function onModeChanged() {
                                         txPanel.syncModeSelector()
+                                        txPanel.syncQ65SubmodeSelector()
                                         txPanel.refreshWorkingFrequencyOptions()
                                     }
                                     function onFrequencyChanged() {
@@ -861,6 +891,50 @@ Item {
                                 font.pixelSize: Math.max(11, Math.round(11 * txPanel.toolbarScale))
                                 itemHeight: 34
                                 popupMinWidth: 176
+                                textHorizontalAlignment: Text.AlignHCenter
+                                leftPadding: 4
+                                rightPadding: 18
+                                topPadding: 4
+                                bottomPadding: 4
+                                bgColor: "transparent"
+                                borderColor: "transparent"
+                            }
+                        }
+
+                        Rectangle {
+                            id: q65SubmodeFrame
+                            visible: txPanel.isQ65Mode
+                            width: visible ? txPanel.toolbarQ65SubmodeWidth : 0
+                            height: txPanel.toolbarButtonHeight
+                            radius: 5
+                            color: Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.10)
+                            border.color: accentGreen
+                            border.width: 1
+
+                            StyledComboBox {
+                                id: q65SubmodeSelector
+                                anchors.fill: parent
+                                anchors.margins: 1
+                                model: txPanel.q65SubmodeOptions
+                                currentIndex: txPanel.q65SubmodeOptions.indexOf("Q65-60A")
+                                onActivated: function(index) {
+                                    if (!engine || index < 0 || index >= txPanel.q65SubmodeOptions.length)
+                                        return
+                                    engine.mode = txPanel.q65SubmodeOptions[index]
+                                }
+                                Component.onCompleted: txPanel.syncQ65SubmodeSelector()
+                                Connections {
+                                    target: engine
+                                    function onModeChanged() { txPanel.syncQ65SubmodeSelector() }
+                                }
+                                Accessible.name: qsTr("Q65 Submode")
+                                ToolTip.visible: hovered
+                                ToolTip.text: qsTr("Q65 submode: period and tone spacing")
+                                font.bold: true
+                                font.family: decodiumMonoFontFamily
+                                font.pixelSize: Math.max(10, Math.round(10 * txPanel.toolbarScale))
+                                itemHeight: 34
+                                popupMinWidth: 124
                                 textHorizontalAlignment: Text.AlignHCenter
                                 leftPadding: 4
                                 rightPadding: 18

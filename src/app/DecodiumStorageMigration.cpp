@@ -2,15 +2,87 @@
 
 #include <QCoreApplication>
 #include <QDir>
+#include <QFile>
 #include <QFileInfo>
 #include <QSettings>
 #include <QString>
 #include <QStringList>
+#include <QDebug>
 #include <QtGlobal>
 
 namespace {
 
 constexpr auto kLegacyOrg  = "IU8LMC";
+
+// QSettings does not repair an existing read-only INI.  This is particularly
+// visible on Linux when the file was copied by an installer or when Decodium
+// was once started with sudo: the application can still read the settings,
+// but every later save silently fails.  Add only the owner permissions that
+// are required by the application; do not broaden access for group/others.
+bool ensureOwnerPermissions(QString const& path,
+                            QFileDevice::Permissions required,
+                            char const* kind)
+{
+    QFileInfo const info(path);
+    if (!info.exists()) {
+        return true;
+    }
+
+    QFileDevice::Permissions const current = info.permissions();
+    QFileDevice::Permissions const repaired = current | required;
+    if (repaired == current) {
+        return true;
+    }
+
+    if (!QFile::setPermissions(path, repaired)) {
+        qWarning().noquote()
+            << "Decodium settings remain read-only:" << path
+            << "(the file or its parent is owned by another user; repair ownership or run:"
+            << "chown $(id -un):$(id -gn)" << path << ")";
+        return false;
+    }
+
+    QFileInfo const after(path);
+    if ((after.permissions() & required) != required) {
+        qWarning().noquote()
+            << "Decodium could not verify writable permissions for settings" << kind << path;
+        return false;
+    }
+
+    qInfo().noquote() << "Decodium repaired owner permissions for settings" << kind << path;
+    return true;
+}
+
+void repairUserSettingsPermissions()
+{
+    // Use the same explicit store as the bridge and radio managers.  Asking
+    // QSettings for fileName() keeps this path portable across Linux, macOS
+    // and Windows instead of duplicating platform-specific conventions.
+    QSettings bridgeSettings(QSettings::IniFormat,
+                             QSettings::UserScope,
+                             QStringLiteral("Decodium"),
+                             QStringLiteral("Decodium3"));
+    QString const settingsPath = bridgeSettings.fileName();
+    if (settingsPath.isEmpty()) {
+        return;
+    }
+
+    QFileInfo const settingsInfo(settingsPath);
+    QString const settingsDirectory = settingsInfo.absolutePath();
+    if (QFileInfo::exists(settingsDirectory)) {
+        ensureOwnerPermissions(settingsDirectory,
+                               QFileDevice::ReadOwner
+                                   | QFileDevice::WriteOwner
+                                   | QFileDevice::ExeOwner,
+                               "directory");
+    }
+
+    if (settingsInfo.exists()) {
+        ensureOwnerPermissions(settingsPath,
+                               QFileDevice::ReadOwner | QFileDevice::WriteOwner,
+                               "file");
+    }
+}
 
 #ifdef Q_OS_WIN
 
@@ -114,6 +186,8 @@ void configure()
     QSettings::setDefaultFormat(QSettings::IniFormat);
     runOnce();
 #endif
+
+    repairUserSettingsPermissions();
 }
 
 void runOnce()
