@@ -45,7 +45,7 @@ Decodium 4 v1.0.698 is the maintained fork release following v1.0.697. It focuse
 
 - Clarified the meaning of Decodium's local Offline mode. The DX Cluster and updater now state that services are paused locally rather than implying that Windows, macOS or Linux has lost Internet access; Setup provides a direct **Resume online services** action.
 - Separated the local network-safety choice from Live Map visual presets and import/export files. Applying or importing a map preset can no longer silently put the application offline and block Cluster or update checks.
-- Hardened Map Intelligence worker cancellation generations with explicit relaxed atomic operations, avoiding a GCC 15 false-positive warning/error path while preserving background-query cancellation and safe grid selection refreshes.
+- Hardened Map Intelligence worker cancellation generations with explicit relaxed atomic operations while preserving background-query cancellation and safe grid-selection refreshes. The known GCC/MinGW `stringop-overflow` false positive produced when queued Qt callbacks are inlined is isolated to this translation unit rather than being allowed to block a release build.
 
 ### Build, package and release assurance
 
@@ -54,7 +54,7 @@ Decodium 4 v1.0.698 is the maintained fork release following v1.0.697. It focuse
 - Made the Linux AppImage and macOS DMG pipelines run the mandatory CAT gate and fail if the packaged runtime does not include the expected Hamlib library and manifest.
 - Expanded cross-platform CI coverage for CAT, serial/CW paths and relevant settings changes; added missing Linux `libudev` development dependencies; and pinned the Windows MSYS2 libusb package fetched from the official archive to keep the Windows build reproducible while the rolling package index changes.
 - Made the Windows CAT gate expose the Qt, Hamlib and MinGW runtime directories to CTest, preventing the `0xc0000135` missing-DLL startup failure while preserving the existing dependency cache.
-- Removed the GCC-only suppression previously masking the Map Intelligence atomic diagnostic, so the source is checked normally after the atomic implementation correction.
+- Kept `-Werror` for the whole target while making only the known GCC/MinGW `MapIntelligenceService` queued-callback `stringop-overflow` false positive non-fatal. Linux and Windows therefore retain all other warning checks without a compiler diagnostic preventing their packages from being produced.
 
 ### Release contents
 
@@ -115,7 +115,7 @@ Decodium 4 v1.0.698 è la release mantenuta del fork successiva alla v1.0.697. S
 
 - Chiarito il significato della modalità Offline locale di Decodium. DX Cluster e updater indicano ora che i servizi sono sospesi localmente, senza far intendere che Windows, macOS o Linux abbia perso Internet; in Setup è disponibile l'azione diretta **Resume online services**.
 - Separata la scelta locale di sicurezza della rete dai preset visivi della Live Map e dai file di import/export. Applicare o importare un preset mappa non può più mettere silenziosamente l'applicazione offline e bloccare Cluster o controlli aggiornamenti.
-- Rafforzate le generazioni di annullamento dei worker Map Intelligence con operazioni atomiche esplicite relaxed, evitando un falso warning/errore di GCC 15 e preservando annullamento delle query in background e aggiornamento sicuro della selezione grid.
+- Rafforzate le generazioni di annullamento dei worker Map Intelligence con operazioni atomiche esplicite relaxed, preservando annullamento delle query in background e aggiornamento sicuro della selezione grid. Il noto falso positivo `stringop-overflow` di GCC/MinGW generato quando callback Qt accodati vengono inline è isolato a questa sola unità di traduzione, invece di poter bloccare una build di rilascio.
 
 ### Build, pacchetti e garanzie di rilascio
 
@@ -124,7 +124,7 @@ Decodium 4 v1.0.698 è la release mantenuta del fork successiva alla v1.0.697. S
 - Le pipeline AppImage Linux e DMG macOS eseguono ora il gate CAT obbligatorio e falliscono se il runtime incluso non contiene la libreria Hamlib e il manifest attesi.
 - Estesa la copertura CI multipiattaforma per CAT, percorsi seriali/CW e modifiche Settings rilevanti; aggiunte le dipendenze di sviluppo `libudev` mancanti su Linux; e fissato il pacchetto libusb MSYS2 per Windows, scaricato dall'archivio ufficiale, per rendere riproducibile la build Windows mentre l'indice rolling dei pacchetti cambia.
 - Il gate CAT Windows espone ora a CTest le directory runtime Qt, Hamlib e MinGW, evitando l'errore di avvio per DLL mancanti `0xc0000135` senza invalidare la cache delle dipendenze esistente.
-- Rimossa la soppressione GCC che in precedenza mascherava la diagnostica atomica di Map Intelligence, così il sorgente viene controllato normalmente dopo la correzione dell'implementazione atomica.
+- Mantenuto `-Werror` per l'intero target, rendendo non bloccante soltanto il noto falso positivo `stringop-overflow` GCC/MinGW dei callback accodati di `MapIntelligenceService`. Linux e Windows conservano quindi tutti gli altri controlli sui warning senza che una diagnostica del compilatore impedisca di produrre i pacchetti.
 
 ### Contenuto della release
 

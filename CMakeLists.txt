@@ -2255,6 +2255,13 @@ mark_as_advanced (DECODIUM_FT2LINK_ACCESS_SALT_B64 DECODIUM_FT2LINK_ACCESS_HASH_
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   set_source_files_properties (Detector/LegacyDspIoHelpers.cpp PROPERTIES
     COMPILE_FLAGS "-Wno-error=stringop-overflow -Wno-error=stringop-overread -Wno-error=array-bounds")
+
+  # GCC 13+ can emit a false stringop-overflow warning after inlining a
+  # queued Qt functor that calls MapIntelligenceService::scheduleQuery().
+  # Keep -Werror for the target and suppress only that known false positive
+  # for the affected translation unit.
+  set_source_files_properties (src/services/MapIntelligenceService.cpp PROPERTIES
+    COMPILE_FLAGS "-Wno-error=stringop-overflow")
 endif ()
 # C17 — FoxVerifier senza Boost.Log (usa qDebug come shim)
 target_compile_definitions (decodium_qml PRIVATE DECODIUM_NO_BOOST_LOG FFTW3_SINGLE_FOUND DECODIUM_QML_PANADAPTER_DIRECT=1)
