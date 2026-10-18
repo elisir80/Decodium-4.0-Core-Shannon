@@ -17,6 +17,19 @@ if [[ ! -f "${build_dir}/CTestTestfile.cmake" ]]; then
   exit 1
 fi
 
+# On Windows, CTest launches the compiled test executables directly.  The
+# MSYS2 runner's build environment does not automatically put Qt's private
+# prefix nor the pinned Hamlib bin directory on PATH, so every test can fail
+# with 0xc0000135 even though compilation succeeded.  Add only directories
+# which actually exist; this is harmless on macOS/Linux and keeps the release
+# gate tied to the same runtime used by the package.
+for cat_runtime_dir in "${QT_PREFIX:-}/bin" "${HAMLIB_PREFIX:-}/bin" /mingw64/bin; do
+  if [[ -n "${cat_runtime_dir}" && -d "${cat_runtime_dir}" ]]; then
+    PATH="${cat_runtime_dir}:${PATH}"
+  fi
+done
+export PATH
+
 test_targets=(
   test_hamlib_release_contract
   test_cat_configuration_snapshot

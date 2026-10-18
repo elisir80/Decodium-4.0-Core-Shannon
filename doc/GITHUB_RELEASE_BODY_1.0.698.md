@@ -53,6 +53,7 @@ Decodium 4 v1.0.698 is the maintained fork release following v1.0.697. It focuse
 - Added a Hamlib runtime manifest to release packages. The manifest records the shipped Hamlib library path, version, byte count and SHA-256, so the package can be audited independently of the CI image.
 - Made the Linux AppImage and macOS DMG pipelines run the mandatory CAT gate and fail if the packaged runtime does not include the expected Hamlib library and manifest.
 - Expanded cross-platform CI coverage for CAT, serial/CW paths and relevant settings changes; added missing Linux `libudev` development dependencies; and pinned the Windows MSYS2 libusb package fetched from the official archive to keep the Windows build reproducible while the rolling package index changes.
+- Made the Windows CAT gate expose the Qt, Hamlib and MinGW runtime directories to CTest, preventing the `0xc0000135` missing-DLL startup failure while preserving the existing dependency cache.
 - Removed the GCC-only suppression previously masking the Map Intelligence atomic diagnostic, so the source is checked normally after the atomic implementation correction.
 
 ### Release contents
@@ -122,6 +123,7 @@ Decodium 4 v1.0.698 è la release mantenuta del fork successiva alla v1.0.697. S
 - Aggiunto un manifest runtime Hamlib ai pacchetti di rilascio. Il manifest registra percorso, versione, numero di byte e SHA-256 della libreria Hamlib realmente distribuita, così il pacchetto può essere verificato indipendentemente dall'immagine CI.
 - Le pipeline AppImage Linux e DMG macOS eseguono ora il gate CAT obbligatorio e falliscono se il runtime incluso non contiene la libreria Hamlib e il manifest attesi.
 - Estesa la copertura CI multipiattaforma per CAT, percorsi seriali/CW e modifiche Settings rilevanti; aggiunte le dipendenze di sviluppo `libudev` mancanti su Linux; e fissato il pacchetto libusb MSYS2 per Windows, scaricato dall'archivio ufficiale, per rendere riproducibile la build Windows mentre l'indice rolling dei pacchetti cambia.
+- Il gate CAT Windows espone ora a CTest le directory runtime Qt, Hamlib e MinGW, evitando l'errore di avvio per DLL mancanti `0xc0000135` senza invalidare la cache delle dipendenze esistente.
 - Rimossa la soppressione GCC che in precedenza mascherava la diagnostica atomica di Map Intelligence, così il sorgente viene controllato normalmente dopo la correzione dell'implementazione atomica.
 
 ### Contenuto della release
