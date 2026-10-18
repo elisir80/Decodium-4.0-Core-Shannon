@@ -388,6 +388,9 @@ private:
     bool    m_transientCatReconnectPending {false};
     bool    m_reconnectAfterDisconnect {false};
     bool    m_disconnectInProgress {false};
+    // CAT startup is RX-only.  Some rigs report/restore a transient CW PTT
+    // state while the initial mode and frequency snapshot is being applied.
+    bool    m_startupPttBlocked {false};
     // A CAT connection is built from a single revisioned snapshot.  If a
     // profile or endpoint changes while rig_open() is pending, the old worker
     // is allowed to close but can never become the active session.

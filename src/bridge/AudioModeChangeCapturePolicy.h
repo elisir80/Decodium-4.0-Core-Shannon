@@ -43,6 +43,14 @@ inline bool preserveExistingCaptureForModeChange(ModeChangeCaptureState const& s
     return !state.targetUsesLegacyBackend || state.targetKeepsDedicatedModernCapture;
 }
 
+// SoundInput is retained after stopAudioCapture(), so object existence says
+// nothing about who currently produces RX levels. Select the meter source by
+// RX ownership (not TX ownership), including an explicit native capture override.
+inline bool useLegacyRxLevels(bool legacyOwnsRx, bool nativeCaptureOverride) noexcept
+{
+    return legacyOwnsRx && !nativeCaptureOverride;
+}
+
 // Moving away from CW/JTTY/SSB is not merely a QAudioSource ownership change:
 // the FT8/FT4 legacy backend has to resume its monitor and its PCM tap has to
 // be selected for the visual pipeline.  Keep this decision separate from the

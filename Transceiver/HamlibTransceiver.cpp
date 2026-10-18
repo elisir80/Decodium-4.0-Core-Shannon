@@ -805,6 +805,26 @@ int HamlibTransceiver::do_start ()
   rig_powered_off_ = false;
   power_on_settle_clock_.invalidate ();
   power_off_probe_clock_.invalidate ();
+
+  // Safety first: some radios/interfaces can briefly key the transmitter
+  // while CAT is opened, especially when the rig was left in CW.  Release
+  // PTT before any startup probe (power status, mode, frequency, ...), so a
+  // slow first CAT response cannot extend that unintended TX window.
+  if (RIG_PTT_NONE != m_->rig_->state.pttport.type.ptt)
+    {
+      CAT_TRACE ("startup immediate rig_set_ptt PTT=false");
+      int const ptt_off_rc = rig_set_ptt (m_->rig_.data (), RIG_VFO_CURR, RIG_PTT_OFF);
+      if (RIG_OK == ptt_off_rc)
+        {
+          ptt_on_ = false;
+          update_PTT (false);
+        }
+      else if (-RIG_ENAVAIL != ptt_off_rc && -RIG_ENIMPL != ptt_off_rc)
+        {
+          CAT_TRACE ("startup immediate rig_set_ptt PTT=false failed with rc:" << ptt_off_rc);
+        }
+    }
+
   // Some rigs keep CAT alive in standby/off. NewCAT is one example: it
   // accepts the PS command but deliberately rejects VS/FA while power is off.
   // Do not turn this into a failed connection: the open serial session is the
@@ -828,21 +848,6 @@ int HamlibTransceiver::do_start ()
         }
       CAT_TRACE ("startup rig_get_powerstat rc=" << power_rc
                  << "status=" << power_status);
-    }
-
-  if (RIG_PTT_NONE != m_->rig_->state.pttport.type.ptt)
-    {
-      CAT_TRACE ("startup rig_set_ptt PTT=false");
-      int const ptt_off_rc = rig_set_ptt (m_->rig_.data (), RIG_VFO_CURR, RIG_PTT_OFF);
-      if (RIG_OK == ptt_off_rc)
-        {
-          ptt_on_ = false;
-          update_PTT (false);
-        }
-      else if (-RIG_ENAVAIL != ptt_off_rc && -RIG_ENIMPL != ptt_off_rc)
-        {
-          CAT_TRACE ("startup rig_set_ptt PTT=false failed with rc:" << ptt_off_rc << "ignoring");
-        }
     }
 
   // reset dynamic state

@@ -11335,7 +11335,27 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
                         }
                     });
                 }
-                applyConfiguredCatRigMode(QStringLiteral("connect"));
+                // Releasing PTT only inside rig_open() is not sufficient for
+                // rigs left in CW: restoring the configured CAT mode below
+                // can briefly reassert the previous key/PTT state. Keep the
+                // connection boundary RX-only before and after that restore.
+                auto releaseStartupPtt = [this]() {
+                    if (m_hamlibCat && m_hamlibCat->connected()) {
+                        m_hamlibCat->setRigPtt(false);
+                    }
+                };
+                releaseStartupPtt();
+                // During startup the rig frequency may still determine the
+                // application mode. Do not first apply the generic DATA-U
+                // CAT mode and then switch to CW/SSB a moment later.
+                if (!m_startupModeAutoPending)
+                    applyConfiguredCatRigMode(QStringLiteral("connect"));
+                releaseStartupPtt();
+                QTimer::singleShot(300, this, [this]() {
+                    if (!m_shuttingDown && m_hamlibCat && m_hamlibCat->connected()) {
+                        m_hamlibCat->setRigPtt(false);
+                    }
+                });
                 syncActiveCatTxSplitFrequency(QStringLiteral("connect"));
                 auto applyCatStartupFrequency = [this, backend, catProp]() {
                     if (!catSignalMatchesBackend(m_catBackend, backend)) {
@@ -11386,7 +11406,8 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
                     QTimer::singleShot(delayMs, this, applyCatStartupFrequency);
                 }
                 QTimer::singleShot(250, this, [this]() {
-                    applyConfiguredCatRigMode(QStringLiteral("connect-retry"));
+                    if (!m_startupModeAutoPending)
+                        applyConfiguredCatRigMode(QStringLiteral("connect-retry"));
                     syncActiveCatTxSplitFrequency(QStringLiteral("connect-retry"));
                 });
                 if (m_catBackend == QStringLiteral("tci") && !canonicalApplicationDecodeMode(m_mode).isEmpty()) {
@@ -11699,6 +11720,12 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     });
 
     loadSettings();
+    QTimer::singleShot(5000, this, [this]() {
+        if (!m_shuttingDown) {
+            m_startupTxGuard = false;
+            bridgeLog(QStringLiteral("TX guard: startup RX-only window released"));
+        }
+    });
     initialiseSstvTx();
     if (m_mapIntelligenceService) {
         m_mapIntelligenceService->setRosterStationCall(m_callsign);
@@ -12520,6 +12547,17 @@ bool DecodiumBridge::useDedicatedModernAudioCaptureWithLegacy() const
         && qEnvironmentVariableIntValue("DECODIUM_DUAL_AUDIO_PANADAPTER", 0) != 0;
 }
 
+bool DecodiumBridge::usesLegacyRxLevels() const
+{
+    bool nativeCaptureOverride = useDedicatedModernAudioCaptureWithLegacy()
+        || m_tciAudioCaptureActive;
+#if DECODIUM_HAS_SSTV
+    nativeCaptureOverride = nativeCaptureOverride
+        || m_sstvWorkspaceActive || nativeSstvRxForcesDedicatedAudioCapture();
+#endif
+    return decodium::audio::useLegacyRxLevels(usingLegacyBackendForRx(), nativeCaptureOverride);
+}
+
 bool DecodiumBridge::legacyBackendAvailable() const
 {
     return m_legacyBackend && m_legacyBackend->available();
@@ -13188,6 +13226,11 @@ void DecodiumBridge::migrateActiveMonitoringToLegacyBackend()
         }
         bridgeLog(QStringLiteral("Legacy monitor migration uses legacy PCM tap for fast QML panadapter"));
     }
+
+    // A CW/JTTY/SSB startup leaves the legacy state timer dormant. Starting
+    // its audio monitor alone makes PCM/decodes live but leaves the QML meters
+    // frozen on the preceding native level. Arm state refresh for both paths.
+    scheduleLegacyStateRefreshBurst();
 }
 
 void DecodiumBridge::recoverGpuPanadapterAfterSourceHandoff(const QString& reason)
@@ -13719,12 +13762,12 @@ void DecodiumBridge::syncLegacyBackendState()
         refreshPskReporterLocalStation();
     }
     double const legacySignalLevel = m_legacyBackend->signalLevel();
-    updateDouble(m_sMeter, legacySignalLevel, [this]() { emit sMeterChanged(); });
+    bool const legacyOwnsRxLevels = usesLegacyRxLevels();
+    updateDouble(m_sMeter, legacyOwnsRxLevels ? legacySignalLevel : 0.0,
+                 [this]() { emit sMeterChanged(); });
     if (m_autoRxInputLevel
         && m_monitoring
-        && usingLegacyBackendForRx()
-        && !m_soundInput
-        && !m_tciAudioCaptureActive
+        && legacyOwnsRxLevels
         && legacySignalLevel > 0.0) {
         qint64 const now = QDateTime::currentMSecsSinceEpoch();
         if (now >= m_autoRxLevelManualHoldUntilMs) {
@@ -13776,9 +13819,10 @@ void DecodiumBridge::syncLegacyBackendState()
             }
         }
     }
-    if (usingLegacyBackendForTx() && !m_soundInput && !m_tciAudioCaptureActive) {
+    if (legacyOwnsRxLevels) {
         // When the embedded legacy backend owns RX audio, the modern
-        // DecodiumAudioSink is intentionally not opened. Feed the QML LVL meter
+        // capture is stopped but its SoundInput object may still exist.
+        // Feed the QML LVL meter according to RX ownership, not that pointer,
         // from the legacy S-meter so the header indicator works on macOS and
         // other platforms that run in legacy audio mode.
         double const legacyAudioLevel = m_monitoring
@@ -18749,6 +18793,12 @@ void DecodiumBridge::setMode(const QString& v) {
         resetAutoCqBurstCadence(QStringLiteral("application mode changed %1->%2")
                                     .arg(previousMode, normalizedMode));
         m_mode = normalizedMode;
+        if (!usesLegacyRxLevels() && m_sMeter != 0.0) {
+            // The stopped legacy backend retains its last positive meter
+            // value. Do not let it mask live native RMS on FT -> CW/JTTY/SSB.
+            m_sMeter = 0.0;
+            emit sMeterChanged();
+        }
         decodium::audio::LegacyRxHandoffState legacyHandoffState;
         legacyHandoffState.monitoringActive = monitorWasActive;
         legacyHandoffState.leavingNativePcmMode = leavingJtty;
@@ -20472,6 +20522,11 @@ bool DecodiumBridge::txDispatchGuardAllows(const QString& reason)
         bridgeLog(QStringLiteral("TX guard: blocked TX%1 during manual hold (%2)")
                       .arg(m_currentTx)
                       .arg(reason));
+        return false;
+    }
+
+    if (m_startupTxGuard && !explicitManual) {
+        bridgeLog(QStringLiteral("TX guard: blocked automatic startup TX (%1)").arg(reason));
         return false;
     }
 
@@ -28512,6 +28567,14 @@ bool DecodiumBridge::transmitFt2LinkAudio(const QString& text,
 void DecodiumBridge::startTx()
 {
     if (m_mode == QStringLiteral("SSB") || m_ssbTxActive) return;
+    // CW audio TX is a dedicated, explicitly armed path. Never let a stale
+    // FT/AutoCQ scheduler call the generic transmitter while the application
+    // is restored in CW; that path can otherwise key the rig at startup.
+    if ((m_mode == QStringLiteral("CW") || m_mode == QStringLiteral("CW-R"))
+        && !m_cwTxActive) {
+        bridgeLog(QStringLiteral("startTx: blocked unarmed generic TX in CW mode"));
+        return;
+    }
     // JTTY has its own continuous keyboard modem and audio/PTT lifecycle.
     // A queued FT/JT start must never fall through to buildTxWaveformForMessage:
     // that builder deliberately has no JTTY waveform, and such a fall-through
@@ -40335,6 +40398,15 @@ void DecodiumBridge::checkAndStartPeriodicTx()
     // far entrare 2 chiamate in startTx() prima che m_transmitting=true ->
     // doppia TX FT2 "singhiozzo".
     if (m_periodicTxInFlight) return;
+    // The periodic FT/JT scheduler has no role in continuous/manual modes.
+    // In particular, a persisted TX-enabled/AutoCQ state must not key a rig
+    // merely because Decodium was restarted in CW.
+    if (m_mode == QStringLiteral("CW")
+        || m_mode == QStringLiteral("CW-R")
+        || m_mode == QStringLiteral("JTTY")
+        || m_mode == QStringLiteral("SSB")) {
+        return;
+    }
     // FT2-Link non usa il sequencer TX FTx standard (TX solo dal pannello).
     if (isFt2LinkApplicationMode(m_mode)) return;
     m_periodicTxInFlight = true;
@@ -44327,6 +44399,10 @@ void DecodiumBridge::cwRigPtt(bool on)
 {
     if (!m_hamlibCat)
         return;
+    if (on && m_startupTxGuard) {
+        bridgeLog(QStringLiteral("TX guard: blocked startup CW PTT ON"));
+        return;
+    }
     // Release an already-started local CW transmission even if the operator
     // changed mode or switched to the remote path before pressing Stop.
     if (on && (m_mode != QStringLiteral("CW") || m_decoPortUseRemote))
@@ -53414,6 +53490,9 @@ void DecodiumBridge::ensureAudioSink()
         });
         connect(m_audioSink, &DecodiumAudioSink::audioLevelChanged,
                 this, [this](double level) {
+            // A queued callback from the just-stopped CW capture must not
+            // overwrite the level after the legacy backend takes ownership.
+            if (usesLegacyRxLevels()) return;
             static int cnt = 0;
             if (cnt++ < 5) bridgeLog("audioLevelChanged received level=" + QString::number(level));
             m_audioLevel = level;

@@ -2085,6 +2085,13 @@ void DecodiumTransceiverManager::connectRig()
     d->desired = Transceiver::TransceiverState {};
     d->desired.online(true);
     setConnecting(true);
+    m_startupPttBlocked = true;
+    QTimer::singleShot(5000, this, [this, xcv]() {
+        if (d->transceiver == xcv && m_connected) {
+            m_startupPttBlocked = false;
+            qInfo().noquote() << "[CATDBG] CAT startup PTT guard released";
+        }
+    });
 
     if (isHamRadioDeluxeRig(params.rig_name)) {
         QString const shownReason = sanitizeHamlibFailure(
@@ -2619,6 +2626,10 @@ void DecodiumTransceiverManager::setRigFrequency(double hz)
     // the QSY had completed, suppressing both a later retry and the bridge's
     // stale-poll guard.
     d->desired.frequency(static_cast<Transceiver::Frequency>(hz));
+    // Frequency synchronisation is never a transmit request. Do not carry a
+    // transient PTT=true read during CAT startup into the complete state
+    // sent for the QSY.
+    d->desired.ptt(false);
 
     // A frequency change must reach the Hamlib worker even when a following
     // mode, split or polling update is queued immediately afterwards. The
@@ -2674,6 +2685,10 @@ void DecodiumTransceiverManager::setRigTxFrequency(double hz)
             << "rxHz=" << QString::number(static_cast<double>(d->desired.frequency()), 'f', 0)
             << "txHz=" << QString::number(hz, 'f', 0);
     }
+    // Updating the TX/RX frequency or split must not key the rig. The only
+    // path allowed to combine a frequency write with PTT ON is the explicit
+    // setRigTxFrequencyAndPtt() transmit helper below.
+    d->desired.ptt(false);
     d->desired.split(hz > 0.0);
     d->desired.tx_frequency(static_cast<Transceiver::Frequency>(hz));
     sendState(d.get());
@@ -2738,6 +2753,10 @@ bool DecodiumTransceiverManager::restoreSatelliteHalfDuplexRx(double rxHz)
 
 void DecodiumTransceiverManager::setRigTxFrequencyAndPtt(double hz, bool on)
 {
+    if (on && m_startupPttBlocked) {
+        qWarning().noquote() << "[CATDBG] Blocking startup PTT ON with TX frequency request";
+        on = false;
+    }
     QElapsedTimer totalTimer;
     totalTimer.start();
     double const rxHz = d->desired.frequency() > 0
@@ -2782,6 +2801,10 @@ void DecodiumTransceiverManager::setRigTxFrequencyAndPtt(double hz, bool on)
 
 void DecodiumTransceiverManager::setRigTxFrequencyAndPttAsync(double hz, bool on)
 {
+    if (on && m_startupPttBlocked) {
+        qWarning().noquote() << "[CATDBG] Blocking startup PTT ON with async TX frequency request";
+        on = false;
+    }
     QElapsedTimer totalTimer;
     totalTimer.start();
     double const rxHz = d->desired.frequency() > 0
@@ -2826,6 +2849,10 @@ void DecodiumTransceiverManager::setRigTxFrequencyAndPttAsync(double hz, bool on
 
 void DecodiumTransceiverManager::setRigPtt(bool on)
 {
+    if (on && m_startupPttBlocked) {
+        qWarning().noquote() << "[CATDBG] Blocking startup PTT ON request";
+        return;
+    }
     if (m_pttMethod == QStringLiteral("VOX")) {
         qDebug() << "[CATDBG] VOX PTT request ignored: TX must be triggered by audio only"
                  << "on=" << on;
@@ -2857,6 +2884,10 @@ void DecodiumTransceiverManager::setRigMode(const QString& mode)
     }
 
     d->desired.mode(targetMode);
+    // Changing the CAT mode must never inherit a stale PTT=true from the
+    // previous rig snapshot. TX is asserted only by the explicit transmit
+    // paths; otherwise restoring CW during startup can key the radio.
+    d->desired.ptt(false);
     sendState(d.get());
 }
 

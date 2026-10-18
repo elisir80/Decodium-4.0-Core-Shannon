@@ -1905,11 +1905,19 @@ GlassApplicationWindow {
     }
 
     // 1.0.571 - finestra DecoPort, creata alla prima apertura.
+    function showSsbWindow() {
+        ssbWindowLoader.active = true
+        if (ssbWindowLoader.item) {
+            ssbWindowLoader.item.show()
+            ssbWindowLoader.item.raise()
+            ssbWindowLoader.item.requestActivate()
+        }
+    }
+
     function openSsbWindow() {
         if (bridge.mode !== "SSB") bridge.mode = "SSB"
         if (bridge.mode !== "SSB") return
-        ssbWindowLoader.active = true
-        if (ssbWindowLoader.item) { ssbWindowLoader.item.show(); ssbWindowLoader.item.raise(); ssbWindowLoader.item.requestActivate() }
+        mainWindow.showSsbWindow()
     }
     Loader {
         id: ssbWindowLoader
@@ -5743,7 +5751,9 @@ GlassApplicationWindow {
 
                             // superldpc — decoder LDPC SIMD per FT2 (AVX2 o NEON)
                             Rectangle {
-                                Layout.preferredWidth: 38
+                                // Give the label a little more room; the flexible STOP
+                                // control naturally gives up the same amount of width.
+                                Layout.preferredWidth: 48
                                 Layout.preferredHeight: 16
                                 color: bridge.fastLdpcEnabled ? Qt.rgba(0.98, 0.68, 0.20, 0.18) : Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.9)
                                 border.color: bridge.fastLdpcEnabled ? "#f0ae33" : glassBorder
@@ -5778,6 +5788,38 @@ GlassApplicationWindow {
 
                                 ToolTip.visible: fastLdpcMA.containsMouse
                                 ToolTip.text: qsTr("Fast LDPC — vectorized FT2 decoder (NEON on Apple Silicon/ARM64, AVX2 on x86).\nDecodes the same words far quicker than the original decoder,\nfreeing CPU for the rest of the cycle. Falls back to the original\ndecoder automatically when the required SIMD backend is unavailable.\nTurn it off if you see decodes that look wrong.")
+                            }
+
+                            Rectangle {
+                                visible: bridge.mode === "CW" || bridge.mode === "JTTY" || bridge.mode === "SSB"
+                                Layout.preferredWidth: bridge.mode === "CW" ? 52 : (bridge.mode === "JTTY" ? 62 : 60)
+                                Layout.preferredHeight: 16
+                                radius: 2
+                                color: showModeWindowMouse.containsMouse
+                                       ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.20)
+                                       : Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.9)
+                                border.color: secondaryCyan
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: bridge.mode === "CW" ? qsTr("SHOW CW")
+                                          : (bridge.mode === "JTTY" ? qsTr("SHOW JTTY") : qsTr("SHOW SSB"))
+                                    font.pixelSize: mainWindow.headerFontSize(7, 8)
+                                    font.bold: true
+                                    color: secondaryCyan
+                                }
+                                MouseArea {
+                                    id: showModeWindowMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: bridge.mode === "CW" ? mainWindow.showCwWindow()
+                                               : (bridge.mode === "JTTY" ? mainWindow.showJttyWindow()
+                                                                          : mainWindow.showSsbWindow())
+                                }
+                                ToolTip.visible: showModeWindowMouse.containsMouse
+                                ToolTip.text: bridge.mode === "CW" ? qsTr("Show the CW window")
+                                              : (bridge.mode === "JTTY" ? qsTr("Show the JTTY window")
+                                                                          : qsTr("Show the SSB window"))
                             }
                         }
 

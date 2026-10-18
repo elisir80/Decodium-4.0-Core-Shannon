@@ -1,5 +1,65 @@
 # Changelog / Registro Modifiche
 
+## [1.0.699] - 2026-10-18
+
+### English
+
+- Hardened radio startup against unintended CW transmission: PTT is released
+  immediately after CAT opens, before startup queries, mode/frequency restore,
+  and power probing, with additional guarded release checks during the startup
+  synchronisation window.
+- Added startup RX-only protections across the bridge and transceiver manager,
+  preventing automatic, periodic, CW, frequency, split, and CAT mode paths
+  from inheriting a stale PTT-on state. Explicit operator transmission remains
+  available after startup protection is released.
+- Prevented an unnecessary intermediate DATA-U/USB mode transition when the
+  persisted radio state is already CW, reducing mode flicker during CAT
+  connection.
+- Added persistent `SHOW CW`, `SHOW JTTY`, and `SHOW SSB` controls to reopen
+  the corresponding external window without changing modes. The LDPC status
+  control was widened so its label remains readable beside STOP.
+- Fixed the SSB external-window focus race that prevented the Radio AGC menu
+  from opening. All SSB combo boxes now retain focus during mouse interaction,
+  including dynamically created menus, while the space-bar PTT remains blocked
+  whenever a menu is active and still works normally elsewhere.
+- Radio AGC selection now reaches the CAT control path reliably, including
+  OFF, FAST, MID, and SLOW presets with their numeric Hamlib values.
+- Fixed frozen receive-level indicators after switching between CW/JTTY/SSB
+  and FT modes by rearming legacy state refresh and selecting the active RX
+  level owner instead of testing a retained audio-input object.
+- Added focused SSB UI regression coverage for menu opening, AGC values,
+  keyboard/mouse focus, text-entry behaviour, and PTT safety; expanded the
+  regression target and validated it with Material and Fusion Qt styles.
+
+### Italiano
+
+- Rafforzata la sicurezza all'avvio della radio contro la trasmissione CW
+  involontaria: il PTT viene rilasciato subito dopo l'apertura CAT, prima delle
+  interrogazioni iniziali, del ripristino modo/frequenza e della lettura della
+  potenza, con ulteriori controlli durante la sincronizzazione di avvio.
+- Aggiunte protezioni RX-only all'avvio nel bridge e nel transceiver manager:
+  i percorsi automatici, periodici, CW, frequenza, split e modo CAT non possono
+  più ereditare uno stato PTT attivo. La trasmissione esplicita dell'operatore
+  resta disponibile dopo la fine della protezione iniziale.
+- Evitato il passaggio intermedio non necessario a DATA-U/USB quando la radio
+  era già in CW, riducendo il cambio di modo visibile durante la connessione CAT.
+- Aggiunti i pulsanti persistenti `SHOW CW`, `SHOW JTTY` e `SHOW SSB` per
+  riaprire le rispettive finestre esterne senza cambiare modo. Allargato il
+  controllo di stato LDPC per rendere leggibile l'etichetta accanto a STOP.
+- Corretto il problema di focus della finestra SSB esterna che impediva
+  l'apertura del menu Radio AGC. Tutti i menu ComboBox SSB mantengono ora il
+  focus durante il clic, inclusi quelli creati dinamicamente; la barra spaziatrice
+  continua a non attivare il PTT mentre un menu è aperto e funziona normalmente
+  negli altri contesti.
+- La selezione Radio AGC raggiunge ora correttamente il percorso CAT, inclusi i
+  preset OFF, FAST, MID e SLOW con i rispettivi valori numerici Hamlib.
+- Corretto il congelamento degli indicatori di livello RX dopo il passaggio tra
+  CW/JTTY/SSB e i modi FT, riattivando il refresh dello stato legacy e usando il
+  proprietario effettivo del livello RX invece di un oggetto audio rimasto in memoria.
+- Aggiunti test mirati per la UI SSB: apertura menu, valori AGC, focus da mouse
+  e tastiera, campi di testo e sicurezza PTT; esteso il target di regressione e
+  validato con gli stili Qt Material e Fusion.
+
 ## [1.0.657] - 2026-10-02
 
 ### English

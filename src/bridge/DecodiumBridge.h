@@ -2863,6 +2863,10 @@ private:
     bool m_startupModeAutoPending {true};
     qint64 m_startupModeAutoUntilMs {0};
     bool m_startupModeAutoAuthoritativeApplied {false};
+    // Startup is receive-only. Automatic TX dispatch and CW keying remain
+    // blocked until the CAT/application state has settled; explicit manual
+    // TX requests are still allowed through their authorisation token.
+    bool m_startupTxGuard {true};
     QString m_legacyStartupModeGuard;
     qint64 m_legacyStartupModeGuardUntilMs {0};
     bool m_preserveFrequencyOnModeChange {false};
@@ -4996,6 +5000,7 @@ private:
     void stopBridgeAudioForLegacyDigitalTx(const QString& reason);
     bool useModernSpectrumFeedWithLegacy() const;
     bool useDedicatedModernAudioCaptureWithLegacy() const;
+    bool usesLegacyRxLevels() const;
     void syncSpecialOperationToLegacyBackend();
     void updateSpecialOperationFromLegacy(int activity);
     void syncLegacyBackendDialogState();

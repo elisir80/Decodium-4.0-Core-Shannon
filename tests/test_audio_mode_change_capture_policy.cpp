@@ -25,6 +25,9 @@ private slots:
     void handlesNonLocalSourcesWithoutPretendingTheyAreQtCapture();
     void requiresACompleteLegacyMonitorHandoffAfterNativePcmModes();
     void requiresBridgeHandoffWhenLeavingLegacyForNativeQ65();
+    void legacyMigrationStartsStateRefreshEvenWhenStartedInCw();
+    void stoppedNativeCaptureDoesNotOwnLegacyMeters();
+    void meterFollowsRxOwnershipAcrossRepeatedModeChanges();
     void bridgeUsesTheSharedOwnershipPolicy();
 };
 
@@ -120,6 +123,47 @@ void TestAudioModeChangeCapturePolicy::requiresBridgeHandoffWhenLeavingLegacyFor
     ft8ToQ65.targetUsesLegacyBackend = false;
     ft8ToQ65.monitoringActive = false;
     QVERIFY(!requiresBridgeRxHandoff(ft8ToQ65));
+}
+
+void TestAudioModeChangeCapturePolicy::legacyMigrationStartsStateRefreshEvenWhenStartedInCw()
+{
+    const QString source = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
+    const qsizetype begin = source.indexOf(QStringLiteral("void DecodiumBridge::migrateActiveMonitoringToLegacyBackend()"));
+    const qsizetype end = source.indexOf(QStringLiteral("void DecodiumBridge::recoverGpuPanadapterAfterSourceHandoff"), begin);
+    QVERIFY(begin >= 0 && end > begin);
+    const QString migration = source.mid(begin, end - begin);
+    // A CW startup never starts m_legacyStateTimer. The normal single-capture
+    // handoff must arm it too, not just the optional dual-capture branch.
+    QVERIFY(migration.contains(QStringLiteral("scheduleLegacyStateRefreshBurst();")));
+    QVERIFY(migration.lastIndexOf(QStringLiteral("scheduleLegacyStateRefreshBurst();"))
+            > migration.lastIndexOf(QStringLiteral("m_legacyPcmSpectrumFeed = true;")));
+}
+
+void TestAudioModeChangeCapturePolicy::stoppedNativeCaptureDoesNotOwnLegacyMeters()
+{
+    const QString source = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
+    const qsizetype begin = source.indexOf(QStringLiteral("void DecodiumBridge::syncLegacyBackendState()"));
+    const qsizetype end = source.indexOf(QStringLiteral("QString const legacyModeRaw"), begin);
+    QVERIFY(begin >= 0 && end > begin);
+    const QString meters = source.mid(begin, end - begin);
+    // stopAudioCapture intentionally retains m_soundInput. Its lifetime must
+    // not decide whether RX levels/auto gain follow the active legacy input.
+    QVERIFY(!meters.contains(QStringLiteral("!m_soundInput")));
+    QVERIFY(meters.contains(QStringLiteral("usesLegacyRxLevels()")));
+}
+
+void TestAudioModeChangeCapturePolicy::meterFollowsRxOwnershipAcrossRepeatedModeChanges()
+{
+    using decodium::audio::useLegacyRxLevels;
+    // CW -> FT8/FT4/FT2 -> CW. The stopped native SoundInput survives every
+    // transition; it is deliberately not an input to this decision.
+    for (int cycle = 0; cycle < 3; ++cycle) {
+        QVERIFY(!useLegacyRxLevels(false, false)); // native CW
+        QVERIFY(useLegacyRxLevels(true, false));   // exclusive legacy RX
+        QVERIFY(!useLegacyRxLevels(false, false)); // native CW again
+    }
+    QVERIFY(!useLegacyRxLevels(true, true)); // dedicated modern/TCI/SSTV capture
+    QVERIFY(!useLegacyRxLevels(false, true)); // remote/native-only RX
 }
 
 void TestAudioModeChangeCapturePolicy::bridgeUsesTheSharedOwnershipPolicy()

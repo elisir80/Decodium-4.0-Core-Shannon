@@ -59,6 +59,16 @@ add_test (NAME test_jtty_window COMMAND $<TARGET_FILE:test_jtty_window>)
 set_tests_properties (test_jtty_window PROPERTIES
   ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software")
 
+add_executable (test_ssb_window_focus test_ssb_window_focus.cpp)
+target_compile_definitions (test_ssb_window_focus PRIVATE DECODIUM_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+target_link_libraries (test_ssb_window_focus Qt6::Test Qt6::Quick Qt6::Qml)
+add_test (NAME test_ssb_window_focus COMMAND $<TARGET_FILE:test_ssb_window_focus>)
+set_tests_properties (test_ssb_window_focus PROPERTIES
+  ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software;QT_QUICK_CONTROLS_STYLE=Material")
+add_test (NAME test_ssb_window_focus_fusion COMMAND $<TARGET_FILE:test_ssb_window_focus>)
+set_tests_properties (test_ssb_window_focus_fusion PROPERTIES
+  ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software;QT_QUICK_CONTROLS_STYLE=Fusion")
+
 add_executable (test_tx_dispatch_guard test_tx_dispatch_guard.cpp)
 target_compile_definitions (test_tx_dispatch_guard PRIVATE DECODIUM_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
 target_link_libraries (test_tx_dispatch_guard Qt6::Test Qt6::Core)
@@ -711,6 +721,7 @@ set (_decodium_regression_test_targets
   test_qt_helpers
   test_panadapter_gpu_recovery
   test_audio_mode_change_capture_policy
+  test_ssb_window_focus
   test_hamlib_release_contract
   test_cat_configuration_snapshot
   test_cat_serial_open_safety

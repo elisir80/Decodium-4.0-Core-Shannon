@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Controls.Material
+import QtQuick.Templates as T
 import QtQuick.Layouts
 import QtQuick.Window
 
@@ -73,23 +74,43 @@ GlassApplicationWindow {
 
     // Barra spaziatrice = PTT: si trasmette finche' e' premuta. Con il cursore in
     // un campo di testo (frequenza) la barra scrive uno spazio e basta; con un
-    // elenco aperto non si ruba il fuoco.
-    readonly property bool popupOpen: side.popup.visible || mic.popup.visible
-                                      || agcBox.popup.visible || rxAgc.popup.visible
+    // elenco non si ruba il fuoco, neanche tra mouse press e mouse release:
+    // togliere il focus in quel momento annulla il click prima dell'apertura.
+    property var focusedMenu: null
+    readonly property bool popupOpen: !!focusedMenu && focusedMenu.popup.visible
     function isTextEntry(item) { return !!item && ("cursorPosition" in item) }
-    onActiveFocusItemChanged: Qt.callLater(function () {
+    function comboBoxForItem(item) {
+        for (var current = item; current; current = current.parent) {
+            // Match the base type, including DecoComboBox with other styles.
+            if (current instanceof T.ComboBox)
+                return current
+        }
+        return null
+    }
+    function restorePttFocus() {
         var f = win.activeFocusItem
-        if (!win.active || f === keyCatcher || win.isTextEntry(f) || win.popupOpen)
+        if (!win.active || f === keyCatcher || win.isTextEntry(f)
+                || win.comboBoxForItem(f) || win.popupOpen)
             return
         keyCatcher.forceActiveFocus()
-    })
+    }
+    onActiveFocusItemChanged: {
+        // Capture the menu synchronously: its popup can take focus before the
+        // deferred callback runs. This also covers menus created by Repeaters.
+        var menu = comboBoxForItem(activeFocusItem)
+        if (menu)
+            focusedMenu = menu
+        Qt.callLater(restorePttFocus)
+    }
     Item {
         id: keyCatcher
+        objectName: "ssbPttKeyCatcher"
         focus: true
         Keys.onPressed: function (event) {
             if (event.key === Qt.Key_Space && !event.isAutoRepeat) {
                 event.accepted = true
-                if (win.ready && controls.busy !== true && mic.currentIndex >= 0 && !voice.transmitting)
+                if (win.ready && !win.popupOpen && controls.busy !== true
+                        && mic.currentIndex >= 0 && !voice.transmitting)
                     voice.start()
             }
         }
@@ -194,6 +215,7 @@ GlassApplicationWindow {
             Label { text: bridge.decoPortUseRemote ? qsTr("REMOTE RADIO") : qsTr("LOCAL RADIO"); color: "#a9bac9" }
             TextField {
                 id: dial
+                objectName: "ssbFrequency"
                 Layout.preferredWidth: 190; font.pixelSize: 20
                 // Consolas is not installed by default on macOS/Linux and
                 // makes Qt rebuild its font-family aliases at startup.
@@ -207,7 +229,7 @@ GlassApplicationWindow {
             Label { text: "MHz" }
             Button { text: "−100 Hz"; enabled: ready && controls.busy !== true && !voice.transmitting; onClicked: bridge.cwTuneFrequency(bridge.frequency-100) }
             Button { text: "+100 Hz"; enabled: ready && controls.busy !== true && !voice.transmitting; onClicked: bridge.cwTuneFrequency(bridge.frequency+100) }
-            ComboBox { id: side; model: ["USB", "LSB"]; Layout.preferredWidth: 90; enabled: ready && controls.busy !== true && !voice.transmitting; onActivated: win.updateRadioMode() }
+            ComboBox { id: side; objectName: "ssbSideband"; model: ["USB", "LSB"]; Layout.preferredWidth: 90; enabled: ready && controls.busy !== true && !voice.transmitting; onActivated: win.updateRadioMode() }
             CheckBox { id: dataInput; text: qsTr("USB/data audio input"); checked: true; enabled: ready && controls.busy !== true && !voice.transmitting; onToggled: if(win.ready && !win.syncingRadioMode) win.updateRadioMode() }
             Item { Layout.fillWidth: true }
             Button { text: qsTr("Activate SSB"); visible: bridge.mode !== "SSB"; onClicked: bridge.mode="SSB" }
@@ -355,6 +377,7 @@ GlassApplicationWindow {
                         }
                         ComboBox {
                             id: keyLangBox
+                            objectName: "ssbKeyerLanguage"
                             Layout.preferredWidth: 72
                             model: ["it", "en"]
                         }
@@ -548,6 +571,7 @@ GlassApplicationWindow {
                     Label { text: qsTr("Radio AGC") }
                     DecoComboBox {
                         id: agcBox
+                        objectName: "ssbRadioAgc"
                         model: controls.agcModes || []; textRole: "name"; valueRole: "value"
                         enabled: ready && controls.busy !== true && !voice.transmitting && controls.agcSupported === true
                         currentIndex: { var a=controls.agcModes || [];for(var i=0;i<a.length;i++)if(a[i].value===controls.agc)return i;return -1 }
