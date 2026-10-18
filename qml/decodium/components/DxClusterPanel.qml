@@ -20,6 +20,7 @@ Rectangle {
     // chiuso: 100-180 ms di thread dell'interfaccia ogni volta, barra a scatti e
     // campioni audio persi durante i pile-up.
     readonly property var spotModel: bridge.dxCluster ? bridge.dxCluster.spotModel : null
+    readonly property bool onlineServicesPaused: !!(bridge && bridge.offlineMode)
 
     // 1.0.343 — se incassato in un layout (DX-Pedition SplitView): disabilita
     // drag header + resize grip (il grip scriveva saveGeometry corrompendo il
@@ -90,18 +91,21 @@ Rectangle {
             spacing: 6
 
             Rectangle {
-                width: 8; height: 8; radius: 4
-                color: bridge.dxCluster && bridge.dxCluster.connected ? "#00e676" : "#ef5350"
+                Layout.preferredWidth: 8; Layout.preferredHeight: 8; radius: 4
+                color: root.onlineServicesPaused ? root.warningOrange
+                      : bridge.dxCluster && bridge.dxCluster.connected ? "#00e676" : "#ef5350"
             }
             Text {
                 text: qsTr("DX Cluster")
                 color: secondaryCyan; font.bold: true; font.pixelSize: 12
             }
             Text {
-                text: bridge.dxCluster && bridge.dxCluster.connected
+                text: root.onlineServicesPaused
+                      ? qsTr("online services paused")
+                      : bridge.dxCluster && bridge.dxCluster.connected
                       ? "● " + bridge.dxCluster.host
                       : "disconnected"
-                color: textSecondary; font.pixelSize: 10
+                color: root.onlineServicesPaused ? root.warningOrange : textSecondary; font.pixelSize: 10
             }
             Item { Layout.fillWidth: true }
 
@@ -111,7 +115,9 @@ Rectangle {
             }
 
             Rectangle {
-                width: 86; height: 22; radius: 4
+                Layout.preferredWidth: root.onlineServicesPaused ? 112 : 86
+                Layout.preferredHeight: 22
+                radius: 4
                 color: connMouse.containsMouse
                        ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.35)
                        : Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.15)
@@ -121,6 +127,8 @@ Rectangle {
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
                         if (!bridge.dxCluster) return
+                        if (root.onlineServicesPaused)
+                            bridge.resumeOnlineServices()
                         if (bridge.dxCluster.connected)
                             bridge.disconnectDxCluster()
                         else
@@ -129,7 +137,8 @@ Rectangle {
                 }
                 Text {
                     anchors.centerIn: parent
-                    text: bridge.dxCluster && bridge.dxCluster.connected ? "Disconnect" : "Connect"
+                    text: root.onlineServicesPaused ? qsTr("Go online")
+                          : bridge.dxCluster && bridge.dxCluster.connected ? qsTr("Disconnect") : qsTr("Connect")
                     color: secondaryCyan; font.pixelSize: 10
                     elide: Text.ElideRight
                 }
@@ -148,10 +157,33 @@ Rectangle {
         }
     }
 
+    Rectangle {
+        id: offlineNotice
+        anchors.top: header.bottom
+        width: parent.width
+        height: root.onlineServicesPaused ? 28 : 0
+        visible: height > 0
+        clip: true
+        color: Qt.rgba(root.warningOrange.r, root.warningOrange.g, root.warningOrange.b, 0.14)
+        border.color: Qt.rgba(root.warningOrange.r, root.warningOrange.g, root.warningOrange.b, 0.48)
+        border.width: 1
+
+        Text {
+            anchors.fill: parent
+            anchors.leftMargin: 8
+            anchors.rightMargin: 8
+            verticalAlignment: Text.AlignVCenter
+            text: qsTr("Online services are paused locally; this is not a Windows Internet-status check. Click Go online to resume Cluster and updates.")
+            color: root.warningOrange
+            font.pixelSize: 10
+            elide: Text.ElideRight
+        }
+    }
+
     // Table headers
     Rectangle {
         id: colHeader
-        anchors.top: header.bottom
+        anchors.top: offlineNotice.bottom
         width: parent.width; height: 22
         color: Qt.rgba(0, 0, 0, 0.25)
 

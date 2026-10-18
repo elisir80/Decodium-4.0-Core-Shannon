@@ -484,7 +484,7 @@ void DecodiumDxCluster::setOfflineMode(bool offline)
             m_connected = false;
             emit connectedChanged();
         }
-        setLastStatus(tr("DX Cluster paused in Offline mode"));
+        setLastStatus(tr("DX Cluster paused by Decodium Offline mode (local setting)"));
     } else {
         m_manualDisconnect = false;
         setLastStatus(tr("DX Cluster ready; connect when requested"));
@@ -674,8 +674,8 @@ bool DecodiumDxCluster::tryNextConnectionCandidate(const QString& failureReason)
 void DecodiumDxCluster::connectCluster()
 {
     if (m_offlineMode) {
-        setLastStatus(tr("DX Cluster disabled in Offline mode"));
-        emit statusUpdate(tr("DX Cluster disabled in Offline mode"));
+        setLastStatus(tr("DX Cluster paused by Decodium Offline mode. Resume online services to connect."));
+        emit statusUpdate(tr("DX Cluster paused by Decodium Offline mode. Resume online services to connect."));
         return;
     }
     if (m_reconnectTimer) {

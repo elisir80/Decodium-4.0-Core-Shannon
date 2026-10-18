@@ -173,6 +173,26 @@ SettingsPageScroll {
         Text { text: qsTr("DX CLUSTER"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
         Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
+        Text {
+            visible: !!(bridge && bridge.offlineMode)
+            Layout.fillWidth: true
+            Layout.columnSpan: pageColumns
+            text: qsTr("Decodium Offline mode is enabled locally. It pauses DX Cluster and update checks; it does not mean that Windows has no Internet connection.")
+            color: bridge && bridge.themeManager ? bridge.themeManager.warningColor : "#ffb347"
+            font.pixelSize: 11
+            wrapMode: Text.Wrap
+        }
+        OutlineButton {
+            visible: !!(bridge && bridge.offlineMode)
+            Layout.columnSpan: pageColumns
+            Layout.alignment: Qt.AlignLeft
+            text: qsTr("Resume online services")
+            settingsHost: root
+            onClicked: if (bridge) bridge.resumeOnlineServices()
+            ToolTip.visible: hovered
+            ToolTip.text: qsTr("Turn off Decodium's local Offline mode and allow Cluster, updates and online lookups again.")
+        }
+
         Text { text: qsTr("Server:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
         DecoTextField {
             id: dxClusterHostField

@@ -81,7 +81,11 @@ GlassApplicationWindow {
         radius: 2
         readonly property bool actionEnabled: action === "on"
             ? mainWindow.dashboardPowerOnEnabled
-            : mainWindow.dashboardRadioControlsEnabled
+            : ((action === "atu" || action === "atu-off")
+               ? mainWindow.dashboardRadioControlsEnabled
+                 && bridge.hamlibCat.atuControlAvailable
+               : mainWindow.dashboardRadioControlsEnabled
+                 && bridge.hamlibCat.powerControlAvailable)
         color: radioQuickMouse.containsMouse && actionEnabled
                ? Qt.rgba(activeColor.r, activeColor.g, activeColor.b, 0.24)
                : Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.9)
@@ -15343,6 +15347,14 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
             color: mainWindow.glassWindowSurface(0.98)
             border.color: Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.45)
             border.width: 1
+
+            // The Live Map uses a frameless top-level surface for Liquid
+            // Glass.  Unlike a native title bar, that surface has no OS
+            // resize border, so it needs the common edge and corner handles
+            // used by the other detached panels.
+            FloatingResizeHandles {
+                targetWindow: liveMapFloatingWindow
+            }
 
             Loader {
                 id: liveMapFloatingLoader

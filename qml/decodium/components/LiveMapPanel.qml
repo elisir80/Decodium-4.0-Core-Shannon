@@ -2484,19 +2484,30 @@ Rectangle {
                                         ToolTip.visible: hovered
                                         ToolTip.text: qsTr("Local atlas, OpenStreetMap/OpenTopoMap, GEBCO bathymetry, NASA GIBS and MapTiler. If a provider fails, the configured fallback is tried.")
                                     }
-                                    CheckBox {
-                                        Layout.preferredWidth: implicitWidth
-                                        text: qsTr("Offline")
-                                        checked: root.mapLayerEnabled("offline")
+                                    Button {
+                                        Layout.preferredWidth: implicitWidth + 10
+                                        text: root.mapLayerEnabled("offline")
+                                            ? qsTr("Resume online services")
+                                            : qsTr("Pause online services")
                                         font.pixelSize: 9
-                                        onToggled: {
+                                        onClicked: {
                                             if (root.mapLayers)
-                                                root.mapLayers.layerModel.setLayerEnabled(
-                                                    "offline", checked)
+                                                root.mapLayers.setNetworkOfflineMode(
+                                                    !root.mapLayerEnabled("offline"))
                                         }
                                         ToolTip.visible: hovered
-                                        ToolTip.text: qsTr("Pause cloud/network services, keep local ADIF, logbook, cache and radio activity available, and use the local atlas or imported raster pack.")
+                                        ToolTip.text: root.mapLayerEnabled("offline")
+                                            ? qsTr("Resume DX Cluster, updates and online lookups. This is a local Decodium setting, not a Windows connectivity check.")
+                                            : qsTr("Pause cloud/network services, keep local ADIF, logbook, cache and radio activity available, and use the local atlas or imported raster pack.")
                                     }
+                                }
+                                Text {
+                                    Layout.fillWidth: true
+                                    visible: root.mapLayerEnabled("offline")
+                                    text: qsTr("Online services are paused locally: DX Cluster and update checks are disabled until you resume them.")
+                                    color: root.accentAmber
+                                    font.pixelSize: 8
+                                    wrapMode: Text.Wrap
                                 }
                                 RowLayout {
                                     Layout.fillWidth: true

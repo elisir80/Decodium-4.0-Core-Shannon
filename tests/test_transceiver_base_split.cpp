@@ -1,5 +1,6 @@
 #include <QtTest>
 
+#include "Transceiver/EmulateSplitTransceiver.hpp"
 #include "Transceiver/TransceiverBase.hpp"
 
 // Drives the real TransceiverBase::set() with a recording rig.  The recorded
@@ -59,6 +60,71 @@ namespace
       commands << (on ? QStringLiteral ("ptt:on") : QStringLiteral ("ptt:off"));
       update_PTT (on);
     }
+  };
+
+  // A deliberately non-Hamlib implementation with every optional CAT
+  // capability enabled.  Fake It must expose this contract unchanged rather
+  // than requiring callers to know the concrete wrapped type.
+  class CapabilityRig final : public Transceiver
+  {
+  public:
+    explicit CapabilityRig (logger_type * logger)
+      : Transceiver {logger, nullptr}
+    {
+    }
+
+    QString morse_text;
+    int morse_wpm {0};
+    int stop_morse_calls {0};
+    int atu_tune_calls {0};
+    int atu_off_calls {0};
+    int power_on_calls {0};
+    int power_off_calls {0};
+    bool atu_enabled {true};
+
+    void set (TransceiverState const& state, unsigned) noexcept override
+    {
+      last_set = state;
+    }
+    void start (unsigned) noexcept override {}
+    void stop () noexcept override {}
+
+    bool supports_morse () const noexcept override {return true;}
+    int morse_text_limit () const noexcept override {return 49;}
+    QString send_morse_checked (QString const& text, int wpm) override
+    {
+      morse_text = text;
+      morse_wpm = wpm;
+      return {};
+    }
+    void stop_morse () noexcept override {++stop_morse_calls;}
+
+    bool supports_atu_control () const noexcept override {return true;}
+    bool request_atu_tune (QString *) override {++atu_tune_calls; atu_enabled = true; return true;}
+    bool request_atu_off (QString *) override {++atu_off_calls; atu_enabled = false; return true;}
+    bool read_atu_state (bool * enabled, QString *) override
+    {
+      if (enabled) *enabled = atu_enabled;
+      return true;
+    }
+
+    bool supports_power_control () const noexcept override {return true;}
+    bool request_power_on (QString *) override {++power_on_calls; return true;}
+    bool request_power_off (QString *) override {++power_off_calls; return true;}
+
+    QVariantMap voice_controls (QString const& key, double value, bool write) override
+    {
+      return {{QStringLiteral ("key"), key},
+              {QStringLiteral ("value"), value},
+              {QStringLiteral ("write"), write}};
+    }
+
+    void report (TransceiverState const& state)
+    {
+      Q_EMIT update (state, 77);
+    }
+
+    TransceiverState last_set;
   };
 
   State request (Frequency rx, Frequency tx, bool ptt)
@@ -183,6 +249,112 @@ private slots:
     send (request (kRx + 2000, 0, false));
     QCOMPARE (rig_->commands, QStringList {QStringLiteral ("rx:%1").arg (kRx + 2000)});
   }
+
+  void fakeItForwardsOptionalCatCapabilities ()
+  {
+    auto * wrapped = new CapabilityRig {&logger_};
+    std::unique_ptr<Transceiver> ownership {wrapped};
+    EmulateSplitTransceiver fake {&logger_, std::move (ownership)};
+
+    QVERIFY (fake.supports_morse ());
+    QCOMPARE (fake.morse_text_limit (), 49);
+    QCOMPARE (fake.send_morse_checked (QStringLiteral ("CQ TEST"), 23), QString {});
+    QCOMPARE (wrapped->morse_text, QStringLiteral ("CQ TEST"));
+    QCOMPARE (wrapped->morse_wpm, 23);
+    fake.stop_morse ();
+    QCOMPARE (wrapped->stop_morse_calls, 1);
+
+    QVERIFY (fake.supports_atu_control ());
+    QString error;
+    QVERIFY (fake.request_atu_tune (&error));
+    QCOMPARE (wrapped->atu_tune_calls, 1);
+    bool atuEnabled = false;
+    QVERIFY (fake.read_atu_state (&atuEnabled, &error));
+    QVERIFY (atuEnabled);
+    QVERIFY (fake.request_atu_off (&error));
+    QCOMPARE (wrapped->atu_off_calls, 1);
+    QVERIFY (fake.read_atu_state (&atuEnabled, &error));
+    QVERIFY (!atuEnabled);
+
+    QVERIFY (fake.supports_power_control ());
+    QVERIFY (fake.request_power_on (&error));
+    QVERIFY (fake.request_power_off (&error));
+    QCOMPARE (wrapped->power_on_calls, 1);
+    QCOMPARE (wrapped->power_off_calls, 1);
+
+    QVariantMap const voice = fake.voice_controls (QStringLiteral ("af"), 42.0, true);
+    QCOMPARE (voice.value (QStringLiteral ("key")).toString (), QStringLiteral ("af"));
+    QCOMPARE (voice.value (QStringLiteral ("value")).toDouble (), 42.0);
+    QVERIFY (voice.value (QStringLiteral ("write")).toBool ());
+  }
+
+  void fakeItKeepsRxFrequencyForUnkeyedTxEcho ()
+  {
+    auto * wrapped = new CapabilityRig {&logger_};
+    std::unique_ptr<Transceiver> ownership {wrapped};
+    EmulateSplitTransceiver fake {&logger_, std::move (ownership)};
+    QList<State> updates;
+    QObject::connect (&fake, &Transceiver::update, [&updates] (State const& state, unsigned) {
+      updates << state;
+    });
+
+    State desired = request (kRx, kTx1, false);
+    desired.split (true);
+    fake.set (desired, 1);
+    State echo = request (kTx1, 0, false);
+    wrapped->report (echo);
+
+    QCOMPARE (updates.size (), 1);
+    QCOMPARE (updates.constLast ().frequency (), kRx);
+    QCOMPARE (updates.constLast ().tx_frequency (), kTx1);
+    QVERIFY (updates.constLast ().split ());
+  }
+
+  void fakeItStillFollowsManualRxQsy ()
+  {
+    auto * wrapped = new CapabilityRig {&logger_};
+    std::unique_ptr<Transceiver> ownership {wrapped};
+    EmulateSplitTransceiver fake {&logger_, std::move (ownership)};
+    QList<State> updates;
+    QObject::connect (&fake, &Transceiver::update, [&updates] (State const& state, unsigned) {
+      updates << state;
+    });
+
+    State desired = request (kRx, kTx1, false);
+    desired.split (true);
+    fake.set (desired, 1);
+    State qsy = request (kRx + 1500, 0, false);
+    wrapped->report (qsy);
+
+    QCOMPARE (updates.size (), 1);
+    QCOMPARE (updates.constLast ().frequency (), kRx + 1500);
+    QCOMPARE (updates.constLast ().tx_frequency (), kTx1);
+    QVERIFY (updates.constLast ().split ());
+  }
+
+  void fakeItStillFollowsManualRxQsyDuringTransmit ()
+  {
+    auto * wrapped = new CapabilityRig {&logger_};
+    std::unique_ptr<Transceiver> ownership {wrapped};
+    EmulateSplitTransceiver fake {&logger_, std::move (ownership)};
+    QList<State> updates;
+    QObject::connect (&fake, &Transceiver::update, [&updates] (State const& state, unsigned) {
+      updates << state;
+    });
+
+    State desired = request (kRx, kTx1, false);
+    desired.split (true);
+    fake.set (desired, 1);
+    State qsy = request (kRx + 1500, 0, true);
+    wrapped->report (qsy);
+
+    QCOMPARE (updates.size (), 1);
+    QCOMPARE (updates.constLast ().frequency (), kRx + 1500);
+    QCOMPARE (updates.constLast ().tx_frequency (), kTx1);
+    QVERIFY (updates.constLast ().ptt ());
+    QVERIFY (updates.constLast ().split ());
+  }
+
 };
 
 QTEST_GUILESS_MAIN (TestTransceiverBaseSplit)

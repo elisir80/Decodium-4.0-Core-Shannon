@@ -37,11 +37,19 @@ Window {
     readonly property real frameRadius: root.roundedFrame
                                        ? (Qt.platform.os === "osx" ? 12 : 8) : 0
     readonly property color opaqueSurfaceColor: root.surfaceColor
-    readonly property color glassSurfaceColor: root.themeManager
-        ? Qt.rgba(root.themeManager.bgDeep.r, root.themeManager.bgDeep.g,
-                  root.themeManager.bgDeep.b, 0.30)
-        : Qt.rgba(root.surfaceColor.r, root.surfaceColor.g,
-                  root.surfaceColor.b, 0.30)
+    // Several existing pop-outs bind their Window.color directly to this
+    // property.  It must therefore resolve to an *opaque* surface as soon as
+    // Liquid Glass is no longer active; otherwise a window opened in Glass
+    // keeps the old 30% alpha when the user switches back to Ocean (or any
+    // other classic theme).
+    readonly property color glassSurfaceColor: root.glassTheme
+                                               && root.glassTransparencySupported
+        ? (root.themeManager
+           ? Qt.rgba(root.themeManager.bgDeep.r, root.themeManager.bgDeep.g,
+                     root.themeManager.bgDeep.b, 0.30)
+           : Qt.rgba(root.surfaceColor.r, root.surfaceColor.g,
+                     root.surfaceColor.b, 0.30))
+        : root.opaqueSurfaceColor
 
     // Keep all existing Window { Item { ... } } content in one clipped scene.
     // This also makes the shell usable by pop-out windows declared inline in

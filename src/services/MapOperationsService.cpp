@@ -2701,38 +2701,36 @@ void MapOperationsService::applyMapPreset(const QString& name)
         preset = presetMap(QStringLiteral("Equirectangular"),
                            QStringLiteral("Live + Logbook"),
                            {QStringLiteral("live"), QStringLiteral("active"),
-                            QStringLiteral("psk"), QStringLiteral("offline")});
+                            QStringLiteral("psk")});
         normalized = QStringLiteral("Operational");
     } else if (normalized.compare(QStringLiteral("Logbook"), Qt::CaseInsensitive) == 0) {
         preset = presetMap(QStringLiteral("Equirectangular"),
                            QStringLiteral("Logbook"),
                            {QStringLiteral("worked"), QStringLiteral("confirmed"),
-                            QStringLiteral("states"), QStringLiteral("offline")});
+                            QStringLiteral("states")});
         normalized = QStringLiteral("Logbook");
     } else if (normalized.compare(QStringLiteral("Parks"), Qt::CaseInsensitive) == 0) {
         preset = presetMap(QStringLiteral("Mercator"),
                            QStringLiteral("Live + Logbook"),
                            {QStringLiteral("live"), QStringLiteral("pota"),
-                            QStringLiteral("states"), QStringLiteral("offline")});
+                            QStringLiteral("states")});
         normalized = QStringLiteral("Parks");
     } else if (normalized.compare(QStringLiteral("Awards"), Qt::CaseInsensitive) == 0) {
         preset = presetMap(QStringLiteral("Miller"),
                            QStringLiteral("Logbook"),
                            {QStringLiteral("worked"), QStringLiteral("confirmed"),
-                            QStringLiteral("iota"), QStringLiteral("wpx"),
-                            QStringLiteral("offline")});
+                            QStringLiteral("iota"), QStringLiteral("wpx")});
         normalized = QStringLiteral("Awards");
     } else if (normalized.compare(QStringLiteral("Propagation"), Qt::CaseInsensitive) == 0) {
         preset = presetMap(QStringLiteral("Equirectangular"),
                            QStringLiteral("Live"),
                            {QStringLiteral("live"), QStringLiteral("propagation"),
                             QStringLiteral("muf"), QStringLiteral("fof2"),
-                            QStringLiteral("aurora"), QStringLiteral("offline")});
+                            QStringLiteral("aurora")});
         normalized = QStringLiteral("Propagation");
     } else if (normalized.compare(QStringLiteral("Minimal"), Qt::CaseInsensitive) == 0) {
         preset = presetMap(QStringLiteral("Equirectangular"),
-                           QStringLiteral("Live"),
-                           {QStringLiteral("live"), QStringLiteral("offline")});
+                           QStringLiteral("Live"), {QStringLiteral("live")});
         normalized = QStringLiteral("Minimal");
     } else {
         QSettings settings(QSettings::IniFormat, QSettings::UserScope,
@@ -2747,6 +2745,9 @@ void MapOperationsService::applyMapPreset(const QString& name)
             settings.value(QStringLiteral("Layers")).toStringList());
         QVariantMap const styles = settings.value(QStringLiteral("Styles")).toMap();
         for (auto it = styles.constBegin(); it != styles.constEnd(); ++it) {
+            if (it.key() == QStringLiteral("offline")) {
+                continue;
+            }
             QVariantMap const style = it.value().toMap();
             m_layerModel->setLayerStyle(
                 it.key(), style.value(QStringLiteral("color")).toString(),
@@ -2757,11 +2758,18 @@ void MapOperationsService::applyMapPreset(const QString& name)
         settings.endGroup();
         settings.endGroup();
     }
-    QStringList const enabled = preset.value(QStringLiteral("layers")).toStringList();
+    QStringList enabled = preset.value(QStringLiteral("layers")).toStringList();
+    // Offline is an application-wide network safety switch, not a visual
+    // layer.  Old user presets may still contain it, but applying any map
+    // preset must leave the local online/offline choice untouched.
+    enabled.removeAll(QStringLiteral("offline"));
     for (int row = 0; row < m_layerModel->rowCount(); ++row) {
         QModelIndex const index = m_layerModel->index(row, 0);
         QString const id =
             m_layerModel->data(index, MapLayerModel::LayerIdRole).toString();
+        if (id == QStringLiteral("offline")) {
+            continue;
+        }
         m_layerModel->setLayerEnabled(id, enabled.contains(id));
     }
     setMapProjection(preset.value(QStringLiteral("projection")).toString());
@@ -2778,11 +2786,18 @@ void MapOperationsService::saveMapPreset(const QString& name)
     QString const normalized = name.trimmed().left(48);
     if (normalized.isEmpty() || !m_layerModel) return;
     QStringList enabled;
+    QVariantMap styles;
     for (int row = 0; row < m_layerModel->rowCount(); ++row) {
         QModelIndex const index = m_layerModel->index(row, 0);
-        if (m_layerModel->data(index, MapLayerModel::LayerEnabledRole).toBool()) {
-            enabled << m_layerModel->data(index, MapLayerModel::LayerIdRole).toString();
+        QString const id =
+            m_layerModel->data(index, MapLayerModel::LayerIdRole).toString();
+        if (id == QStringLiteral("offline")) {
+            continue;
         }
+        if (m_layerModel->data(index, MapLayerModel::LayerEnabledRole).toBool()) {
+            enabled << id;
+        }
+        styles.insert(id, m_layerModel->layerStyle(id));
     }
     QSettings settings(QSettings::IniFormat, QSettings::UserScope,
                        QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
@@ -2791,7 +2806,7 @@ void MapOperationsService::saveMapPreset(const QString& name)
     settings.setValue(QStringLiteral("Projection"), m_mapProjection);
     settings.setValue(QStringLiteral("DataView"), m_dataViewMode);
     settings.setValue(QStringLiteral("Layers"), enabled);
-    settings.setValue(QStringLiteral("Styles"), m_layerModel->allLayerStyles());
+    settings.setValue(QStringLiteral("Styles"), styles);
     settings.endGroup();
     settings.endGroup();
     m_activeMapPreset = normalized;

@@ -49,10 +49,12 @@ jobs:
           update: true
           cache: true
           install: >-
+            curl
             git
             make
             perl
             python
+            tar
             gperf
             mingw-w64-x86_64-toolchain
             mingw-w64-x86_64-cmake
@@ -274,7 +276,7 @@ jobs:
             -DRIGCTL_EXE="${RIGCTL_EXE}" \
             -DRIGCTLD_EXE="${RIGCTLD_EXE}" \
             -DRIGCTLCOM_EXE="${RIGCTLCOM_EXE}" \
-            -DBUILD_TESTING=OFF \
+            -DBUILD_TESTING=ON \
             -DWSJT_GENERATE_DOCS=OFF \
             -DWSJT_SKIP_MANPAGES=ON \
             -DWSJT_BUILD_UTILS=OFF
@@ -285,6 +287,11 @@ jobs:
               exit 1
             fi
           done
+
+      - name: Run mandatory CAT release gate
+        run: |
+          set -euo pipefail
+          bash scripts/ci/run-cat-release-gate.sh build-windows "$(nproc)"
 
       - name: Build Decodium
         run: |
@@ -527,6 +534,11 @@ jobs:
 
           printf '%s\n' "Runtime DLLs bundled:" > "${DIST}/runtime-dll-report.txt"
           find "${DIST}" -maxdepth 1 -type f -iname '*.dll' -printf '%f\n' | sort -fu >> "${DIST}/runtime-dll-report.txt"
+          bash scripts/ci/write-hamlib-runtime-manifest.sh \
+            "${DIST}/hamlib-runtime-manifest.json" \
+            "${HAMLIB_VERSION}" \
+            "${DIST}" \
+            windows
 
           echo "=== Portable bundle contents ==="
           find "${DIST}" -maxdepth 2 -type f | sort

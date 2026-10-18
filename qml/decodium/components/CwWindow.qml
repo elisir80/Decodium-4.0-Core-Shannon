@@ -19,12 +19,30 @@ GlassWindow {
     readonly property var eng: (typeof appEngine !== 'undefined' ? appEngine : null)
     readonly property var cw: (typeof cwModule !== 'undefined' ? cwModule : null)
     // Aprire la finestra e' la sola cosa che avvia il modulo CW.
-    Component.onCompleted: if (cw) cw.ensureStarted()
+    Component.onCompleted: {
+        restoreTrafficSplitRatio()
+        if (cw) cw.ensureStarted()
+    }
     readonly property var tm: eng ? eng.themeManager : null
+    readonly property bool liquidGlassEnabled: !!(tm && tm.isGlassTheme
+                                                    && tm.glassTransparencySupported)
     readonly property color cBg:     tm ? tm.bgDeep        : "#0a0f14"
-    readonly property color cPanel:  tm && tm.isGlassTheme && tm.glassTransparencySupported
-                                      ? Qt.rgba(tm.panelColor.r, tm.panelColor.g, tm.panelColor.b, 0.58)
+    // CW is a dense operational window: on a transparent top-level surface,
+    // the usual 58% panel alpha makes the controls and copied CW text hard to
+    // read.  Keep the glass frame, but give its working surface enough
+    // contrast to remain usable over a bright desktop or waterfall.
+    readonly property color cContentSurface: liquidGlassEnabled
+                                             ? Qt.rgba(cBg.r, cBg.g, cBg.b, 0.96)
+                                             : cBg
+    readonly property color cPanel:  liquidGlassEnabled
+                                      ? Qt.rgba(tm.panelColor.r, tm.panelColor.g, tm.panelColor.b, 0.94)
                                       : (tm ? tm.panelColor : "#111a22")
+    readonly property color cInputSurface: liquidGlassEnabled
+                                           ? Qt.rgba(cBg.r, cBg.g, cBg.b, 0.98)
+                                           : Qt.darker(cPanel, 1.12)
+    readonly property color cReadSurface: liquidGlassEnabled
+                                          ? Qt.rgba(cBg.r, cBg.g, cBg.b, 0.985)
+                                          : Qt.darker(cPanel, 1.20)
     readonly property color cBorder: tm ? tm.borderColor   : "#22303c"
     readonly property color cText:   tm ? tm.textPrimary   : "#dbe4ea"
     readonly property color cDim:    tm ? tm.textSecondary : "#7d8b96"
@@ -38,6 +56,12 @@ GlassWindow {
     property bool flushingTypedInput: false
     property int lastTypedPosition: 0
     property string lastTypedText: ""
+    // The receive and transmit transcripts have deliberately independent
+    // widths.  The saved value is a ratio, so the chosen split follows the
+    // window when it is resized or restored on a different display.
+    property real trafficSplitRatio: 0.5
+    readonly property real trafficMinimumPaneWidth: 180
+    readonly property int trafficDividerWidth: 14
 
     readonly property bool canSend: !!(cw && cw.canSend)
     readonly property bool tuneReady: !!(eng && eng.catConnected && !eng.transmitting && cw && !cw.sending)
@@ -56,11 +80,39 @@ GlassWindow {
     Material.theme: (tm && tm.isLightTheme) ? Material.Light : Material.Dark
     Material.accent: cAccent
     Material.foreground: cText
-    Material.background: cBg
+    Material.background: cContentSurface
 
     // Il decodificatore riceve l'audio solo mentre la finestra e' aperta.
     onVisibleChanged: if (eng) eng.cwInAscolto = visible
     Component.onDestruction: if (eng) eng.cwInAscolto = false
+
+    function clampTrafficSplitRatio(value, availableWidth) {
+        var ratio = Number(value)
+        if (!isFinite(ratio)) ratio = 0.5
+        var usableWidth = Number(availableWidth)
+        if (!isFinite(usableWidth) || usableWidth <= 0)
+            usableWidth = Math.max(1, width - 24 - trafficDividerWidth)
+        // When the minimum window size cannot accommodate two 180 px panes,
+        // a centred split remains the only non-overlapping safe choice.
+        if (usableWidth <= trafficMinimumPaneWidth * 2)
+            return 0.5
+        var minimumRatio = trafficMinimumPaneWidth / usableWidth
+        return Math.max(minimumRatio, Math.min(1 - minimumRatio, ratio))
+    }
+    function restoreTrafficSplitRatio() {
+        if (!eng || typeof eng.getSetting !== "function") return
+        trafficSplitRatio = clampTrafficSplitRatio(
+                    eng.getSetting("uiCwTrafficSplitRatio", 0.5),
+                    width - 24 - trafficDividerWidth)
+    }
+    function persistTrafficSplitRatio() {
+        if (eng && typeof eng.setSetting === "function")
+            eng.setSetting("uiCwTrafficSplitRatio", trafficSplitRatio)
+    }
+    function setTrafficSplitFromX(x, availableWidth) {
+        var usableWidth = Math.max(1, Number(availableWidth))
+        trafficSplitRatio = clampTrafficSplitRatio(Number(x) / usableWidth, usableWidth)
+    }
 
     function ctx() {
         return {
@@ -190,7 +242,7 @@ GlassWindow {
         font.family: win.mono
         background: Rectangle {
             radius: 4
-            color: "transparent"
+            color: win.cInputSurface
             border.width: 1
             border.color: parent.activeFocus ? win.cAccent : win.cBorder
         }
@@ -471,6 +523,22 @@ GlassWindow {
     }
 
     // ── La finestra ────────────────────────────────────────────────────────
+    // The exterior stays on the common glass shell.  This inner surface is
+    // deliberately almost opaque in Liquid Glass: CW is read for long
+    // periods and must not inherit the desktop's luminance.
+    Rectangle {
+        id: cwReadabilitySurface
+        anchors.fill: parent
+        anchors.margins: win.transparentCorners ? 2 : 0
+        radius: win.transparentCorners ? Math.max(4, win.frameRadius - 1) : 0
+        color: win.cContentSurface
+        border.width: win.liquidGlassEnabled ? 1 : 0
+        border.color: win.liquidGlassEnabled
+                      ? Qt.rgba(win.cBorder.r, win.cBorder.g, win.cBorder.b, 0.90)
+                      : "transparent"
+        z: -1
+    }
+
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 12
@@ -846,7 +914,7 @@ GlassWindow {
             Layout.fillWidth: true
             Layout.preferredHeight: 92
             visible: !!win.cw && win.cw.decoderOn
-            color: Qt.darker(win.cPanel, 1.4)
+            color: win.cReadSurface
             border.color: win.cBorder
             radius: 4
             clip: true
@@ -943,17 +1011,24 @@ GlassWindow {
         // RX e TX restano separati: il testo trasmesso comprende le macro
         // gia' espanse, mentre il testo ricevuto continua a provenire dal
         // decoder CW.  I due colori rendono immediata la distinzione.
-        RowLayout {
+        Item {
             id: cwTraffic
+            objectName: "cwTraffic"
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.minimumHeight: 100
-            spacing: 8
+            Layout.minimumWidth: 0
+            readonly property real availablePaneWidth: Math.max(1, width - win.trafficDividerWidth)
+            readonly property real effectiveSplitRatio: win.clampTrafficSplitRatio(
+                                                            win.trafficSplitRatio, availablePaneWidth)
+            readonly property real rxPaneWidth: Math.round(availablePaneWidth * effectiveSplitRatio)
+            readonly property real txPaneWidth: Math.max(0, availablePaneWidth - rxPaneWidth)
 
             ColumnLayout {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.minimumWidth: 0
+                id: rxTrafficPane
+                x: 0
+                width: cwTraffic.rxPaneWidth
+                height: cwTraffic.height
                 spacing: 4
                 RowLayout {
                     Layout.fillWidth: true
@@ -967,32 +1042,120 @@ GlassWindow {
                     Item { Layout.fillWidth: true }
                     Btn { label: qsTr("Clear RX"); onClicked: win.cw.clearDecoder() }
                 }
-                ScrollView {
-                    id: decodedScroll
+                // Keep the transcript content physically inside a dedicated,
+                // clipped panel.  A TextArea used as ScrollView content does
+                // not itself define the viewport's visual boundary on every
+                // Qt Quick style, which previously allowed the first TX line
+                // to appear in the gap above the apparent box.
+                Rectangle {
+                    id: rxTranscriptBox
+                    objectName: "cwRxTranscriptBox"
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     Layout.minimumHeight: 70
+                    color: win.cReadSurface
+                    border.color: win.cBorder
+                    border.width: 1
+                    radius: 4
                     clip: true
-                    contentWidth: availableWidth
-                    TextArea {
-                        id: decoded
-                        width: decodedScroll.availableWidth
-                        readOnly: true
-                        wrapMode: TextArea.WrapAnywhere
-                        text: win.cw ? win.cw.decoderText : ""
-                        color: win.cOk
-                        font.family: win.mono
-                        font.pixelSize: 14
-                        background: Rectangle { color: Qt.darker(win.cPanel, 1.2); border.color: win.cBorder; radius: 4 }
-                        onTextChanged: cursorPosition = length
+
+                    ScrollView {
+                        id: decodedScroll
+                        anchors.fill: parent
+                        anchors.margins: 1
+                        clip: true
+                        contentWidth: availableWidth
+                        background: Item { }
+                        TextArea {
+                            id: decoded
+                            objectName: "cwRxTranscriptText"
+                            width: decodedScroll.availableWidth
+                            height: Math.max(decodedScroll.availableHeight, implicitHeight)
+                            readOnly: true
+                            wrapMode: TextArea.WrapAnywhere
+                            leftPadding: 8
+                            rightPadding: 8
+                            topPadding: 7
+                            bottomPadding: 7
+                            text: win.cw ? win.cw.decoderText : ""
+                            color: win.cOk
+                            font.family: win.mono
+                            font.pixelSize: 14
+                            background: Item { }
+                            onTextChanged: cursorPosition = length
+                        }
                     }
                 }
             }
 
+            Item {
+                id: cwTrafficDivider
+                objectName: "cwTrafficDivider"
+                x: cwTraffic.rxPaneWidth
+                width: win.trafficDividerWidth
+                height: cwTraffic.height
+                z: 2
+
+                Rectangle {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: cwTrafficDividerMouse.containsMouse || cwTrafficDividerMouse.pressed ? 3 : 1
+                    height: Math.max(30, parent.height - 4)
+                    radius: width / 2
+                    color: cwTrafficDividerMouse.containsMouse || cwTrafficDividerMouse.pressed
+                           ? win.cAccent : Qt.rgba(win.cBorder.r, win.cBorder.g, win.cBorder.b, 0.95)
+                }
+                Rectangle {
+                    anchors.centerIn: parent
+                    width: 6
+                    height: 28
+                    radius: 3
+                    color: cwTrafficDividerMouse.containsMouse || cwTrafficDividerMouse.pressed
+                           ? Qt.rgba(win.cAccent.r, win.cAccent.g, win.cAccent.b, 0.36)
+                           : Qt.rgba(win.cPanel.r, win.cPanel.g, win.cPanel.b, 0.92)
+                    border.width: 1
+                    border.color: win.cBorder
+                }
+                MouseArea {
+                    id: cwTrafficDividerMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    preventStealing: true
+                    cursorShape: Qt.SizeHorCursor
+                    property bool dragging: false
+                    onPressed: function(mouse) {
+                        dragging = true
+                        var point = mapToItem(cwTraffic, mouse.x, mouse.y)
+                        win.setTrafficSplitFromX(point.x, cwTraffic.availablePaneWidth)
+                    }
+                    onPositionChanged: function(mouse) {
+                        if (!dragging) return
+                        var point = mapToItem(cwTraffic, mouse.x, mouse.y)
+                        win.setTrafficSplitFromX(point.x, cwTraffic.availablePaneWidth)
+                    }
+                    onReleased: {
+                        if (dragging) win.persistTrafficSplitRatio()
+                        dragging = false
+                    }
+                    onCanceled: {
+                        if (dragging) win.persistTrafficSplitRatio()
+                        dragging = false
+                    }
+                    onDoubleClicked: {
+                        win.trafficSplitRatio = 0.5
+                        win.persistTrafficSplitRatio()
+                    }
+                    ToolTip.visible: containsMouse
+                    ToolTip.delay: 700
+                    ToolTip.text: qsTr("Drag to resize RX and TX. Double-click to centre.")
+                }
+            }
+
             ColumnLayout {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.minimumWidth: 0
+                id: txTrafficPane
+                x: cwTraffic.rxPaneWidth + win.trafficDividerWidth
+                width: cwTraffic.txPaneWidth
+                height: cwTraffic.height
                 spacing: 4
                 RowLayout {
                     Layout.fillWidth: true
@@ -1006,24 +1169,43 @@ GlassWindow {
                     Item { Layout.fillWidth: true }
                     Btn { label: qsTr("Clear TX"); onClicked: win.cw.clearTxTranscript() }
                 }
-                ScrollView {
-                    id: txScroll
+                Rectangle {
+                    id: txTranscriptBox
+                    objectName: "cwTxTranscriptBox"
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     Layout.minimumHeight: 70
+                    color: win.cReadSurface
+                    border.color: win.cBorder
+                    border.width: 1
+                    radius: 4
                     clip: true
-                    contentWidth: availableWidth
-                    TextArea {
-                        id: transmitted
-                        width: txScroll.availableWidth
-                        readOnly: true
-                        wrapMode: TextArea.WrapAnywhere
-                        text: win.cw ? win.cw.txText : ""
-                        color: win.cWarn
-                        font.family: win.mono
-                        font.pixelSize: 14
-                        background: Rectangle { color: Qt.darker(win.cPanel, 1.2); border.color: win.cBorder; radius: 4 }
-                        onTextChanged: cursorPosition = length
+
+                    ScrollView {
+                        id: txScroll
+                        anchors.fill: parent
+                        anchors.margins: 1
+                        clip: true
+                        contentWidth: availableWidth
+                        background: Item { }
+                        TextArea {
+                            id: transmitted
+                            objectName: "cwTxTranscriptText"
+                            width: txScroll.availableWidth
+                            height: Math.max(txScroll.availableHeight, implicitHeight)
+                            readOnly: true
+                            wrapMode: TextArea.WrapAnywhere
+                            leftPadding: 8
+                            rightPadding: 8
+                            topPadding: 7
+                            bottomPadding: 7
+                            text: win.cw ? win.cw.txText : ""
+                            color: win.cWarn
+                            font.family: win.mono
+                            font.pixelSize: 14
+                            background: Item { }
+                            onTextChanged: cursorPosition = length
+                        }
                     }
                 }
             }

@@ -4468,6 +4468,24 @@ int main(int argc, char* argv[])
                           &jtty, &decodium::jtty::JttyController::feedAudio);
         QObject::connect (&bridge, &DecodiumBridge::jttyModeLeaving,
                           &jtty, &decodium::jtty::JttyController::leave);
+        QObject::connect (&bridge, &DecodiumBridge::jttyAbortRequested,
+                          &jtty, &decodium::jtty::JttyController::abort);
+        // The six generic TX buttons contain useful manually composed text,
+        // but their usual route builds FT/JT waveforms. JTTY must instead
+        // pack its own frames and own the shared PTT/audio lifecycle.
+        QObject::connect (&bridge, &DecodiumBridge::jttyPanelTransmitRequested,
+                          &jtty, [&bridge, &jtty] (QString const& text) {
+            if (!jtty.active ()) {
+                bridge.reportJttyPanelTransmitResult (
+                    false, text, QStringLiteral ("JTTY is no longer the active mode."));
+                return;
+            }
+            if (jtty.send (text)) {
+                bridge.reportJttyPanelTransmitResult (true, text);
+            } else {
+                bridge.reportJttyPanelTransmitResult (false, text, jtty.lastError ());
+            }
+        });
         // Monitor spento e riacceso: l'audio riprende dopo un buco di durata
         // ignota, e il ricevitore riparte da zero invece di sbagliare gli orari.
         QObject::connect (&bridge, &DecodiumBridge::monitoringChanged, &jtty, [&bridge, &jtty] {

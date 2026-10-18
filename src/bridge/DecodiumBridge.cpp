@@ -16,6 +16,7 @@
 #include "DecodiumDecoPortGateway.h"
 #include "DecodiumNativeCatShare.h"
 #include "DecodiumSerialPortRegistry.h"
+#include "AudioModeChangeCapturePolicy.h"
 #include "DecodeUiFilterPolicy.h"
 #include "MamTxPayloadPolicy.h"
 #include "RttyRxRecovery.h"
@@ -4305,8 +4306,9 @@ static bool isStreamingKeyboardMode(QString const& mode)
         || m.compare(QStringLiteral("CW"), Qt::CaseInsensitive) == 0;
 }
 
-// JTTY e CW tengono la cattura PCM nativa mentre sono attivi: uscendone verso
-// un modo che usa il backend legacy serve lo stesso passaggio di consegne.
+// JTTY e CW tengono la cattura PCM nativa mentre sono attivi. Uscendone serve
+// un passaggio di consegne soltanto se il nuovo modo assegna davvero la
+// periferica al backend legacy; il percorso moderno riusa lo stesso stream.
 static bool isNativePcmKeyboardMode(QString const& mode)
 {
     QString const m = mode.trimmed();
@@ -11859,6 +11861,23 @@ bool DecodiumBridge::offlineMode() const
     return m_mapIntelligenceService && m_mapIntelligenceService->offlineMode();
 }
 
+void DecodiumBridge::resumeOnlineServices()
+{
+    if (!m_mapIntelligenceService) {
+        emit errorMessage(tr("Online services are not available yet."));
+        return;
+    }
+
+    m_mapIntelligenceService->setNetworkOfflineMode(false);
+    if (m_mapIntelligenceService->offlineMode()) {
+        emit errorMessage(tr("Could not resume Decodium online services."));
+        return;
+    }
+
+    qInfo().noquote() << "[NETWORK] Online services resumed by user";
+    emit statusMessage(tr("Online services resumed. DX Cluster and update checks can connect again."));
+}
+
 QObject * DecodiumBridge::callsignIntelligence() const
 {
     return m_callsignIntelligence;
@@ -11925,6 +11944,12 @@ bool DecodiumBridge::usingLegacyBackendForRx() const
 bool DecodiumBridge::legacyBackendRequestedForRx() const
 {
     if (rtlSdrEnabled()) {
+        return false;
+    }
+    // Q65 variants are fully bridge-owned.  In particular on macOS this must
+    // be checked before the generic "legacy requested" branch below: otherwise
+    // the worker is not created when Q65-60A is selected after FT8/FT4.
+    if (m_mode.trimmed().toUpper().startsWith(QStringLiteral("Q65-"))) {
         return false;
     }
     if (isStreamingKeyboardMode(m_mode)
@@ -12011,6 +12036,8 @@ void DecodiumBridge::ensureDecodeWorkerForMode(const QString& mode)
         m_q65Worker->moveToThread(m_workerThreadQ65);
         connect(m_q65Worker, &decodium::q65::Q65DecodeWorker::decodeReady,
                 this, &DecodiumBridge::onQ65DecodeReady);
+        connect(m_q65Worker, &decodium::q65::Q65DecodeWorker::coherentCount,
+                this, &DecodiumBridge::notifyCoherentAveraging);
         connect(m_workerThreadQ65, &QThread::finished, m_q65Worker, &QObject::deleteLater);
         m_workerThreadQ65->start(QThread::LowPriority);
         workerName = QStringLiteral("Q65");
@@ -12977,19 +13004,25 @@ void DecodiumBridge::syncLegacyBackendDialogState()
     m_legacyBackend->setRxInputLevel(qRound(qBound(0.0, m_rxInputLevel, 100.0)));
     int const legacyTxAttn = legacyTxAttenuationFromLevel(m_txOutputLevel);
     m_legacyBackend->setTxOutputAttenuation(legacyTxAttn);
+    bool const bridgeOwnedExplicitQ65 = m_mode.trimmed().toUpper().startsWith(QStringLiteral("Q65-"));
     QString const legacyDialogMode = isFt2LinkApplicationMode(m_mode)
         ? QStringLiteral("FT2")
         : m_mode;
     m_legacyBackend->setFt2DecodeEnabled(m_mode == QStringLiteral("FT2"));
-    if (isStreamingKeyboardMode(m_mode)) {
+    if (isStreamingKeyboardMode(m_mode) || bridgeOwnedExplicitQ65) {
         // Do not hand RTTY to the hidden legacy decoder: it has no RTTY
-        // implementation and would retain its previous decoder mode.  CAT
-        // parameters below are still mirrored for legacy CAT fallback.
+        // implementation and would retain its previous decoder mode.  Q65-*
+        // is similarly native because the embedded backend has no period/A-E
+        // submode contract. CAT parameters below are still mirrored for the
+        // legacy CAT fallback.
         if (m_legacyBackend->monitoring()) {
             m_legacyBackend->setMonitoring(false);
         }
         m_legacyStartupModeGuard.clear();
         m_legacyStartupModeGuardUntilMs = 0;
+        if (bridgeOwnedExplicitQ65) {
+            bridgeLog(QStringLiteral("legacy dialog sync: Q65 variant remains bridge-owned; legacy decoder quiesced"));
+        }
     } else {
         m_legacyBackend->setMode(legacyDialogMode);
         m_legacyStartupModeGuard = legacyDialogMode.trimmed();
@@ -13155,6 +13188,85 @@ void DecodiumBridge::migrateActiveMonitoringToLegacyBackend()
         }
         bridgeLog(QStringLiteral("Legacy monitor migration uses legacy PCM tap for fast QML panadapter"));
     }
+}
+
+void DecodiumBridge::recoverGpuPanadapterAfterSourceHandoff(const QString& reason)
+{
+#if defined(DECODIUM_QML_PANADAPTER_DIRECT)
+    m_panadapterItems.removeAll(QPointer<PanadapterItem>(nullptr));
+    int targets = 0;
+    for (const QPointer<PanadapterItem>& ref : std::as_const(m_panadapterItems)) {
+        if (PanadapterItem* item = ref.data()) {
+            item->recoverGpuDirectVisualAfterSourceHandoff();
+            ++targets;
+        }
+    }
+    bridgeLog(QStringLiteral("[PANDBG] Native PCM to legacy RX hand-off: GPU direct visual recovery queued "
+                             "reason=%1 targets=%2 fallback=deferred")
+                  .arg(reason)
+                  .arg(targets));
+#else
+    Q_UNUSED(reason)
+#endif
+}
+
+void DecodiumBridge::completeNativePcmToLegacyRxHandoff(const QString& previousMode)
+{
+    if (!m_monitoring || m_transmitting || m_tuning || !usingLegacyBackendForRx()
+        || !legacyBackendAvailable()) {
+        return;
+    }
+
+    QString const reason = QStringLiteral("mode hand-off %1 -> %2")
+        .arg(previousMode, m_mode);
+    bool const keepDedicatedModernCapture = useDedicatedModernAudioCaptureWithLegacy();
+
+    if (keepDedicatedModernCapture) {
+        // A deliberately configured modern capture must not be stopped and
+        // reopened merely because the legacy decoder takes over FT8/FT4.  It
+        // still needs the legacy monitor to start, and its visual source must
+        // remain bridge-owned rather than the legacy PCM tap.
+        if (m_periodTimer) {
+            m_periodTimer->stop();
+        }
+        if (m_asyncDecodeTimer) {
+            m_asyncDecodeTimer->stop();
+        }
+        m_asyncDecodePending = false;
+        if (m_decoding) {
+            m_decoding = false;
+            emit decodingChanged();
+        }
+        syncLegacyBackendState();
+        syncLegacyBackendTxState();
+        m_legacyBackend->setMonitoring(true);
+        syncLegacyBackendState();
+        m_legacyPcmSpectrumFeed = false;
+        resetRxPeriodAccumulation(true);
+        m_spectrumBuf.clear();
+        m_wfRingPos = 0;
+        m_lastPanadapterData.clear();
+        m_lastPanadapterFrameMs = QDateTime::currentMSecsSinceEpoch() - 1000;
+        m_lastSpectrumRecoveryMs = 0;
+        if (m_spectrumTimer && !m_spectrumTimer->isActive()) {
+            m_spectrumTimer->start();
+        }
+        scheduleLegacyStateRefreshBurst();
+        bridgeLog(QStringLiteral("Native PCM to legacy RX hand-off keeps dedicated modern capture: %1")
+                      .arg(reason));
+    } else {
+        // This is the normal FT8/FT4 path.  The legacy backend becomes the
+        // only owner of the sound device and its PCM tap becomes the source
+        // for the GPU panadapter.  Calling only stopAudioCapture() leaves the
+        // tap disabled from CW/JTTY/SSB and freezes the last texture forever.
+        migrateActiveMonitoringToLegacyBackend();
+        bridgeLog(QStringLiteral("Native PCM to legacy RX hand-off completed via legacy PCM tap: %1")
+                      .arg(reason));
+    }
+
+    // The next PCM frame is deliberately rendered through fresh RHI textures.
+    // This is a GPU recovery, not a request to fall back to FFTW/CPU.
+    recoverGpuPanadapterAfterSourceHandoff(reason);
 }
 
 void DecodiumBridge::applyDirectVisualAudioCaptureMode(const QString& reason)
@@ -13329,16 +13441,18 @@ void DecodiumBridge::syncLegacyBackendState()
     }
     QScopedValueRollback<bool> legacyStateGuard(m_syncingLegacyBackendState, true);
     bool const rttyApplicationMode = isStreamingKeyboardMode(m_mode);
+    bool const bridgeOwnedExplicitQ65 = m_mode.trimmed().toUpper().startsWith(QStringLiteral("Q65-"));
 #if DECODIUM_HAS_SSTV
     // The legacy state poll can otherwise reassert its saved MONITOR state a
     // few hundred milliseconds after the SSTV workspace switched to the
     // visual-only native capture. Keep CAT/telemetry synchronisation alive,
     // but make the hidden decoder unconditionally quiescent.
-    if ((m_sstvWorkspaceActive || rttyApplicationMode) && m_legacyBackend->monitoring()) {
+    if ((m_sstvWorkspaceActive || rttyApplicationMode || bridgeOwnedExplicitQ65)
+        && m_legacyBackend->monitoring()) {
         m_legacyBackend->setMonitoring(false);
     }
 #else
-    if (rttyApplicationMode && m_legacyBackend->monitoring()) {
+    if ((rttyApplicationMode || bridgeOwnedExplicitQ65) && m_legacyBackend->monitoring()) {
         m_legacyBackend->setMonitoring(false);
     }
 #endif
@@ -13482,9 +13596,10 @@ void DecodiumBridge::syncLegacyBackendState()
         m_sstvWorkspaceActive ||
 #endif
         nativeSstvRxForcesDedicatedAudioCapture();
-    // RTTY owns the same single modern PCM capture as its QML modem and the
-    // panadapter.  The legacy monitor is intentionally false in this state.
-    bool const nativeRttyMonitoring = rttyApplicationMode && m_monitorRequested;
+    // RTTY and explicit Q65 variants own the modern PCM capture. The legacy
+    // monitor is intentionally false in these states.
+    bool const nativeBridgeMonitoring = (rttyApplicationMode || bridgeOwnedExplicitQ65)
+        && m_monitorRequested;
     bool const ft2LinkLegacyRxRequested =
         isFt2LinkApplicationMode(m_mode)
         && m_monitorRequested
@@ -13495,7 +13610,7 @@ void DecodiumBridge::syncLegacyBackendState()
         && !legacyTxOrTune;
     bool const effectiveLegacyMonitoring = m_legacyBackend->monitoring()
         || nativeSstvMonitoring
-        || nativeRttyMonitoring
+        || nativeBridgeMonitoring
         || ft2LinkLegacyRxRequested
         || startupMonitorGrace
         || (m_monitorRequested
@@ -13695,6 +13810,17 @@ void DecodiumBridge::syncLegacyBackendState()
             s_lastRttyLegacyModeIgnoreLogMs = logNowMs;
             bridgeLog(QStringLiteral("RTTY: ignoring retained legacy decoder mode %1; RTTY remains exclusive")
                           .arg(legacyModeRaw));
+        }
+    } else if (!legacyMode.isEmpty() && bridgeOwnedExplicitQ65) {
+        // Do not let the retained legacy FT8/Q65 label replace Q65-15A ...
+        // Q65-300E. Its unqualified "Q65" has no submode information and
+        // would silently put the bridge back on the wrong ownership path.
+        static qint64 s_lastQ65LegacyModeIgnoreLogMs = 0;
+        qint64 const logNowMs = QDateTime::currentMSecsSinceEpoch();
+        if (logNowMs - s_lastQ65LegacyModeIgnoreLogMs >= 10000) {
+            s_lastQ65LegacyModeIgnoreLogMs = logNowMs;
+            bridgeLog(QStringLiteral("Q65: ignoring retained legacy decoder mode %1; keeping application mode %2")
+                          .arg(legacyModeRaw, m_mode));
         }
     } else if (!legacyMode.isEmpty() && isFt2LinkApplicationMode(m_mode)) {
         // FT2-Link intentionally keeps the legacy/radio side on the FT2 base
@@ -17481,11 +17607,19 @@ void DecodiumBridge::resetEarlyDecodeSchedule()
 void DecodiumBridge::resetFtxDecodeWorkersForModeChange(const QString& previousMode,
                                                         const QString& nextMode)
 {
-    if (!isFtx77MessageMode(previousMode) && !isFtx77MessageMode(nextMode)) {
+    auto isQ65Mode = [] (const QString& mode) {
+        QString const normalized = mode.trimmed().toUpper();
+        return normalized == QStringLiteral("Q65")
+            || normalized.startsWith(QStringLiteral("Q65-"));
+    };
+    bool const involvesFtx = isFtx77MessageMode(previousMode)
+        || isFtx77MessageMode(nextMode);
+    bool const involvesQ65 = isQ65Mode(previousMode) || isQ65Mode(nextMode);
+    if (!involvesFtx && !involvesQ65) {
         return;
     }
 
-    bridgeLog(QStringLiteral("mode-change FTx worker reset: %1 -> %2").arg(previousMode, nextMode));
+    bridgeLog(QStringLiteral("mode-change decoder worker reset: %1 -> %2").arg(previousMode, nextMode));
 
     m_asyncDecodePending = false;
     m_ft8EarlyDecodeSerials.clear();
@@ -17511,6 +17645,9 @@ void DecodiumBridge::resetFtxDecodeWorkersForModeChange(const QString& previousM
     removeQueuedDecodeCalls(m_ft8Worker);
     removeQueuedDecodeCalls(m_ft2Worker);
     removeQueuedDecodeCalls(m_ft4Worker);
+    if (involvesQ65) {
+        removeQueuedDecodeCalls(m_q65Worker);
+    }
 
     quint64 const staleDecodeSerial = std::numeric_limits<quint64>::max();
     if (m_ft8Worker) {
@@ -18171,6 +18308,14 @@ int DecodiumBridge::minimumDecodeSamplesForMode(const QString& mode) const
     if (normalized == QStringLiteral("FT4")) {
         return 60000;  // Leaves margin for FT4's shorter DSP window while dropping startup fragments.
     }
+    if (normalized == QStringLiteral("Q65")
+        || normalized.startsWith(QStringLiteral("Q65-"))) {
+        // Q65's native decoder pads a short buffer for memory safety, but a
+        // mode change must not turn that safety padding into a fake RF window.
+        // Wait for a substantially complete period instead.
+        int const targetSamples = targetDecodeSamplesForMode(normalized);
+        return targetSamples > 0 ? targetSamples * 4 / 5 : 0;
+    }
     if (normalized == QStringLiteral("WSPR")) {
         return 110 * SAMPLE_RATE; // WSPR needs almost the full 120s receive window.
     }
@@ -18513,7 +18658,7 @@ void DecodiumBridge::lockFt2LinkAccess()
 
 void DecodiumBridge::setMode(const QString& v) {
     QString const requestedMode = v.trimmed();
-    QString const normalizedMode = canonicalApplicationDecodeMode(requestedMode);
+    QString normalizedMode = canonicalApplicationDecodeMode(requestedMode);
     if (normalizedMode.isEmpty()) {
         if (isRadioOnlyModeLabel(requestedMode)) {
             if (m_catMode.compare(requestedMode, Qt::CaseInsensitive) != 0) {
@@ -18527,6 +18672,12 @@ void DecodiumBridge::setMode(const QString& v) {
                           .arg(requestedMode, m_mode));
         }
         return;
+    }
+
+    // Keep compatibility with profiles created before the explicit Q65
+    // selector existed.  The historic plain label always meant Q65-60A.
+    if (normalizedMode == QStringLiteral("Q65")) {
+        normalizedMode = QStringLiteral("Q65-60A");
     }
 
     if (isFt2LinkApplicationMode(normalizedMode) && !m_ft2LinkAccessUnlocked) {
@@ -18556,6 +18707,11 @@ void DecodiumBridge::setMode(const QString& v) {
         if (m_decodeReleaseTimer) m_decodeReleaseTimer->stop();
         m_pendingDecodeReleaseQueue.clear();
         QString const previousMode = m_mode;
+        // A different application modem invalidates every deferred FT/JT
+        // request. In particular, a callback created before entering JTTY
+        // must never be allowed to reuse its old authorisation afterwards.
+        invalidateDeferredTxRequests(QStringLiteral("application mode changed %1->%2")
+                                         .arg(previousMode, normalizedMode));
         bool const enteringCw = normalizedMode == QStringLiteral("CW")
             && previousMode != QStringLiteral("CW");
         bool const leavingCw = previousMode == QStringLiteral("CW")
@@ -18573,6 +18729,7 @@ void DecodiumBridge::setMode(const QString& v) {
         }
         bool const monitorWasActive = m_monitoring;
         bool const monitorShouldStayActive = monitorWasActive || m_monitorRequested;
+        bool const sourceUsesLegacyRx = usingLegacyBackendForRx();
         bool const enteringRtty = isStreamingKeyboardMode(normalizedMode);
         // Compute this before m_mode is changed.  A legacy FT8/JT monitor
         // needs a deliberate hand-off to the native RTTY PCM capture.
@@ -18583,7 +18740,7 @@ void DecodiumBridge::setMode(const QString& v) {
         // panadapter/waterfall on the first slot after the mode change.
         bool const leavingJtty = isNativePcmKeyboardMode(previousMode);
         bool const rearmModernMonitor = monitorWasActive
-            && (!usingLegacyBackendForRx() || enteringRtty || leavingJtty);
+            && (!sourceUsesLegacyRx || enteringRtty || leavingJtty);
         quint64 const monitorSessionId = monitorShouldStayActive ? ++m_periodTimerSessionId : m_periodTimerSessionId;
         if (rearmModernMonitor && m_periodTimer) {
             m_periodTimer->stop();
@@ -18592,6 +18749,44 @@ void DecodiumBridge::setMode(const QString& v) {
         resetAutoCqBurstCadence(QStringLiteral("application mode changed %1->%2")
                                     .arg(previousMode, normalizedMode));
         m_mode = normalizedMode;
+        decodium::audio::LegacyRxHandoffState legacyHandoffState;
+        legacyHandoffState.monitoringActive = monitorWasActive;
+        legacyHandoffState.leavingNativePcmMode = leavingJtty;
+        legacyHandoffState.targetUsesLegacyBackend = usingLegacyBackendForRx();
+        legacyHandoffState.targetKeepsDedicatedModernCapture =
+            useDedicatedModernAudioCaptureWithLegacy();
+        bool const nativePcmToLegacyRxHandoff =
+            decodium::audio::requiresLegacyRxHandoff(legacyHandoffState);
+        bool const bridgeOwnedExplicitQ65 = m_mode.startsWith(QStringLiteral("Q65-"), Qt::CaseInsensitive);
+        decodium::audio::BridgeRxHandoffState bridgeHandoffState;
+        bridgeHandoffState.monitoringActive = monitorWasActive;
+        bridgeHandoffState.sourceUsesLegacyBackend = sourceUsesLegacyRx;
+        bridgeHandoffState.targetUsesLegacyBackend = usingLegacyBackendForRx();
+        bool const legacyToBridgeRxHandoff =
+            decodium::audio::requiresBridgeRxHandoff(bridgeHandoffState);
+        if (legacyToBridgeRxHandoff && m_periodTimer) {
+            m_periodTimer->stop();
+        }
+
+        if (bridgeOwnedExplicitQ65) {
+            // Explicit Q65 variants must never share RX ownership with the
+            // old backend: it has no period/submode contract and can otherwise
+            // leave the native audio buffer empty after the first window.
+            if (m_legacyBackend && m_legacyBackend->monitoring()) {
+                m_legacyBackend->setMonitoring(false);
+            }
+            m_legacyPcmSpectrumFeed = false;
+            m_legacyStartupModeGuard.clear();
+            m_legacyStartupModeGuardUntilMs = 0;
+            if (legacyToBridgeRxHandoff) {
+                if (m_asyncDecodeTimer) {
+                    m_asyncDecodeTimer->stop();
+                }
+                m_asyncDecodePending = false;
+                bridgeLog(QStringLiteral("Q65 RX hand-off: legacy=%1 -> native=%2; rearming capture and UTC timer")
+                              .arg(previousMode, m_mode));
+            }
+        }
 
         if (previousMode == QStringLiteral("RTTY")) {
             // Stop producers before releasing their shared USB output. The
@@ -18786,7 +18981,8 @@ void DecodiumBridge::setMode(const QString& v) {
                 m_asyncDecodeTimer->stop();
                 m_asyncDecodePending = false;
             }
-            if (rearmModernMonitor) {
+            if ((rearmModernMonitor || legacyToBridgeRxHandoff)
+                && !nativePcmToLegacyRxHandoff) {
                 restartAudioCaptureForModeChange(previousMode);
                 armPeriodTimerForCurrentMode(monitorSessionId, QStringLiteral("setMode"));
             }
@@ -18797,6 +18993,7 @@ void DecodiumBridge::setMode(const QString& v) {
         emit periodMillisecondsChanged();
         emit modeChanged();
         if (legacyBackendAvailable()
+            && !bridgeOwnedExplicitQ65
             && !isFt2LinkApplicationMode(normalizedMode)
             && !isStreamingKeyboardMode(normalizedMode)) {
             // setMode() causes the embedded widget backend to regenerate CQ
@@ -18804,20 +19001,23 @@ void DecodiumBridge::setMode(const QString& v) {
             // that call, even if an earlier state sync has not run yet.
             m_legacyBackend->setStationIdentity(m_callsign, m_grid);
             m_legacyBackend->setFt2DecodeEnabled(normalizedMode == QStringLiteral("FT2"));
-            QString const legacyMode = normalizedMode.startsWith(QStringLiteral("Q65-"))
-                ? QStringLiteral("Q65")
-                : normalizedMode;
+            QString const legacyMode = normalizedMode;
             m_legacyBackend->setMode(legacyMode);
             applyAutoCqBurstCadenceToLegacyBackend();
             m_legacyStartupModeGuard = legacyMode.trimmed();
             m_legacyStartupModeGuardUntilMs = QDateTime::currentMSecsSinceEpoch() + 6000;
-        } else if (legacyBackendAvailable() && !isStreamingKeyboardMode(normalizedMode)) {
+        } else if (legacyBackendAvailable()
+                   && !bridgeOwnedExplicitQ65
+                   && !isStreamingKeyboardMode(normalizedMode)) {
             m_legacyBackend->setStationIdentity(m_callsign, m_grid);
             m_legacyBackend->setFt2DecodeEnabled(false);
             m_legacyBackend->setMode(QStringLiteral("FT2"));
             applyAutoCqBurstCadenceToLegacyBackend();
             m_legacyStartupModeGuard = QStringLiteral("FT2");
             m_legacyStartupModeGuardUntilMs = QDateTime::currentMSecsSinceEpoch() + 6000;
+        }
+        if (nativePcmToLegacyRxHandoff) {
+            completeNativePcmToLegacyRxHandoff(previousMode);
         }
         if (!m_callsign.trimmed().isEmpty()) {
             regenerateTxMessages();
@@ -18865,7 +19065,10 @@ void DecodiumBridge::setMode(const QString& v) {
             });
         }
         syncActiveCatTxSplitFrequency(QStringLiteral("mode-change"));
-        scheduleModeChangeMonitorRecovery(previousMode, m_mode, monitorSessionId, monitorShouldStayActive);
+        quint64 const recoverySessionId = nativePcmToLegacyRxHandoff
+            ? m_periodTimerSessionId
+            : monitorSessionId;
+        scheduleModeChangeMonitorRecovery(previousMode, m_mode, recoverySessionId, monitorShouldStayActive);
         // Schedule after the backend hand-off, even if its monitor flag is
         // temporarily false. UTC/NTP rearming must not cancel audio recovery.
         if (previousMode == QStringLiteral("RTTY") && monitorShouldStayActive)
@@ -28309,6 +28512,17 @@ bool DecodiumBridge::transmitFt2LinkAudio(const QString& text,
 void DecodiumBridge::startTx()
 {
     if (m_mode == QStringLiteral("SSB") || m_ssbTxActive) return;
+    // JTTY has its own continuous keyboard modem and audio/PTT lifecycle.
+    // A queued FT/JT start must never fall through to buildTxWaveformForMessage:
+    // that builder deliberately has no JTTY waveform, and such a fall-through
+    // used to produce the misleading "mode not supported by audio bridge"
+    // error on every platform. Explicit TX-panel clicks are intercepted in
+    // sendTx() and forwarded to JttyController instead.
+    if (m_mode.compare(QStringLiteral("JTTY"), Qt::CaseInsensitive) == 0) {
+        bridgeLog(QStringLiteral("startTx: blocked generic JTTY TX path; waiting for explicit JTTY controller request"));
+        emit statusMessage(tr("JTTY uses its native transmitter; use the JTTY window or click a TX message explicitly."));
+        return;
+    }
     // Il CW a tasto verso la radio remota tiene il PTT: un altro modo che
     // partisse adesso trasmetterebbe sopra.
     if (m_cwRemoteKeying) {
@@ -29541,8 +29755,55 @@ void DecodiumBridge::startTx()
     emit statusMessage("TX: " + msg.trimmed());
 }
 
+void DecodiumBridge::reportJttyPanelTransmitResult(bool accepted, const QString& text,
+                                                    const QString& reason)
+{
+    const QString message = text.simplified();
+    if (accepted) {
+        bridgeLog(QStringLiteral("JTTY: standard TX panel request accepted: msg=[%1]").arg(message));
+        emit statusMessage(tr("JTTY TX: %1").arg(message));
+        return;
+    }
+
+    const QString detail = reason.trimmed().isEmpty()
+        ? tr("The JTTY transmitter could not be started.")
+        : reason.trimmed();
+    bridgeLog(QStringLiteral("JTTY: standard TX panel request rejected: %1 msg=[%2]")
+                  .arg(detail, message));
+    emit errorMessage(tr("JTTY TX: %1").arg(detail));
+}
+
 void DecodiumBridge::sendTx(int n)
 {
+    // JTTY messages are free-text frames produced by JttyController, not
+    // WSJT-style slot waveforms. Keep this branch before every FT/JT
+    // validation, legacy-backend decision and deferred-slot scheduler.
+    // Calling sendTx is an explicit user/remote command; startTx remains
+    // blocked above so an old automatic timer can never key JTTY.
+    if (m_mode.compare(QStringLiteral("JTTY"), Qt::CaseInsensitive) == 0) {
+        if (!selectCurrentTxIfAllowed(n, QStringLiteral("sendTx JTTY"))) {
+            return;
+        }
+        const QString message = txMessage(n).trimmed();
+        if (message.isEmpty()) {
+            const QString detail = tr("No text is available in this TX slot. Use the JTTY window to enter a message.");
+            bridgeLog(QStringLiteral("sendTx JTTY: empty TX%1 request rejected").arg(n));
+            emit errorMessage(tr("JTTY TX: %1").arg(detail));
+            return;
+        }
+
+        // A deliberate click is allowed to resume after HALT, but must not
+        // leave an FT/JT manual authorisation that could survive a later mode
+        // change. JttyController owns the actual PTT/audio admission check.
+        clearManualTxHold(QStringLiteral("explicit JTTY sendTx"));
+        m_explicitManualTxRequest = 0;
+        bridgeLog(QStringLiteral("sendTx JTTY: forwarding explicit TX%1 to native controller msg=[%2]")
+                      .arg(n)
+                      .arg(message));
+        emit jttyPanelTransmitRequested(message);
+        return;
+    }
+
     if (m_specialOperationActivity == kSpecialOpHound && n != 3) {
         n = 1;
     }
@@ -29691,6 +29952,12 @@ void DecodiumBridge::stopTx()
     if (QThread::currentThread() != thread()) {
         QMetaObject::invokeMethod(this, &DecodiumBridge::stopTx, Qt::QueuedConnection);
         return;
+    }
+    // JTTY owns the shared audio transmitter outside m_transmitting. The
+    // generic stop path therefore needs an explicit hand-off to its controller
+    // or HALT could leave a native JTTY transmission running.
+    if (m_mode.compare(QStringLiteral("JTTY"), Qt::CaseInsensitive) == 0) {
+        emit jttyAbortRequested();
     }
     // An aborted call must not be counted by a subsequent idle callback.
     m_activeTxWasPureAutoCqCq = false;
@@ -42392,7 +42659,15 @@ void DecodiumBridge::loadSettings()
     m_frequency = s.value("frequency", 14074000.0).toDouble();
     {
         QString const savedMode = s.value("mode", "FT8").toString().trimmed();
-        QString const canonicalMode = canonicalApplicationDecodeMode(savedMode);
+        QString canonicalMode = canonicalApplicationDecodeMode(savedMode);
+        // Older profiles saved the unqualified Q65 label, which was the
+        // legacy/default path before the explicit period/submode selector.
+        // Preserve the historical default while moving it onto the native
+        // Q65 contract at startup.
+        if (canonicalMode == QStringLiteral("Q65")) {
+            canonicalMode = QStringLiteral("Q65-60A");
+            bridgeLog(QStringLiteral("loadSettings: migrated saved Q65 mode to Q65-60A"));
+        }
         if (!canonicalMode.isEmpty()) {
             m_mode = canonicalMode;
         } else {
@@ -53988,22 +54263,35 @@ void DecodiumBridge::restartAudioCaptureForModeChange(const QString& previousMod
     }
 
     qint64 const now = QDateTime::currentMSecsSinceEpoch();
-    bool const keepExistingQtCapture = (!isNativePcmKeyboardMode(previousMode)
-                                        && !m_tciAudioCaptureActive && m_soundInput)
-        || (m_rtlSdrInput && m_rtlSdrInput->isActive());
+    bool const targetUsesLegacyBackend = usingLegacyBackendForRx();
+    decodium::audio::ModeChangeCaptureState captureState;
+    captureState.hasLocalQtCapture = m_soundInput != nullptr;
+    captureState.tciCaptureActive = m_tciAudioCaptureActive;
+    captureState.rtlSdrCaptureActive = m_rtlSdrInput && m_rtlSdrInput->isActive();
+    captureState.targetUsesLegacyBackend = targetUsesLegacyBackend;
+    captureState.targetKeepsDedicatedModernCapture =
+        useDedicatedModernAudioCaptureWithLegacy()
+        || nativeSstvRxForcesDedicatedAudioCapture();
+    bool const keepExistingQtCapture =
+        decodium::audio::preserveExistingCaptureForModeChange(captureState);
 
     if (keepExistingQtCapture) {
-        bridgeLog(QStringLiteral("setMode: preserving active QAudioSource for mode change %1 -> %2")
+        // A prior mode change may have queued a real replacement.  Keeping the
+        // current stream is itself a newer ownership decision, so invalidate
+        // that old reopen before it can touch this healthy capture.
+        ++m_modeChangeAudioRecoverySerial;
+        bridgeLog(QStringLiteral("setMode: preserving active RX capture for mode change %1 -> %2 "
+                                 "(same bridge-owned source; no QtMultimedia reopen)")
                       .arg(previousMode, m_mode));
     } else {
         bridgeLog(QStringLiteral("setMode: restarting RX capture for mode change %1 -> %2")
                       .arg(previousMode, m_mode));
         stopAudioCapture();
     }
-    // JTTY tears down and recreates its native PCM path on exit. Give the
-    // replacement capture and scene graph time to settle before recovery.
+    // A real native-PCM hand-off needs additional settling time before the
+    // audio watchdog intervenes. Reusing the existing modern source does not.
     m_audioWatchdogIgnoreUntilMs = now
-        + (isNativePcmKeyboardMode(previousMode) ? 15000 : 5000);
+        + (!keepExistingQtCapture && isNativePcmKeyboardMode(previousMode) ? 15000 : 5000);
     m_audioUnhealthyStartMs = 0;
     resetRxPeriodAccumulation(true);
     resetTimeSyncDecodeMetrics();
@@ -54025,12 +54313,18 @@ void DecodiumBridge::restartAudioCaptureForModeChange(const QString& previousMod
             m_soundInput->setInputGain(rxInputGainFromLevel(m_rxInputLevel));
         }
     } else {
-        // SoundInput lives on its own thread.  stopAudioCapture() therefore
-        // queues the teardown; starting it again immediately in this call can
-        // overlap with the old QAudioSource callbacks on Qt Multimedia.  In
-        // particular this is reproducible as a crash-prone CW -> FT mode
-        // transition on Windows/WASAPI.  Let the queued stop drain first and
-        // invalidate the callback if another mode change supersedes it.
+        // An exclusive legacy target has to own the input device itself.  Do
+        // not reopen the bridge stream after that deliberate hand-off.
+        if (targetUsesLegacyBackend
+            && !captureState.targetKeepsDedicatedModernCapture) {
+            bridgeLog(QStringLiteral("setMode: local RX capture released to the legacy backend"));
+            return;
+        }
+
+        // SoundInput lives on its own thread.  A real source replacement (for
+        // example TCI -> local card) must wait for the old backend callbacks
+        // to drain.  Ordinary CW -> FT mode changes never enter this branch:
+        // they keep the same QAudioSource and avoid the Windows/WASAPI race.
         const quint64 recoverySerial = ++m_modeChangeAudioRecoverySerial;
         QTimer::singleShot(0, this, [this, recoverySerial]() {
             if (recoverySerial != m_modeChangeAudioRecoverySerial
@@ -54278,6 +54572,10 @@ void DecodiumBridge::stopAudioCapture()
     // Cancel a pending watchdog fallback before any deliberate stop (mode or
     // device change) can replace the capture configuration.
     ++m_audioWatchdogRecoverySerial;
+    // The same rule applies to a deferred mode-change reopen.  Once a caller
+    // explicitly stops capture, an older CW/FT hand-off must never bring it
+    // back behind that caller's back.
+    ++m_modeChangeAudioRecoverySerial;
     m_lastAudioCaptureStartKey.clear();
     m_lastAudioCaptureStartMs = 0;
     if (m_rtlSdrInput && m_rtlSdrInput->isActive()) {
@@ -55723,7 +56021,18 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
                 }
             }
         }
-        req.ndepth  = decodeDepth; req.ncontest = m_ncontest;
+        // Q65 uses the low two bits as a depth class.  Global FT depth 4
+        // therefore becomes zero in Q65 unless it is mapped back to Q65's
+        // valid 1..3 range.
+        int const q65DecodeDepth = qBound(1, decodeDepth, 3);
+        bool const q65CoherentAverage = m_coherentAvgEnabled;
+        req.ndepth = q65DecodeDepth | (q65CoherentAverage ? 16 : 0);
+        req.coherentAvgEnabled = q65CoherentAverage;
+        req.nclearave = q65CoherentAverage ? 0 : 1;
+        if (!q65CoherentAverage) {
+            notifyCoherentAveraging(0);
+        }
+        req.ncontest = m_ncontest;
         req.nqsoprogress = decodeQsoProgress;
         req.hisgrid = m_dxGrid.toLocal8Bit();
         req.emedelay = (req.ntrperiod == 60) ? 2.5f : 0.0f;
@@ -55736,6 +56045,16 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
             emit decodingChanged();
             return;
         }
+        bridgeLog(QStringLiteral("[Q65DISPATCH] serial=%1 mode=%2 period=%3 submode=%4 samples=%5 target=%6 depth=%7 coherent=%8 clearAverage=%9")
+                      .arg(serial)
+                      .arg(modeSnapshot)
+                      .arg(req.ntrperiod)
+                      .arg(req.nsubmode)
+                      .arg(audioSnapshot.size())
+                      .arg(targetDecodeSamplesForMode(modeSnapshot))
+                      .arg(req.ndepth)
+                      .arg(req.coherentAvgEnabled ? 1 : 0)
+                      .arg(req.nclearave));
         QMetaObject::invokeMethod(worker, [worker, req]() {
             worker->decode(req);
         }, Qt::QueuedConnection);
@@ -58607,7 +58926,7 @@ bool DecodiumBridge::exportCabrillo(const QString& filename)
 void DecodiumBridge::checkForUpdates()
 {
     if (offlineMode()) {
-        emit statusMessage(QStringLiteral("Offline: update checks disabled"));
+        emit statusMessage(tr("Update checks are paused by Decodium Offline mode."));
         return;
     }
     if (!kDecodiumUpdateCheckerEnabled) {

@@ -14,6 +14,7 @@
 
 #include "DecoPortSerialLine.h"
 #include "DecodiumSerialPortRegistry.h"
+#include "CatConfigurationSnapshot.h"
 
 // Forward-declare per nascondere le dipendenze Boost/Hamlib dall'header
 struct DecodiumTransceiverManagerPrivate;
@@ -82,6 +83,11 @@ class DecodiumTransceiverManager : public QObject
     Q_PROPERTY(bool    powerSettingValid  READ powerSettingValid  NOTIFY paMetersChanged)
     Q_PROPERTY(bool    atuEnabled         READ atuEnabled         NOTIFY atuStateChanged)
     Q_PROPERTY(bool    atuStateValid      READ atuStateValid      NOTIFY atuStateChanged)
+    // A connected CAT session does not imply that the selected radio exposes
+    // its internal ATU or power switch through Hamlib.  These properties let
+    // QML disable unavailable controls before an operator can request them.
+    Q_PROPERTY(bool    atuControlAvailable READ atuControlAvailable NOTIFY catCapabilitiesChanged)
+    Q_PROPERTY(bool    powerControlAvailable READ powerControlAvailable NOTIFY catCapabilitiesChanged)
 
     // ── Liste per UI ──────────────────────────────────────────────────────
     Q_PROPERTY(QStringList rigList  READ rigList  NOTIFY rigListChanged)
@@ -166,6 +172,8 @@ public:
     bool    powerSettingValid() const { return m_powerSettingValid; }
     bool    atuEnabled()        const { return m_atuEnabled; }
     bool    atuStateValid()     const { return m_atuStateValid && m_connected; }
+    bool    atuControlAvailable() const { return m_connected && m_atuControlSupported; }
+    bool    powerControlAvailable() const { return m_connected && m_powerControlSupported; }
 
     QStringList rigList()       const;
     QStringList portList()      const { return m_portList; }
@@ -182,7 +190,7 @@ public:
     // ── Scrittura proprietà ───────────────────────────────────────────────
     void setRigName(const QString&);
     void setSerialPort(const QString& v);
-    void setBaudRate(int v)               { if (m_baudRate != v)   { m_baudRate = v;   emit baudRateChanged(); } }
+    void setBaudRate(int v);
     void setDataBits(const QString& v);
     void setStopBits(const QString& v);
     void setHandshake(const QString& v);
@@ -191,13 +199,13 @@ public:
     void setForceRts(bool v);
     void setRtsHigh(bool v);
     void setNetworkPort(const QString& v);
-    void setTciPort(const QString& v)     { if (m_tciPort != v)    { m_tciPort = v;    emit tciPortChanged(); } }
+    void setTciPort(const QString& v);
     void setPttMethod(const QString& v);
     void setPttPort(const QString& v);
     void setSplitMode(const QString& v);
     void setCivAddress(int v);
-    void setCatKeepAlive(bool v)        { if (m_catKeepAlive != v){ m_catKeepAlive = v; emit catKeepAliveChanged(); } }
-    void setPollInterval(int v)           { if (m_pollInterval != v){ m_pollInterval = v; emit pollIntervalChanged(); } }
+    void setCatKeepAlive(bool v);
+    void setPollInterval(int v);
     void setCatAutoConnect(bool v)        { if (m_catAutoConnect != v){ m_catAutoConnect = v; emit catAutoConnectChanged(); } }
     void setAudioAutoStart(bool v)        { if (m_audioAutoStart != v){ m_audioAutoStart = v; emit audioAutoStartChanged(); } }
     void setTciAudioEnabled(bool v);
@@ -282,6 +290,7 @@ signals:
     void alcChanged();
     void paMetersChanged();   // 1.0.581 — tensione, corrente, temperatura, compressione
     void atuStateChanged();
+    void catCapabilitiesChanged();
     void catAutoConnectChanged();
     void audioAutoStartChanged();
     void tciAudioEnabledChanged();
@@ -301,7 +310,9 @@ private:
     void enforceForceLineAvailability();
     void updateTelemetry(double powerWatts, double swr, double alc = 0.0, bool alcValid = false);
     void setAtuState(bool valid, bool enabled);
-    void reconnectRigForParameterChange(const QString& reason);
+    void setCatCapabilities(bool atuControlSupported, bool powerControlSupported);
+    decodium::cat::ConfigurationSnapshot catConfigurationSnapshot() const;
+    void noteCatConfigurationChanged(const QString& reason, bool resetRadioIdentity = false);
     void disconnectRigInternal(bool reconnectAfterDisconnect);
     void scheduleTransientReconnect(const QString& reason);
     void restartTransientCatConnectionNonBlocking();
@@ -359,6 +370,8 @@ private:
     bool    m_powerSettingValid  {false};
     bool    m_atuEnabled         {false};
     bool    m_atuStateValid      {false};
+    bool    m_atuControlSupported {false};
+    bool    m_powerControlSupported {false};
 
     QStringList m_portList;
     bool    m_catAutoConnect {false};
@@ -375,6 +388,12 @@ private:
     bool    m_transientCatReconnectPending {false};
     bool    m_reconnectAfterDisconnect {false};
     bool    m_disconnectInProgress {false};
+    // A CAT connection is built from a single revisioned snapshot.  If a
+    // profile or endpoint changes while rig_open() is pending, the old worker
+    // is allowed to close but can never become the active session.
+    quint64 m_catConfigurationRevision {1};
+    bool    m_catConfigurationReconnectPending {false};
+    bool    m_loadingCatSettings {false};
     CatLineRedirect       m_catLineRedirect;
     std::function<void()> m_catLineRelease;
     // Process-local ownership of the physical CAT/PTT serial endpoints.  The

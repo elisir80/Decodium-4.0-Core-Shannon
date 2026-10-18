@@ -230,6 +230,7 @@ cmake -S "${ROOT_DIR}" -B "${BUILD_DIR}" -G "Unix Makefiles" \
   -DRIGCTLCOM_EXE="${HAMLIB_PREFIX}/bin/rigctlcom" \
   -DFORK_RELEASE_VERSION="${VERSION}" \
   -DQT_MAJOR_VERSION=6 \
+  -DBUILD_TESTING=ON \
   -DWSJT_GENERATE_DOCS=OFF \
   -DWSJT_SKIP_MANPAGES=ON \
   -DWSJT_BUILD_UTILS=OFF
@@ -254,6 +255,9 @@ if [[ "${QSB_FLAG}" != "1" ]]; then
   echo "error: AppImage build did not enable QSB shaders; install qt6-shadertools-dev" >&2
   exit 1
 fi
+
+log "Run mandatory CAT release gate"
+bash "${ROOT_DIR}/scripts/ci/run-cat-release-gate.sh" "${BUILD_DIR}" "${JOBS}"
 
 log "Build"
 cmake --build "${BUILD_DIR}" --target wsjtx decodium_app wsprd udp_daemon message_aggregator wsjtx_app_version --parallel "${JOBS}"
@@ -425,6 +429,12 @@ done
 linuxdeploy_args+=(--plugin qt)
 
 "${LINUXDEPLOY_RUNNER}" "${linuxdeploy_args[@]}"
+
+bash "${ROOT_DIR}/scripts/ci/write-hamlib-runtime-manifest.sh" \
+  "${APPDIR}/usr/share/decodium/hamlib-runtime-manifest.json" \
+  "${HAMLIB_VERSION}" \
+  "${APPDIR}" \
+  linux
 
 log "Bundle QML modules"
 APP_QML_DIR="${APPDIR}/usr/bin/qml"
@@ -738,6 +748,16 @@ require_appimage_file "usr/bin/qml/QtQuick/Controls/Material/impl/libqtquickcont
 require_appimage_file "usr/qml/QtQuick/Controls/Material/qmldir"
 require_appimage_file "usr/qml/QtQuick/Controls/Material/libqtquickcontrols2materialstyleplugin.so"
 require_appimage_file "usr/qml/QtQuick/Controls/Material/impl/libqtquickcontrols2materialstyleimplplugin.so"
+require_appimage_file "usr/share/decodium/hamlib-runtime-manifest.json"
+if ! grep -Fq "\"version\": \"${HAMLIB_VERSION}\"" \
+    "${EXTRACTED_APPDIR}/usr/share/decodium/hamlib-runtime-manifest.json"; then
+  echo "error: final AppImage Hamlib manifest does not report ${HAMLIB_VERSION}" >&2
+  exit 1
+fi
+if ! find "${EXTRACTED_APPDIR}" -type f -name 'libhamlib.so*' -print -quit | grep -q .; then
+  echo "error: final AppImage does not contain the Hamlib runtime library" >&2
+  exit 1
+fi
 for image_plugin in libqgif.so libqjpeg.so libqtiff.so libqwebp.so; do
   if ! find "${EXTRACTED_APPDIR}" -type f \
       -path "*/imageformats/${image_plugin}" -print -quit | grep -q .; then

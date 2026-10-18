@@ -2123,6 +2123,10 @@ MapIntelligenceService::MapIntelligenceService(QObject* parent,
     m_pskFeedService->setEnabled(
         settings.value(QStringLiteral("PskMqttEnabled"), false).toBool());
     setOfflineMode(m_layerModel->layerEnabled(QStringLiteral("offline")));
+    qInfo().noquote()
+        << "[MAPINT] online services="
+        << (m_offlineMode ? "paused (local Offline mode)" : "enabled")
+        << "settings=" << settings.fileName();
 
     m_queryTimer = new QTimer(this);
     m_queryTimer->setSingleShot(true);
@@ -2161,9 +2165,9 @@ MapIntelligenceService::MapIntelligenceService(QObject* parent,
 
 MapIntelligenceService::~MapIntelligenceService()
 {
-    ++m_queryGeneration;
-    ++m_importGeneration;
-    ++m_gridDetailsGeneration;
+    m_queryGeneration.fetch_add(1, std::memory_order_relaxed);
+    m_importGeneration.fetch_add(1, std::memory_order_relaxed);
+    m_gridDetailsGeneration.fetch_add(1, std::memory_order_relaxed);
     m_workerPool.clear();
     m_workerPool.waitForDone(5000);
 }
@@ -2211,6 +2215,33 @@ void MapIntelligenceService::setOfflineMode(bool offline)
     }
     if (changed) {
         emit offlineModeChanged();
+    }
+}
+
+void MapIntelligenceService::setNetworkOfflineMode(bool offline)
+{
+    const bool wasOffline = m_offlineMode;
+    bool layerChanged = false;
+    if (m_layerModel
+        && m_layerModel->layerEnabled(QStringLiteral("offline")) != offline) {
+        m_layerModel->setLayerEnabled(QStringLiteral("offline"), offline);
+        layerChanged = true;
+    }
+
+    // The model signal normally persists and applies the state.  Keep this
+    // fallback for callers during construction/recovery, where the model may
+    // already have the requested value but the service has not yet caught up.
+    if (!layerChanged) {
+        saveSetting(QStringLiteral("Offline"), offline);
+    }
+    if (m_offlineMode != offline) {
+        setOfflineMode(offline);
+    }
+    if (wasOffline != offline) {
+        qInfo().noquote()
+            << "[MAPINT] online services="
+            << (offline ? "paused by local Offline mode" : "resumed")
+            << "source=local-user-action";
     }
 }
 
@@ -3172,6 +3203,11 @@ bool MapIntelligenceService::exportMapConfiguration(const QString& path,
     for (int row = 0; row < m_layerModel->rowCount(); ++row) {
         QModelIndex const index = m_layerModel->index(row, 0);
         QString const id = m_layerModel->data(index, MapLayerModel::LayerIdRole).toString();
+        // Offline mode is an application-wide network safety switch, not a
+        // visual layer.  Do not let a map preset copy it between installs.
+        if (id == QStringLiteral("offline")) {
+            continue;
+        }
         QJsonObject layer = QJsonObject::fromVariantMap(m_layerModel->layerStyle(id));
         layer.insert(QStringLiteral("id"), id);
         layer.insert(QStringLiteral("enabled"),
@@ -3191,7 +3227,9 @@ bool MapIntelligenceService::exportMapConfiguration(const QString& path,
         settings.endGroup();
         return result;
     };
-    root.insert(QStringLiteral("settings"), exportGroup(QStringLiteral("LiveMapLayers")));
+    QJsonObject layerSettings = exportGroup(QStringLiteral("LiveMapLayers"));
+    layerSettings.remove(QStringLiteral("Offline"));
+    root.insert(QStringLiteral("settings"), layerSettings);
     QJsonObject const mapOperations = exportGroup(QStringLiteral("MapOperations"));
     root.insert(QStringLiteral("mapOperations"), mapOperations);
 
@@ -3284,11 +3322,22 @@ QVariantMap MapIntelligenceService::importMapConfiguration(const QString& path)
     QSettings settings(QSettings::IniFormat, QSettings::UserScope,
                        QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
     settings.beginGroup(QStringLiteral("LiveMapLayers"));
+    // Retain the local, explicit network choice.  Older exported bundles may
+    // contain Offline=true: accepting it here used to make Cluster and update
+    // checks look as though Windows had lost Internet access after a profile
+    // or map configuration was restored.
+    const bool locallyOffline = m_layerModel
+        && m_layerModel->layerEnabled(QStringLiteral("offline"));
     settings.remove(QString());
-    QJsonObject const settingObject = root.value(QStringLiteral("settings")).toObject();
+    QJsonObject settingObject = root.value(QStringLiteral("settings")).toObject();
+    // Do this before using the object below as the source of the imported
+    // filters as well.  A legacy bundle must have no route by which its
+    // Offline value can leak back into the local service state.
+    settingObject.remove(QStringLiteral("Offline"));
     for (auto it = settingObject.constBegin(); it != settingObject.constEnd(); ++it) {
         settings.setValue(it.key(), it.value().toVariant());
     }
+    settings.setValue(QStringLiteral("Offline"), locallyOffline);
     settings.endGroup();
 
     settings.beginGroup(QStringLiteral("MapOperations"));
@@ -3314,7 +3363,7 @@ QVariantMap MapIntelligenceService::importMapConfiguration(const QString& path)
     for (QJsonValue const& value : root.value(QStringLiteral("layers")).toArray()) {
         QJsonObject const layer = value.toObject();
         QString const id = layer.value(QStringLiteral("id")).toString();
-        if (id.isEmpty()) {
+        if (id.isEmpty() || id == QStringLiteral("offline")) {
             continue;
         }
         m_layerModel->setLayerStyle(
@@ -3458,6 +3507,10 @@ QVariantMap MapIntelligenceService::importMapConfiguration(const QString& path)
                                                   QStringLiteral("Operational")).toString();
         m_operationsService->applyMapPreset(active);
     }
+    // A map import changes visual state, not the application's network safety
+    // state.  This final restoration also protects users who still have a
+    // legacy custom preset containing the old offline layer entry.
+    setNetworkOfflineMode(locallyOffline);
     scheduleQuery();
     return root.value(QStringLiteral("viewport")).toObject().toVariantMap();
 }
@@ -3465,8 +3518,10 @@ QVariantMap MapIntelligenceService::importMapConfiguration(const QString& path)
 void MapIntelligenceService::reloadFromAdif(const QString& path)
 {
     QString const cleanPath = QFileInfo(path).absoluteFilePath();
-    quint64 const importGeneration = ++m_importGeneration;
-    quint64 const queryGeneration = ++m_queryGeneration;
+    quint64 const importGeneration = m_importGeneration.fetch_add(
+        1, std::memory_order_relaxed) + 1;
+    quint64 const queryGeneration = m_queryGeneration.fetch_add(
+        1, std::memory_order_relaxed) + 1;
     if (m_sourcePath != cleanPath) {
         m_sourcePath = cleanPath;
         emit sourcePathChanged();
@@ -3591,7 +3646,8 @@ void MapIntelligenceService::selectGrid(const QString& grid)
         return;
     }
 
-    quint64 const generation = ++m_gridDetailsGeneration;
+    quint64 const generation = m_gridDetailsGeneration.fetch_add(
+        1, std::memory_order_relaxed) + 1;
     m_selectedGrid = normalized;
     m_selectedGridLive.clear();
     m_selectedGridQsos.clear();
@@ -3632,7 +3688,7 @@ void MapIntelligenceService::selectGrid(const QString& grid)
 
 void MapIntelligenceService::clearGridSelection()
 {
-    ++m_gridDetailsGeneration;
+    m_gridDetailsGeneration.fetch_add(1, std::memory_order_relaxed);
     bool const hadSelection = !m_selectedGrid.isEmpty()
         || !m_selectedGridSummary.isEmpty()
         || !m_selectedGridLive.isEmpty()
@@ -4090,7 +4146,10 @@ void MapIntelligenceService::ingestDecodeEntry(const QVariantMap& entry,
 
 void MapIntelligenceService::scheduleQuery()
 {
-    ++m_queryGeneration;
+    // The workers use this solely as a cancellation generation. Relaxed
+    // ordering is sufficient and avoids GCC 15's false stringop-overflow
+    // diagnostic for the overloaded atomic pre-increment in Qt functors.
+    m_queryGeneration.fetch_add(1, std::memory_order_relaxed);
     m_queryTimer->start();
 }
 

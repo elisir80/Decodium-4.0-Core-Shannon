@@ -983,7 +983,10 @@ Dialog {
     }
 
     function forceRtsControlEnabled() {
-        return activeCatPortType() === "serial"
+        var controller = activeCatController()
+        var hardwareHandshake = controller && controller.handshake !== undefined
+                && String(controller.handshake).trim().toLowerCase() === "hardware"
+        return activeCatPortType() === "serial" && !hardwareHandshake
                 && !(activePttMethod() === "RTS" && pttSharesCatPort())
     }
 

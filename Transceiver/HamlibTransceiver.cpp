@@ -804,6 +804,7 @@ int HamlibTransceiver::do_start ()
 
   rig_powered_off_ = false;
   power_on_settle_clock_.invalidate ();
+  power_off_probe_clock_.invalidate ();
   // Some rigs keep CAT alive in standby/off. NewCAT is one example: it
   // accepts the PS command but deliberately rejects VS/FA while power is off.
   // Do not turn this into a failed connection: the open serial session is the
@@ -815,6 +816,7 @@ int HamlibTransceiver::do_start ()
       if (RIG_OK == power_rc && RIG_POWER_OFF == power_status)
         {
           rig_powered_off_ = true;
+          power_off_probe_clock_.restart ();
           qInfo ().noquote ()
             << "[CATDBG] Hamlib CAT session opened while rig power is off"
             << "rig=" << rig_get_caps_cptr (m_->model_, RIG_CAPS_MODEL_NAME_CPTR)
@@ -1768,8 +1770,32 @@ void HamlibTransceiver::do_poll ()
   // A serial CAT link can remain alive while the rig is in standby.  Do not
   // let the ordinary polling cycle turn that usable link into a failure by
   // asking NewCAT for VFO/mode data before the radio has been powered on.
+  // Still probe get_powerstat at a deliberately low rate: this is how a
+  // front-panel power-on recovers automatically without reopening the CAT
+  // endpoint or treating a transient standby reply as a port failure.
   if (rig_powered_off_)
     {
+      bool const due = !power_off_probe_clock_.isValid ()
+        || power_off_probe_clock_.elapsed () >= kPowerOffProbeIntervalMs_;
+      if (due && rig->caps->get_powerstat)
+        {
+          power_off_probe_clock_.restart ();
+          powerstat_t power_status {RIG_POWER_UNKNOWN};
+          int const power_rc = rig_get_powerstat (rig, &power_status);
+          if (RIG_OK == power_rc && RIG_POWER_OFF != power_status)
+            {
+              rig_powered_off_ = false;
+              power_on_settle_clock_.restart ();
+              qInfo ().noquote ()
+                << "[CATDBG] Hamlib detected front-panel power-on; resuming CAT after"
+                << kPowerOnSettleMs_ << "ms settle";
+            }
+          else
+            {
+              CAT_TRACE ("standby power probe rc=" << power_rc
+                         << "status=" << power_status);
+            }
+        }
       return;
     }
 
@@ -2584,6 +2610,20 @@ bool HamlibTransceiver::supports_morse () const noexcept
   return m_->rig_ && m_->rig_->caps && m_->rig_->caps->send_morse;
 }
 
+bool HamlibTransceiver::supports_atu_control () const noexcept
+{
+  return m_->rig_ && m_->rig_->caps
+    && rig_has_set_func (m_->rig_.data (), RIG_FUNC_TUNER);
+}
+
+bool HamlibTransceiver::supports_power_control () const noexcept
+{
+  // Do not expose a Power button merely because a Hamlib session exists.
+  // Backends without set_powerstat() cannot implement either Power On or
+  // Power Off, and calling the generic wrapper would only produce ENAVAIL.
+  return m_->rig_ && m_->rig_->caps && m_->rig_->caps->set_powerstat;
+}
+
 int HamlibTransceiver::morse_text_limit () const noexcept
 {
   return m_->rig_ && m_->rig_->caps->rig_model == RIG_MODEL_FT991
@@ -2733,6 +2773,10 @@ bool HamlibTransceiver::request_power_on (QString * error)
 {
   auto * rig = m_->rig_.data ();
   if (!rig) { if (error) *error = tr ("Radio disconnected"); return false; }
+  if (!supports_power_control ()) {
+    if (error) *error = tr ("This radio does not expose power control through Hamlib");
+    return false;
+  }
   if (ptt_on_) { if (error) *error = tr ("Cannot power on while transmitting"); return false; }
   int rc = rig_set_powerstat (rig, RIG_POWER_ON);
   if (rc != RIG_OK) {
@@ -2740,6 +2784,7 @@ bool HamlibTransceiver::request_power_on (QString * error)
     return false;
   }
   rig_powered_off_ = false;
+  power_off_probe_clock_.invalidate ();
   power_on_settle_clock_.restart ();
   qInfo ().noquote () << "[CATDBG] Hamlib power-on accepted; CAT reads paused for"
                       << kPowerOnSettleMs_ << "ms";
@@ -2750,6 +2795,10 @@ bool HamlibTransceiver::request_power_off (QString * error)
 {
   auto * rig = m_->rig_.data ();
   if (!rig) { if (error) *error = tr ("Radio disconnected"); return false; }
+  if (!supports_power_control ()) {
+    if (error) *error = tr ("This radio does not expose power control through Hamlib");
+    return false;
+  }
   if (ptt_on_) { if (error) *error = tr ("Cannot power off while transmitting"); return false; }
   int rc = rig_set_powerstat (rig, RIG_POWER_OFF);
   if (rc != RIG_OK) {
@@ -2758,6 +2807,7 @@ bool HamlibTransceiver::request_power_off (QString * error)
   }
   rig_powered_off_ = true;
   power_on_settle_clock_.invalidate ();
+  power_off_probe_clock_.restart ();
   stop_cat_keep_alive_timer ();
   qInfo ().noquote () << "[CATDBG] Hamlib power-off accepted; preserving CAT session for Power On";
   return true;

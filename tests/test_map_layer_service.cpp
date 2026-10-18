@@ -23,6 +23,23 @@
 
 namespace {
 
+class ScopedCurrentDirectory final
+{
+public:
+    ScopedCurrentDirectory()
+        : m_original(QDir::currentPath())
+    {
+    }
+
+    ~ScopedCurrentDirectory()
+    {
+        QDir::setCurrent(m_original);
+    }
+
+private:
+    QString m_original;
+};
+
 QByteArray field(const QByteArray& name, const QByteArray& value)
 {
     return "<" + name + ":" + QByteArray::number(value.size()) + ">" + value;
@@ -101,6 +118,172 @@ class TestMapIntelligenceService final : public QObject
     Q_OBJECT
 
 private slots:
+    void networkOfflineModeUsesUserSettingsRatherThanWorkingDirectory()
+    {
+        QTemporaryDir settingsRoot;
+        QTemporaryDir customInstallDirectory;
+        QVERIFY(settingsRoot.isValid());
+        QVERIFY(customInstallDirectory.isValid());
+        QSettings::setPath(QSettings::IniFormat, QSettings::UserScope,
+                           settingsRoot.path());
+
+        {
+            QSettings settings(QSettings::IniFormat, QSettings::UserScope,
+                               QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+            settings.clear();
+            settings.beginGroup(QStringLiteral("LiveMapLayers"));
+            settings.setValue(QStringLiteral("PreferencesVersion"), 2);
+            settings.setValue(QStringLiteral("Offline"), false);
+            settings.endGroup();
+            settings.sync();
+        }
+
+        // A copied portable/custom install may contain an adjacent INI.  The
+        // normal desktop application must never consume it for user settings.
+        QFile misleadingInstallIni(
+            customInstallDirectory.filePath(QStringLiteral("Decodium3.ini")));
+        QVERIFY(misleadingInstallIni.open(QIODevice::WriteOnly | QIODevice::Text));
+        misleadingInstallIni.write("[LiveMapLayers]\nPreferencesVersion=2\nOffline=true\n");
+        misleadingInstallIni.close();
+
+        ScopedCurrentDirectory restoreWorkingDirectory;
+        QVERIFY(QDir::setCurrent(customInstallDirectory.path()));
+        MapIntelligenceService service(
+            nullptr, settingsRoot.filePath(QStringLiteral("map-intelligence.sqlite")));
+        auto* layerModel = qobject_cast<MapLayerModel*>(service.layerModel());
+        QVERIFY(layerModel);
+        QVERIFY(!service.offlineMode());
+        QVERIFY(!layerModel->layerEnabled(QStringLiteral("offline")));
+
+        service.setNetworkOfflineMode(true);
+        QVERIFY(service.offlineMode());
+        QVERIFY(layerModel->layerEnabled(QStringLiteral("offline")));
+        service.setNetworkOfflineMode(false);
+        QVERIFY(!service.offlineMode());
+        QVERIFY(!layerModel->layerEnabled(QStringLiteral("offline")));
+    }
+
+    void mapConfigurationNeverImportsOfflineMode()
+    {
+        QTemporaryDir tempDir;
+        QVERIFY(tempDir.isValid());
+        QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, tempDir.path());
+
+        const QString sourceDatabase = tempDir.filePath(QStringLiteral("source.sqlite"));
+        const QString targetDatabase = tempDir.filePath(QStringLiteral("target.sqlite"));
+        const QString bundlePath = tempDir.filePath(QStringLiteral("map-config.json"));
+
+        MapIntelligenceService source(nullptr, sourceDatabase);
+        source.setNetworkOfflineMode(true);
+        QVERIFY(source.offlineMode());
+        QVERIFY(source.exportMapConfiguration(bundlePath));
+
+        QFile bundle(bundlePath);
+        QVERIFY(bundle.open(QIODevice::ReadOnly));
+        QJsonParseError parseError;
+        QJsonDocument document = QJsonDocument::fromJson(bundle.readAll(), &parseError);
+        bundle.close();
+        QCOMPARE(parseError.error, QJsonParseError::NoError);
+        QJsonObject root = document.object();
+        QVERIFY(!root.value(QStringLiteral("settings")).toObject()
+                    .contains(QStringLiteral("Offline")));
+        for (QJsonValue const& value : root.value(QStringLiteral("layers")).toArray()) {
+            QVERIFY(value.toObject().value(QStringLiteral("id")).toString()
+                         != QStringLiteral("offline"));
+        }
+
+        // Emulate an old bundle produced before the network safety switch was
+        // excluded.  Importing it must not change the target machine's local
+        // online/offline preference.
+        QJsonObject settings = root.value(QStringLiteral("settings")).toObject();
+        settings.insert(QStringLiteral("Offline"), true);
+        root.insert(QStringLiteral("settings"), settings);
+        QJsonArray layers = root.value(QStringLiteral("layers")).toArray();
+        layers.append(QJsonObject {
+            {QStringLiteral("id"), QStringLiteral("offline")},
+            {QStringLiteral("enabled"), true}
+        });
+        root.insert(QStringLiteral("layers"), layers);
+        bundle.setFileName(bundlePath);
+        QVERIFY(bundle.open(QIODevice::WriteOnly | QIODevice::Truncate));
+        bundle.write(QJsonDocument(root).toJson(QJsonDocument::Compact));
+        bundle.close();
+
+        source.setNetworkOfflineMode(false);
+        MapIntelligenceService target(nullptr, targetDatabase);
+        QVERIFY(!target.offlineMode());
+        QVariantMap const viewport = target.importMapConfiguration(bundlePath);
+        QVERIFY(viewport.isEmpty());
+        QVERIFY(!target.offlineMode());
+        auto* targetLayers = qobject_cast<MapLayerModel*>(target.layerModel());
+        QVERIFY(targetLayers);
+        QVERIFY(!targetLayers->layerEnabled(QStringLiteral("offline")));
+    }
+
+    void mapPresetsNeverChangeNetworkOfflineMode()
+    {
+        QTemporaryDir tempDir;
+        QVERIFY(tempDir.isValid());
+        QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, tempDir.path());
+
+        MapIntelligenceService service(
+            nullptr, tempDir.filePath(QStringLiteral("map-intelligence.sqlite")));
+        auto* operations = qobject_cast<MapOperationsService*>(service.operationsService());
+        auto* layers = qobject_cast<MapLayerModel*>(service.layerModel());
+        QVERIFY(operations);
+        QVERIFY(layers);
+
+        const QStringList builtInPresets {
+            QStringLiteral("Operational"), QStringLiteral("Logbook"),
+            QStringLiteral("Parks"), QStringLiteral("Awards"),
+            QStringLiteral("Propagation"), QStringLiteral("Minimal")
+        };
+        for (const QString& preset : builtInPresets) {
+            service.setNetworkOfflineMode(false);
+            operations->applyMapPreset(preset);
+            QVERIFY2(!service.offlineMode(), qPrintable(preset));
+            QVERIFY2(!layers->layerEnabled(QStringLiteral("offline")), qPrintable(preset));
+
+            service.setNetworkOfflineMode(true);
+            operations->applyMapPreset(preset);
+            QVERIFY2(service.offlineMode(), qPrintable(preset));
+            QVERIFY2(layers->layerEnabled(QStringLiteral("offline")), qPrintable(preset));
+        }
+
+        // A pre-fix custom preset may still have persisted the offline layer.
+        // It must be harmless when restored on an online installation.
+        {
+            QSettings settings(QSettings::IniFormat, QSettings::UserScope,
+                               QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+            settings.beginGroup(QStringLiteral("MapPresets"));
+            settings.beginGroup(QStringLiteral("Legacy offline preset"));
+            settings.setValue(QStringLiteral("Projection"), QStringLiteral("Mercator"));
+            settings.setValue(QStringLiteral("DataView"), QStringLiteral("Live"));
+            settings.setValue(QStringLiteral("Layers"),
+                              QStringList {QStringLiteral("live"), QStringLiteral("offline")});
+            settings.endGroup();
+            settings.endGroup();
+            settings.sync();
+        }
+        service.setNetworkOfflineMode(false);
+        operations->applyMapPreset(QStringLiteral("Legacy offline preset"));
+        QVERIFY(!service.offlineMode());
+        QVERIFY(!layers->layerEnabled(QStringLiteral("offline")));
+
+        service.setNetworkOfflineMode(true);
+        operations->saveMapPreset(QStringLiteral("No network state"));
+        QSettings settings(QSettings::IniFormat, QSettings::UserScope,
+                           QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+        settings.beginGroup(QStringLiteral("MapPresets"));
+        settings.beginGroup(QStringLiteral("No network state"));
+        QVERIFY(!settings.value(QStringLiteral("Layers")).toStringList()
+                     .contains(QStringLiteral("offline")));
+        QVERIFY(!settings.value(QStringLiteral("Styles")).toMap()
+                     .contains(QStringLiteral("offline")));
+        settings.endGroup();
+        settings.endGroup();
+    }
+
     void satelliteFieldsSurviveCanonicalQsoStore()
     {
         QTemporaryDir tempDir;
@@ -2720,7 +2903,13 @@ private slots:
         QJsonParseError parseError;
         QJsonDocument const document = QJsonDocument::fromJson(bundle.readAll(), &parseError);
         QCOMPARE(parseError.error, QJsonParseError::NoError);
-        QVERIFY(document.object().value(QStringLiteral("layers")).toArray().size() >= 24);
+        QJsonArray const exportedLayers =
+            document.object().value(QStringLiteral("layers")).toArray();
+        QCOMPARE(exportedLayers.size(), sourceLayers->rowCount() - 1);
+        for (const QJsonValue& layer : exportedLayers) {
+            QVERIFY(layer.toObject().value(QStringLiteral("id")).toString()
+                         != QStringLiteral("offline"));
+        }
         QVERIFY(document.object().value(QStringLiteral("presetNames")).toArray().size() >= 6);
         QVERIFY(document.object().value(QStringLiteral("presets")).isObject());
         QVERIFY(document.object().value(QStringLiteral("roster")).toObject()

@@ -579,14 +579,14 @@ GlassApplicationWindow {
                         text: qsTr("Read ATU state")
                         Layout.columnSpan: 2
                         enabled: ready && controls.busy !== true && !voice.transmitting
-                                 && !bridge.decoPortUseRemote && bridge.hamlibCat && bridge.hamlibCat.connected
+                                 && !bridge.decoPortUseRemote && bridge.hamlibCat && bridge.hamlibCat.atuControlAvailable
                         onClicked: bridge.hamlibCat.requestAtuState()
                     }
                     Button {
                         text: qsTr("ATU Tune")
                         Layout.columnSpan: 2
                         enabled: ready && controls.busy !== true && !voice.transmitting
-                                 && !bridge.decoPortUseRemote && bridge.hamlibCat && bridge.hamlibCat.connected
+                                 && !bridge.decoPortUseRemote && bridge.hamlibCat && bridge.hamlibCat.atuControlAvailable
                         ToolTip.visible: hovered
                         ToolTip.text: qsTr("Ask the radio to start its internal antenna tuner.")
                         onClicked: bridge.hamlibCat.requestAtuTune()
@@ -595,7 +595,7 @@ GlassApplicationWindow {
                         text: qsTr("ATU OFF")
                         Layout.columnSpan: 2
                         enabled: ready && controls.busy !== true && !voice.transmitting
-                                 && !bridge.decoPortUseRemote && bridge.hamlibCat && bridge.hamlibCat.connected
+                                 && !bridge.decoPortUseRemote && bridge.hamlibCat && bridge.hamlibCat.atuControlAvailable
                         ToolTip.visible: hovered
                         ToolTip.text: qsTr("Disable the radio's automatic antenna tuner.")
                         onClicked: bridge.hamlibCat.requestAtuOff()
@@ -613,7 +613,7 @@ GlassApplicationWindow {
                         text: qsTr("Power off radio")
                         Layout.columnSpan: 2
                         enabled: ready && controls.busy !== true && !voice.transmitting
-                                 && !bridge.decoPortUseRemote && bridge.hamlibCat && bridge.hamlibCat.connected
+                                 && !bridge.decoPortUseRemote && bridge.hamlibCat && bridge.hamlibCat.powerControlAvailable
                         onClicked: powerOffDialog.open()
                     }
                     Label {

@@ -279,6 +279,10 @@ public:
     int unreadAlertCount() const { return m_unreadAlertCount; }
     bool offlineMode() const { return m_offlineMode; }
 
+    // This is intentionally separate from the map configuration bundle.  It
+    // pauses every online service in Decodium (Cluster, updates, lookups), so
+    // importing a visual/map preset must never silently change it.
+    Q_INVOKABLE void setNetworkOfflineMode(bool offline);
     void setOfflineMode(bool offline);
     QString selectedGrid() const { return m_selectedGrid; }
     QVariantMap selectedGridSummary() const { return m_selectedGridSummary; }

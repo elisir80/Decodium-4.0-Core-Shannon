@@ -6,10 +6,10 @@
 #include "DecodiumLogging.hpp"
 #include "DecodiumProfileSettings.h"
 #include "DecodiumRigDetector.h"
+#include "CatSerialOpenSafety.h"
 #include "Transceiver/TransceiverFactory.hpp"
 #include "Transceiver/Transceiver.hpp"
 #include "Transceiver/TransceiverBase.hpp"
-#include "Transceiver/HamlibTransceiver.hpp"
 
 #include <QByteArray>
 #include <QDir>
@@ -628,9 +628,9 @@ bool d3ForceRtsAvailable(QString const& portType, QString const& handshake,
                          QString const& pttMethod, QString const& serialPort,
                          QString const& pttPort)
 {
-    Q_UNUSED(handshake);
     bool const serialCat = 0 == portType.compare(QStringLiteral("serial"), Qt::CaseInsensitive);
-    return serialCat
+    bool const hardwareHandshake = 0 == handshake.compare(QStringLiteral("hardware"), Qt::CaseInsensitive);
+    return serialCat && !hardwareHandshake
         && !(0 == pttMethod.compare(QStringLiteral("RTS"), Qt::CaseInsensitive)
              && pttPortSharesCatPort(serialPort, pttPort));
 }
@@ -1069,13 +1069,61 @@ bool DecodiumTransceiverManager::forceRtsAvailable() const
     return d3ForceRtsAvailable(m_portType, m_handshake, m_pttMethod, m_serialPort, m_pttPort);
 }
 
-void DecodiumTransceiverManager::reconnectRigForParameterChange(const QString& reason)
+decodium::cat::ConfigurationSnapshot DecodiumTransceiverManager::catConfigurationSnapshot() const
 {
-    if (!m_connected || (!d->transceiver && !d->xcvThread)) {
+    return {
+        m_rigName,
+        m_serialPort,
+        m_networkPort,
+        m_tciPort,
+        m_portType,
+        m_baudRate,
+        m_dataBits,
+        m_stopBits,
+        m_handshake,
+        m_forceDtr,
+        m_dtrHigh,
+        m_forceRts,
+        m_rtsHigh,
+        m_pttMethod,
+        m_pttPort,
+        m_splitMode,
+        m_civAddress,
+        m_catKeepAlive,
+        m_pollInterval,
+        m_tciAudioEnabled
+    };
+}
+
+void DecodiumTransceiverManager::noteCatConfigurationChanged(const QString& reason,
+                                                              bool resetRadioIdentity)
+{
+    if (resetRadioIdentity)
+        m_serialDeviceKey.clear();
+
+    ++m_catConfigurationRevision;
+    m_catConfigurationReconnectPending = true;
+    qInfo().noquote()
+        << "[CATDBG] Configuration revision changed"
+        << "revision=" << m_catConfigurationRevision
+        << "reason=" << reason
+        << "connecting=" << m_connecting
+        << "connected=" << m_connected;
+
+    // Profile loading updates several fields as one transaction.  The caller
+    // commits a single reopen after the complete snapshot is in place.
+    if (m_loadingCatSettings)
+        return;
+
+    if (!d->transceiver && !d->xcvThread && !m_connecting && !m_connected) {
+        m_catConfigurationReconnectPending = false;
         return;
     }
 
-    emit statusUpdate(reason + QStringLiteral(": riconnessione CAT per applicare il PTT"));
+    // The old worker is deliberately allowed to close before the replacement
+    // starts, but it must not remain actionable in the UI in that interval.
+    setCatCapabilities(false, false);
+    emit statusUpdate(reason + QStringLiteral(": reconnecting CAT with the updated configuration…"));
     disconnectRigInternal(true);
 }
 
@@ -1101,12 +1149,24 @@ void DecodiumTransceiverManager::enforceForceLineAvailability()
 
 void DecodiumTransceiverManager::setSerialPort(const QString& v)
 {
-    if (m_serialPort != v) {
+    bool const changed = m_serialPort != v;
+    if (changed) {
         m_serialPort = v;
         m_serialDeviceKey.clear();
         emit serialPortChanged();
     }
     enforceForceLineAvailability();
+    if (changed)
+        noteCatConfigurationChanged(QStringLiteral("CAT port"), true);
+}
+
+void DecodiumTransceiverManager::setBaudRate(int v)
+{
+    if (m_baudRate == v)
+        return;
+    m_baudRate = v;
+    emit baudRateChanged();
+    noteCatConfigurationChanged(QStringLiteral("CAT baud rate"));
 }
 
 void DecodiumTransceiverManager::setDataBits(const QString& v)
@@ -1115,6 +1175,7 @@ void DecodiumTransceiverManager::setDataBits(const QString& v)
     if (m_dataBits != normalized) {
         m_dataBits = normalized;
         emit dataBitsChanged();
+        noteCatConfigurationChanged(QStringLiteral("CAT data bits"));
     }
 }
 
@@ -1124,30 +1185,39 @@ void DecodiumTransceiverManager::setStopBits(const QString& v)
     if (m_stopBits != normalized) {
         m_stopBits = normalized;
         emit stopBitsChanged();
+        noteCatConfigurationChanged(QStringLiteral("CAT stop bits"));
     }
 }
 
 void DecodiumTransceiverManager::setHandshake(const QString& v)
 {
     QString const normalized = normalizeHandshakeChoice(v);
-    if (m_handshake != normalized) {
+    bool const changed = m_handshake != normalized;
+    if (changed) {
         m_handshake = normalized;
         emit handshakeChanged();
     }
     enforceForceLineAvailability();
+    if (changed)
+        noteCatConfigurationChanged(QStringLiteral("CAT handshake"));
 }
 
 void DecodiumTransceiverManager::setForceDtr(bool v)
 {
     bool const effective = forceDtrAvailable() ? v : false;
+    bool changed = false;
     if (m_forceDtr != effective) {
         m_forceDtr = effective;
         emit forceDtrChanged();
+        changed = true;
     }
     if (!m_forceDtr && m_dtrHigh) {
         m_dtrHigh = false;
         emit dtrHighChanged();
+        changed = true;
     }
+    if (changed)
+        noteCatConfigurationChanged(QStringLiteral("CAT DTR state"));
 }
 
 void DecodiumTransceiverManager::setDtrHigh(bool v)
@@ -1156,20 +1226,26 @@ void DecodiumTransceiverManager::setDtrHigh(bool v)
     if (m_dtrHigh != effective) {
         m_dtrHigh = effective;
         emit dtrHighChanged();
+        noteCatConfigurationChanged(QStringLiteral("CAT DTR polarity"));
     }
 }
 
 void DecodiumTransceiverManager::setForceRts(bool v)
 {
     bool const effective = forceRtsAvailable() ? v : false;
+    bool changed = false;
     if (m_forceRts != effective) {
         m_forceRts = effective;
         emit forceRtsChanged();
+        changed = true;
     }
     if (!m_forceRts && m_rtsHigh) {
         m_rtsHigh = false;
         emit rtsHighChanged();
+        changed = true;
     }
+    if (changed)
+        noteCatConfigurationChanged(QStringLiteral("CAT RTS state"));
 }
 
 void DecodiumTransceiverManager::setRtsHigh(bool v)
@@ -1178,6 +1254,7 @@ void DecodiumTransceiverManager::setRtsHigh(bool v)
     if (m_rtsHigh != effective) {
         m_rtsHigh = effective;
         emit rtsHighChanged();
+        noteCatConfigurationChanged(QStringLiteral("CAT RTS polarity"));
     }
 }
 
@@ -1190,7 +1267,36 @@ void DecodiumTransceiverManager::setNetworkPort(const QString& v)
     if (m_networkPort != value) {
         m_networkPort = value;
         emit networkPortChanged();
+        noteCatConfigurationChanged(QStringLiteral("Network CAT endpoint"), true);
     }
+}
+
+void DecodiumTransceiverManager::setTciPort(const QString& v)
+{
+    if (m_tciPort == v)
+        return;
+    m_tciPort = v;
+    emit tciPortChanged();
+    noteCatConfigurationChanged(QStringLiteral("TCI endpoint"), true);
+}
+
+void DecodiumTransceiverManager::setCatKeepAlive(bool v)
+{
+    if (m_catKeepAlive == v)
+        return;
+    m_catKeepAlive = v;
+    emit catKeepAliveChanged();
+    noteCatConfigurationChanged(QStringLiteral("CAT keep-alive"));
+}
+
+void DecodiumTransceiverManager::setPollInterval(int v)
+{
+    int const effective = qBound(1, v, 99);
+    if (m_pollInterval == effective)
+        return;
+    m_pollInterval = effective;
+    emit pollIntervalChanged();
+    noteCatConfigurationChanged(QStringLiteral("CAT poll interval"));
 }
 
 void DecodiumTransceiverManager::setPttMethod(const QString& v)
@@ -1200,23 +1306,27 @@ void DecodiumTransceiverManager::setPttMethod(const QString& v)
         0 == m_portType.compare(QStringLiteral("tci"), Qt::CaseInsensitive)
             ? QStringLiteral("CAT")
             : (normalized.isEmpty() ? QStringLiteral("CAT") : normalized);
-    if (m_pttMethod != effective) {
+    bool const changed = m_pttMethod != effective;
+    if (changed) {
         m_pttMethod = effective;
         emit pttMethodChanged();
-        reconnectRigForParameterChange(QStringLiteral("PTT Method"));
     }
     enforceForceLineAvailability();
+    if (changed)
+        noteCatConfigurationChanged(QStringLiteral("PTT method"));
 }
 
 void DecodiumTransceiverManager::setPttPort(const QString& v)
 {
     QString const effective = v.trimmed().isEmpty() ? QStringLiteral("CAT") : v.trimmed();
-    if (m_pttPort != effective) {
+    bool const changed = m_pttPort != effective;
+    if (changed) {
         m_pttPort = effective;
         emit pttPortChanged();
-        reconnectRigForParameterChange(QStringLiteral("PTT Port"));
     }
     enforceForceLineAvailability();
+    if (changed)
+        noteCatConfigurationChanged(QStringLiteral("PTT port"));
 }
 
 void DecodiumTransceiverManager::setCivAddress(int v)
@@ -1228,12 +1338,7 @@ void DecodiumTransceiverManager::setCivAddress(int v)
 
     m_civAddress = effective;
     emit civAddressChanged();
-    if (m_connected && d->transceiver
-        && 0 == m_portType.compare(QStringLiteral("serial"), Qt::CaseInsensitive)) {
-        QString const civText = QString::number(m_civAddress, 16).rightJustified(2, QLatin1Char('0')).toUpper();
-        emit statusUpdate(QStringLiteral("CI-V Address: riconnessione CAT per applicare 0x%1").arg(civText));
-        disconnectRigInternal(true);
-    }
+    noteCatConfigurationChanged(QStringLiteral("CI-V address"));
 }
 
 void DecodiumTransceiverManager::setTciAudioEnabled(bool v)
@@ -1242,16 +1347,9 @@ void DecodiumTransceiverManager::setTciAudioEnabled(bool v)
         return;
     }
 
-    bool const reconnect = m_connected && d->transceiver
-        && 0 == m_portType.compare(QStringLiteral("tci"), Qt::CaseInsensitive);
     m_tciAudioEnabled = v;
     emit tciAudioEnabledChanged();
-
-    if (reconnect) {
-        emit statusUpdate(QStringLiteral("Audio TCI: riconnessione CAT per applicare %1")
-                              .arg(v ? QStringLiteral("ON") : QStringLiteral("OFF")));
-        disconnectRigInternal(true);
-    }
+    noteCatConfigurationChanged(QStringLiteral("TCI audio"));
 }
 
 // ── rigList ────────────────────────────────────────────────────────────────
@@ -1265,19 +1363,9 @@ void DecodiumTransceiverManager::setSplitMode(const QString& v)
         return;
     }
 
-    bool const reconnect = m_connected && d->transceiver;
     m_splitMode = normalized;
     emit splitModeChanged();
-
-    if (reconnect) {
-        emit statusUpdate(QStringLiteral("Split: riconnessione CAT per applicare %1")
-                              .arg(normalized == QStringLiteral("emulate")
-                                       ? QStringLiteral("Fake It")
-                                       : normalized == QStringLiteral("rig")
-                                           ? QStringLiteral("Rig")
-                                           : QStringLiteral("None")));
-        disconnectRigInternal(true);
-    }
+    noteCatConfigurationChanged(QStringLiteral("CAT split mode"));
 }
 
 QStringList DecodiumTransceiverManager::rigList() const
@@ -1295,6 +1383,7 @@ void DecodiumTransceiverManager::setRigName(const QString& v)
 {
     if (m_rigName == v) return;
     m_rigName = v;
+    m_serialDeviceKey.clear();
     emit rigNameChanged();
 
     using PT = TransceiverFactory::Capabilities::PortType;
@@ -1335,6 +1424,8 @@ void DecodiumTransceiverManager::setRigName(const QString& v)
         emit pttMethodChanged();
     }
     enforceForceLineAvailability();
+    if (!m_loadingCatSettings)
+        noteCatConfigurationChanged(QStringLiteral("Radio profile"), true);
 }
 
 // ── Helpers enum ──────────────────────────────────────────────────────────
@@ -1559,28 +1650,34 @@ static TransceiverFactory::ParameterPack buildParams(const DecodiumTransceiverMa
     bool const canForceDtr = d3ForceDtrAvailable(m->portType(), m->pttMethod(), m->serialPort(), m->pttPort());
     bool const canForceRts = d3ForceRtsAvailable(m->portType(), m->handshake(), m->pttMethod(), m->serialPort(), m->pttPort());
     bool const serialCat = 0 == m->portType().compare(QStringLiteral("serial"), Qt::CaseInsensitive);
-    TransceiverFactory::PTTMethod const pttType =
+    TransceiverFactory::PTTMethod pttType =
         0 == m->portType().compare(QStringLiteral("tci"), Qt::CaseInsensitive)
             ? TransceiverFactory::PTT_method_CAT
             : parsePtt(m->pttMethod());
-#if defined(Q_OS_LINUX)
-    // Linux tty drivers may assert DTR/RTS when Hamlib opens the CAT port.
-    // Keep unused control lines inactive so opening CAT cannot key PTT on
-    // radios/interfaces that map those lines to transmit.
-    bool const autoDtrLow = serialCat
-        && canForceDtr
-        && !m->forceDtr()
-        && !(pttType == TransceiverFactory::PTT_method_DTR
-             && pttPortSharesCatPort(m->serialPort(), m->pttPort()));
-    bool const autoRtsLow = serialCat
-        && canForceRts
-        && !m->forceRts()
-        && !(pttType == TransceiverFactory::PTT_method_RTS
-             && pttPortSharesCatPort(m->serialPort(), m->pttPort()));
-#else
-    bool const autoDtrLow = false;
-    bool const autoRtsLow = false;
-#endif
+    TransceiverFactory::Handshake const requestedHandshake = parseHandshake(m->handshake());
+    bool const hardwareHandshake = requestedHandshake == TransceiverFactory::handshake_hardware;
+    // macOS, Windows and Linux serial stacks can retain or briefly assert
+    // DTR/RTS while a USB/serial adapter is opened.  Do not leave unused CAT
+    // control lines unspecified: an interface can wire either line to PTT.
+    // The policy deliberately leaves an intentional line-PTT setup and
+    // hardware RTS/CTS handshake alone.
+    decodium::cat::SerialOpenLineSafetyInput lineSafetyInput;
+    lineSafetyInput.serialCat = serialCat;
+    lineSafetyInput.canForceDtr = canForceDtr;
+    lineSafetyInput.canForceRts = canForceRts;
+    lineSafetyInput.userForceDtr = m->forceDtr();
+    lineSafetyInput.userDtrHigh = m->dtrHigh();
+    lineSafetyInput.userForceRts = m->forceRts();
+    lineSafetyInput.userRtsHigh = m->rtsHigh();
+    lineSafetyInput.hardwareHandshake = hardwareHandshake;
+    lineSafetyInput.dtrIsPttOnCatPort =
+        pttType == TransceiverFactory::PTT_method_DTR
+        && pttPortSharesCatPort(m->serialPort(), m->pttPort());
+    lineSafetyInput.rtsIsPttOnCatPort =
+        pttType == TransceiverFactory::PTT_method_RTS
+        && pttPortSharesCatPort(m->serialPort(), m->pttPort());
+    decodium::cat::SerialOpenLineSafety const lineSafety =
+        decodium::cat::serialOpenLineSafety(lineSafetyInput);
     bool const pwrAndSwrEnabled = configuredPwrAndSwrEnabled();
     int const requestedPollInterval = qBound(1, m->pollInterval(), 99);
     int const basePollInterval = qMax(serialCat ? 2 : 1, requestedPollInterval);
@@ -1601,26 +1698,34 @@ static TransceiverFactory::ParameterPack buildParams(const DecodiumTransceiverMa
     p.baud          = m->baudRate();
     p.data_bits     = parseData(m->dataBits());
     p.stop_bits     = parseStop(m->stopBits());
-    TransceiverFactory::Handshake const requestedHandshake = parseHandshake(m->handshake());
     p.handshake     = requestedHandshake;
-    p.force_dtr     = canForceDtr && (m->forceDtr() || autoDtrLow);
-    p.dtr_high      = canForceDtr && m->forceDtr() && m->dtrHigh();
-    p.force_rts     = canForceRts && (m->forceRts() || autoRtsLow);
-    p.rts_high      = canForceRts && m->forceRts() && m->rtsHigh();
-#if defined(Q_OS_LINUX)
-    bool const linuxRtsLowGuard = serialCat
-        && p.force_rts
-        && !p.rts_high
-        && requestedHandshake == TransceiverFactory::handshake_hardware;
-    if (linuxRtsLowGuard) {
-        p.handshake = TransceiverFactory::handshake_none;
-    }
-#endif
-    p.ptt_type      = pttType;
+    p.force_dtr     = lineSafety.forceDtr;
+    p.dtr_high      = lineSafety.dtrHigh;
+    p.force_rts     = lineSafety.forceRts;
+    p.rts_high      = lineSafety.rtsHigh;
     p.audio_source  = configuredTxAudioSource();
     p.split_mode    = parseSplit(m->splitMode());
     // "CAT" in PTT Port means "use the same serial port as CAT", as in WSJT-X.
     p.ptt_port      = resolvedPttPort(m);
+    bool const separateLinePtt = pttType == TransceiverFactory::PTT_method_DTR
+        || pttType == TransceiverFactory::PTT_method_RTS;
+    if (separateLinePtt && p.ptt_port.compare(QStringLiteral("None"), Qt::CaseInsensitive) == 0) {
+        qWarning().noquote()
+            << "[CATDBG] Disabling line PTT: no physical PTT port is configured"
+            << "rig=" << p.rig_name
+            << "transport=" << m->portType()
+            << "method=" << pttMethodName(pttType);
+        pttType = TransceiverFactory::PTT_method_VOX;
+    } else if (serialCat && hardwareHandshake
+               && pttType == TransceiverFactory::PTT_method_RTS
+               && pttPortSharesCatPort(p.serial_port, p.ptt_port)) {
+        qWarning().noquote()
+            << "[CATDBG] Disabling RTS PTT on the CAT port because hardware handshake owns RTS"
+            << "rig=" << p.rig_name << "port=" << p.serial_port;
+        pttType = TransceiverFactory::PTT_method_VOX;
+        p.ptt_port = QStringLiteral("None");
+    }
+    p.ptt_type      = pttType;
     p.civ_address   = m->civAddress();
     p.cat_keep_alive = m->catKeepAlive();
     p.auto_power_on = autoPowerOn;
@@ -1653,11 +1758,8 @@ static TransceiverFactory::ParameterPack buildParams(const DecodiumTransceiverMa
         << "dtrHigh=" << p.dtr_high
         << "forceRts=" << p.force_rts
         << "rtsHigh=" << p.rts_high
-#if defined(Q_OS_LINUX)
-        << "linuxAutoDtrLow=" << autoDtrLow
-        << "linuxAutoRtsLow=" << autoRtsLow
-        << "linuxRtsLowGuard=" << linuxRtsLowGuard
-#endif
+        << "autoDtrLow=" << lineSafety.automaticDtrLow
+        << "autoRtsLow=" << lineSafety.automaticRtsLow
         << "split=" << splitModeName(p.split_mode)
         << "catKeepAlive=" << p.cat_keep_alive
         << "autoPowerOn=" << p.auto_power_on
@@ -1682,6 +1784,7 @@ void DecodiumTransceiverManager::connectRig()
             m_connected = false;
             setAtuState(false, false);
             emit connectedChanged();
+            emit catCapabilitiesChanged();
         }
         updateTelemetry(0.0, 0.0);
         qInfo().noquote()
@@ -1752,9 +1855,10 @@ void DecodiumTransceiverManager::connectRig()
     }
 
     QString const lowerPortType = m_portType.trimmed().toLower();
-    bool const serialTransport =
-        lowerPortType == QStringLiteral("serial")
-        || lowerPortType == QStringLiteral("usb");
+    // RIG_PORT_USB is a Hamlib USB endpoint (vid:pid or backend-defined
+    // pathname), not necessarily a QSerialPort.  Only RIG_PORT_SERIAL may be
+    // deferred, followed or leased as a serial device here.
+    bool const serialTransport = lowerPortType == QStringLiteral("serial");
     if (serialTransport && !isHamRadioDeluxeRig(m_rigName)) {
         if (!serialPortCurrentlyAvailable(m_serialPort))
             followRadioToNewPort();
@@ -1800,8 +1904,11 @@ void DecodiumTransceiverManager::connectRig()
     TransceiverFactory::ParameterPack params;
     Transceiver* xcv = nullptr;
     bool catLineShared = false;
+    quint64 attemptConfigurationRevision = 0;
     try {
         params = buildParams(this, m_coldStartPowerOnPending && !m_coldStartPowerOnWakeSent);
+        attemptConfigurationRevision = m_catConfigurationRevision;
+        m_catConfigurationReconnectPending = false;
         // Condivisione nel protocollo della radio (DecoPort): la seriale la
         // tiene il multiplexer e Hamlib gli parla da una presa locale, cosi'
         // altri programmi usano la stessa radio da una COM virtuale. Se la
@@ -1844,8 +1951,7 @@ void DecodiumTransceiverManager::connectRig()
         // rig_open()/QSerialPort::open().  Native DecoPort sharing already
         // owns the physical CAT line through DecoPortSerialLine; only reserve
         // the remaining separate PTT line in that case.
-        const bool serialTransport = lowerPortType == QStringLiteral("serial")
-            || lowerPortType == QStringLiteral("usb");
+        const bool serialTransport = lowerPortType == QStringLiteral("serial");
         QStringList portsToReserve;
         if (serialTransport && !catLineShared)
             portsToReserve << params.serial_port;
@@ -1853,7 +1959,12 @@ void DecodiumTransceiverManager::connectRig()
             (params.ptt_type == TransceiverFactory::PTT_method_DTR
              || params.ptt_type == TransceiverFactory::PTT_method_RTS)
             && !pttPortSharesCatPort(params.serial_port, params.ptt_port);
-        if (serialTransport && separatePtt)
+        // A network/TCI CAT backend may still key a local physical serial
+        // PTT line.  Its lease is independent from the CAT transport and
+        // must be acquired before the worker opens it.
+        if (separatePtt
+            && !params.ptt_port.trimmed().isEmpty()
+            && params.ptt_port.compare(QStringLiteral("None"), Qt::CaseInsensitive) != 0)
             portsToReserve << params.ptt_port;
         if (!portsToReserve.isEmpty()) {
             QString conflictPort;
@@ -1915,6 +2026,7 @@ void DecodiumTransceiverManager::connectRig()
             << "split=" << splitModeName(params.split_mode)
             << "catKeepAlive=" << params.cat_keep_alive
             << "autoPowerOn=" << params.auto_power_on
+            << "configRevision=" << attemptConfigurationRevision
             << "poll=" << (params.poll_interval & 0xffff);
         auto uptr = d->factory.create(params, thread);
         xcv = uptr.release();          // trasferisce ownership al thread (via deleteLater)
@@ -1966,6 +2078,10 @@ void DecodiumTransceiverManager::connectRig()
     }
 
     d->transceiver = xcv;
+    // Query static Hamlib model capabilities before the worker starts. The
+    // QML-facing values become visible only after the session is online, so a
+    // failed connection can never advertise an unavailable control.
+    setCatCapabilities(xcv->supports_atu_control(), xcv->supports_power_control());
     d->desired = Transceiver::TransceiverState {};
     d->desired.online(true);
     setConnecting(true);
@@ -1999,8 +2115,10 @@ void DecodiumTransceiverManager::connectRig()
     // terminato, evitando di distruggerlo mentre il worker è ancora attivo.
     connect(thread, &QThread::finished, xcv, &QObject::deleteLater);
     connect(thread, &QThread::finished, this,
-            [this, thread, xcv]() {
-                bool const reconnect = m_reconnectAfterDisconnect;
+            [this, thread, xcv, attemptConfigurationRevision]() {
+                bool const staleConfiguration = m_catConfigurationReconnectPending
+                    && attemptConfigurationRevision != m_catConfigurationRevision;
+                bool const reconnect = m_reconnectAfterDisconnect || staleConfiguration;
                 m_reconnectAfterDisconnect = false;
                 if (d->xcvThread == thread)
                     d->xcvThread = nullptr;
@@ -2014,6 +2132,7 @@ void DecodiumTransceiverManager::connectRig()
                     m_connected = false;
                     setAtuState(false, false);
                     emit connectedChanged();
+                    emit catCapabilitiesChanged();
                 }
                 updateTelemetry(0.0, 0.0);
                 // Release the process-local lease only after the worker's
@@ -2036,8 +2155,17 @@ void DecodiumTransceiverManager::connectRig()
     // Aggiornamenti di stato dal rig → main thread
     connect(xcv, &Transceiver::update,
             this,
-            [this, xcv](Transceiver::TransceiverState const& state, unsigned /*seq*/) {
+            [this, xcv, attemptConfigurationRevision](Transceiver::TransceiverState const& state, unsigned /*seq*/) {
                 if (d->transceiver != xcv) {
+                    return;
+                }
+                if (attemptConfigurationRevision != m_catConfigurationRevision) {
+                    qInfo().noquote()
+                        << "[CATDBG] Ignoring stale CAT session update"
+                        << "attemptRevision=" << attemptConfigurationRevision
+                        << "currentRevision=" << m_catConfigurationRevision;
+                    if (!m_disconnectInProgress)
+                        disconnectRigInternal(true);
                     return;
                 }
                 auto const requestedAudio = d->desired.audio();
@@ -2083,6 +2211,7 @@ void DecodiumTransceiverManager::connectRig()
                     m_connected = onl;
                     setAtuState(false, false);
                     emit connectedChanged();
+                    emit catCapabilitiesChanged();
                     emit statusUpdate(onl ? ("Connesso: " + m_rigName) : "Disconnesso");
                     if (onl) {
                         m_transientCatRetryCount = 0;
@@ -2181,7 +2310,16 @@ void DecodiumTransceiverManager::connectRig()
             this,
             [this, attemptRig, attemptPortType, attemptSerial, attemptNetwork, attemptTci,
              attemptBaud, attemptHandshake, attemptPtt, attemptPttPort,
-             attemptAutoPowerOn](QString const& reason) {
+             attemptAutoPowerOn, attemptConfigurationRevision](QString const& reason) {
+                if (attemptConfigurationRevision != m_catConfigurationRevision) {
+                    qInfo().noquote()
+                        << "[CATDBG] Ignoring stale CAT session failure"
+                        << "attemptRevision=" << attemptConfigurationRevision
+                        << "currentRevision=" << m_catConfigurationRevision;
+                    if (!m_disconnectInProgress)
+                        disconnectRigInternal(true);
+                    return;
+                }
                 bool const wasConnected = m_connected;
                 bool const startupAttempt = m_connecting && !wasConnected;
                 setConnecting(false);
@@ -2237,7 +2375,12 @@ void DecodiumTransceiverManager::connectRig()
                 } else {
                     emit errorOccurred("CAT failure: " + shownReason);
                 }
-                if (m_connected) { m_connected = false; setAtuState(false, false); emit connectedChanged(); }
+                if (m_connected) {
+                    m_connected = false;
+                    setAtuState(false, false);
+                    emit connectedChanged();
+                    emit catCapabilitiesChanged();
+                }
                 updateTelemetry(0.0, 0.0);
             },
             Qt::QueuedConnection);
@@ -2268,6 +2411,7 @@ void DecodiumTransceiverManager::disconnectRig()
     // the user's explicit Power On intent.
     m_coldStartPowerOnPending = false;
     m_coldStartPowerOnWakeSent = false;
+    m_catConfigurationReconnectPending = false;
     disconnectRigInternal(false);
 }
 
@@ -2359,6 +2503,7 @@ void DecodiumTransceiverManager::disconnectRigInternal(bool reconnectAfterDiscon
         m_connected = false;
         setAtuState(false, false);
         emit connectedChanged();
+        emit catCapabilitiesChanged();
     }
     updateTelemetry(0.0, 0.0);
     emit statusUpdate("Disconnesso dal transceiver");
@@ -2718,14 +2863,12 @@ void DecodiumTransceiverManager::setRigMode(const QString& mode)
 bool DecodiumTransceiverManager::rigMorseAvailable() const
 {
     if (!m_connected || !d->transceiver) return false;
-    auto const *hamlib = dynamic_cast<HamlibTransceiver *>(d->transceiver.data());
-    return hamlib && hamlib->supports_morse();
+    return d->transceiver->supports_morse();
 }
 
 int DecodiumTransceiverManager::rigMorseTextLimit() const
 {
-    auto const *hamlib = dynamic_cast<HamlibTransceiver *>(d->transceiver.data());
-    return hamlib ? hamlib->morse_text_limit() : 0;
+    return d->transceiver ? d->transceiver->morse_text_limit() : 0;
 }
 
 bool DecodiumTransceiverManager::sendRigMorse(const QString& text, int wpm,
@@ -2738,9 +2881,8 @@ bool DecodiumTransceiverManager::sendRigMorse(const QString& text, int wpm,
     return QMetaObject::invokeMethod(xcv, [xcv, manager, text, wpm, completion = std::move(completion)]() {
         QString error;
         try {
-            auto *hamlib = dynamic_cast<HamlibTransceiver *>(xcv.data());
-            error = hamlib ? hamlib->send_morse_checked(text, wpm)
-                           : QStringLiteral("CAT CW keyer disconnected before sending");
+            error = xcv ? xcv->send_morse_checked(text, wpm)
+                        : QStringLiteral("CAT CW keyer disconnected before sending");
         } catch (std::exception const& e) {
             error = QString::fromUtf8(e.what());
         } catch (...) {
@@ -2806,18 +2948,22 @@ void DecodiumTransceiverManager::requestAtuTune()
         emit radioActionCompleted(action, false, tr("CAT disconnected"));
         return;
     }
+    if (!m_atuControlSupported) {
+        emit radioActionCompleted(action, false,
+                                  tr("This radio does not expose ATU control through Hamlib"));
+        return;
+    }
     QPointer<DecodiumTransceiverManager> owner(this);
     QPointer<Transceiver> xcv = d->transceiver;
     QMetaObject::invokeMethod(xcv, [owner, xcv, action]() {
-        auto *hamlib = dynamic_cast<HamlibTransceiver *>(xcv.data());
         QString error;
-        bool const ok = hamlib && hamlib->request_atu_tune(&error);
-        if (!hamlib) error = QStringLiteral("ATU control is available only for Hamlib radios");
+        bool const ok = xcv && xcv->request_atu_tune(&error);
+        if (!xcv) error = QStringLiteral("CAT disconnected before ATU control could run");
         bool stateValid = false;
         bool enabled = false;
         QString stateError;
-        if (ok && hamlib)
-            stateValid = hamlib->read_atu_state(&enabled, &stateError);
+        if (ok && xcv)
+            stateValid = xcv->read_atu_state(&enabled, &stateError);
         if (owner) QMetaObject::invokeMethod(owner, [owner, xcv, action, ok, error,
                                                       stateValid, enabled]() {
             if (owner && owner->m_connected && owner->d->transceiver == xcv) {
@@ -2836,18 +2982,23 @@ void DecodiumTransceiverManager::requestAtuOff()
         emit radioActionCompleted(action, false, tr("CAT disconnected"));
         return;
     }
+    if (!m_atuControlSupported) {
+        setAtuState(false, false);
+        emit radioActionCompleted(action, false,
+                                  tr("This radio does not expose ATU control through Hamlib"));
+        return;
+    }
     QPointer<DecodiumTransceiverManager> owner(this);
     QPointer<Transceiver> xcv = d->transceiver;
     QMetaObject::invokeMethod(xcv, [owner, xcv, action]() {
-        auto *hamlib = dynamic_cast<HamlibTransceiver *>(xcv.data());
         QString error;
-        bool const commandOk = hamlib && hamlib->request_atu_off(&error);
-        if (!hamlib) error = QStringLiteral("ATU control is available only for Hamlib radios");
+        bool const commandOk = xcv && xcv->request_atu_off(&error);
+        if (!xcv) error = QStringLiteral("CAT disconnected before ATU control could run");
         bool stateValid = false;
         bool enabled = false;
         QString stateError;
-        if (commandOk && hamlib)
-            stateValid = hamlib->read_atu_state(&enabled, &stateError);
+        if (commandOk && xcv)
+            stateValid = xcv->read_atu_state(&enabled, &stateError);
         bool const ok = commandOk && stateValid && !enabled;
         if (commandOk && !stateValid)
             error = QStringLiteral("ATU OFF command sent, but the radio state could not be read back: ") + stateError;
@@ -2869,13 +3020,16 @@ void DecodiumTransceiverManager::requestAtuState()
         setAtuState(false, false);
         return;
     }
+    if (!m_atuControlSupported) {
+        setAtuState(false, false);
+        return;
+    }
     QPointer<DecodiumTransceiverManager> owner(this);
     QPointer<Transceiver> xcv = d->transceiver;
     QMetaObject::invokeMethod(xcv, [owner, xcv]() {
-        auto *hamlib = dynamic_cast<HamlibTransceiver *>(xcv.data());
         bool enabled = false;
         QString error;
-        bool const ok = hamlib && hamlib->read_atu_state(&enabled, &error);
+        bool const ok = xcv && xcv->read_atu_state(&enabled, &error);
         if (owner) QMetaObject::invokeMethod(owner, [owner, xcv, ok, enabled]() {
             if (owner && owner->m_connected && owner->d->transceiver == xcv)
                 owner->setAtuState(ok, enabled);
@@ -2890,6 +3044,23 @@ void DecodiumTransceiverManager::setAtuState(bool valid, bool enabled)
     m_atuStateValid = valid;
     m_atuEnabled = enabled;
     emit atuStateChanged();
+}
+
+void DecodiumTransceiverManager::setCatCapabilities(bool atuControlSupported,
+                                                     bool powerControlSupported)
+{
+    if (m_atuControlSupported == atuControlSupported
+        && m_powerControlSupported == powerControlSupported) {
+        return;
+    }
+    m_atuControlSupported = atuControlSupported;
+    m_powerControlSupported = powerControlSupported;
+    qInfo().noquote()
+        << "[CATDBG] Hamlib optional capabilities"
+        << "rig=" << m_rigName
+        << "atu=" << m_atuControlSupported
+        << "power=" << m_powerControlSupported;
+    emit catCapabilitiesChanged();
 }
 
 // La porta CAT si segue per identita' fisica, non per numero COM. Dopo uno
@@ -2953,6 +3124,7 @@ void DecodiumTransceiverManager::requestRadioPowerOn()
         QString const transport = m_portType.trimmed().toLower();
         bool const directCat = transport == QStringLiteral("serial")
             || transport == QStringLiteral("usb");
+        bool const serialCat = transport == QStringLiteral("serial");
         if (!directCat) {
             emit radioActionCompleted(action, false, tr(
                 "Power On while disconnected requires a direct serial or USB Hamlib CAT connection."));
@@ -2969,8 +3141,12 @@ void DecodiumTransceiverManager::requestRadioPowerOn()
                 "Select the radio's CAT port before using Power On."));
             return;
         }
-        followRadioToNewPort();
-        if (!serialPortCurrentlyAvailable(m_serialPort)) {
+        // RIG_PORT_USB values are Hamlib endpoints (for example vid:pid),
+        // not QSerialPort names.  Do not reject a valid direct USB CAT wake
+        // because it does not appear in QSerialPortInfo.
+        if (serialCat)
+            followRadioToNewPort();
+        if (serialCat && !serialPortCurrentlyAvailable(m_serialPort)) {
             refreshPorts();
             ++m_transientCatReconnectSerial;
             m_transientCatReconnectPending = false;
@@ -3006,13 +3182,17 @@ void DecodiumTransceiverManager::requestRadioPowerOn()
         connectRig();
         return;
     }
+    if (!m_powerControlSupported) {
+        emit radioActionCompleted(action, false,
+                                  tr("This radio does not expose power control through Hamlib"));
+        return;
+    }
     QPointer<DecodiumTransceiverManager> owner(this);
     QPointer<Transceiver> xcv = d->transceiver;
     QMetaObject::invokeMethod(xcv, [owner, xcv, action]() {
-        auto *hamlib = dynamic_cast<HamlibTransceiver *>(xcv.data());
         QString error;
-        bool const ok = hamlib && hamlib->request_power_on(&error);
-        if (!hamlib) error = QStringLiteral("Power control is available only for Hamlib radios");
+        bool const ok = xcv && xcv->request_power_on(&error);
+        if (!xcv) error = QStringLiteral("CAT disconnected before power control could run");
         if (owner) QMetaObject::invokeMethod(owner, [owner, xcv, action, ok, error]() {
             if (owner && owner->m_connected && owner->d->transceiver == xcv) {
                 emit owner->radioActionCompleted(action, ok, error);
@@ -3042,13 +3222,17 @@ void DecodiumTransceiverManager::requestRadioPowerOff()
         emit radioActionCompleted(action, false, tr("CAT disconnected"));
         return;
     }
+    if (!m_powerControlSupported) {
+        emit radioActionCompleted(action, false,
+                                  tr("This radio does not expose power control through Hamlib"));
+        return;
+    }
     QPointer<DecodiumTransceiverManager> owner(this);
     QPointer<Transceiver> xcv = d->transceiver;
     QMetaObject::invokeMethod(xcv, [owner, xcv, action]() {
-        auto *hamlib = dynamic_cast<HamlibTransceiver *>(xcv.data());
         QString error;
-        bool const ok = hamlib && hamlib->request_power_off(&error);
-        if (!hamlib) error = QStringLiteral("Power control is available only for Hamlib radios");
+        bool const ok = xcv && xcv->request_power_off(&error);
+        if (!xcv) error = QStringLiteral("CAT disconnected before power control could run");
         if (owner) QMetaObject::invokeMethod(owner, [owner, xcv, action, ok, error]() {
             if (owner && owner->m_connected && owner->d->transceiver == xcv) {
                 if (ok) owner->m_radioPoweredOffByUser = true;
@@ -3143,6 +3327,13 @@ void DecodiumTransceiverManager::saveSettings()
 
 void DecodiumTransceiverManager::loadSettings()
 {
+    decodium::cat::ConfigurationSnapshot const previousConfiguration =
+        catConfigurationSnapshot();
+
+    // A profile is a single CAT configuration transaction.  Do not let
+    // setRigName() reopen the old session halfway through loading the new
+    // endpoint, line settings and PTT configuration.
+    m_loadingCatSettings = true;
     QSettings s(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
     decodium::beginActiveSettingsProfile(s);
     s.beginGroup("Transceiver");
@@ -3204,6 +3395,14 @@ void DecodiumTransceiverManager::loadSettings()
         emit networkPortChanged();
     }
     enforceForceLineAvailability();
+    m_loadingCatSettings = false;
+
+    decodium::cat::ConfigurationSnapshot const currentConfiguration =
+        catConfigurationSnapshot();
+    if (currentConfiguration.endpointDiffers(previousConfiguration))
+        m_serialDeviceKey.clear();
+    if (currentConfiguration != previousConfiguration)
+        noteCatConfigurationChanged(QStringLiteral("CAT profile"));
 }
 
 void DecodiumTransceiverManager::requestVoiceControl(const QString& key, double value, bool write)

@@ -520,8 +520,6 @@ endif ()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   set_source_files_properties (Detector/LegacyDspIoHelpers.cpp PROPERTIES COMPILE_FLAGS "-Wno-error=stringop-overflow -Wno-error=stringop-overread")
-  # GCC 15 misdiagnoses std::atomic increments in inlined Qt functor wrappers.
-  set_source_files_properties (src/services/MapIntelligenceService.cpp PROPERTIES COMPILE_FLAGS "-Wno-error=stringop-overflow")
 endif ()
 
 set (wsjt_qtmm_CXXSRCS

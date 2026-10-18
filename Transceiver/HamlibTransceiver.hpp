@@ -29,14 +29,16 @@ public:
   ~HamlibTransceiver ();
 
   QVariantMap voice_controls(QString const&, double, bool) override;
-  bool request_atu_tune(QString * error);
-  bool request_atu_off(QString * error);
-  bool read_atu_state(bool * enabled, QString * error);
-  bool request_power_on(QString * error);
-  bool request_power_off(QString * error);
-  bool supports_morse () const noexcept;
-  int morse_text_limit () const noexcept;
-  QString send_morse_checked (QString const&, int);
+  bool supports_atu_control () const noexcept override;
+  bool request_atu_tune(QString * error) override;
+  bool request_atu_off(QString * error) override;
+  bool read_atu_state(bool * enabled, QString * error) override;
+  bool supports_power_control () const noexcept override;
+  bool request_power_on(QString * error) override;
+  bool request_power_off(QString * error) override;
+  bool supports_morse () const noexcept override;
+  int morse_text_limit () const noexcept override;
+  QString send_morse_checked (QString const&, int) override;
   void send_morse (QString const&, int) noexcept override;  // keying CW via Hamlib
   void stop_morse () noexcept override;
 
@@ -83,6 +85,10 @@ private:
   // session usable long enough for the dashboard Power On command.
   bool rig_powered_off_ = false;
   QElapsedTimer power_on_settle_clock_;
+  // When the operator turns the radio back on from its front panel, NewCAT
+  // can retain the serial session. Probe only its inexpensive power state at
+  // a bounded rate, then resume ordinary polling without reopening the port.
+  QElapsedTimer power_off_probe_clock_;
   bool rig_split_control_enabled_ = true;
   bool explicit_frequency_poll_vfo_ = false;
   bool frequency_poll_vfo_logged_ = false;
@@ -133,6 +139,7 @@ private:
   static constexpr int kCatKeepAliveIntervalMs_ = 300;
   static constexpr int kCatKeepAliveMaxFailures_ = 3;
   static constexpr int kPowerOnSettleMs_ = 5000;
+  static constexpr int kPowerOffProbeIntervalMs_ = 2000;
   static constexpr int kFrequencyPollMaxFailures_ = 2;
   static constexpr int kFrequencyPollInitialBackoffTicks_ = 2;
   static constexpr int kFrequencyPollMaxBackoffTicks_ = 10;

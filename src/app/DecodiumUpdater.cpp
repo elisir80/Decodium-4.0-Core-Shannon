@@ -149,9 +149,9 @@ void DecodiumUpdater::setOfflineMode(bool offline)
         }
         setBusy(false);
         setProgress(0);
-        setStatus(tr("Offline: update checks disabled"));
+        setStatus(tr("Update checks paused by Decodium Offline mode"));
     } else {
-        setStatus(tr("Online: update checks enabled"));
+        setStatus(tr("Online services resumed: update checks enabled"));
     }
     emit offlineModeChanged();
 }
@@ -183,7 +183,7 @@ void DecodiumUpdater::checkOnStartupIfDue()
 void DecodiumUpdater::check(bool silent)
 {
     if (m_offlineMode) {
-        setStatus(tr("Offline: update checks disabled"));
+        setStatus(tr("Update checks paused by Decodium Offline mode"));
         return;
     }
     if (m_busy)
@@ -249,7 +249,7 @@ void DecodiumUpdater::onCheckFinished(QNetworkReply* reply, bool silent, bool se
     if (m_offlineMode) {
         setBusy(false);
         setProgress(0);
-        setStatus(tr("Offline: update checks disabled"));
+        setStatus(tr("Update checks paused by Decodium Offline mode"));
         return;
     }
 
@@ -367,7 +367,7 @@ void DecodiumUpdater::skipThisVersion()
 void DecodiumUpdater::downloadAndInstall()
 {
     if (m_offlineMode) {
-        setStatus(tr("Offline: downloads disabled"));
+        setStatus(tr("Downloads paused by Decodium Offline mode"));
         return;
     }
     if (m_busy)

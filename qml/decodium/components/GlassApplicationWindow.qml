@@ -24,11 +24,17 @@ ApplicationWindow {
     readonly property real frameRadius: root.roundedFrame
                                        ? (Qt.platform.os === "osx" ? 12 : 8) : 0
     readonly property color opaqueSurfaceColor: root.surfaceColor
-    readonly property color glassSurfaceColor: root.themeManager
-        ? Qt.rgba(root.themeManager.bgDeep.r, root.themeManager.bgDeep.g,
-                  root.themeManager.bgDeep.b, 0.30)
-        : Qt.rgba(root.surfaceColor.r, root.surfaceColor.g,
-                  root.surfaceColor.b, 0.30)
+    // Keep the meaning of this shared colour safe for windows/components
+    // which bind to it directly: classic themes must repaint an opaque root
+    // after a live Liquid Glass -> Ocean/Stellar/Darkcodium switch.
+    readonly property color glassSurfaceColor: root.glassTheme
+                                               && root.glassTransparencySupported
+        ? (root.themeManager
+           ? Qt.rgba(root.themeManager.bgDeep.r, root.themeManager.bgDeep.g,
+                     root.themeManager.bgDeep.b, 0.30)
+           : Qt.rgba(root.surfaceColor.r, root.surfaceColor.g,
+                     root.surfaceColor.b, 0.30))
+        : root.opaqueSurfaceColor
 
     // ApplicationWindow.contentItem is read-only; expose an explicit default
     // alias so Main.qml can keep its existing direct-child structure.

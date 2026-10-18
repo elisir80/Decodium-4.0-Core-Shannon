@@ -19,8 +19,12 @@ class TestLiquidGlassWindows final : public QObject
 
 private slots:
     void shellIsCrossPlatformAndThemeGated();
+    void classicThemeRestoresOpaqueSurface();
     void mainAndPopoutsUseGlassShell();
+    void liveMapFramelessPopoutHasAllResizeHandles();
     void dialogsAndHostedPanelsUseGlassSurfaces();
+    void cwWindowKeepsOperationalContrastAndHasPersistentTrafficSplitter();
+    void jttyWindowKeepsOperationalContrast();
     void restoredPopoutsWaitForStartupPresentation();
 };
 
@@ -42,6 +46,35 @@ void TestLiquidGlassWindows::shellIsCrossPlatformAndThemeGated()
         // material modules just to display the optional theme.
         QVERIFY(!shell.contains(QStringLiteral("import QtQuick.Effects")));
         QVERIFY(!shell.contains(QStringLiteral("MultiEffect {")));
+    }
+}
+
+void TestLiquidGlassWindows::classicThemeRestoresOpaqueSurface()
+{
+    const QStringList shellPaths {
+        QStringLiteral("qml/decodium/components/GlassWindow.qml"),
+        QStringLiteral("qml/decodium/components/GlassApplicationWindow.qml")
+    };
+
+    for (const QString &path : shellPaths) {
+        const QString shell = readSource(path);
+        QVERIFY2(!shell.isEmpty(), qPrintable(path));
+
+        const int surfaceStart = shell.indexOf(
+            QStringLiteral("readonly property color glassSurfaceColor:"));
+        const int nextSection = shell.indexOf(
+            QStringLiteral("default property alias windowContent"), surfaceStart);
+        QVERIFY2(surfaceStart >= 0, qPrintable(path));
+        QVERIFY2(nextSection > surfaceStart, qPrintable(path));
+
+        const QString surfaceBinding = shell.mid(surfaceStart, nextSection - surfaceStart);
+        QVERIFY(surfaceBinding.contains(QStringLiteral("root.glassTheme")));
+        QVERIFY(surfaceBinding.contains(
+            QStringLiteral("root.glassTransparencySupported")));
+        // This is the regression guard for a live Liquid Glass -> classic
+        // theme switch: any pop-out that binds directly to glassSurfaceColor
+        // must be repainted with an alpha=1 surface.
+        QVERIFY(surfaceBinding.contains(QStringLiteral(": root.opaqueSurfaceColor")));
     }
 }
 
@@ -120,6 +153,49 @@ void TestLiquidGlassWindows::mainAndPopoutsUseGlassShell()
     }
 }
 
+void TestLiquidGlassWindows::liveMapFramelessPopoutHasAllResizeHandles()
+{
+    const QString main = readSource(QStringLiteral("qml/decodium/Main.qml"));
+    QVERIFY(!main.isEmpty());
+
+    const int liveMapStart = main.indexOf(QStringLiteral("id: liveMapFloatingWindow"));
+    const int nextPopout = main.indexOf(
+        QStringLiteral("// ========== DETACHABLE FULL SPECTRUM WINDOW =========="),
+        liveMapStart);
+    QVERIFY(liveMapStart >= 0);
+    QVERIFY(nextPopout > liveMapStart);
+
+    const QString liveMapWindow = main.mid(liveMapStart, nextPopout - liveMapStart);
+    QVERIFY(liveMapWindow.contains(QStringLiteral("Qt.FramelessWindowHint")));
+    // A frameless window has no native border.  FloatingResizeHandles provides
+    // the four edges plus all four corners for independent width/height resize.
+    QVERIFY(liveMapWindow.contains(QStringLiteral("FloatingResizeHandles {")));
+    QVERIFY(liveMapWindow.contains(
+        QStringLiteral("targetWindow: liveMapFloatingWindow")));
+
+    const int handlesStart = main.indexOf(
+        QStringLiteral("component FloatingResizeHandles: Item"));
+    const int nextHandleComponent = main.indexOf(
+        QStringLiteral("component ProportionalResizeHandles: Item"), handlesStart);
+    QVERIFY(handlesStart >= 0);
+    QVERIFY(nextHandleComponent > handlesStart);
+    const QString handles = main.mid(handlesStart, nextHandleComponent - handlesStart);
+    // Keep this as an explicit contract: each detached frameless popout that
+    // uses the common handles is resizable from all four sides and corners.
+    const QStringList requiredHandles {
+        QStringLiteral("resizeTopHandle"),
+        QStringLiteral("resizeBottomHandle"),
+        QStringLiteral("resizeLeftHandle"),
+        QStringLiteral("resizeRightHandle"),
+        QStringLiteral("resizeTopLeftHandle"),
+        QStringLiteral("resizeTopRightHandle"),
+        QStringLiteral("resizeBottomLeftHandle"),
+        QStringLiteral("resizeBottomRightHandle")
+    };
+    for (const QString &handle : requiredHandles)
+        QVERIFY(handles.contains(handle));
+}
+
 void TestLiquidGlassWindows::dialogsAndHostedPanelsUseGlassSurfaces()
 {
     const QStringList surfaces = {
@@ -151,6 +227,53 @@ void TestLiquidGlassWindows::dialogsAndHostedPanelsUseGlassSurfaces()
                      || source.contains(QStringLiteral("liquidGlassEnabled")),
                  qPrintable(path));
     }
+}
+
+void TestLiquidGlassWindows::cwWindowKeepsOperationalContrastAndHasPersistentTrafficSplitter()
+{
+    const QString cw = readSource(QStringLiteral("qml/decodium/components/CwWindow.qml"));
+    QVERIFY(!cw.isEmpty());
+
+    // The glass frame remains optional, but dense CW controls and transcripts
+    // must not be rendered on the generic low-alpha pop-out surface.
+    QVERIFY(cw.contains(QStringLiteral("readonly property bool liquidGlassEnabled")));
+    QVERIFY(cw.contains(QStringLiteral("readonly property color cContentSurface")));
+    QVERIFY(cw.contains(QStringLiteral("readonly property color cReadSurface")));
+    QVERIFY(cw.contains(QStringLiteral("id: cwReadabilitySurface")));
+    QVERIFY(cw.contains(QStringLiteral("color: win.cContentSurface")));
+    QVERIFY(cw.contains(QStringLiteral("color: win.cReadSurface")));
+
+    // RX and TX must be independently resizable and the user's choice must
+    // survive close/reopen without allowing either transcript to collapse.
+    QVERIFY(cw.contains(QStringLiteral("property real trafficSplitRatio: 0.5")));
+    QVERIFY(cw.contains(QStringLiteral("trafficMinimumPaneWidth: 180")));
+    QVERIFY(cw.contains(QStringLiteral("function clampTrafficSplitRatio")));
+    QVERIFY(cw.contains(QStringLiteral("function restoreTrafficSplitRatio")));
+    QVERIFY(cw.contains(QStringLiteral("function persistTrafficSplitRatio")));
+    QVERIFY(cw.contains(QStringLiteral("uiCwTrafficSplitRatio")));
+    QVERIFY(cw.contains(QStringLiteral("id: cwTrafficDivider")));
+    QVERIFY(cw.contains(QStringLiteral("cursorShape: Qt.SizeHorCursor")));
+    QVERIFY(cw.contains(QStringLiteral("onDoubleClicked:")));
+}
+
+void TestLiquidGlassWindows::jttyWindowKeepsOperationalContrast()
+{
+    const QString jtty = readSource(QStringLiteral("qml/decodium/components/JttyWindow.qml"));
+    QVERIFY(!jtty.isEmpty());
+
+    // A JTTY window has two continuously-read receive lists, compact macro
+    // previews and a transmit editor.  Those cannot use the generic low-alpha
+    // pop-out panel that intentionally reveals the desktop behind it.
+    QVERIFY(jtty.contains(QStringLiteral("import QtQuick.Controls.Material")));
+    QVERIFY(jtty.contains(QStringLiteral("readonly property bool liquidGlassEnabled")));
+    QVERIFY(jtty.contains(QStringLiteral("readonly property color cContentSurface")));
+    QVERIFY(jtty.contains(QStringLiteral("readonly property color cInputSurface")));
+    QVERIFY(jtty.contains(QStringLiteral("readonly property color cReadSurface")));
+    QVERIFY(jtty.contains(QStringLiteral("id: jttyReadabilitySurface")));
+    QVERIFY(jtty.contains(QStringLiteral("color: win.cContentSurface")));
+    QVERIFY(jtty.contains(QStringLiteral("color: win.cReadSurface")));
+    QVERIFY(jtty.contains(QStringLiteral("Material.theme:")));
+    QVERIFY(jtty.contains(QStringLiteral("Material.background: cContentSurface")));
 }
 
 void TestLiquidGlassWindows::restoredPopoutsWaitForStartupPresentation()

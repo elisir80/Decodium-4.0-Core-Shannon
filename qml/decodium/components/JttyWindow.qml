@@ -12,6 +12,7 @@
  */
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Controls.Material
 import QtQuick.Layouts
 import QtQuick.Window
 
@@ -25,10 +26,25 @@ GlassWindow {
     readonly property string mono: (typeof decodiumMonoFontFamily !== 'undefined' ? decodiumMonoFontFamily : "monospace")
 
     readonly property var tm: eng ? eng.themeManager : null
+    readonly property bool liquidGlassEnabled: !!(tm && tm.isGlassTheme
+                                                    && tm.glassTransparencySupported)
     readonly property color cBg:      tm ? tm.bgDeep        : "#0a0f14"
-    readonly property color cPanel:   tm && tm.isGlassTheme && tm.glassTransparencySupported
-                                       ? Qt.rgba(tm.panelColor.r, tm.panelColor.g, tm.panelColor.b, 0.58)
+    // JTTY is read continuously and includes compact macro/error text.  The
+    // generic 58% glass panel made the desktop and waterfall bleed through
+    // enough to erase that text.  Keep the outer glass shell, but place the
+    // working surface and all read/write panes on stable, near-opaque layers.
+    readonly property color cContentSurface: liquidGlassEnabled
+                                             ? Qt.rgba(cBg.r, cBg.g, cBg.b, 0.96)
+                                             : cBg
+    readonly property color cPanel:   liquidGlassEnabled
+                                       ? Qt.rgba(tm.panelColor.r, tm.panelColor.g, tm.panelColor.b, 0.94)
                                        : (tm ? tm.panelColor : "#111a22")
+    readonly property color cInputSurface: liquidGlassEnabled
+                                           ? Qt.rgba(cBg.r, cBg.g, cBg.b, 0.98)
+                                           : cBg
+    readonly property color cReadSurface: liquidGlassEnabled
+                                          ? Qt.rgba(cBg.r, cBg.g, cBg.b, 0.985)
+                                          : cPanel
     readonly property color cBorder:  tm ? tm.borderColor   : "#22303c"
     readonly property color cText:    tm ? tm.textPrimary   : "#dbe4ea"
     readonly property color cDim:     tm ? tm.textSecondary : "#7d8b96"
@@ -43,6 +59,14 @@ GlassWindow {
     minimumWidth: 640
     minimumHeight: 480
     color: transparentCorners ? "transparent" : glassSurfaceColor
+
+    // A detached Window does not reliably inherit the main application's
+    // Material palette.  Bind it here so native controls never fall back to
+    // a light foreground over the dark readable JTTY work surface.
+    Material.theme: (tm && tm.isLightTheme) ? Material.Light : Material.Dark
+    Material.accent: cAccent
+    Material.foreground: cText
+    Material.background: cContentSurface
 
     // Ripete le anteprime dei tasti quando cambiano nominativi o numeri.
     property int previewTick: 0
@@ -129,7 +153,7 @@ GlassWindow {
         property string heading: ""
         property var model: null
         property bool qsoList: false
-        color: win.cPanel
+        color: win.cReadSurface
         border.color: win.cBorder
         border.width: 1
         radius: 6
@@ -184,6 +208,23 @@ GlassWindow {
                 }
             }
         }
+    }
+
+    // The glass frame remains visible at the rounded edge.  This inner layer
+    // protects operational text from an arbitrary-bright desktop, wallpaper
+    // or panadapter below the detached JTTY window.
+    Rectangle {
+        id: jttyReadabilitySurface
+        objectName: "jttyReadabilitySurface"
+        anchors.fill: parent
+        anchors.margins: win.transparentCorners ? 2 : 0
+        radius: win.transparentCorners ? Math.max(4, win.frameRadius - 1) : 0
+        color: win.cContentSurface
+        border.width: win.liquidGlassEnabled ? 1 : 0
+        border.color: win.liquidGlassEnabled
+                      ? Qt.rgba(win.cBorder.r, win.cBorder.g, win.cBorder.b, 0.90)
+                      : "transparent"
+        z: -1
     }
 
     ColumnLayout {
@@ -307,7 +348,9 @@ GlassWindow {
                             Layout.fillWidth: true
                             implicitHeight: 40
                             radius: 5
-                            color: keyMA.containsMouse ? Qt.rgba(win.cAccent.r, win.cAccent.g, win.cAccent.b, 0.14) : "transparent"
+                            color: keyMA.containsMouse
+                                   ? Qt.rgba(win.cAccent.r, win.cAccent.g, win.cAccent.b, 0.14)
+                                   : (win.liquidGlassEnabled ? win.cInputSurface : "transparent")
                             border.color: invalid ? win.cWarn : win.cBorder
                             Column {
                                 anchors.fill: parent
@@ -405,7 +448,7 @@ GlassWindow {
                 selectionColor: Qt.rgba(win.cAccent.r, win.cAccent.g, win.cAccent.b, 0.35)
                 selectedTextColor: win.cText
                 background: Rectangle {
-                    color: win.cBg
+                    color: win.cInputSurface
                     border.color: txField.activeFocus ? win.cAccent : win.cBorder
                     border.width: 1
                     radius: 5

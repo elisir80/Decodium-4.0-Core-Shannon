@@ -1024,17 +1024,30 @@ SettingsPageScroll {
                 if (!bridge.catManager)
                     return -1
                 var idx = find(bridge.catManager.pttPort)
-                return idx >= 0 ? idx : (count > 0 ? 0 : -1)
+                // Never silently substitute the first enumerated port for an
+                // invalid saved value.  In particular, "CAT" is not a valid
+                // PTT endpoint for network CAT; choosing COM1 here could key
+                // unrelated hardware on the next reconnect.
+                return idx >= 0 ? idx : -1
             }
             onActivated: {
-                if (bridge.catManager) {
+                if (bridge.catManager && currentIndex >= 0 && currentText !== "") {
                     bridge.catManager.pttPort = currentText
                     dialog.enforceForceLineAvailability()
                 }
                 dialog.scheduleCatPersist()
             }
             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
-            contentItem: Text { text: pttPortCombo.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
+            contentItem: Text {
+                text: pttPortCombo.currentIndex >= 0
+                      ? pttPortCombo.displayText
+                      : qsTr("Select a physical serial PTT port")
+                color: pttPortCombo.currentIndex >= 0 ? textPrimary : "#ffb45b"
+                font.pixelSize: controlFontSize
+                leftPadding: 8
+                verticalAlignment: Text.AlignVCenter
+                elide: Text.ElideRight
+            }
             delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12 }
                 background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
             popup: SettingsComboPopup { combo: pttPortCombo }

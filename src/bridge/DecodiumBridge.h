@@ -1610,6 +1610,11 @@ public slots:
     Q_INVOKABLE void stopTx();
     Q_INVOKABLE void triggerManualTx() { startTx(); }  // PTT manuale FT2
     Q_INVOKABLE void sendTx(int n);    // usato da TxPanel: seleziona messaggio n e trasmette
+    // Esito del passaggio dal pannello TX generico al modem JTTY nativo.
+    // Non e' invocabile da QML: viene chiamato solo dal collegamento C++
+    // bridge -> JttyController, dopo che il controller ha verificato PTT/audio.
+    void reportJttyPanelTransmitResult(bool accepted, const QString& text,
+                                       const QString& reason = QString());
     // CW via AUDIO: manipola un sidetone e lo trasmette come audio TX in USB/DATA-U,
     // riusando l'intero percorso TX del bridge (PTT, audio sink, stop). Indipendente
     // dal keyer CAT (rig_send_morse), che su molte radio (es. Yaesu FT-991/991A) non
@@ -1848,6 +1853,10 @@ public:
 
     // C16 — Update checker
     Q_INVOKABLE void checkForUpdates();
+    // The Live Map exposes an offline safety switch.  Keep a direct recovery
+    // action here so a user can restore Cluster/updates without hunting for a
+    // map-layer checkbox or mistaking it for a Windows connectivity failure.
+    Q_INVOKABLE void resumeOnlineServices();
 
     // C17 — OTP Fox verification
     Q_INVOKABLE void verifyOtp(const QString& callsign, const QString& code, int audioHz);
@@ -2114,6 +2123,11 @@ signals:
     // Uscita da JTTY: il suo modem deve smettere di produrre audio prima che
     // l'uscita condivisa venga chiusa.
     void jttyModeLeaving();
+    // Il pannello TX generale non deve costruire una waveform FT/JT per JTTY.
+    // Le richieste esplicite vengono consegnate al modem JTTY nativo, mentre
+    // HALT/stop usa questo segnale per interrompere il suo PTT/audio.
+    void jttyPanelTransmitRequested(const QString& text);
+    void jttyAbortRequested();
     void satelliteTrackingWindowRequested();
     void ft2LinkSatelliteHalfDuplexStatusChanged();
     void spectrumDataReady(QVector<float> data);
@@ -4989,6 +5003,8 @@ private:
     void syncLegacyBackendState();
     void scheduleLegacyStateRefreshBurst();
     void migrateActiveMonitoringToLegacyBackend();
+    void completeNativePcmToLegacyRxHandoff(const QString& previousMode);
+    void recoverGpuPanadapterAfterSourceHandoff(const QString& reason);
     void applyDirectVisualAudioCaptureMode(const QString& reason);
     void rearmLegacyPcmSpectrumFeed(const QString& reason);
     void scheduleLegacyPcmSpectrumRearm(const QString& reason);

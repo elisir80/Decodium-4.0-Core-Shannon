@@ -16,7 +16,12 @@ on:
       - 'src/bridge/DecodiumBridge*'
       - 'src/bridge/DecodiumLegacyBackend.*'
       - 'src/net/DecoPortLink.*'
+      - 'src/net/DecodiumSerialPortRegistry.*'
       - 'src/radio/DecodiumTransceiverManager.*'
+      - 'Transceiver/**'
+      - 'src/cw/**'
+      - 'qml/decodium/components/SettingsDialog.qml'
+      - 'qml/decodium/components/SettingsTab1.qml'
       - 'src/rtl/RtlSdrInput.*'
       - 'src/services/SatelliteTrackingService.*'
       - 'src/sstv/**'
@@ -41,7 +46,12 @@ on:
       - 'src/bridge/DecodiumBridge*'
       - 'src/bridge/DecodiumLegacyBackend.*'
       - 'src/net/DecoPortLink.*'
+      - 'src/net/DecodiumSerialPortRegistry.*'
       - 'src/radio/DecodiumTransceiverManager.*'
+      - 'Transceiver/**'
+      - 'src/cw/**'
+      - 'qml/decodium/components/SettingsDialog.qml'
+      - 'qml/decodium/components/SettingsTab1.qml'
       - 'src/rtl/RtlSdrInput.*'
       - 'src/services/SatelliteTrackingService.*'
       - 'src/sstv/**'
@@ -227,6 +237,7 @@ jobs:
             libomp-dev \
             libopenjp2-7-dev \
             libreadline-dev \
+            libudev-dev \
             libusb-1.0-0-dev \
             libxkbcommon-dev \
             ninja-build \
@@ -382,6 +393,7 @@ jobs:
             libomp-dev \
             libopenjp2-7-dev \
             libreadline-dev \
+            libudev-dev \
             libusb-1.0-0-dev \
             libxkbcommon-dev \
             ninja-build \
@@ -502,7 +514,6 @@ jobs:
             mingw-w64-x86_64-boost
             mingw-w64-x86_64-cmake
             mingw-w64-x86_64-fftw
-            mingw-w64-x86_64-libusb
             mingw-w64-x86_64-ninja
             mingw-w64-x86_64-openjpeg2
             mingw-w64-x86_64-pkgconf
@@ -521,6 +532,15 @@ jobs:
             mingw-w64-x86_64-qt6-translations
             mingw-w64-x86_64-qt6-websockets
             tar
+
+      - name: Install pinned libusb from the official MSYS2 package archive
+        run: |
+          set -euo pipefail
+          package="/tmp/mingw-w64-x86_64-libusb-1.0.30-1-any.pkg.tar.zst"
+          curl -fsSL --retry 3 \
+            "https://mirror.msys2.org/mingw/mingw64/mingw-w64-x86_64-libusb-1.0.30-1-any.pkg.tar.zst" \
+            -o "${package}"
+          pacman -U --noconfirm "${package}"
 
       - name: Build and install Hamlib
         run: |

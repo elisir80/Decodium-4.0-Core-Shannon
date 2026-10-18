@@ -22,10 +22,42 @@ target_compile_definitions (test_qso_waterfall_recovery PRIVATE DECODIUM_SOURCE_
 target_link_libraries (test_qso_waterfall_recovery Qt6::Test Qt6::Core)
 add_test (NAME test_qso_waterfall_recovery COMMAND $<TARGET_FILE:test_qso_waterfall_recovery>)
 
+add_executable (test_panadapter_gpu_recovery test_panadapter_gpu_recovery.cpp)
+target_compile_definitions (test_panadapter_gpu_recovery PRIVATE DECODIUM_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+target_link_libraries (test_panadapter_gpu_recovery Qt6::Test Qt6::Core)
+add_test (NAME test_panadapter_gpu_recovery COMMAND $<TARGET_FILE:test_panadapter_gpu_recovery>)
+
+add_executable (test_audio_mode_change_capture_policy test_audio_mode_change_capture_policy.cpp)
+target_include_directories (test_audio_mode_change_capture_policy PRIVATE ${CMAKE_SOURCE_DIR})
+target_compile_definitions (test_audio_mode_change_capture_policy PRIVATE DECODIUM_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+target_link_libraries (test_audio_mode_change_capture_policy Qt6::Test Qt6::Core)
+add_test (NAME test_audio_mode_change_capture_policy COMMAND $<TARGET_FILE:test_audio_mode_change_capture_policy>)
+
 add_executable (test_liquid_glass_windows test_liquid_glass_windows.cpp)
 target_compile_definitions (test_liquid_glass_windows PRIVATE DECODIUM_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
 target_link_libraries (test_liquid_glass_windows Qt6::Test Qt6::Core)
 add_test (NAME test_liquid_glass_windows COMMAND $<TARGET_FILE:test_liquid_glass_windows>)
+
+add_executable (test_glass_theme_switch test_glass_theme_switch.cpp)
+target_compile_definitions (test_glass_theme_switch PRIVATE DECODIUM_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+target_link_libraries (test_glass_theme_switch Qt6::Test Qt6::Quick Qt6::Qml)
+add_test (NAME test_glass_theme_switch COMMAND $<TARGET_FILE:test_glass_theme_switch>)
+set_tests_properties (test_glass_theme_switch PROPERTIES
+  ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software")
+
+add_executable (test_cw_window test_cw_window.cpp)
+target_compile_definitions (test_cw_window PRIVATE DECODIUM_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+target_link_libraries (test_cw_window Qt6::Test Qt6::Quick Qt6::Qml)
+add_test (NAME test_cw_window COMMAND $<TARGET_FILE:test_cw_window>)
+set_tests_properties (test_cw_window PROPERTIES
+  ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software")
+
+add_executable (test_jtty_window test_jtty_window.cpp)
+target_compile_definitions (test_jtty_window PRIVATE DECODIUM_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+target_link_libraries (test_jtty_window Qt6::Test Qt6::Quick Qt6::Qml)
+add_test (NAME test_jtty_window COMMAND $<TARGET_FILE:test_jtty_window>)
+set_tests_properties (test_jtty_window PROPERTIES
+  ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software")
 
 add_executable (test_tx_dispatch_guard test_tx_dispatch_guard.cpp)
 target_compile_definitions (test_tx_dispatch_guard PRIVATE DECODIUM_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
@@ -57,6 +89,22 @@ add_executable (test_transceiver_base_split test_transceiver_base_split.cpp)
 target_include_directories (test_transceiver_base_split PRIVATE ${CMAKE_SOURCE_DIR} ${PROJECT_BINARY_DIR})
 target_link_libraries (test_transceiver_base_split wsjt_qt wsjt_cxx wsjt_fort Qt6::Test)
 add_test (NAME test_transceiver_base_split COMMAND $<TARGET_FILE:test_transceiver_base_split>)
+
+# A no-hardware release contract: use the same Hamlib shared library linked by
+# the package and verify the IC-7300 CAT model/capabilities Decodium exposes.
+add_executable (test_hamlib_release_contract test_hamlib_release_contract.cpp)
+target_link_libraries (test_hamlib_release_contract Qt6::Test Qt6::Core Hamlib::Hamlib)
+add_test (NAME test_hamlib_release_contract COMMAND $<TARGET_FILE:test_hamlib_release_contract>)
+
+add_executable (test_cat_configuration_snapshot test_cat_configuration_snapshot.cpp)
+target_link_libraries (test_cat_configuration_snapshot Qt6::Test Qt6::Core)
+add_test (NAME test_cat_configuration_snapshot COMMAND $<TARGET_FILE:test_cat_configuration_snapshot>)
+
+add_executable (test_cat_serial_open_safety test_cat_serial_open_safety.cpp)
+target_include_directories (test_cat_serial_open_safety PRIVATE ${CMAKE_SOURCE_DIR})
+target_compile_definitions (test_cat_serial_open_safety PRIVATE DECODIUM_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+target_link_libraries (test_cat_serial_open_safety Qt6::Test Qt6::Core)
+add_test (NAME test_cat_serial_open_safety COMMAND $<TARGET_FILE:test_cat_serial_open_safety>)
 
 add_executable (test_ft8_mycall_ap
   test_ft8_mycall_ap.cpp
@@ -122,6 +170,13 @@ add_dependencies (test_qt_helpers ap_storico_test)
 add_executable (q65_stage_compare q65_stage_compare.cpp ../Detector/Q65DecodeWorker.cpp)
 target_include_directories (q65_stage_compare PRIVATE ${PROJECT_BINARY_DIR})
 target_link_libraries (q65_stage_compare wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
+
+add_executable (test_q65_decoder_continuity
+  test_q65_decoder_continuity.cpp
+  ../Detector/Q65DecodeWorker.cpp)
+target_include_directories (test_q65_decoder_continuity PRIVATE ${PROJECT_BINARY_DIR})
+target_link_libraries (test_q65_decoder_continuity wsjt_qt wsjt_cxx wsjt_fort Qt6::Test Qt6::Core)
+add_test (NAME test_q65_decoder_continuity COMMAND $<TARGET_FILE:test_q65_decoder_continuity>)
 
 add_executable (ft2_equalized_compare ft2_equalized_compare.cpp)
 target_link_libraries (ft2_equalized_compare wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
@@ -654,6 +709,11 @@ endif ()
 add_custom_target (decodium_regression_test_binaries)
 set (_decodium_regression_test_targets
   test_qt_helpers
+  test_panadapter_gpu_recovery
+  test_audio_mode_change_capture_policy
+  test_hamlib_release_contract
+  test_cat_configuration_snapshot
+  test_cat_serial_open_safety
   test_transceiver_base_split
   test_qso_sequencer_rules
   test_tx_pipeline
@@ -682,6 +742,7 @@ set (_decodium_regression_test_targets
   test_udp_client_id
   test_ftx_weak_decode
   test_q65_doppler
+  test_q65_decoder_continuity
   test_ft2_qso_sim
   test_secure_settings
   test_callsign_intelligence

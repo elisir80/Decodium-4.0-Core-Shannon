@@ -445,7 +445,9 @@ cmake_args=(
   # Keep them explicit so a reused build directory cannot retain a feature-off cache.
   -DDECODIUM_ENABLE_SSTV=ON
   -DDECODIUM_ENABLE_HAMDRM=ON
-  -DBUILD_TESTING=OFF
+  # A release is not allowed to skip the CAT contract tests.  They build with
+  # the same pinned Hamlib selected by the caller/workflow.
+  -DBUILD_TESTING=ON
   -DWSJT_GENERATE_DOCS=OFF
   -DWSJT_SKIP_MANPAGES=ON
   -DWSJT_BUILD_UTILS=OFF
@@ -518,6 +520,9 @@ done
 echo "[2/7] Building project..."
 cmake --build "$BUILD_DIR" -j"$JOBS"
 
+echo "[2a/7] Running mandatory CAT release gate..."
+bash "${ROOT_DIR}/scripts/ci/run-cat-release-gate.sh" "${BUILD_DIR}" "${JOBS}"
+
 echo "[3/7] Generating DMG with CPack..."
 CPACK_VOLUME_MOUNT="/Volumes/Decodium 4.0 Core Shannon"
 detach_mountpoint_if_present "${CPACK_VOLUME_MOUNT}" || true
@@ -583,6 +588,20 @@ if [[ ! -f "${STAGED_APP_ABS}/Contents/Resources/doc/wsjtx/THIRD_PARTY_LICENSES_
   exit 1
 fi
 echo "HAMDRM OpenJPEG runtime and notice bundled"
+
+HAMLIB_RUNTIME_VERSION="${HAMLIB_VERSION:-}"
+if [[ -z "${HAMLIB_RUNTIME_VERSION}" ]] && command -v pkg-config >/dev/null 2>&1; then
+  HAMLIB_RUNTIME_VERSION="$(pkg-config --modversion hamlib 2>/dev/null || true)"
+fi
+if [[ -z "${HAMLIB_RUNTIME_VERSION}" ]]; then
+  echo "error: unable to determine the pinned Hamlib version for the package manifest" >&2
+  exit 1
+fi
+bash "${ROOT_DIR}/scripts/ci/write-hamlib-runtime-manifest.sh" \
+  "${STAGED_APP_ABS}/Contents/Resources/hamlib-runtime-manifest.json" \
+  "${HAMLIB_RUNTIME_VERSION}" \
+  "${STAGED_APP_ABS}/Contents/Frameworks" \
+  macos
 
 if [[ "$SKIP_COMPAT_CHECK" -eq 0 ]]; then
   echo "[5/7] Checking bundle compatibility target macOS ${COMPAT_MACOS}..."

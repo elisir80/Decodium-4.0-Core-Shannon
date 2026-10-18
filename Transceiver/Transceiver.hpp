@@ -287,6 +287,46 @@ public:
   Q_SLOT virtual void start (unsigned sequence_number) noexcept = 0;
   Q_SLOT virtual void stop () noexcept = 0;
 
+  // Optional CAT capabilities belong to the generic interface rather than to
+  // a concrete Hamlib implementation.  Decorators such as Fake It must not
+  // hide controls that the wrapped backend supports.
+  virtual bool supports_morse () const noexcept {return false;}
+  virtual int morse_text_limit () const noexcept {return 0;}
+  virtual QString send_morse_checked (QString const&, int)
+  {
+    return QStringLiteral ("The radio CAT CW keyer is unavailable");
+  }
+
+  virtual bool supports_atu_control () const noexcept {return false;}
+  virtual bool request_atu_tune (QString * error)
+  {
+    if (error) *error = QStringLiteral ("ATU control is unavailable for this CAT backend");
+    return false;
+  }
+  virtual bool request_atu_off (QString * error)
+  {
+    if (error) *error = QStringLiteral ("ATU control is unavailable for this CAT backend");
+    return false;
+  }
+  virtual bool read_atu_state (bool * enabled, QString * error)
+  {
+    if (enabled) *enabled = false;
+    if (error) *error = QStringLiteral ("ATU state is unavailable for this CAT backend");
+    return false;
+  }
+
+  virtual bool supports_power_control () const noexcept {return false;}
+  virtual bool request_power_on (QString * error)
+  {
+    if (error) *error = QStringLiteral ("Power control is unavailable for this CAT backend");
+    return false;
+  }
+  virtual bool request_power_off (QString * error)
+  {
+    if (error) *error = QStringLiteral ("Power control is unavailable for this CAT backend");
+    return false;
+  }
+
   // Trasmissione CW: invia 'text' al keyer della radio a 'wpm' parole/min.
   // Default no-op: i transceiver che non supportano il keying CAT lo ignorano.
   Q_SLOT virtual void send_morse (QString const& /*text*/, int /*wpm*/) noexcept {}

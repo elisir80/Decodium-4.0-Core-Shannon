@@ -206,6 +206,10 @@ public:
                         quint64 serial);
     void activateCpuSpectrumFallback();
     void prepareGpuSpectrumRetry();
+    // The PCM producer changed (for example CW native capture -> FT8 legacy
+    // tap). Rebuild direct GPU resources on the render thread before the CPU
+    // fallback is considered, so stale textures cannot survive the hand-off.
+    void recoverGpuDirectVisualAfterSourceHandoff();
     // 1.0.569+ - vero solo se questo pannello puo' davvero consumare e disegnare
     // un frame PCM. Un pannello nascosto (es. il waterfall classico mentre e'
     // attivo il workspace DX-Pedition) non e' un consumatore: il suo "accetto"
@@ -307,6 +311,12 @@ private:
     void releaseGpuFftResources();
     void failGpuFft(const QString& reason);
     void notifyGpuFftActive(const QString& backend);
+    // The direct RHI route owns QRhi textures which can be replaced when a
+    // scene changes geometry.  The QSG materials are bound during the sync
+    // phase, whereas compute runs immediately afterwards.  Ask the GUI
+    // thread for a few sync passes so the materials cannot remain attached to
+    // an older texture after a mode/passband transition.
+    void scheduleGpuDirectTextureRebind(quint64 textureGeneration);
     void connectBridgePcmFrameFeed();
     void recordOverlayMetric(qint64 elapsedUs, int decodeLabels, int clusterLabels, const QSize& size);
     void recordOverlayNodeMetric(qint64 elapsedUs,
@@ -484,6 +494,11 @@ private:
     qint64 m_lastGpuFftTimeoutLogMs = 0;
     int   m_gpuFftUiBinsExpected = 0;
     bool  m_gpuDirectTextureReady = false;
+    std::atomic<quint64> m_gpuDirectTextureGeneration {0};
+    std::atomic<quint64> m_gpuDirectTextureBoundGeneration {0};
+    std::atomic<quint64> m_gpuDirectTextureRebindEpoch {0};
+    std::atomic_int m_gpuDirectTextureRebuildAttempts {0};
+    std::atomic_bool m_gpuDirectTextureRebuildRequested {false};
     float m_gpuDirectDisplayMinDb = -70.0f;
     float m_gpuDirectDisplayMaxDb = 35.0f;
     float m_spectrumOverlayDisplayMinDb = -9999.0f;

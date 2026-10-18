@@ -216,6 +216,28 @@ bool gpuDirectPanadapterEnabled()
     return qEnvironmentVariableIntValue("DECODIUM_GPU_PANADAPTER_DIRECT") != 0;
 }
 
+// The direct shader can resample the decoder passband.  Keep its default
+// output width fixed at all positive-frequency FFT bins rather than matching
+// the current decoder passband.  CW -> FT and FT2/FT8 changes otherwise
+// replace every direct texture while QSG materials still reference the old
+// QRhiTexture.  This is GPU work (not a CPU fallback) and prevents the most
+// common source of a stale/partly-black panadapter after a mode switch.
+constexpr int kGpuPanadapterFftSize = 4096;
+constexpr int kGpuDirectStableOutputBins = kGpuPanadapterFftSize / 2;
+
+int gpuDirectOutputBinCount(int requestedBins)
+{
+    if (requestedBins > 0)
+        return qBound(64, requestedBins, kGpuDirectStableOutputBins);
+    return kGpuDirectStableOutputBins;
+}
+
+constexpr int kGpuDirectTextureRebindDelaysMs[] = {75, 250, 700};
+constexpr int kGpuDirectTextureRebindAttemptCount =
+    static_cast<int>(sizeof(kGpuDirectTextureRebindDelaysMs)
+                     / sizeof(kGpuDirectTextureRebindDelaysMs[0]));
+constexpr int kGpuDirectTextureRebuildLimit = 3;
+
 bool gpuDirectDebugReadbackEnabled()
 {
     return qEnvironmentVariableIntValue("DECODIUM_GPU_PANADAPTER_DEBUG_READBACK") != 0;
@@ -963,6 +985,31 @@ struct PanadapterItem::GpuFftState
         texture = nullptr;
         while (retiredDirectTextures.size() > 16)
             delete retiredDirectTextures.takeFirst();
+    }
+
+    // Called on the render thread only.  Retain the old textures until QSG
+    // has rebound its external wrappers; deleting them immediately would make
+    // a failed/reordered sync pass far worse than a stale frame.
+    void resetDirectTexturesForRetry()
+    {
+        delete directPipeline;
+        delete directSrb;
+        delete directParamsBuffer;
+        directPipeline = nullptr;
+        directSrb = nullptr;
+        directParamsBuffer = nullptr;
+        retireDirectTexture(directSpectrumTexture);
+        retireDirectTexture(directWaterfallTexture);
+        retireDirectTexture(directRowParamsTexture);
+        retireDirectTexture(directPeakTexture);
+        directSpectrumSize = QSize();
+        directWaterfallSize = QSize();
+        directRowParamsSize = QSize();
+        directPeakSize = QSize();
+        directBins = 0;
+        directRows = 0;
+        directWriteRow = 0;
+        directTexturePathActive = false;
     }
 
     void reset()
@@ -2678,6 +2725,39 @@ void PanadapterItem::prepareGpuSpectrumRetry()
     m_gpuFftFailed = false;
     m_gpuFftFailureReason.clear();
     m_hasPendingPcmFrame = false;
+    m_gpuDirectTextureRebindEpoch.fetch_add(1, std::memory_order_acq_rel);
+    m_gpuDirectTextureBoundGeneration.store(0, std::memory_order_release);
+    m_gpuDirectTextureRebuildAttempts.store(0, std::memory_order_release);
+    m_gpuDirectTextureRebuildRequested.store(false, std::memory_order_release);
+}
+
+void PanadapterItem::recoverGpuDirectVisualAfterSourceHandoff()
+{
+    {
+        QMutexLocker lock(&m_mutex);
+        // A source hand-off is not a GPU failure.  Discard the frame captured
+        // from the retired source, invalidate any delayed material rebind and
+        // let beforeRendering recreate the RHI textures for the first fresh
+        // frame.  Do not emit gpuFftUnavailable here: GPU remains preferred.
+        m_gpuFftActiveNotified = false;
+        m_gpuFftFailed = false;
+        m_gpuFftFailureReason.clear();
+        m_hasPendingPcmFrame = false;
+        m_gpuDirectTextureReady = false;
+        m_gpuFftUiBinsExpected = 0;
+        m_gpuDirectTextureRebindEpoch.fetch_add(1, std::memory_order_acq_rel);
+        m_gpuDirectTextureBoundGeneration.store(0, std::memory_order_release);
+        m_gpuDirectTextureRebuildAttempts.store(0, std::memory_order_release);
+        // This flag is consumed only by recordGpuFftCompute(), on the render
+        // thread, where QRhi resources may safely be destroyed and recreated.
+        m_gpuDirectTextureRebuildRequested.store(true, std::memory_order_release);
+    }
+
+    qInfo().noquote()
+        << "[PANDBG] GPU direct visual source hand-off queued"
+        << "action=release_and_recreate_RHI_textures"
+        << "fallback=deferred_until_gpu_retries_exhausted";
+    update();
 }
 
 // Compatibilità: riceve valori 0-1 normalizzati e li converte in dB
@@ -4909,6 +4989,15 @@ void PanadapterItem::releaseGpuFftResources()
     GpuFftState* state = m_gpuFft;
     m_gpuFft = nullptr;
     m_gpuDirectTextureReady = false;
+    // Cancel delayed QSG rebind probes from this scene graph lifetime.  Keep
+    // the texture generation monotonic: an old timer must never mistake a
+    // later resource lifetime for an unbound texture generation.
+    m_gpuDirectTextureRebindEpoch.fetch_add(1, std::memory_order_acq_rel);
+    m_gpuDirectTextureBoundGeneration.store(
+        m_gpuDirectTextureGeneration.load(std::memory_order_acquire),
+        std::memory_order_release);
+    m_gpuDirectTextureRebuildAttempts.store(0, std::memory_order_release);
+    m_gpuDirectTextureRebuildRequested.store(false, std::memory_order_release);
     m_gpuFftUiBinsExpected = 0;
     m_hasPendingPcmFrame = false;
     if (!state)
@@ -4938,6 +5027,11 @@ void PanadapterItem::failGpuFft(const QString& reason)
         m_lastGpuFftReadbackMs = 0;
         m_gpuFftUiBinsExpected = 0;
         m_gpuDirectTextureReady = false;
+        m_gpuDirectTextureRebindEpoch.fetch_add(1, std::memory_order_acq_rel);
+        m_gpuDirectTextureBoundGeneration.store(
+            m_gpuDirectTextureGeneration.load(std::memory_order_acquire),
+            std::memory_order_release);
+        m_gpuDirectTextureRebuildRequested.store(false, std::memory_order_release);
         m_gpuFftActiveNotified = false;
         m_gpuFftInvalidReadbacks = 0;
         m_gpuFftReadbackTimeouts = 0;
@@ -4969,6 +5063,67 @@ void PanadapterItem::notifyGpuFftActive(const QString& backend)
     QMetaObject::invokeMethod(this, [guard, backend]() {
         if (guard)
             emit guard->gpuFftActivated(backend);
+    }, Qt::QueuedConnection);
+}
+
+void PanadapterItem::scheduleGpuDirectTextureRebind(quint64 textureGeneration)
+{
+    QPointer<PanadapterItem> guard(this);
+    quint64 const rebindEpoch = m_gpuDirectTextureRebindEpoch.load(std::memory_order_acquire);
+    QMetaObject::invokeMethod(this, [guard, textureGeneration, rebindEpoch]() {
+        if (!guard || guard->m_gpuDirectTextureRebindEpoch.load(std::memory_order_acquire)
+            != rebindEpoch) {
+            return;
+        }
+
+        // The first update is deliberately queued out of beforeRendering:
+        // QQuickItem::update() there is too late for the sync phase of the
+        // frame that allocated the QRhi textures.
+        guard->update();
+        for (int attempt = 0; attempt < kGpuDirectTextureRebindAttemptCount; ++attempt) {
+            QTimer::singleShot(kGpuDirectTextureRebindDelaysMs[attempt], guard.data(),
+                               [guard, textureGeneration, rebindEpoch, attempt]() {
+                if (!guard || guard->m_gpuDirectTextureRebindEpoch.load(std::memory_order_acquire)
+                    != rebindEpoch) {
+                    return;
+                }
+                if (guard->m_gpuDirectTextureBoundGeneration.load(std::memory_order_acquire)
+                    >= textureGeneration) {
+                    return;
+                }
+
+                if (attempt + 1 < kGpuDirectTextureRebindAttemptCount) {
+                    qInfo().noquote()
+                        << "[PANDBG] GPU direct texture QSG rebind retry"
+                        << "generation=" << textureGeneration
+                        << "attempt=" << (attempt + 1);
+                    guard->update();
+                    return;
+                }
+
+                // A material that still has not rebound gets a complete
+                // GPU-resource rebuild first.  Only after repeated GPU
+                // rebuilds fail do we hand control to the existing FFTW
+                // fallback, so software remains a genuine last resort.
+                int const rebuildAttempt = guard->m_gpuDirectTextureRebuildAttempts.fetch_add(
+                    1, std::memory_order_acq_rel) + 1;
+                if (rebuildAttempt <= kGpuDirectTextureRebuildLimit) {
+                    guard->m_gpuDirectTextureRebuildRequested.store(true,
+                                                                      std::memory_order_release);
+                    qWarning().noquote()
+                        << "[PANDBG] GPU direct texture rebind stalled; scheduling GPU resource retry"
+                        << "generation=" << textureGeneration
+                        << "gpu_retry=" << rebuildAttempt
+                        << "of" << kGpuDirectTextureRebuildLimit;
+                    guard->update();
+                    return;
+                }
+
+                guard->failGpuFft(
+                    QStringLiteral("GPU direct texture rebind failed after %1 GPU resource retries")
+                        .arg(kGpuDirectTextureRebuildLimit));
+            });
+        }
     }, Qt::QueuedConnection);
 }
 
@@ -5065,7 +5220,7 @@ void PanadapterItem::recordGpuFftCompute()
         return;
     }
 
-    const int N = 4096;
+    const int N = kGpuPanadapterFftSize;
     if (frame.samples.size() < N || frame.nfb <= frame.nfa) {
         failGpuFft(QStringLiteral("invalid PCM frame for GPU compute"));
         return;
@@ -5082,10 +5237,6 @@ void PanadapterItem::recordGpuFftCompute()
     }
     bool const wantsDirectTexturePath = gpuDirectPanadapterEnabled();
     int const requestedGpuBins = qEnvironmentVariableIntValue("DECODIUM_GPU_PANADAPTER_DFT_BINS");
-    int const defaultGpuBins = wantsDirectTexturePath ? sourceBins : qMin(512, sourceBins);
-    const int nBins = qMin(sourceBins,
-        requestedGpuBins > 0 ? qBound(64, requestedGpuBins, sourceBins) : defaultGpuBins);
-
     if (!m_gpuFft)
         m_gpuFft = new GpuFftState;
     if (m_gpuFft->rhi && m_gpuFft->rhi != rhi)
@@ -5105,12 +5256,35 @@ void PanadapterItem::recordGpuFftCompute()
         }
     }
 
-    const int sampleBytes = N * static_cast<int>(sizeof(float));
-    const int outputBytes = nBins * static_cast<int>(sizeof(float));
-
     bool const directTexturePath =
         wantsDirectTexturePath
         && rhi->isTextureFormatSupported(QRhiTexture::R32F, QRhiTexture::UsedWithLoadStore);
+
+    // Do not couple direct-texture dimensions to the active decoder passband.
+    // The compute shader resamples sourceBins to this stable GPU output width.
+    int const defaultGpuBins = directTexturePath
+        ? gpuDirectOutputBinCount(requestedGpuBins)
+        : qMin(512, sourceBins);
+    const int nBins = directTexturePath
+        ? defaultGpuBins
+        : qMin(sourceBins,
+               requestedGpuBins > 0 ? qBound(64, requestedGpuBins, sourceBins)
+                                    : defaultGpuBins);
+    const int sampleBytes = N * static_cast<int>(sizeof(float));
+    const int outputBytes = nBins * static_cast<int>(sizeof(float));
+
+    if (m_gpuDirectTextureRebuildRequested.exchange(false, std::memory_order_acq_rel)) {
+        m_gpuFft->resetDirectTexturesForRetry();
+        {
+            QMutexLocker lock(&m_mutex);
+            m_gpuDirectTextureReady = false;
+            m_gpuFftUiBinsExpected = 0;
+        }
+        qInfo().noquote()
+            << "[PANDBG] GPU direct texture resources released for retry"
+            << "path=RHI_compute"
+            << "fallback=deferred_until_gpu_retries_exhausted";
+    }
 
     if (directTexturePath) {
         if (!m_gpuFft->directShader.isValid()) {
@@ -5283,6 +5457,13 @@ void PanadapterItem::recordGpuFftCompute()
         bool const peakRecreated = recreateTexture(m_gpuFft->directPeakTexture,
                                                    m_gpuFft->directPeakSize,
                                                    spectrumSize);
+        bool const directTexturesRecreated = spectrumRecreated
+            || waterfallRecreated
+            || rowParamsRecreated
+            || peakRecreated;
+        quint64 const directTextureGeneration = directTexturesRecreated
+            ? m_gpuDirectTextureGeneration.fetch_add(1, std::memory_order_acq_rel) + 1
+            : 0;
         if (!m_gpuFft->directSpectrumTexture
             || !m_gpuFft->directWaterfallTexture
             || !m_gpuFft->directRowParamsTexture
@@ -5501,6 +5682,18 @@ void PanadapterItem::recordGpuFftCompute()
         notifyGpuFftActive(QStringLiteral("%1 RHI compute")
                                .arg(QString::fromLatin1(
                                    waterfallGraphicsApiName(rif->graphicsApi()))));
+
+        if (directTexturesRecreated) {
+            qInfo().noquote()
+                << "[PANDBG] GPU direct textures recreated"
+                << "generation=" << directTextureGeneration
+                << "spectrum=" << QStringLiteral("%1x%2")
+                    .arg(spectrumSize.width()).arg(spectrumSize.height())
+                << "waterfall=" << QStringLiteral("%1x%2")
+                    .arg(waterfallSize.width()).arg(waterfallSize.height())
+                << "qsg_rebind=queued";
+            scheduleGpuDirectTextureRebind(directTextureGeneration);
+        }
 
         if (!m_gpuFft->loggedDirectActive) {
             qInfo().noquote()
@@ -6442,6 +6635,10 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
                         }
                         logWaterfallRenderPath(true, "shader samples GPU-direct FFT ring texture; no CPU row upload/readback");
                         paintWaterfallLogUs += monotonicUs() - logStartUs;
+                        m_gpuDirectTextureBoundGeneration.store(
+                            m_gpuDirectTextureGeneration.load(std::memory_order_acquire),
+                            std::memory_order_release);
+                        m_gpuDirectTextureRebuildAttempts.store(0, std::memory_order_release);
                         return root;
                     }
                 }

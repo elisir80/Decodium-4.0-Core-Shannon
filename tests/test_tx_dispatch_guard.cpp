@@ -32,6 +32,7 @@ private slots:
     void staleTx6RequiresAutoOrExplicitManualAuthority();
     void lifecycleTransitionsInvalidateDeferredRequests();
     void deferredCallbacksCheckRequestGeneration();
+    void jttyUsesNativeManualDispatchAndBlocksGenericStart();
 };
 
 void TestTxDispatchGuard::commonGuardIsWiredIntoTxEntryPoints()
@@ -129,6 +130,49 @@ void TestTxDispatchGuard::deferredCallbacksCheckRequestGeneration()
                             .arg(generationChecks)));
     QVERIFY(cpp.contains(QStringLiteral("tryStartDeferredManualSyncTx")));
     QVERIFY(cpp.contains(QStringLiteral("TX guard")));
+}
+
+void TestTxDispatchGuard::jttyUsesNativeManualDispatchAndBlocksGenericStart()
+{
+    const QString header = readSource(QStringLiteral("src/bridge/DecodiumBridge.h"));
+    const QString bridge = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
+    const QString app = readSource(QStringLiteral("src/app/main_qml.cpp"));
+    QVERIFY(!header.isEmpty());
+    QVERIFY(!bridge.isEmpty());
+    QVERIFY(!app.isEmpty());
+
+    QVERIFY(header.contains(QStringLiteral("void jttyPanelTransmitRequested(const QString& text);")));
+    QVERIFY(header.contains(QStringLiteral("void jttyAbortRequested();")));
+    QVERIFY(header.contains(QStringLiteral("void reportJttyPanelTransmitResult(bool accepted")));
+
+    const QString startTx = functionBody(
+        bridge,
+        QStringLiteral("void DecodiumBridge::startTx()"),
+        QStringLiteral("void DecodiumBridge::reportJttyPanelTransmitResult"));
+    const QString sendTx = functionBody(
+        bridge,
+        QStringLiteral("void DecodiumBridge::sendTx(int n)"),
+        QStringLiteral("QString DecodiumBridge::txMessage(int n) const"));
+    const QString stopTx = functionBody(
+        bridge,
+        QStringLiteral("void DecodiumBridge::stopTx()"),
+        QStringLiteral("void DecodiumBridge::armTuneWatchdog"));
+    const QString setMode = functionBody(
+        bridge,
+        QStringLiteral("void DecodiumBridge::setMode(const QString& v)"),
+        QStringLiteral("void DecodiumBridge::setMonitoring(bool v)"));
+
+    QVERIFY(startTx.contains(QStringLiteral("blocked generic JTTY TX path")));
+    QVERIFY(sendTx.contains(QStringLiteral("forwarding explicit TX%1 to native controller")));
+    QVERIFY(sendTx.contains(QStringLiteral("emit jttyPanelTransmitRequested(message);")));
+    QVERIFY(sendTx.indexOf(QStringLiteral("emit jttyPanelTransmitRequested(message);"))
+             < sendTx.indexOf(QStringLiteral("armExplicitManualTxRequest(n")));
+    QVERIFY(stopTx.contains(QStringLiteral("emit jttyAbortRequested();")));
+    QVERIFY(setMode.contains(QStringLiteral("application mode changed %1->%2")));
+
+    QVERIFY(app.contains(QStringLiteral("&DecodiumBridge::jttyPanelTransmitRequested")));
+    QVERIFY(app.contains(QStringLiteral("jtty.send (text)")));
+    QVERIFY(app.contains(QStringLiteral("&DecodiumBridge::jttyAbortRequested")));
 }
 
 QTEST_MAIN(TestTxDispatchGuard)
