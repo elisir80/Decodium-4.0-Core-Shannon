@@ -55,6 +55,7 @@ Decodium 4 v1.0.698 is the maintained fork release following v1.0.697. It focuse
 - Expanded cross-platform CI coverage for CAT, serial/CW paths and relevant settings changes; added missing Linux `libudev` development dependencies; and pinned the Windows MSYS2 libusb package fetched from the official archive to keep the Windows build reproducible while the rolling package index changes.
 - Made the Windows CAT gate expose the Qt, Hamlib and MinGW runtime directories to CTest, preventing the `0xc0000135` missing-DLL startup failure while preserving the existing dependency cache.
 - Kept `-Werror` for the whole target while making only the known GCC/MinGW `MapIntelligenceService` queued-callback `stringop-overflow` false positive non-fatal. Linux and Windows therefore retain all other warning checks without a compiler diagnostic preventing their packages from being produced.
+- Modernised the Rotor regression assertion for Qt 6.11, replacing a deprecated Qt test API so macOS can retain warning-clean `-Werror` builds rather than weakening its compiler checks.
 
 ### Release contents
 
@@ -125,6 +126,7 @@ Decodium 4 v1.0.698 è la release mantenuta del fork successiva alla v1.0.697. S
 - Estesa la copertura CI multipiattaforma per CAT, percorsi seriali/CW e modifiche Settings rilevanti; aggiunte le dipendenze di sviluppo `libudev` mancanti su Linux; e fissato il pacchetto libusb MSYS2 per Windows, scaricato dall'archivio ufficiale, per rendere riproducibile la build Windows mentre l'indice rolling dei pacchetti cambia.
 - Il gate CAT Windows espone ora a CTest le directory runtime Qt, Hamlib e MinGW, evitando l'errore di avvio per DLL mancanti `0xc0000135` senza invalidare la cache delle dipendenze esistente.
 - Mantenuto `-Werror` per l'intero target, rendendo non bloccante soltanto il noto falso positivo `stringop-overflow` GCC/MinGW dei callback accodati di `MapIntelligenceService`. Linux e Windows conservano quindi tutti gli altri controlli sui warning senza che una diagnostica del compilatore impedisca di produrre i pacchetti.
+- Modernizzata l'asserzione di regressione del Rotore per Qt 6.11, sostituendo un'API Qt di test deprecata; macOS può così mantenere build pulite con `-Werror`, invece di indebolire i controlli del compilatore.
 
 ### Contenuto della release
 

@@ -75,7 +75,8 @@ private slots:
         const QVariantMap applied = rotor.goTo(10.0, std::nullopt);
         QVERIFY(std::fabs(applied.value(QStringLiteral("az")).toDouble() - 10.0) < 0.01);
         QTRY_VERIFY_WITH_TIMEOUT(std::fabs(rotor.snapshot().value(QStringLiteral("az")).toDouble() - 10.0) < 1.5, 8000);
-        QVERIFY_EXCEPTION_THROWN(rotor.goToLocator(QStringLiteral("not a locator")), RotorError);
+        QVERIFY_THROWS_EXCEPTION(RotorError,
+                                 rotor.goToLocator(QStringLiteral("not a locator")));
         rotor.shutdown();
     }
 
