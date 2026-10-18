@@ -1027,7 +1027,10 @@ GlassApplicationWindow {
             var alpha = Math.min(0.30, panel.a)
             return Qt.rgba(panel.r, panel.g, panel.b, alpha)
         }
-        return Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, fallbackAlpha)
+        // Classic themes and unsupported transparency must be fully opaque.
+        // Keep fallbackAlpha in the API for existing call sites; using it
+        // here would let the dashboard bleed through the detached surface.
+        return bgDeep
     }
 
     // Dialogs and popups are child surfaces. A solid child rectangle would
@@ -1038,7 +1041,8 @@ GlassApplicationWindow {
             var panel = bridge.themeManager.panelColor
             return Qt.rgba(panel.r, panel.g, panel.b, Math.min(0.30, panel.a))
         }
-        return Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, fallbackAlpha)
+        // A disabled/unsupported Glass surface is a classic opaque surface.
+        return bgDeep
     }
 
     function minimizeFloatingWindow(windowRef, minimizedPropName) {

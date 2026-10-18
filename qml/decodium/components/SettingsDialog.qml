@@ -978,7 +978,10 @@ Dialog {
     }
 
     function forceDtrControlEnabled() {
-        return activeCatPortType() === "serial"
+        var controller = activeCatController()
+        var defaultHandshake = !controller || controller.handshake === undefined
+                || String(controller.handshake).trim().toLowerCase() === "default"
+        return activeCatPortType() === "serial" && !defaultHandshake
                 && !(activePttMethod() === "DTR" && pttSharesCatPort())
     }
 
@@ -986,7 +989,9 @@ Dialog {
         var controller = activeCatController()
         var hardwareHandshake = controller && controller.handshake !== undefined
                 && String(controller.handshake).trim().toLowerCase() === "hardware"
-        return activeCatPortType() === "serial" && !hardwareHandshake
+        var defaultHandshake = !controller || controller.handshake === undefined
+                || String(controller.handshake).trim().toLowerCase() === "default"
+        return activeCatPortType() === "serial" && !defaultHandshake && !hardwareHandshake
                 && !(activePttMethod() === "RTS" && pttSharesCatPort())
     }
 

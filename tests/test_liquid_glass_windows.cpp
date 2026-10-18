@@ -21,6 +21,7 @@ private slots:
     void shellIsCrossPlatformAndThemeGated();
     void classicThemeRestoresOpaqueSurface();
     void mainAndPopoutsUseGlassShell();
+    void classicMainSurfacesAreOpaque();
     void liveMapFramelessPopoutHasAllResizeHandles();
     void dialogsAndHostedPanelsUseGlassSurfaces();
     void cwWindowKeepsOperationalContrastAndHasPersistentTrafficSplitter();
@@ -151,6 +152,32 @@ void TestLiquidGlassWindows::mainAndPopoutsUseGlassShell()
                          || source.contains(QStringLiteral("liquidGlassTheme")),
                  qPrintable(path));
     }
+}
+
+void TestLiquidGlassWindows::classicMainSurfacesAreOpaque()
+{
+    const QString main = readSource(QStringLiteral("qml/decodium/Main.qml"));
+    QVERIFY(!main.isEmpty());
+
+    const int windowStart = main.indexOf(
+        QStringLiteral("function glassWindowSurface(fallbackAlpha)"));
+    const int dialogStart = main.indexOf(
+        QStringLiteral("function glassDialogSurface(fallbackAlpha)"));
+    const int nextFunctionAfterDialog = main.indexOf(
+        QStringLiteral("function minimizeFloatingWindow"), dialogStart);
+    QVERIFY(windowStart >= 0);
+    QVERIFY(dialogStart > windowStart);
+    QVERIFY(nextFunctionAfterDialog > dialogStart);
+
+    const QString windowSurface = main.mid(windowStart, dialogStart - windowStart);
+    const QString dialogSurface = main.mid(
+        dialogStart, nextFunctionAfterDialog - dialogStart);
+    QVERIFY(windowSurface.contains(QStringLiteral("return bgDeep")));
+    QVERIFY(dialogSurface.contains(QStringLiteral("return bgDeep")));
+    QVERIFY(!windowSurface.contains(
+        QStringLiteral("Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, fallbackAlpha)")));
+    QVERIFY(!dialogSurface.contains(
+        QStringLiteral("Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, fallbackAlpha)")));
 }
 
 void TestLiquidGlassWindows::liveMapFramelessPopoutHasAllResizeHandles()

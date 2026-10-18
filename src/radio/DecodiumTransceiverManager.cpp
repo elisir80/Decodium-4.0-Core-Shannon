@@ -615,11 +615,17 @@ bool isTransientCatIoFailure(QString const& reason)
     return false;
 }
 
-bool d3ForceDtrAvailable(QString const& portType, QString const& pttMethod,
+bool d3ForceDtrAvailable(QString const& portType, QString const& handshake,
+                         QString const& pttMethod,
                          QString const& serialPort, QString const& pttPort)
 {
     bool const serialCat = 0 == portType.compare(QStringLiteral("serial"), Qt::CaseInsensitive);
-    return serialCat
+    // Hamlib's Default handshake is resolved by the backend/driver.  On
+    // Windows that may become hardware flow control, where changing the
+    // serial control lines while opening the port is not safe.  Require an
+    // explicit handshake before exposing or applying DTR forcing.
+    bool const defaultHandshake = 0 == handshake.compare(QStringLiteral("default"), Qt::CaseInsensitive);
+    return serialCat && !defaultHandshake
         && !(0 == pttMethod.compare(QStringLiteral("DTR"), Qt::CaseInsensitive)
              && pttPortSharesCatPort(serialPort, pttPort));
 }
@@ -629,8 +635,12 @@ bool d3ForceRtsAvailable(QString const& portType, QString const& handshake,
                          QString const& pttPort)
 {
     bool const serialCat = 0 == portType.compare(QStringLiteral("serial"), Qt::CaseInsensitive);
+    bool const defaultHandshake = 0 == handshake.compare(QStringLiteral("default"), Qt::CaseInsensitive);
     bool const hardwareHandshake = 0 == handshake.compare(QStringLiteral("hardware"), Qt::CaseInsensitive);
-    return serialCat && !hardwareHandshake
+    // Do not combine an unspecified handshake with forced RTS.  Hamlib may
+    // resolve Default to hardware flow control and then reject rig_open()
+    // with "cannot set RTS with hardware handshake" (notably on Windows).
+    return serialCat && !defaultHandshake && !hardwareHandshake
         && !(0 == pttMethod.compare(QStringLiteral("RTS"), Qt::CaseInsensitive)
              && pttPortSharesCatPort(serialPort, pttPort));
 }
@@ -1061,7 +1071,7 @@ bool DecodiumTransceiverManager::pttSharesCatPort() const
 
 bool DecodiumTransceiverManager::forceDtrAvailable() const
 {
-    return d3ForceDtrAvailable(m_portType, m_pttMethod, m_serialPort, m_pttPort);
+    return d3ForceDtrAvailable(m_portType, m_handshake, m_pttMethod, m_serialPort, m_pttPort);
 }
 
 bool DecodiumTransceiverManager::forceRtsAvailable() const
@@ -1647,7 +1657,7 @@ static TransceiverFactory::ParameterPack buildParams(const DecodiumTransceiverMa
                                                      bool autoPowerOn = false)
 {
     TransceiverFactory::ParameterPack p;
-    bool const canForceDtr = d3ForceDtrAvailable(m->portType(), m->pttMethod(), m->serialPort(), m->pttPort());
+    bool const canForceDtr = d3ForceDtrAvailable(m->portType(), m->handshake(), m->pttMethod(), m->serialPort(), m->pttPort());
     bool const canForceRts = d3ForceRtsAvailable(m->portType(), m->handshake(), m->pttMethod(), m->serialPort(), m->pttPort());
     bool const serialCat = 0 == m->portType().compare(QStringLiteral("serial"), Qt::CaseInsensitive);
     TransceiverFactory::PTTMethod pttType =

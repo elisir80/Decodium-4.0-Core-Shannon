@@ -32,6 +32,7 @@ private slots:
     void protectsUnusedControlLinesOnEveryPlatform();
     void preservesExplicitLineRequests();
     void neverStealsAPttLineOrHardwareHandshake();
+    void defaultHandshakeDoesNotForceLines();
     void managerUsesTheSharedOpeningPolicy();
 };
 
@@ -87,6 +88,20 @@ void TestCatSerialOpenSafety::neverStealsAPttLineOrHardwareHandshake()
     QVERIFY(hardwareSafety.forceDtr);
 }
 
+void TestCatSerialOpenSafety::defaultHandshakeDoesNotForceLines()
+{
+    // The manager represents an unresolved/default handshake by disabling
+    // both force capabilities before this shared opening policy is called.
+    auto input = ordinarySerialCat();
+    input.canForceDtr = false;
+    input.canForceRts = false;
+    const auto safety = decodium::cat::serialOpenLineSafety(input);
+    QVERIFY(!safety.automaticDtrLow);
+    QVERIFY(!safety.automaticRtsLow);
+    QVERIFY(!safety.forceDtr);
+    QVERIFY(!safety.forceRts);
+}
+
 void TestCatSerialOpenSafety::managerUsesTheSharedOpeningPolicy()
 {
     const QString source = readSource(QStringLiteral("src/radio/DecodiumTransceiverManager.cpp"));
@@ -94,6 +109,8 @@ void TestCatSerialOpenSafety::managerUsesTheSharedOpeningPolicy()
     QVERIFY(source.contains(QStringLiteral("CatSerialOpenSafety.h")));
     QVERIFY(source.contains(QStringLiteral("SerialOpenLineSafetyInput lineSafetyInput")));
     QVERIFY(source.contains(QStringLiteral("serialOpenLineSafety(lineSafetyInput)")));
+    QVERIFY(source.contains(QStringLiteral("d3ForceDtrAvailable(m->portType(), m->handshake()")));
+    QVERIFY(source.contains(QStringLiteral("defaultHandshake")));
     QVERIFY(source.contains(QStringLiteral("autoDtrLow=")));
     QVERIFY(source.contains(QStringLiteral("autoRtsLow=")));
 }

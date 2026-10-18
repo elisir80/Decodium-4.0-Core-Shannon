@@ -1,5 +1,45 @@
 # Changelog / Registro Modifiche
 
+## [1.0.700] - 2026-10-18
+
+### English
+
+- Fixed the classic/non-Glass dashboard surfaces that remained translucent when
+  Glass was disabled or unavailable. The main hamburger menu and its language
+  submenu now use an opaque theme surface, keeping their text and controls
+  readable without changing the Liquid Glass appearance when it is supported.
+- Added a regression check covering the opaque fallback for detached windows,
+  dialogs and popups.
+- Hardened Windows CAT serial configuration for an unresolved `Default`
+  handshake. Force DTR and Force RTS are no longer offered or applied in that
+  state, preventing Hamlib from selecting hardware flow control and rejecting
+  the connection with `cannot set RTS with hardware handshake` or `Invalid
+  configuration`.
+- Preserved explicit handshake behaviour and the operator's ability to select
+  DTR/RTS when the CAT handshake is explicitly configured.
+- Added focused CAT serial safety coverage for the default-handshake case and
+  validated the implementation with the existing CAT and Liquid Glass test
+  targets.
+
+### Italiano
+
+- Corrette le superfici classiche della dashboard che restavano traslucide con
+  Glass disattivato o non disponibile. Il menu hamburger principale e il suo
+  sottomenu della lingua usano ora uno sfondo opaco del tema, mantenendo testo
+  e controlli leggibili senza modificare l'aspetto Liquid Glass quando è
+  supportato.
+- Aggiunto un controllo di regressione per il fallback opaco di finestre
+  esterne, dialoghi e popup.
+- Rafforzata la configurazione CAT seriale su Windows quando l'handshake è
+  `Default` e quindi non ancora risolto. Force DTR e Force RTS non vengono più
+  proposti né applicati in questo stato, evitando che Hamlib selezioni il
+  controllo di flusso hardware e rifiuti la connessione con `cannot set RTS with
+  hardware handshake` o `Invalid configuration`.
+- Conservato il comportamento per gli handshake espliciti: DTR/RTS restano
+  selezionabili quando la configurazione CAT lo consente realmente.
+- Aggiunti test mirati per la sicurezza CAT seriale con handshake predefinito e
+  validata l'implementazione con i target di test CAT e Liquid Glass esistenti.
+
 ## [1.0.699] - 2026-10-18
 
 ### English
