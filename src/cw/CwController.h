@@ -47,6 +47,10 @@ class CwController : public QObject {
     Q_PROPERTY(bool tuningLowerSideband READ tuningLowerSideband WRITE setTuningLowerSideband NOTIFY txChanged)
     Q_PROPERTY(bool decoderOn READ decoderOn WRITE setDecoderOn NOTIFY decoderChanged)
     Q_PROPERTY(QString decoderText READ decoderText NOTIFY decoderChanged)
+    // Callsigns recognised in the received CW transcript.  They are exposed
+    // separately from decoderText so the UI can make each station clickable
+    // without trying to edit or interpret the transcript itself.
+    Q_PROPERTY(QStringList decoderCalls READ decoderCalls NOTIFY decoderChanged)
     // Expanded CW text submitted to the active transmitter.  This is kept
     // separate from decoderText so RX and TX can be shown with different
     // colours without mixing operator input with received decoding.
@@ -116,8 +120,12 @@ public:
         using MorseCompletion = std::function<void(const QString&)>;
         std::function<bool(const QString&, int, MorseCompletion)> sendRigMorseAsync;
         std::function<int()> rigMorseTextLimit;
+        // Most radios let their native CW keyer own the PTT/break-in timing.
+        // The application supplies false for the CAT path so inter-character
+        // and inter-word gaps are not held inside one explicit PTT interval.
+        std::function<bool()> rigCwRequiresExplicitPtt;
         std::function<void()> stopRigMorse;
-        // Il keyer CAT nativo spesso richiede PTT esplicito (es. Yaesu FT-991A).
+        // Optional explicit PTT ownership for legacy/embedded integrations.
         std::function<void(bool on)> rigPtt;
         // Restituisce chi sta gia' riservando una porta seriale locale, oppure
         // una stringa vuota se il keyer la puo' aprire.  In particolare, una
@@ -154,6 +162,7 @@ public:
     bool decoderOn() const { return m_decoderOn; }
     void setDecoderOn(bool on);
     QString decoderText() const { return m_decoderText; }
+    QStringList decoderCalls() const { return m_decoderCalls; }
     QString txText() const { return m_txText; }
     int decoderWpm() const { return m_decoder.wpm(); }
     int decoderTone() const { return static_cast<int>(m_decoder.toneHz()); }
@@ -251,12 +260,13 @@ private:
     void clearTxSetupError();
     void sendExpanded(const QString& ready);
     void sendNextRigChunk();
-    void finishRigKey();
+    void finishRigKey(bool disarm = false);
     void startRemoteKey(const QString& text);
     void pumpRemoteKey();
     void finishRemoteKey(bool immediate);
     void setSending(bool on, int macroIndex);
     void appendTxTranscript(const QString& text);
+    void rebuildDecoderCalls();
     void publishScope(bool force = false);
     void save();
     Context contextFrom(const QVariantMap& map) const;
@@ -266,6 +276,7 @@ private:
 
     CwDecoder m_decoder {12000};
     QString m_decoderText;
+    QStringList m_decoderCalls;
     QString m_txText;
     bool m_decoderOn {true};
     int m_decoderToneLock {0};
@@ -307,6 +318,10 @@ private:
     QString m_rigQueuedText;
     bool m_rigActive {false};
     bool m_rigWaiting {false};
+    bool m_rigPttOwned {false};
+    // Keep the CAT stop path armed after the controller's estimated CW
+    // duration expires: the radio may still be draining its own keyer buffer.
+    bool m_rigStopArmed {false};
     quint64 m_rigGeneration {0};
 };
 

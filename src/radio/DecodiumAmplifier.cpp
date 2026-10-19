@@ -31,6 +31,17 @@ DecodiumAmplifier::~DecodiumAmplifier()
     configure(false, m_port, m_baud, m_passive, m_pollMs);
 }
 
+void DecodiumAmplifier::setManufacturer(const QString& manufacturer)
+{
+    QString value = manufacturer.trimmed();
+    if (value.isEmpty())
+        value = QStringLiteral("SPE");
+    if (value == m_manufacturer)
+        return;
+    m_manufacturer = value;
+    emit configChanged();
+}
+
 QList<DecodiumAmplifier::Trovato>
 DecodiumAmplifier::cerca(const QStringList& daEscludere, int attesaMs)
 {
@@ -141,9 +152,26 @@ DecodiumAmplifier::Reading DecodiumAmplifier::parseSpeStatus(const QByteArray& f
         return r;
 
     int const n = quint8(frame.at(i + 3));
-    if (frame.size() < i + 4 + n)
+    int const bodyEnd = i + 4 + n;
+    // A STATUS frame has two checksum bytes followed by either CRLF (the
+    // original table) or ,CRLF (the form emitted by the Taurus firmware).
+    // Do not infer the end from the total QByteArray: callers may pass a
+    // buffer containing noise or another frame after this one.
+    int const trailerStart = bodyEnd + 2; // checksum bytes occupy bodyEnd..bodyEnd+1
+    if (frame.size() < trailerStart + 2)
         return r;
     QByteArray const body = frame.mid(i + 4, n);
+
+    if (frame.size() >= trailerStart + 3
+        && frame.at(trailerStart + 1) == '\r'
+        && frame.at(trailerStart + 2) == '\n'
+        && frame.at(trailerStart) == ',') {
+        // checksum, checksum, comma, CR, LF
+    } else if (frame.at(trailerStart) == '\r' && frame.at(trailerStart + 1) == '\n') {
+        // checksum, checksum, CR, LF
+    } else {
+        return r;
+    }
 
     // La somma di controllo non e' pignoleria: su una linea disturbata una
     // trama mutila darebbe letture assurde proprio mentre si trasmette a
@@ -151,14 +179,19 @@ DecodiumAmplifier::Reading DecodiumAmplifier::parseSpeStatus(const QByteArray& f
     int sum = 0;
     for (unsigned char c : body)
         sum += c;
-    if (frame.size() >= i + 6 + n) {
-        int const c0 = quint8(frame.at(i + 4 + n));
-        int const c1 = quint8(frame.at(i + 5 + n));
-        if (c0 != (sum % 256) || c1 != ((sum / 256) % 256))
-            return r;
-    }
+    int const c0 = quint8(frame.at(bodyEnd));
+    int const c1 = quint8(frame.at(bodyEnd + 1));
+    if (c0 != (sum % 256) || c1 != ((sum / 256) % 256))
+        return r;
 
-    QStringList const f = QString::fromLatin1(body).split(QLatin1Char(','));
+    QStringList f = QString::fromLatin1(body).split(QLatin1Char(','));
+    // The published example omits the delimiters, while the Taurus firmware
+    // sends both: `,15K,...,N,N,`.  Strip only those framing delimiters so
+    // the documented field indexes remain identical for both variants.
+    if (!f.isEmpty() && f.first().trimmed().isEmpty())
+        f.removeFirst();
+    if (!f.isEmpty() && f.last().trimmed().isEmpty())
+        f.removeLast();
     if (f.size() < 12)
         return r;
 
@@ -195,17 +228,31 @@ QList<DecodiumAmplifier::Reading> DecodiumAmplifier::harvest(QByteArray& buffer)
         if (i < 0 || buffer.size() < i + 4)
             break;
         int const n = quint8(buffer.at(i + 3));
-        int const end = i + 6 + n;
-        if (buffer.size() < end)
+        int const bodyEnd = i + 4 + n;
+        int const trailerStart = bodyEnd + 2; // checksum bytes occupy bodyEnd..bodyEnd+1
+        if (buffer.size() < trailerStart + 2)
             break;
-        Reading const r = parseSpeStatus(buffer.mid(i, end - i));
-        // La trama termina con CR LF: consumarli evita di lasciare code nel
-        // buffer, che a lungo andare confondono la ricerca del sincronismo.
-        int consumed = end;
-        while (consumed < buffer.size()
-               && (buffer.at(consumed) == 0x0D || buffer.at(consumed) == 0x0A))
-            ++consumed;
-        buffer.remove(0, consumed);
+
+        // The Taurus reply has an extra comma before CRLF.  Wait for the
+        // complete terminator before consuming anything; otherwise that
+        // comma remains at the head of the buffer and every later poll is
+        // permanently out of phase.
+        int frameEnd = trailerStart + 2;
+        if (buffer.at(trailerStart) == ',') {
+            if (buffer.size() < trailerStart + 3)
+                break;
+            if (buffer.at(trailerStart + 1) != '\r' || buffer.at(trailerStart + 2) != '\n') {
+                buffer.remove(0, i + 1);
+                continue;
+            }
+            frameEnd = trailerStart + 3;
+        } else if (buffer.at(trailerStart) != '\r' || buffer.at(trailerStart + 1) != '\n') {
+            buffer.remove(0, i + 1);
+            continue;
+        }
+
+        Reading const r = parseSpeStatus(buffer.mid(i, frameEnd - i));
+        buffer.remove(0, frameEnd);
         if (r.valid)
             out.append(r);
     }

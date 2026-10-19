@@ -107,6 +107,7 @@
 #include <QScreen>
 #include <QQuickGraphicsConfiguration>
 #include <QQuickWindow>
+#include <QWindow>
 #include <QApplication>
 #include <QCheckBox>
 #include <QComboBox>
@@ -10384,6 +10385,11 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     // Amplificatore: si apre solo se richiesto. Lettura con ricaduta sulla
     // radice, per la stessa ragione della CAT condivisa.
     QString const ampPort = decodium::profiledSettingsValue({}, QStringLiteral("AmpPort"), QString()).toString();
+    if (m_amplifier) {
+        m_amplifier->setManufacturer(
+            decodium::profiledSettingsValue({}, QStringLiteral("AmpManufacturer"), QStringLiteral("SPE"))
+                .toString());
+    }
     if (m_amplifier && decodium::profiledSettingsValue({}, QStringLiteral("AmpEnabled"), false).toBool()
         && !amplifierPortClashesWithCat(m_hamlibCat, ampPort)) {
         m_amplifier->configure(
@@ -23227,6 +23233,16 @@ void DecodiumBridge::configureAmplifier(bool enabled, const QString& port,
     setSetting(QStringLiteral("AmpPollMs"), pollMs);
     if (m_amplifier)
         m_amplifier->configure(enabled, port, baud, passive, pollMs);
+}
+
+void DecodiumBridge::configureAmplifierManufacturer(const QString& manufacturer)
+{
+    QString value = manufacturer.trimmed();
+    if (value.isEmpty())
+        value = QStringLiteral("SPE");
+    setSetting(QStringLiteral("AmpManufacturer"), value);
+    if (m_amplifier)
+        m_amplifier->setManufacturer(value);
 }
 
 // CAT condivisa. Le impostazioni passano dallo stesso archivio di tutte le
@@ -58309,18 +58325,71 @@ static QWidget* dialogParentWidget()
     return nullptr;
 }
 
+static QWindow* dialogOwnerWindow(QWidget* widgetParent)
+{
+    if (widgetParent) {
+        if (auto* window = widgetParent->windowHandle()) {
+            return window;
+        }
+    }
+
+    // Detached QML windows (including the QSO log) are QQuickWindow objects,
+    // not QWidget instances.  QApplication::activeWindow() therefore does
+    // not find them, leaving a QFileDialog without an owner on macOS and
+    // allowing it to open behind the application.
+    if (auto* focused = QGuiApplication::focusWindow()) {
+        if (focused->isVisible()
+            && focused->visibility() != QWindow::Minimized) {
+            return focused;
+        }
+    }
+
+    for (auto* window : QGuiApplication::allWindows()) {
+        if (window && window->isVisible()
+            && window->visibility() != QWindow::Minimized) {
+            return window;
+        }
+    }
+    return nullptr;
+}
+
+static void prepareFileDialogForActivation(QFileDialog& dialog,
+                                           QWindow* ownerWindow)
+{
+    dialog.setWindowModality(Qt::ApplicationModal);
+    dialog.setOption(QFileDialog::DontUseNativeDialog, true);
+
+    // Create the native window handle before showing it so the transient
+    // relationship is established before the window enters the desktop.
+    dialog.winId();
+    if (auto* dialogWindow = dialog.windowHandle()) {
+        if (ownerWindow && ownerWindow != dialogWindow) {
+            dialogWindow->setTransientParent(ownerWindow);
+        }
+    }
+
+    dialog.show();
+    dialog.raise();
+    dialog.activateWindow();
+    if (auto* dialogWindow = dialog.windowHandle()) {
+        dialogWindow->raise();
+        dialogWindow->requestActivate();
+    }
+}
+
 QString DecodiumBridge::openFileDialog(const QString& title,
                                        const QString& initialPath,
                                        const QStringList& nameFilters) const
 {
-    QFileDialog dialog(dialogParentWidget(),
+    QWidget* const widgetParent = dialogParentWidget();
+    QWindow* const ownerWindow = dialogOwnerWindow(widgetParent);
+    QFileDialog dialog(widgetParent,
                        title,
                        localDialogPath(initialPath),
                        dialogFilterString(nameFilters));
     dialog.setFileMode(QFileDialog::ExistingFile);
     dialog.setAcceptMode(QFileDialog::AcceptOpen);
-    dialog.setWindowModality(Qt::ApplicationModal);
-    dialog.setOption(QFileDialog::DontUseNativeDialog, true);
+    prepareFileDialogForActivation(dialog, ownerWindow);
     if (dialog.exec() != QDialog::Accepted) {
         return QString();
     }

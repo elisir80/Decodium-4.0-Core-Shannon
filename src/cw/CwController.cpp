@@ -16,6 +16,42 @@ constexpr int kKeyerRetryIntervalMs = 250;
 constexpr int kKeyerRetryLimit = 120;
 const char kGroup[] = "CW";
 
+bool looksLikeCwCallsign(const QString& token)
+{
+    // Keep this deliberately conservative. A CW decoder is allowed to emit
+    // partial words, but only callsign-shaped tokens become clickable targets.
+    // Both normal prefixes (EA3ABC) and numeric prefixes (3D2ABC) are
+    // covered, as are portable suffixes (/P, /MM...).
+    static const QRegularExpression callPattern(
+        QStringLiteral(R"(^(?:[A-Z]{1,3}\d[A-Z]{1,4}|\d[A-Z]{1,3}\d[A-Z]{1,4})(?:/[A-Z0-9]{1,4})?$)"));
+    return callPattern.match(token).hasMatch();
+}
+
+QStringList callsFromCwText(const QString& text)
+{
+    QStringList calls;
+    static const QRegularExpression tokenPattern(
+        QStringLiteral(R"([A-Z0-9]{2,}(?:/[A-Z0-9]+)?)"),
+        QRegularExpression::CaseInsensitiveOption);
+
+    auto it = tokenPattern.globalMatch(text);
+    while (it.hasNext()) {
+        const QString token = it.next().captured().toUpper();
+        if (!looksLikeCwCallsign(token))
+            continue;
+
+        // Keep the most recently heard station at the right-hand end, while
+        // preserving one chip per station in the compact UI.
+        calls.removeAll(token);
+        calls.append(token);
+    }
+
+    constexpr int kMaxClickableCalls = 16;
+    while (calls.size() > kMaxClickableCalls)
+        calls.removeFirst();
+    return calls;
+}
+
 // A serial keyer and a K1EL WinKeyer are local devices opened through
 // QSerialPort.  rigctld endpoints are commonly written as host:port, which
 // QSerialPort otherwise tries to open as a (non-existent) device name and
@@ -65,13 +101,15 @@ CwController::CwController(QObject* parent)
             pumpRemoteKey();
     });
     connect(&m_audioDone, &QTimer::timeout, this, [this] {
-        // Per il keyer CAT il PTT alto e' lo stato atteso durante l'invio:
-        // non passare da canTransmit(), che in TX risulta correttamente falso.
+        // CAT CW is active while a message is queued.  The application path
+        // normally lets the radio own break-in/PTT; legacy embeddings may
+        // still own it explicitly through rigPtt.
         if (m_rigActive) {
             if (m_rigWaiting) {
                 // No completion from the CAT worker: stop before releasing PTT.
                 if (m_hooks.stopRigMorse) m_hooks.stopRigMorse();
-                finishRigKey();
+                if (!m_rigPttOwned && m_hooks.rigPtt) m_hooks.rigPtt(false);
+                finishRigKey(true);
                 emit message(tr("The CAT CW keyer did not confirm the send command"), QStringLiteral("warning"));
             } else if (!m_rigQueuedText.isEmpty()) {
                 sendNextRigChunk();
@@ -194,6 +232,7 @@ void CwController::setDecoderOn(bool on)
         const QString last = m_decoder.flush();
         if (!last.isEmpty())
             m_decoderText += last;
+        rebuildDecoderCalls();
         m_scope.clear();
         emit decoderScopeChanged();
     }
@@ -285,6 +324,7 @@ bool CwController::centerSignal()
 void CwController::clearDecoder()
 {
     m_decoderText.clear();
+    m_decoderCalls.clear();
     m_decoder.reset();
     emit decoderChanged();
 }
@@ -329,9 +369,15 @@ void CwController::feedRxAudio(const QVector<short>& samples, int sampleRate)
         // caratteri bastano e avanzano.
         if (m_decoderText.size() > 4000)
             m_decoderText = m_decoderText.right(3000);
+        rebuildDecoderCalls();
     }
     emit decoderChanged();
     publishScope();
+}
+
+void CwController::rebuildDecoderCalls()
+{
+    m_decoderCalls = callsFromCwText(m_decoderText);
 }
 
 void CwController::publishScope(bool force)
@@ -642,9 +688,16 @@ void CwController::sendMacro(int index, const QVariantMap& context)
 {
     if (index < 0 || index >= m_macros.size())
         return;
-    const QString ready = expand(m_macros.at(index).text, contextFrom(context));
-    if (ready.isEmpty())
+    const Macro& macro = m_macros.at(index);
+    const QString ready = expand(macro.text, contextFrom(context));
+    qInfo().noquote() << "[CW-MACRO] index=" << index
+                      << "label=" << macro.label
+                      << "template_chars=" << macro.text.size()
+                      << "expanded_chars=" << ready.size();
+    if (ready.isEmpty()) {
+        emit message(tr("CW macro is empty"), QStringLiteral("warning"));
         return;
+    }
     if (!canSend()) {
         emit message(tr("CW transmit is not ready"), QStringLiteral("warning"));
         return;
@@ -695,8 +748,15 @@ void CwController::sendExpanded(const QString& ready)
             return;
         }
         m_rigQueuedText = ready;
+        m_rigStopArmed = true;
+        // Keep the DecoDXLog behaviour for the application CAT path: the
+        // radio's own CW keyer controls break-in and releases PTT between
+        // characters/words.  The hook defaults to true for older embedding
+        // code and tests that still own PTT explicitly.
+        m_rigPttOwned = !m_hooks.rigCwRequiresExplicitPtt
+            || m_hooks.rigCwRequiresExplicitPtt();
         m_rigActive = true;
-        if (m_hooks.rigPtt) m_hooks.rigPtt(true);
+        if (m_rigPttOwned && m_hooks.rigPtt) m_hooks.rigPtt(true);
         sendNextRigChunk();
         return;
     }
@@ -749,7 +809,7 @@ void CwController::sendNextRigChunk()
         if (!self || !self->m_rigActive || generation != self->m_rigGeneration) return;
         self->m_rigWaiting = false;
         if (!error.isEmpty()) {
-            self->finishRigKey();
+            self->finishRigKey(true);
             emit self->message(error, QStringLiteral("warning"));
         } else {
             self->m_audioDone.start(duration + tail);
@@ -764,14 +824,17 @@ void CwController::sendNextRigChunk()
     }
 }
 
-void CwController::finishRigKey()
+void CwController::finishRigKey(bool disarm)
 {
     ++m_rigGeneration; // invalidate acknowledgements from an earlier send
     m_rigActive = false;
     m_rigWaiting = false;
     m_rigQueuedText.clear();
     m_audioDone.stop();
-    if (m_hooks.rigPtt) m_hooks.rigPtt(false);
+    if (m_rigPttOwned && m_hooks.rigPtt) m_hooks.rigPtt(false);
+    m_rigPttOwned = false;
+    if (disarm)
+        m_rigStopArmed = false;
     setSending(false, -1);
 }
 
@@ -840,8 +903,14 @@ void CwController::finishRemoteKey(bool immediate)
 
 void CwController::stop()
 {
-    if (m_rigActive) {
+    if (m_rigActive || m_rigStopArmed) {
         if (m_hooks.stopRigMorse) m_hooks.stopRigMorse();
+        // stop_morse is the normal native-keyer stop.  PTT OFF is only an
+        // emergency release here; it is deliberately not used when a CAT
+        // message is running, otherwise the radio would transmit one
+        // continuous carrier across all CW gaps.
+        if (!m_rigPttOwned && m_hooks.rigPtt) m_hooks.rigPtt(false);
+        m_rigStopArmed = false;
         // Release the path that started TX, even after CAT/backend changes.
         finishRigKey();
     }

@@ -44,6 +44,18 @@ CHK1             SUM(DATA0..DATA66) / 256
 CR LF
 ```
 
+Il firmware dell'**Expert 1.5K-FA Taurus** invia la stessa trama con due
+delimitatori aggiuntivi: una virgola all'inizio e una virgola tra i due byte
+di checksum e `CR LF`:
+
+```text
+AA AA AA 43 ,15K,S,R,A,1,01,1a,0r,M,0000, 0.00, 0.00, 0.0, 0.0,081,000,000,N,N, CHK0 CHK1 , CR LF
+```
+
+I delimitatori non sono campi: vanno rimossi prima di dividere il testo sui
+separatori. Il modello si identifica come `15K`. Decodium accetta sia questa
+variante Taurus sia la forma senza virgole prevista dalla tabella originale.
+
 Esempio dalla guida:
 
 ```

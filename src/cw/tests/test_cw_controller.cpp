@@ -446,6 +446,80 @@ private slots:
         QCOMPARE(c.effectiveBackend(), QString("audio"));
     }
 
+    void nativeRadioKeyerOwnsPttTiming()
+    {
+        QSettings s(iniPath(), QSettings::IniFormat);
+        CwController c;
+        QString sent;
+        QVector<bool> ptt;
+        CwController::Hooks h;
+        h.canTransmit = [] { return true; };
+        h.remoteRadio = [] { return false; };
+        h.rigKeyerAvailable = [] { return true; };
+        h.rigCwRequiresExplicitPtt = [] { return false; };
+        h.rigPtt = [&](bool on) { ptt.append(on); };
+        h.sendRigMorse = [&](const QString& text, int) { sent = text; return true; };
+        c.setHooks(h);
+        c.start(&s);
+
+        c.sendText(QStringLiteral("CQ TEST"), {});
+        QCOMPARE(sent, QStringLiteral("CQ TEST"));
+        QVERIFY(ptt.isEmpty());
+        c.stop();
+        QCOMPARE(ptt, (QVector<bool>{false}));
+    }
+
+    void oneCharacterMacroReachesTheRigKeyer()
+    {
+        QSettings s(iniPath(), QSettings::IniFormat);
+        CwController c;
+        QString sent;
+        CwController::Hooks h;
+        h.canTransmit = [] { return true; };
+        h.remoteRadio = [] { return false; };
+        h.rigKeyerAvailable = [] { return true; };
+        h.sendRigMorse = [&](const QString& text, int) { sent = text; return true; };
+        c.setHooks(h);
+        c.start(&s);
+        c.setMacro(4, QStringLiteral("F5 ?"), QStringLiteral("?"));
+
+        c.sendMacro(4, {});
+
+        QCOMPARE(sent, QStringLiteral("?"));
+        QVERIFY(c.sending());
+        c.stop();
+        QVERIFY(!c.sending());
+    }
+
+    void nativeRadioStopRemainsArmedAfterEstimatedCompletion()
+    {
+        QSettings s(iniPath(), QSettings::IniFormat);
+        CwController c;
+        bool stopped = false;
+        QVector<bool> ptt;
+        CwController::Hooks h;
+        h.canTransmit = [] { return true; };
+        h.remoteRadio = [] { return false; };
+        h.rigKeyerAvailable = [] { return true; };
+        h.rigCwRequiresExplicitPtt = [] { return false; };
+        h.rigPtt = [&](bool on) { ptt.append(on); };
+        h.stopRigMorse = [&] { stopped = true; };
+        h.sendRigMorse = [&](const QString&, int) { return true; };
+        c.setHooks(h);
+        c.start(&s);
+        c.setWpm(60);
+
+        c.sendText(QStringLiteral("E"), {});
+        QTRY_VERIFY_WITH_TIMEOUT(!c.sending(), 3000);
+        QVERIFY(ptt.isEmpty());
+
+        // The controller is idle by estimate, but Stop must still release a
+        // radio that is draining its native CAT keyer buffer.
+        c.stop();
+        QVERIFY(stopped);
+        QCOMPARE(ptt, (QVector<bool>{false}));
+    }
+
     void txTranscriptShowsExpandedTextAndCanBeCleared()
     {
         QSettings s(iniPath(), QSettings::IniFormat);
@@ -784,6 +858,24 @@ private slots:
         QVERIFY2(c.decoderText().contains("IU8LMC"), qPrintable(c.decoderText()));
         QVERIFY(c.decoderWpm() >= 15 && c.decoderWpm() <= 25);
         QVERIFY(c.decoderTone() > 600 && c.decoderTone() < 800);
+    }
+
+    void decoderExposesClickableCallsigns()
+    {
+        QSettings s(iniPath(), QSettings::IniFormat);
+        CwController c;
+        c.start(&s);
+        const QVector<short> audio = morseAudio("CQ DE IU8LMC K1ABC", 20, 700, 12000);
+        for (int i = 0; i < audio.size(); i += 240)
+            c.feedRxAudio(audio.mid(i, 240), 12000);
+
+        const QStringList calls = c.decoderCalls();
+        QVERIFY2(calls.contains(QStringLiteral("IU8LMC")), qPrintable(c.decoderText()));
+        QVERIFY2(calls.contains(QStringLiteral("K1ABC")), qPrintable(c.decoderText()));
+        QVERIFY(!calls.contains(QStringLiteral("CQ")));
+
+        c.clearDecoder();
+        QVERIFY(c.decoderCalls().isEmpty());
     }
 
     void decoderOffReadsNothing()

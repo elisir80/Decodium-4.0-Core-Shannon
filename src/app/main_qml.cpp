@@ -4527,6 +4527,10 @@ int main(int argc, char* argv[])
             auto* cat = bridge.hamlibCat();
             return cat ? cat->rigMorseTextLimit() : 0;
         };
+        // Native CAT CW owns its own break-in/PTT timing. Keeping CAT PTT
+        // high here would turn every word gap into a continuous carrier,
+        // unlike the 1.17.02 DecoDXLog path.
+        h.rigCwRequiresExplicitPtt = [] { return false; };
         h.stopRigMorse = [&bridge] { bridge.cwStopRigMorse (); };
         h.rigPtt       = [&bridge] (bool on) { bridge.cwRigPtt (on); };
         h.sendKey = [&bridge] (QVector<decodium::cw::KeyEvent> const& events, int toneHz) {

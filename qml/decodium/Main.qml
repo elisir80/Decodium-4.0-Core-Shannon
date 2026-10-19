@@ -42,6 +42,12 @@ GlassApplicationWindow {
         && ["default", "auto", "predefinito"].indexOf(String(bridge.hamlibCat.serialPort || "").trim().toLowerCase()) < 0
         && !bridge.hamlibCat.connecting && !bridge.decoPortUseRemote
         && !bridge.transmitting && !bridge.tuning)
+    // When the CW pop-out owns the keyboard, its F1-F12 macros must take
+    // precedence over the dashboard shortcuts (F1/F3/F4) and fullscreen
+    // (F11).  Loader.item is intentionally checked defensively because the
+    // CW window is created lazily.
+    readonly property bool cwFunctionKeyWindowActive: !!(cwWindowLoader.item
+                                                         && cwWindowLoader.item["visible"])
     property string dashboardRadioActionStatus: ""
     Dialog {
         id: dashboardPowerOffDialog
@@ -1753,6 +1759,7 @@ GlassApplicationWindow {
     Shortcut {
         sequences: ["F11"]
         context: Qt.ApplicationShortcut
+        enabled: !mainWindow.cwFunctionKeyWindowActive
         onActivated: mainWindow.toggleFullScreen()
     }
     Shortcut {
@@ -12372,6 +12379,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
     Shortcut {
         sequence: "F2"
         context: Qt.ApplicationShortcut
+        enabled: !mainWindow.cwFunctionKeyWindowActive
         onActivated: mainWindow.openQsyQuickPicker()
     }
     // 1.0.229 — toggle compact mode Full Spectrum
@@ -12406,16 +12414,19 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
     Shortcut {
         sequence: "F1"
         context: Qt.ApplicationShortcut
+        enabled: !mainWindow.cwFunctionKeyWindowActive
         onActivated: { if (bridge) { bridge.monitoring ? bridge.stopMonitor() : bridge.startMonitor() } }
     }
     Shortcut {
         sequence: "F3"
         context: Qt.ApplicationShortcut
+        enabled: !mainWindow.cwFunctionKeyWindowActive
         onActivated: { if (bridge) bridge.autoSeq = !bridge.autoSeq }
     }
     Shortcut {
         sequence: "F4"
         context: Qt.ApplicationShortcut
+        enabled: !mainWindow.cwFunctionKeyWindowActive
         onActivated: {
             if (!bridge)
                 return

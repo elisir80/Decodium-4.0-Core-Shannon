@@ -25,6 +25,7 @@ private slots:
     void liveMapFramelessPopoutHasAllResizeHandles();
     void dialogsAndHostedPanelsUseGlassSurfaces();
     void cwWindowKeepsOperationalContrastAndHasPersistentTrafficSplitter();
+    void cwFunctionKeysOverrideDashboardShortcuts();
     void jttyWindowKeepsOperationalContrast();
     void restoredPopoutsWaitForStartupPresentation();
 };
@@ -48,6 +49,20 @@ void TestLiquidGlassWindows::shellIsCrossPlatformAndThemeGated()
         QVERIFY(!shell.contains(QStringLiteral("import QtQuick.Effects")));
         QVERIFY(!shell.contains(QStringLiteral("MultiEffect {")));
     }
+}
+
+void TestLiquidGlassWindows::cwFunctionKeysOverrideDashboardShortcuts()
+{
+    const QString main = readSource(QStringLiteral("qml/decodium/Main.qml"));
+    const QString cw = readSource(QStringLiteral("qml/decodium/components/CwWindow.qml"));
+    QVERIFY(!main.isEmpty());
+    QVERIFY(!cw.isEmpty());
+
+    QVERIFY(main.contains(QStringLiteral("cwFunctionKeyWindowActive")));
+    QVERIFY(main.contains(QStringLiteral("enabled: !mainWindow.cwFunctionKeyWindowActive")));
+    QVERIFY(cw.contains(QStringLiteral("context: Qt.WindowShortcut")));
+    QVERIFY(cw.contains(QStringLiteral("sequence: \"F\" + (index + 1)")));
+    QVERIFY(cw.contains(QStringLiteral("win.cw.sendMacro(index, win.ctx())")));
 }
 
 void TestLiquidGlassWindows::classicThemeRestoresOpaqueSurface()

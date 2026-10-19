@@ -38,6 +38,16 @@ target_compile_definitions (test_liquid_glass_windows PRIVATE DECODIUM_SOURCE_DI
 target_link_libraries (test_liquid_glass_windows Qt6::Test Qt6::Core)
 add_test (NAME test_liquid_glass_windows COMMAND $<TARGET_FILE:test_liquid_glass_windows>)
 
+add_executable (test_file_dialog_focus test_file_dialog_focus.cpp)
+target_compile_definitions (test_file_dialog_focus PRIVATE DECODIUM_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+target_link_libraries (test_file_dialog_focus Qt6::Test Qt6::Core)
+add_test (NAME test_file_dialog_focus COMMAND $<TARGET_FILE:test_file_dialog_focus>)
+
+add_executable (test_cw_cat_speed_fallback test_cw_cat_speed_fallback.cpp)
+target_compile_definitions (test_cw_cat_speed_fallback PRIVATE DECODIUM_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+target_link_libraries (test_cw_cat_speed_fallback Qt6::Test Qt6::Core)
+add_test (NAME test_cw_cat_speed_fallback COMMAND $<TARGET_FILE:test_cw_cat_speed_fallback>)
+
 add_executable (test_glass_theme_switch test_glass_theme_switch.cpp)
 target_compile_definitions (test_glass_theme_switch PRIVATE DECODIUM_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
 target_link_libraries (test_glass_theme_switch Qt6::Test Qt6::Quick Qt6::Qml)

@@ -29,6 +29,23 @@ QByteArray frame(const QByteArray& body)
     return f;
 }
 
+// Trama realmente osservata su un Expert 1.5K-FA Taurus: il firmware mette
+// una virgola prima del primo campo e una seconda virgola prima di CRLF.
+QByteArray taurusFrame(const QByteArray& body)
+{
+    int sum = 0;
+    for (unsigned char c : body)
+        sum += c;
+    QByteArray f;
+    f.append(char(0xAA)).append(char(0xAA)).append(char(0xAA));
+    f.append(char(body.size()));
+    f.append(body);
+    f.append(char(sum % 256));
+    f.append(char((sum / 256) % 256));
+    f.append(",\r\n");
+    return f;
+}
+
 // Esempio della guida del costruttore, in trasmissione.
 QByteArray const kTx =
     "20K,O,T,x,1,10,1a,0r,H,0407, 1.15, 1.20, 48.0, 13.1, 37,  0,  0,N,N";
@@ -66,6 +83,19 @@ private slots:
         QCOMPARE(r.watts, 0.0);
         // Con ROS a zero in ricezione si riporta 1.0, non un rapporto
         // impossibile: uno strumento non deve mai mostrare un ROS < 1.
+        QCOMPARE(r.swr, 1.0);
+    }
+
+    void leggeLaTramaRealeDelTaurus15K()
+    {
+        QByteArray const body =
+            ",15K,S,R,A,1,01,1a,0r,M,0000, 0.00, 0.00, 0.0, 0.0,081,000,000,N,N,";
+        auto const r = DecodiumAmplifier::parseSpeStatus(taurusFrame(body));
+        QVERIFY(r.valid);
+        QCOMPARE(r.model, QStringLiteral("15K"));
+        QVERIFY(!r.transmitting);
+        QCOMPARE(r.watts, 0.0);
+        QCOMPARE(r.temperature, 81);
         QCOMPARE(r.swr, 1.0);
     }
 
@@ -110,6 +140,24 @@ private slots:
         QCOMPARE(letture.at(1).watts, 512.0);
         QCOMPARE(letture.at(1).swr, 1.35);
         QVERIFY(!letture.at(2).transmitting);
+    }
+
+    void estraeUnaTramaTaurusConLeVirgoleDiFraming()
+    {
+        QByteArray const body =
+            ",15K,O,T,A,1,05,1a,0r,H,1250, 1.10, 1.40,48.0,32.5,047,000,000,N,N,";
+        QByteArray flusso("noise", 5);
+        flusso.append(taurusFrame(body));
+        flusso.append("\x00\xFF", 2);
+        flusso.append(frame(kRx));
+
+        auto const letture = DecodiumAmplifier::harvest(flusso);
+        QCOMPARE(letture.size(), 2);
+        QCOMPARE(letture.at(0).model, QStringLiteral("15K"));
+        QCOMPARE(letture.at(0).watts, 1250.0);
+        QVERIFY(letture.at(0).transmitting);
+        QVERIFY(!letture.at(1).transmitting);
+        QVERIFY(flusso.isEmpty());
     }
 
     void unaTramaSpezzataSiCompletaAlPezzoSuccessivo()

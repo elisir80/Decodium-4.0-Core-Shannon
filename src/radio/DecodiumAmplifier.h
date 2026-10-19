@@ -32,6 +32,7 @@ class DecodiumAmplifier : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(bool    enabled     READ enabled     NOTIFY configChanged)
+    Q_PROPERTY(QString manufacturer READ manufacturer WRITE setManufacturer NOTIFY configChanged)
     Q_PROPERTY(QString port        READ port        NOTIFY configChanged)
     Q_PROPERTY(int     baud        READ baud        NOTIFY configChanged)
     Q_PROPERTY(bool    passive     READ passive     NOTIFY configChanged)
@@ -68,6 +69,8 @@ public:
     ~DecodiumAmplifier() override;
 
     bool    enabled()      const { return m_enabled; }
+    QString manufacturer() const { return m_manufacturer; }
+    void    setManufacturer(const QString& manufacturer);
     QString port()         const { return m_port; }
     int     baud()         const { return m_baud; }
     bool    passive()      const { return m_passive; }
@@ -139,6 +142,7 @@ private:
     QByteArray m_buffer;
 
     bool m_enabled {false};
+    QString m_manufacturer {QStringLiteral("SPE")};
     bool m_passive {true};
     QString m_port;
     int m_baud {9600};

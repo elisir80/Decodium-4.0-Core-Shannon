@@ -160,6 +160,13 @@ namespace
         && is_icom_serial_cat (model);
   }
 
+  bool is_yaesu_rig (RIG const * rig)
+  {
+    return rig && rig->caps && rig->caps->mfg_name
+      && 0 == QString::fromLatin1 (rig->caps->mfg_name).trimmed ()
+        .compare (QStringLiteral ("Yaesu"), Qt::CaseInsensitive);
+  }
+
   // int frequency_change_callback (RIG * /* rig */, vfo_t vfo, freq_t f, rig_ptr_t arg)
   // {
   //   (void)vfo;			// unused in release build
@@ -2648,17 +2655,46 @@ QString HamlibTransceiver::send_morse_checked (QString const& text, int wpm)
     }
   if (payload.trimmed ().isEmpty ())
     return tr ("CW text is empty");
+
+  // Hamlib's Yaesu CAT backend reserves a one-character send_morse() payload
+  // for memories 1-5 (and rejects other single characters such as '?').
+  // Decodium always means literal Morse text, so force the backend through
+  // its text-message path with a trailing word gap.  Without this, F5='?'
+  // and user macros containing one character are not transmitted reliably.
+  bool const literal_single_char = payload.size () == 1 && is_yaesu_rig (m_->rig_.data ());
+  if (literal_single_char)
+    payload += QLatin1Char (' ');
+
   if (wpm > 0)
     {
       value_t speed {}; speed.i = wpm;
       int const rc = rig_set_level (m_->rig_.data (), RIG_VFO_CURR, RIG_LEVEL_KEYSPD, speed);
       if (rc != RIG_OK)
-        return tr ("Setting CW speed failed: %1 (%2)").arg (QString::fromLatin1 (rigerror (rc))).arg (rc);
+        {
+          // A NET rigctl/rigctld connection can expose send_morse() while
+          // deliberately not exposing the KEYSPD level.  That is a missing
+          // optional control, not a failure to send CW: continue with the
+          // speed configured in the radio.  Previously this early return
+          // released PTT without ever issuing rig_send_morse(), which made
+          // CW look completely broken through rigctld.
+          if (rc == -RIG_ENAVAIL || rc == -RIG_ENIMPL)
+            {
+              qWarning ().noquote ()
+                << "[CW-CAT] CW speed control unavailable; using the radio's configured speed"
+                << "rc=" << rc;
+            }
+          else
+            {
+              return tr ("Setting CW speed failed: %1 (%2)")
+                .arg (QString::fromLatin1 (rigerror (rc))).arg (rc);
+            }
+        }
     }
   QByteArray const bytes = payload.toLatin1 ();
   int const rc = rig_send_morse (m_->rig_.data (), RIG_VFO_CURR, bytes.constData ());
   qInfo ().noquote () << "[CW-CAT] send result=" << rc << "model=" << m_->rig_->caps->rig_model
-                     << "text_chars=" << text.size () << "payload_chars=" << payload.size () << "wpm=" << wpm;
+                     << "text_chars=" << text.size () << "payload_chars=" << payload.size ()
+                     << "literal_single_char=" << literal_single_char << "wpm=" << wpm;
   return rc == RIG_OK ? QString {} : tr ("Sending CW failed: %1 (%2)")
     .arg (QString::fromLatin1 (rigerror (rc))).arg (rc);
 }

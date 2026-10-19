@@ -1,5 +1,84 @@
 # Changelog / Registro Modifiche
 
+## [1.0.701] - 2026-10-19
+
+### English
+
+- Fixed the CW external-window function-key path. F1-F12 now dispatch the
+  active CW macros while the CW window owns the keyboard, and the dashboard's
+  global F1/F2/F3/F4/F11 shortcuts are temporarily disabled in that context so
+  monitoring, QSY selection, QSO logging and fullscreen cannot consume a CW
+  macro key.
+- Fixed one-character CW macros for Yaesu CAT radios. Hamlib's Yaesu backend
+  treats a single-character `send_morse()` payload as a memory selector; the
+  literal Decodium text path now adds a trailing word gap so F5=`?` and custom
+  one-character macros are transmitted as Morse text.
+- Kept CW speed control optional for rigctld/Hamlib connections: when
+  `KEYSPD` is unavailable, the configured radio speed is used and the Morse
+  command is still sent instead of being rejected before transmission.
+- Hardened native CAT keyer ownership and stopping. The radio can control its
+  own break-in/PTT timing, while Stop still sends the native keyer stop command
+  and releases an emergency PTT state when required. Late CAT completions no
+  longer revive a stopped transmission.
+- Added CW macro diagnostics containing macro index, label, template length and
+  expanded length, plus a visible warning for macros that expand to empty text.
+- Added clickable decoded CW callsigns. Recognised calls are exposed as a
+  separate list in the CW window; clicking one fills the CW Call field and the
+  application DX call without transmitting anything.
+- Fixed file-dialog activation for ADIF import and other bridge file dialogs.
+  The dialog now uses an application-modal non-native window, establishes the
+  transient relationship with the QML owner, raises and activates the dialog
+  before entering the modal loop, and requests native focus explicitly.
+- Added SPE Expert amplifier manufacturer selection and Taurus telemetry
+  compatibility. The parser now accepts both the documented SPE status frame
+  and the real Expert 1.5K-FA Taurus frame with its leading/trailing framing
+  commas, while preserving checksum validation and correct stream consumption.
+- Added focused regression coverage for Yaesu single-character CAT Morse,
+  unavailable CAT speed control, CW macro delivery, CW function-key ownership,
+  file-dialog activation, and SPE/Taurus telemetry parsing.
+
+### Italiano
+
+- Corretto il percorso dei tasti funzione nella finestra CW esterna. F1-F12
+  inviano ora le macro CW attive quando la finestra CW possiede la tastiera; in
+  questo contesto le scorciatoie globali F1/F2/F3/F4/F11 della dashboard vengono
+  temporaneamente disabilitate, evitando che attivino monitor, QSY, log QSO o
+  fullscreen al posto della macro.
+- Corrette le macro CW di un solo carattere sulle radio Yaesu via CAT. Il
+  backend Yaesu di Hamlib interpreta un payload singolo di `send_morse()` come
+  selezione di memoria; il percorso testuale letterale di Decodium aggiunge ora
+  una pausa finale, così F5=`?` e le macro personalizzate di un carattere
+  vengono trasmesse come testo Morse.
+- Il controllo della velocità CW resta opzionale per le connessioni
+  rigctld/Hamlib: se `KEYSPD` non è disponibile, viene usata la velocità già
+  configurata nella radio e il comando Morse viene comunque inviato invece di
+  essere rifiutato prima della trasmissione.
+- Rafforzata la gestione del keyer CAT nativo e del comando Stop. La radio può
+  controllare autonomamente il proprio break-in/PTT, mentre Stop invia comunque
+  il comando di arresto al keyer nativo e rilascia il PTT di emergenza quando
+  necessario. Le completion CAT arrivate in ritardo non possono riavviare una
+  trasmissione già fermata.
+- Aggiunta una diagnostica delle macro CW con indice, etichetta, lunghezza del
+  modello e lunghezza del testo espanso, oltre a un avviso visibile quando una
+  macro risulta vuota dopo l'espansione.
+- Aggiunta la selezione cliccabile dei callsign decodificati in CW. I callsign
+  riconosciuti sono esposti in un elenco separato nella finestra CW; cliccandone
+  uno si riempiono il campo Call della finestra e il DX call dell'applicazione,
+  senza trasmettere nulla.
+- Corretto il focus dei dialoghi file usati per l'import ADIF e dagli altri
+  percorsi file del bridge. Il dialogo usa ora una finestra non nativa modale
+  per l'applicazione, collega la finestra QML proprietaria come transient parent,
+  porta il dialogo in primo piano e richiede esplicitamente l'attivazione prima
+  del ciclo modale.
+- Aggiunta la selezione del produttore per gli amplificatori SPE Expert e la
+  compatibilità con la telemetria Taurus. Il parser accetta ora sia la trama
+  SPE documentata sia quella reale dell'Expert 1.5K-FA Taurus con virgole di
+  framing iniziali/finali, mantenendo il controllo checksum e il consumo
+  corretto del flusso seriale.
+- Aggiunti test mirati per Morse CAT Yaesu a carattere singolo, velocità CAT
+  non disponibile, invio macro CW, priorità dei tasti funzione CW, attivazione
+  dei dialoghi file e parsing della telemetria SPE/Taurus.
+
 ## [1.0.700] - 2026-10-18
 
 ### English

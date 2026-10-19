@@ -1163,6 +1163,7 @@ public:
 
     Q_INVOKABLE void configureAmplifier(bool enabled, const QString& port,
                                         int baud, bool passive, int pollMs);
+    Q_INVOKABLE void configureAmplifierManufacturer(const QString& manufacturer);
     Q_INVOKABLE void configureCatShare(bool enabled, int port,
                                        bool allowControl, bool allowPtt);
     // Condivisione nel protocollo della radio: COM virtuale e, se rawPort non

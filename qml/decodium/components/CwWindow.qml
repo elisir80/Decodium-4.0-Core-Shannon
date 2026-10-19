@@ -123,6 +123,17 @@ GlassWindow {
             name: nameField.text.trim()
         }
     }
+    function useDecodedCall(value) {
+        const call = String(value || "").trim().toUpperCase()
+        if (!call) return
+
+        // Keep the application DX call and the CW field in sync. The macro
+        // text is not overwritten: its {CALL} placeholder is expanded from
+        // this field when the operator presses a macro key.
+        if (win.eng) win.eng.dxCall = call
+        callField.text = call
+        win.say(qsTr("%1 loaded into Call and CW macros").arg(call), "info")
+    }
     function say(text, level) {
         statusText.text = text
         statusText.color = level === "warning" ? cWarn : cDim
@@ -1042,6 +1053,60 @@ GlassWindow {
                     Item { Layout.fillWidth: true }
                     Btn { label: qsTr("Clear RX"); onClicked: win.cw.clearDecoder() }
                 }
+                RowLayout {
+                    id: decodedCallsRow
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 28
+                    spacing: 6
+                    visible: !!(win.cw && win.cw.decoderCalls && win.cw.decoderCalls.length > 0)
+
+                    Text {
+                        text: qsTr("Stations")
+                        color: win.cDim
+                        font.pixelSize: 10
+                        font.bold: true
+                    }
+                    ListView {
+                        id: decodedCallsView
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        orientation: ListView.Horizontal
+                        spacing: 4
+                        clip: true
+                        model: win.cw ? win.cw.decoderCalls : []
+
+                        delegate: Rectangle {
+                            width: decodedCallText.implicitWidth + 16
+                            height: 24
+                            radius: 4
+                            color: callMouse.containsMouse
+                                   ? Qt.rgba(win.cAccent.r, win.cAccent.g, win.cAccent.b, 0.22)
+                                   : Qt.rgba(win.cAccent.r, win.cAccent.g, win.cAccent.b, 0.10)
+                            border.width: 1
+                            border.color: win.cAccent
+
+                            Text {
+                                id: decodedCallText
+                                anchors.centerIn: parent
+                                text: modelData
+                                color: win.cAccent
+                                font.family: win.mono
+                                font.pixelSize: 11
+                                font.bold: true
+                            }
+                            MouseArea {
+                                id: callMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: win.useDecodedCall(modelData)
+                            }
+                            ToolTip.visible: callMouse.containsMouse
+                            ToolTip.delay: 500
+                            ToolTip.text: qsTr("Click to load %1 into Call and CW macros; no TX").arg(modelData)
+                        }
+                    }
+                }
                 // Keep the transcript content physically inside a dedicated,
                 // clipped panel.  A TextArea used as ScrollView content does
                 // not itself define the viewport's visual boundary on every
@@ -1224,10 +1289,14 @@ GlassWindow {
     // I tasti funzione, quando la finestra ha il fuoco; Esc ferma tutto.
     Repeater {
         model: Math.min(12, win.cw ? win.cw.macros.length : 0)
-        Item {
+            Item {
             required property int index
             Shortcut {
                 sequence: "F" + (index + 1)
+                // The main dashboard also has global F1/F2/F3/F4/F11
+                // shortcuts.  This window-local scope is what makes the
+                // CW macro win whenever the operator is working in CW.
+                context: Qt.WindowShortcut
                 enabled: win.active && win.canSend && !macroEditor.visible && !setup.visible
                 onActivated: win.cw.sendMacro(index, win.ctx())
             }

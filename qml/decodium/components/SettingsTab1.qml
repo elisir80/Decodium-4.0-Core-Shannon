@@ -1658,6 +1658,28 @@ SettingsPageScroll {
         Text { text: qsTr("AMPLIFIER"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
         Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
+        Text { text: qsTr("Manufacturer / protocol:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+        DecoComboBox {
+            id: ampManufacturer
+            // Keep the list capability-driven: this release speaks the SPE
+            // Expert/Taurus status protocol. Adding an unimplemented brand
+            // here would make the selector look functional while sending
+            // bytes the amplifier cannot understand.
+            model: [qsTr("SPE — Expert / Taurus")]
+            currentIndex: 0
+            Layout.fillWidth: true
+            Layout.columnSpan: Math.max(1, pageColumns - 1)
+            implicitHeight: controlHeight
+            onActivated: if (bridge) bridge.configureAmplifierManufacturer("SPE")
+            background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+            contentItem: Text { text: ampManufacturer.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter }
+            delegate: ItemDelegate {
+                contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12 }
+                background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium }
+            }
+            popup: SettingsComboPopup { combo: ampManufacturer }
+        }
+
         Text { text: qsTr("Read amplifier:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
             id: ampEnabled
