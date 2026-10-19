@@ -845,7 +845,7 @@ Rectangle {
                                 font.pixelSize: 11; font.family: decodiumMonoFontFamily; font.bold: true
                                 leftPadding: 6; rightPadding: 4; topPadding: 0; bottomPadding: 0
                                 verticalAlignment: TextInput.AlignVCenter
-                                color: "#FFFFFF"; background: Rectangle { color: "transparent" }
+                                color: textPrimary; background: Rectangle { color: "transparent" }
                             }
                         }
                     }
@@ -862,7 +862,7 @@ Rectangle {
                                 font.pixelSize: 11; font.family: decodiumMonoFontFamily
                                 leftPadding: 6; rightPadding: 4; topPadding: 0; bottomPadding: 0
                                 verticalAlignment: TextInput.AlignVCenter
-                                color: "#FFFFFF"; background: Rectangle { color: "transparent" }
+                                color: textPrimary; background: Rectangle { color: "transparent" }
                             }
                         }
                     }
@@ -879,7 +879,7 @@ Rectangle {
                                 font.pixelSize: 11; font.family: decodiumMonoFontFamily
                                 leftPadding: 6; rightPadding: 4; topPadding: 0; bottomPadding: 0
                                 verticalAlignment: TextInput.AlignVCenter
-                                color: "#FFFFFF"; background: Rectangle { color: "transparent" }
+                                color: textPrimary; background: Rectangle { color: "transparent" }
                             }
                         }
                     }
@@ -896,7 +896,7 @@ Rectangle {
                                 font.pixelSize: 11; font.family: decodiumMonoFontFamily
                                 leftPadding: 6; rightPadding: 4; topPadding: 0; bottomPadding: 0
                                 verticalAlignment: TextInput.AlignVCenter
-                                color: "#FFFFFF"; background: Rectangle { color: "transparent" }
+                                color: textPrimary; background: Rectangle { color: "transparent" }
                             }
                         }
                     }
@@ -913,7 +913,7 @@ Rectangle {
                                 font.pixelSize: 11; font.family: decodiumMonoFontFamily
                                 leftPadding: 6; rightPadding: 4; topPadding: 0; bottomPadding: 0
                                 verticalAlignment: TextInput.AlignVCenter
-                                color: "#FFFFFF"; background: Rectangle { color: "transparent" }
+                                color: textPrimary; background: Rectangle { color: "transparent" }
                             }
                         }
                     }
@@ -930,7 +930,7 @@ Rectangle {
                                 font.pixelSize: 11; font.family: decodiumMonoFontFamily
                                 leftPadding: 6; rightPadding: 4; topPadding: 0; bottomPadding: 0
                                 verticalAlignment: TextInput.AlignVCenter
-                                color: "#FFFFFF"; background: Rectangle { color: "transparent" }
+                                color: textPrimary; background: Rectangle { color: "transparent" }
                             }
                         }
                     }

@@ -15,7 +15,8 @@ FocusScope {
 
     property string placeholderText: ""
     property color placeholderTextColor: Qt.rgba(color.r, color.g, color.b, 0.45)
-    property color color: "#ffffff"
+    property color color: (typeof bridge !== "undefined" && bridge && bridge.themeManager)
+                           ? bridge.themeManager.textPrimary : "#ffffff"
     property color selectionColor: "#448aff"
     property color selectedTextColor: "#ffffff"
     property font font: Qt.font({ pixelSize: 12 })
