@@ -113,9 +113,9 @@ const DecodiumThemeManager::ThemePalette DecodiumThemeManager::s_oceanBlue {
 // verde-teal (non il blu/ciano altrui) e il fondo pagina e' appena piu'
 // grigio, cosi' le schede bianche si staccano invece di confondersi.
 const DecodiumThemeManager::ThemePalette DecodiumThemeManager::s_stellarLight {
-    /* bgDeep         */ QColor("#DDE5F0"),   // fondo pagina
-    /* bgMedium       */ QColor("#D3DCEA"),   // fasce e barre
-    /* bgLight        */ QColor("#F5F7FB"),   // schede (bianco spento)
+    /* bgDeep         */ QColor("#E6ECF5"),   // fondo pagina
+    /* bgMedium       */ QColor("#DBE3EF"),   // fasce e barre
+    /* bgLight        */ QColor("#FBFCFE"),   // schede (bianco spento)
     /* primaryColor   */ QColor("#0860B8"),   // blu dei comandi attivi
     /* secondaryColor */ QColor("#00626F"),   // teal scuro, leggibile su chiaro
     /* accentColor    */ QColor("#066549"),   // verde ad alto contrasto
@@ -124,12 +124,12 @@ const DecodiumThemeManager::ThemePalette DecodiumThemeManager::s_stellarLight {
     /* textPrimary    */ QColor("#14233B"),   // blu notte quasi nero
     /* textSecondary  */ QColor("#3A4C6B"),   // testo secondario leggibile
     /* successColor   */ QColor("#066549"),
-    /* glassOverlay   */ QColor(245, 247, 251, 214),
-    /* glassBorder    */ QColor("#B8C6DB"),   // filetti sottili
-    /* borderColor    */ QColor("#B0BFD6"),
-    /* borderSoft     */ QColor("#C8D3E4"),
-    /* panelColor     */ QColor("#F5F7FB"),
-    /* panelHeader    */ QColor("#E3EAF4"),
+    /* glassOverlay   */ QColor(251, 252, 254, 214),
+    /* glassBorder    */ QColor("#BFCBDF"),   // filetti sottili
+    /* borderColor    */ QColor("#B4C2D8"),
+    /* borderSoft     */ QColor("#CDD8E8"),
+    /* panelColor     */ QColor("#FBFCFE"),
+    /* panelHeader    */ QColor("#EEF2F8"),
     /* rowMatchBg     */ QColor(8, 127, 91, 36),
     /* rowMatchBorder */ QColor("#066549"),
     /* ledRed         */ QColor("#B0202E"),

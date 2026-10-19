@@ -4563,7 +4563,7 @@ GlassApplicationWindow {
                 color: bridge && bridge.themeManager && bridge.themeManager.isGlassTheme
                        ? Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.72)
                        : ((bridge && bridge.themeManager && bridge.themeManager.isLightTheme)
-                          ? Qt.lighter(bgDeep, 1.08) : Qt.darker(bgDeep, 1.20))
+                          ? bgDeep : Qt.darker(bgDeep, 1.20))
             }
             GradientStop {
                 position: 0.5
@@ -4575,7 +4575,7 @@ GlassApplicationWindow {
                 color: bridge && bridge.themeManager && bridge.themeManager.isGlassTheme
                        ? Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.82)
                        : ((bridge && bridge.themeManager && bridge.themeManager.isLightTheme)
-                          ? Qt.darker(bgDeep, 1.05) : Qt.darker(bgDeep, 1.10))
+                          ? bgDeep : Qt.darker(bgDeep, 1.10))
             }
         }
     }
