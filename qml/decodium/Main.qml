@@ -3416,7 +3416,7 @@ GlassApplicationWindow {
                               : bridge.themeManager.textPrimary
     property color textSecondary: bridge.themeManager.isLightTheme
                                 ? contrastSafeUiColor(bridge.themeManager.textSecondary,
-                                                      "#46597A", bgDeep, 4.5)
+                                                      "#3A4C6B", bgDeep, 4.5)
                                 : bridge.themeManager.textSecondary
     property color successGreen: bridge.themeManager.successColor
     property color glassOverlay: bridge.themeManager.glassOverlay
@@ -3434,7 +3434,7 @@ GlassApplicationWindow {
     // small labels in the light header enough to remain readable.
     readonly property real headerReadabilityScale: bridge.themeManager.isLightTheme ? 1.18 : 1.0
     readonly property color headerLayoutColor: bridge.themeManager.isLightTheme ? "#8A4B00" : "#FFAF58"
-    readonly property color headerDxPedColor: bridge.themeManager.isLightTheme ? "#06704F" : "#19FF88"
+    readonly property color headerDxPedColor: bridge.themeManager.isLightTheme ? "#066549" : "#19FF88"
     readonly property color headerHistoryColor: bridge.themeManager.isLightTheme ? "#185A90" : "#58AFFF"
 
     function headerFontSize(baseSize, minimumSize) {

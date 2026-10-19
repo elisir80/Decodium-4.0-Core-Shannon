@@ -113,28 +113,28 @@ const DecodiumThemeManager::ThemePalette DecodiumThemeManager::s_oceanBlue {
 // verde-teal (non il blu/ciano altrui) e il fondo pagina e' appena piu'
 // grigio, cosi' le schede bianche si staccano invece di confondersi.
 const DecodiumThemeManager::ThemePalette DecodiumThemeManager::s_stellarLight {
-    /* bgDeep         */ QColor("#F2F5FC"),   // fondo pagina
-    /* bgMedium       */ QColor("#EAF0F9"),   // fasce e barre
-    /* bgLight        */ QColor("#FFFFFF"),   // schede
-    /* primaryColor   */ QColor("#0A6BCC"),   // blu dei comandi attivi
-    /* secondaryColor */ QColor("#006B7A"),   // teal scuro, leggibile su chiaro
-    /* accentColor    */ QColor("#06704F"),   // verde ad alto contrasto
-    /* warningColor   */ QColor("#966000"),
-    /* errorColor     */ QColor("#C52B3A"),
+    /* bgDeep         */ QColor("#DDE5F0"),   // fondo pagina
+    /* bgMedium       */ QColor("#D3DCEA"),   // fasce e barre
+    /* bgLight        */ QColor("#F5F7FB"),   // schede (bianco spento)
+    /* primaryColor   */ QColor("#0860B8"),   // blu dei comandi attivi
+    /* secondaryColor */ QColor("#00626F"),   // teal scuro, leggibile su chiaro
+    /* accentColor    */ QColor("#066549"),   // verde ad alto contrasto
+    /* warningColor   */ QColor("#855200"),
+    /* errorColor     */ QColor("#B0202E"),
     /* textPrimary    */ QColor("#14233B"),   // blu notte quasi nero
-    /* textSecondary  */ QColor("#46597A"),   // testo secondario leggibile
-    /* successColor   */ QColor("#06704F"),
-    /* glassOverlay   */ QColor(255, 255, 255, 214),
-    /* glassBorder    */ QColor("#CFDAEA"),   // filetti sottili
-    /* borderColor    */ QColor("#C5D3E8"),
-    /* borderSoft     */ QColor("#DCE5F3"),
-    /* panelColor     */ QColor("#FFFFFF"),
-    /* panelHeader    */ QColor("#EAF0F9"),
+    /* textSecondary  */ QColor("#3A4C6B"),   // testo secondario leggibile
+    /* successColor   */ QColor("#066549"),
+    /* glassOverlay   */ QColor(245, 247, 251, 214),
+    /* glassBorder    */ QColor("#B8C6DB"),   // filetti sottili
+    /* borderColor    */ QColor("#B0BFD6"),
+    /* borderSoft     */ QColor("#C8D3E4"),
+    /* panelColor     */ QColor("#F5F7FB"),
+    /* panelHeader    */ QColor("#E3EAF4"),
     /* rowMatchBg     */ QColor(8, 127, 91, 36),
-    /* rowMatchBorder */ QColor("#06704F"),
-    /* ledRed         */ QColor("#C52B3A"),
-    /* ledBlue        */ QColor("#0A6BCC"),
-    /* ledYellow      */ QColor("#966000"),
+    /* rowMatchBorder */ QColor("#066549"),
+    /* ledRed         */ QColor("#B0202E"),
+    /* ledBlue        */ QColor("#0860B8"),
+    /* ledYellow      */ QColor("#855200"),
     /* ledMagenta     */ QColor("#9B5FBF"),
     /* accentDim      */ QColor(),
     /* accentDeep     */ QColor(),
