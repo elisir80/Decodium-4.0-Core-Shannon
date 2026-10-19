@@ -12,6 +12,31 @@ using namespace decodium::cw;
 class TestCwTypingQml : public QObject {
     Q_OBJECT
 private slots:
+    void stopButtonAlwaysRequestsEmergencyRelease()
+    {
+        CwController cw;
+        int stops = 0;
+        QVector<bool> ptt;
+        CwController::Hooks hooks;
+        hooks.stopRigMorse = [&] { ++stops; };
+        hooks.rigPtt = [&](bool on) { ptt.append(on); };
+        cw.setHooks(hooks);
+        QQmlEngine engine;
+        engine.rootContext()->setContextProperty("cwModule", &cw);
+        QQmlComponent component(&engine, QUrl::fromLocalFile(QStringLiteral(CW_WINDOW_QML)));
+        std::unique_ptr<QObject> object(component.create());
+        QVERIFY2(object, qPrintable(component.errorString()));
+        auto* stop = object->findChild<QObject*>(QStringLiteral("cwStopButton"));
+        QVERIFY(stop);
+        // Btn's MouseArea emits this same signal on a real left click. Calling
+        // it directly keeps the test deterministic on the off-screen QPA
+        // backend while still exercising the QML onClicked wiring.
+        QVERIFY(QMetaObject::invokeMethod(stop, "clicked", Qt::DirectConnection));
+
+        QCOMPARE(stops, 1);
+        QCOMPARE(ptt, (QVector<bool>{false}));
+    }
+
     void typingPreservesEveryLetterAndWordBoundary()
     {
         CwController cw;

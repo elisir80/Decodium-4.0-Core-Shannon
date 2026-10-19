@@ -185,6 +185,26 @@ private slots:
         QCOMPARE(c.activeMacroIndex(), -1);
     }
 
+    void f2ExpandsTheLowercaseCallPlaceholderBeforeTransmission()
+    {
+        QSettings s(iniPath(), QSettings::IniFormat);
+        CwController c;
+        QString sent;
+        CwController::Hooks h;
+        h.canTransmit = [] { return true; };
+        h.rigKeyerAvailable = [] { return true; };
+        h.sendRigMorse = [&](const QString& text, int) { sent = text; return true; };
+        c.setHooks(h);
+        c.start(&s);
+        c.setMacro(1, QStringLiteral("F2 Call"), QStringLiteral("{call}"));
+
+        c.sendMacro(1, {{QStringLiteral("call"), QStringLiteral("it9xyz")}});
+
+        QCOMPARE(sent, QStringLiteral("IT9XYZ"));
+        QVERIFY(c.sending());
+        c.stop();
+    }
+
     void audioSendingEndsByItself()
     {
         QSettings s(iniPath(), QSettings::IniFormat);
@@ -518,6 +538,26 @@ private slots:
         c.stop();
         QVERIFY(stopped);
         QCOMPARE(ptt, (QVector<bool>{false}));
+    }
+
+    void stopAlwaysSendsTheCatEmergencyReleaseEvenWhenAlreadyIdle()
+    {
+        QSettings s(iniPath(), QSettings::IniFormat);
+        CwController c;
+        int stops = 0;
+        QVector<bool> ptt;
+        CwController::Hooks h;
+        h.stopRigMorse = [&] { ++stops; };
+        h.rigPtt = [&](bool on) { ptt.append(on); };
+        c.setHooks(h);
+        c.start(&s);
+
+        QVERIFY(!c.sending());
+        c.stop();
+
+        QCOMPARE(stops, 1);
+        QCOMPARE(ptt, (QVector<bool>{false}));
+        QVERIFY(!c.sending());
     }
 
     void txTranscriptShowsExpandedTextAndCanBeCleared()

@@ -2665,6 +2665,30 @@ QString HamlibTransceiver::send_morse_checked (QString const& text, int wpm)
   if (literal_single_char)
     payload += QLatin1Char (' ');
 
+  // Do not trust the UI/manager mode cache here.  In particular a NET
+  // rigctl bridge can acknowledge the preceding QSY before the DATA-U -> CW
+  // change has reached the radio.  Hamlib deliberately refuses send_morse()
+  // outside CW/CWR, so make the mode part of this same serialised keyer
+  // operation.  This sends only a mode command: native break-in remains in
+  // charge of keying and no continuous PTT is asserted.
+  rmode_t current_mode {RIG_MODE_NONE};
+  pbwidth_t current_width {RIG_PASSBAND_NOCHANGE};
+  int const get_mode_rc = rig_get_mode (m_->rig_.data (), RIG_VFO_CURR,
+                                        &current_mode, &current_width);
+  if (get_mode_rc != RIG_OK
+      || (current_mode != RIG_MODE_CW && current_mode != RIG_MODE_CWR))
+    {
+      int const set_mode_rc = rig_set_mode (m_->rig_.data (), RIG_VFO_CURR,
+                                            RIG_MODE_CW, RIG_PASSBAND_NOCHANGE);
+      if (set_mode_rc != RIG_OK)
+        return tr ("Setting CW mode before keying failed: %1 (%2)")
+          .arg (QString::fromLatin1 (rigerror (set_mode_rc))).arg (set_mode_rc);
+      qInfo ().noquote ()
+        << "[CW-CAT] CW mode reasserted immediately before native keyer send"
+        << "previous_mode=" << rig_strrmode (current_mode)
+        << "get_mode_rc=" << get_mode_rc;
+    }
+
   if (wpm > 0)
     {
       value_t speed {}; speed.i = wpm;
@@ -2720,11 +2744,97 @@ void HamlibTransceiver::stop_morse () noexcept
 {
   try
     {
-      if (m_->rig_ && m_->rig_->caps && m_->rig_->caps->stop_morse)
-        rig_stop_morse (m_->rig_.data (), RIG_VFO_CURR);
+      auto * rig = m_->rig_.data ();
+      if (!rig || !rig->caps)
+        return;
+
+      // This is the CW frame's emergency stop.  Do not rely on the cached
+      // TransceiverState::ptt(): native radio keyers own their break-in timing,
+      // so Decodium normally (and correctly) keeps that cache at false even
+      // while the radio is actually sending.  A normal set(ptt=false) would
+      // consequently be optimised away and several radios stayed in TX.
+      // Force the configured PTT release first.  This may be CAT, RTS, DTR or
+      // another Hamlib PTT route.
+      int ptt_rc = -RIG_EIO;
+      int const attempts = ptt_off_attempt_limit (false);
+      for (int attempt = 0; attempt < attempts; ++attempt)
+        {
+          ptt_rc = rig_set_ptt (rig, RIG_VFO_CURR, RIG_PTT_OFF);
+          CAT_TRACE ("CW emergency PTT=false attempt=" << attempt << " rc=" << ptt_rc);
+          if (RIG_OK == ptt_rc || -RIG_ENAVAIL == ptt_rc || -RIG_ENIMPL == ptt_rc)
+            break;
+        }
+
+      // Yaesu NewCAT radios can start their own message keyer with KY even
+      // when Hamlib's configured PTT route is RTS/DTR/NONE.  Those backends
+      // commonly expose send_morse but no stop_morse, so releasing only the
+      // configured line does not necessarily stop the radio.  Temporarily
+      // route this *off* operation through the CAT backend as well; for these
+      // radios that is the documented TX0; command.  Restore the user's PTT
+      // configuration immediately afterwards so normal TX remains untouched.
+      auto const configured_ptt = rig->state.pttport.type.ptt;
+      bool const configured_ptt_is_cat = RIG_PTT_RIG == configured_ptt
+        || RIG_PTT_RIG_MICDATA == configured_ptt;
+      bool const force_yaesu_cat_off = is_yaesu_rig (rig)
+        && !rig->caps->stop_morse
+        && rig->caps->set_ptt
+        && !configured_ptt_is_cat;
+      int cat_ptt_rc = -RIG_ENAVAIL;
+      if (force_yaesu_cat_off)
+        {
+          rig->state.pttport.type.ptt = RIG_PTT_RIG;
+          for (int attempt = 0; attempt < attempts; ++attempt)
+            {
+              cat_ptt_rc = rig_set_ptt (rig, RIG_VFO_CURR, RIG_PTT_OFF);
+              CAT_TRACE ("CW emergency Yaesu CAT PTT=false attempt=" << attempt
+                         << " rc=" << cat_ptt_rc);
+              if (RIG_OK == cat_ptt_rc || -RIG_ENAVAIL == cat_ptt_rc
+                  || -RIG_ENIMPL == cat_ptt_rc)
+                break;
+            }
+          rig->state.pttport.type.ptt = configured_ptt;
+        }
+
+      int const effective_ptt_rc = force_yaesu_cat_off ? cat_ptt_rc : ptt_rc;
+      if (RIG_OK == effective_ptt_rc)
+        {
+          ptt_on_ = false;
+          ptt_off_failed_recently_ = false;
+          update_PTT (false);
+        }
+      else if (-RIG_ENAVAIL != effective_ptt_rc && -RIG_ENIMPL != effective_ptt_rc)
+        {
+          ptt_off_failed_recently_ = true;
+          qWarning ().noquote ()
+            << "[CW-CAT] emergency PTT-off failed"
+            << "configured_rc=" << ptt_rc
+            << "cat_rc=" << cat_ptt_rc
+            << "attempts=" << attempts;
+        }
+
+      // Clear the radio's native CW buffer where the backend provides a real
+      // stop operation (Icom, several Kenwood models, newer radios, and the
+      // NET rigctl bridge).  Many Yaesu backends expose send_morse but no
+      // stop_morse; the unconditional PTT OFF above is therefore essential.
+      int stop_rc = -RIG_ENAVAIL;
+      if (rig->caps->stop_morse)
+        stop_rc = rig_stop_morse (rig, RIG_VFO_CURR);
+      qInfo ().noquote ()
+        << "[CW-CAT] emergency stop"
+        << "model=" << rig->caps->rig_model
+        << "ptt_off_rc=" << ptt_rc
+        << "yaesu_cat_off=" << force_yaesu_cat_off
+        << "yaesu_cat_off_rc=" << cat_ptt_rc
+        << "stop_morse_rc=" << stop_rc
+        << "has_stop_morse=" << (rig->caps->stop_morse != nullptr);
+    }
+  catch (std::exception const& error)
+    {
+      qWarning () << "[CW-CAT] emergency stop exception:" << error.what ();
     }
   catch (...)
     {
+      qWarning () << "[CW-CAT] unknown emergency stop exception";
     }
 }
 

@@ -14,6 +14,13 @@ constexpr int kMinWpm = 5;
 constexpr int kMaxWpm = 60;
 constexpr int kKeyerRetryIntervalMs = 250;
 constexpr int kKeyerRetryLimit = 120;
+// A native keyer request normally completes in a few milliseconds, but a
+// double CAT bridge (Decodium -> DecoDXLog -> rigctld) can still be draining
+// startup/polling work on both worker threads. Ten seconds was short enough
+// for the safety timer to issue stop_morse before the queued send_morse had
+// reached the downstream rig. Keep the watchdog finite, but allow the CAT
+// chain to finish instead of cancelling a valid first macro after start-up.
+constexpr int kRigDispatchWatchdogMs = 30000;
 const char kGroup[] = "CW";
 
 bool looksLikeCwCallsign(const QString& token)
@@ -803,7 +810,7 @@ void CwController::sendNextRigChunk()
     const int tail = qMax(100, 3 * (1200 / m_wpm));
     const quint64 generation = ++m_rigGeneration;
     m_rigWaiting = true;
-    m_audioDone.start(10000);
+    m_audioDone.start(kRigDispatchWatchdogMs);
     QPointer<CwController> self(this);
     auto completed = [self, generation, duration, tail](const QString& error) {
         if (!self || !self->m_rigActive || generation != self->m_rigGeneration) return;
@@ -903,17 +910,20 @@ void CwController::finishRemoteKey(bool immediate)
 
 void CwController::stop()
 {
-    if (m_rigActive || m_rigStopArmed) {
-        if (m_hooks.stopRigMorse) m_hooks.stopRigMorse();
-        // stop_morse is the normal native-keyer stop.  PTT OFF is only an
-        // emergency release here; it is deliberately not used when a CAT
-        // message is running, otherwise the radio would transmit one
-        // continuous carrier across all CW gaps.
-        if (!m_rigPttOwned && m_hooks.rigPtt) m_hooks.rigPtt(false);
-        m_rigStopArmed = false;
-        // Release the path that started TX, even after CAT/backend changes.
-        finishRigKey();
-    }
+    // This button is an emergency release, not merely a UI-state transition.
+    // Always send both stop_morse and PTT OFF: some radios keep draining an
+    // internal CW memory after our duration estimate, while others do not
+    // implement stop_morse at all.  In the latter case PTT OFF is the only
+    // portable command that can force the transmitter back to RX.  The calls
+    // are idempotent, so doing this while the controller already looks idle
+    // is intentional and safe.
+    if (m_hooks.stopRigMorse) m_hooks.stopRigMorse();
+    if (m_hooks.rigPtt) m_hooks.rigPtt(false);
+    m_rigPttOwned = false; // the unconditional release above already did it
+    m_rigStopArmed = false;
+    // Invalidate late CAT acknowledgements and discard every queued chunk,
+    // even if a backend or mode change made m_rigActive false meanwhile.
+    finishRigKey();
     finishRemoteKey(true);
     m_audioDone.stop();
     m_keyer.stop();

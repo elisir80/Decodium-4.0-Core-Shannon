@@ -578,7 +578,13 @@ GlassWindow {
                                    : win.cw.effectiveBackend === "serial" ? qsTr("serial keyer") : "WinKeyer") : "")
                       + (win.remote ? "   ·   " + qsTr("remote radio") : "")
             }
-            Btn { label: qsTr("Stop"); danger: true; armed: !!win.cw && win.cw.sending; onClicked: win.stopSending() }
+            Btn {
+                objectName: "cwStopButton"
+                label: qsTr("Stop")
+                danger: true
+                armed: !!win.cw && win.cw.sending
+                onClicked: win.stopSending()
+            }
             Btn { label: qsTr("Macros…"); onClicked: macroEditor.open() }
             Btn { label: qsTr("Setup…"); onClicked: setup.open() }
         }

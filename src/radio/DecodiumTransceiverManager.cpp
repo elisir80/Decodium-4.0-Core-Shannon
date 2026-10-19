@@ -2917,6 +2917,15 @@ bool DecodiumTransceiverManager::sendRigMorse(const QString& text, int wpm,
 {
     if (text.trimmed().isEmpty() || !rigMorseAvailable() || !d->transceiver)
         return false;
+
+    // send_morse_checked() verifies the physical rig mode on the CAT worker,
+    // but the manager also owns the desired state used by later PTT-OFF and
+    // polling updates. Keep that state in CW as well: otherwise a bridge
+    // which was still reporting DATA/SSB could accept the CW correction and
+    // then immediately be driven back to the stale mode before its queued
+    // Morse command reached the radio.
+    d->desired.mode(Transceiver::CW);
+    d->desired.ptt(false);
     QPointer<Transceiver> xcv = d->transceiver;
     QPointer<DecodiumTransceiverManager> manager(this);
     return QMetaObject::invokeMethod(xcv, [xcv, manager, text, wpm, completion = std::move(completion)]() {
@@ -2941,6 +2950,10 @@ bool DecodiumTransceiverManager::sendRigMorse(const QString& text, int wpm,
 void DecodiumTransceiverManager::stopRigMorse()
 {
     if (!m_connected || !d->transceiver) return;
+    // Prevent a stale desired-state transaction from reasserting TX after the
+    // emergency operation below.  HamlibTransceiver::stop_morse() bypasses
+    // the cached state and always performs a physical PTT OFF as well.
+    d->desired.ptt(false);
     QPointer<Transceiver> xcv = d->transceiver;
     QMetaObject::invokeMethod(xcv, [xcv]() {
         if (xcv) xcv->stop_morse();
