@@ -8047,7 +8047,7 @@ GlassApplicationWindow {
                 // Valori salvati per tema; clic sull'icona = azzera quel cursore.
                 Rectangle {
                     id: lookTile
-                    width: 118
+                    width: 168
                     height: 74
                     radius: 8
                     color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.9)
@@ -8068,7 +8068,7 @@ GlassApplicationWindow {
                         property color lineColor: "#000000"
                         signal valueEdited(int v)
                         signal resetRequested()
-                        width: 106
+                        width: 72
                         height: 26
 
                         Text {
@@ -8096,7 +8096,7 @@ GlassApplicationWindow {
                             id: lsSlider
                             anchors.left: lsIcon.right
                             anchors.leftMargin: 2
-                            anchors.right: lsValue.left
+                            anchors.right: parent.right
                             anchors.verticalCenter: parent.verticalCenter
                             height: 20
                             from: -100; to: 100; stepSize: 5
@@ -8136,22 +8136,11 @@ GlassApplicationWindow {
                             ToolTip.delay: 400
                             ToolTip.text: ls.tip + ": " + (ls.sliderValue > 0 ? "+" : "") + ls.sliderValue
                         }
-
-                        Text {
-                            id: lsValue
-                            anchors.right: parent.right
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: 26
-                            horizontalAlignment: Text.AlignRight
-                            text: (ls.sliderValue > 0 ? "+" : "") + ls.sliderValue
-                            font.pixelSize: 9
-                            color: ls.mutedColor
-                        }
                     }
 
-                    Column {
+                    Row {
                         anchors.centerIn: parent
-                        spacing: 4
+                        spacing: 8
 
                         LookSlider {
                             icon: "☼"
