@@ -505,7 +505,7 @@ GlassWindow {
                          ? qsTr("A remote radio is in use: only the key timing goes over the link, and the gateway next to the radio makes the tone.")
                          : qsTr("A remote radio is in use: the CW goes out as an audio tone through the link, whatever is chosen above."))
                       : (win.cw && win.cw.effectiveBackend === "rigkey"
-                         ? qsTr("The radio's built-in CAT keyer sends CW while the rig stays in CW mode.")
+                         ? qsTr("The radio's built-in CAT keyer sends CW while the rig stays in CW mode. It cannot always be interrupted: some radios finish the text they already received, even after Stop.")
                          : qsTr("The audio tone needs the radio in USB or DATA-U. A serial keyer or a WinKeyer keys the radio's own key input and needs the radio in CW."))
             }
             Text {
@@ -574,7 +574,8 @@ GlassWindow {
                        : qsTr("no CAT")) + "   ·   "
                       + (win.cw ? (win.cw.effectiveBackend === "audio" ? qsTr("audio tone")
                                    : win.cw.effectiveBackend === "remotekey" ? qsTr("remote key")
-                                   : win.cw.effectiveBackend === "rigkey" ? qsTr("radio CAT keyer")
+                                   : win.cw.effectiveBackend === "rigkey"
+                                     ? qsTr("radio CAT keyer") + (win.cw.txBackend === "audio" ? " (" + qsTr("audio tone selected") + ")" : "")
                                    : win.cw.effectiveBackend === "serial" ? qsTr("serial keyer") : "WinKeyer") : "")
                       + (win.remote ? "   ·   " + qsTr("remote radio") : "")
             }
@@ -587,6 +588,19 @@ GlassWindow {
             }
             Btn { label: qsTr("Macros…"); onClicked: macroEditor.open() }
             Btn { label: qsTr("Setup…"); onClicked: setup.open() }
+        }
+
+        Text {
+            objectName: "cwCatKeyerStopNotice"
+            Layout.fillWidth: true
+            visible: !!win.cw && !win.remote && win.cw.effectiveBackend === "rigkey"
+            wrapMode: Text.Wrap
+            color: win.cWarn
+            font.pixelSize: 11
+            text: (win.cw && win.cw.txBackend === "audio"
+                   ? qsTr("In CW mode the audio tone is replaced by the radio's CAT keyer. ")
+                   : "")
+                  + qsTr("Stop releases the PTT, but some radios (for example the Yaesu FT-991) have no command to empty their keyer and finish the text they already received. For an immediate stop choose a serial keyer in Setup.")
         }
 
         RowLayout {
