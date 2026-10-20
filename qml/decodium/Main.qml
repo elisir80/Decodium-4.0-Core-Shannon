@@ -8047,8 +8047,8 @@ GlassApplicationWindow {
                 // Valori salvati per tema; clic sull'icona = azzera quel cursore.
                 Rectangle {
                     id: lookTile
-                    width: 168
-                    height: 74
+                    width: 146
+                    height: 30
                     radius: 8
                     color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.9)
                     border.color: glassBorder
@@ -8068,8 +8068,8 @@ GlassApplicationWindow {
                         property color lineColor: "#000000"
                         signal valueEdited(int v)
                         signal resetRequested()
-                        width: 72
-                        height: 26
+                        width: 64
+                        height: 22
 
                         Text {
                             id: lsIcon
@@ -8140,7 +8140,7 @@ GlassApplicationWindow {
 
                     Row {
                         anchors.centerIn: parent
-                        spacing: 8
+                        spacing: 6
 
                         LookSlider {
                             icon: "☼"
