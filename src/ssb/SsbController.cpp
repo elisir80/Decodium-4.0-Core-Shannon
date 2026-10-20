@@ -35,6 +35,47 @@ void SsbController::setAutomatic(bool v){dsp.automatic=v;save();}
 void SsbController::setLowCut(int v){dsp.lowHz=std::clamp(v,80,500);save();}
 void SsbController::setHighCut(int v){dsp.highHz=std::clamp(v,1800,3500);save();}
 void SsbController::fail(QString const& text){stop();message=text;emit changed();}
+bool SsbController::openMicrophone()
+{
+    QAudioDevice device;
+    for(const auto& d:QMediaDevices::audioInputs())if(d.id().toBase64()==deviceId.toLatin1())device=d;
+    if(device.isNull())return false;
+
+    source=new QAudioSource(device,format,this);
+    source->setBufferSize(format.bytesForDuration(40000));
+    input=source->start();
+    if(!input || source->error()!=QAudio::NoError){
+        source->stop();source->deleteLater();source=nullptr;input=nullptr;
+        return false;
+    }
+    connect(input,&QIODevice::readyRead,this,&SsbController::capture);
+    connect(source,&QAudioSource::stateChanged,this,[this](QAudio::State state){
+        if(active && state==QAudio::StoppedState)recoverMicrophone();
+    });
+    return true;
+}
+
+void SsbController::recoverMicrophone()
+{
+    if(!active)return;
+    if(microphoneRestartAttempts++ >= 1){
+        fail(tr("Microphone error; PTT released"));
+        return;
+    }
+    const quint64 generation=++microphoneGeneration;
+    if(source){source->disconnect(this);source->stop();source->deleteLater();source=nullptr;}
+    input=nullptr;
+    // PipeWire/WASAPI devices may briefly report Stopped while the first
+    // capture stream is negotiating with the USB radio output. One bounded
+    // reopen keeps a held SSB PTT alive without masking a real microphone
+    // fault indefinitely.
+    QTimer::singleShot(120,this,[this,generation]{
+        if(!active || generation!=microphoneGeneration)return;
+        if(!openMicrophone()){fail(tr("Cannot reopen microphone; PTT released"));return;}
+        lastAudio.restart();message=tr("SSB transmitting");emit changed();
+    });
+}
+
 bool SsbController::start(){
     if(active)return true;
     QAudioDevice device;
@@ -51,22 +92,15 @@ bool SsbController::start(){
         if(supported)break;
     }
     if(!supported){fail(tr("Microphone must support 48 kHz PCM"));return false;}
-    source=new QAudioSource(device,format,this);
-    source->setBufferSize(format.bytesForDuration(40000));
-    input=source->start();
-    if(!input || source->error()!=QAudio::NoError){fail(tr("Cannot open microphone"));return false;}
+    if(!openMicrophone()){fail(tr("Cannot open microphone"));return false;}
     if(!hooks.begin || !hooks.begin()){fail(tr("PTT refused: check CAT, USB/LSB mode and TX audio output"));return false;}
-    active=true;message=tr("SSB transmitting");peak=0;phase=0;dsp.reset();pending.clear();packet.clear();
+    active=true;microphoneRestartAttempts=0;++microphoneGeneration;message=tr("SSB transmitting");peak=0;phase=0;dsp.reset();pending.clear();packet.clear();
     lead=hooks.leadMs ? std::clamp(hooks.leadMs(),0,1500) : 150;
     clock.start();lastAudio.start();guard.start();
-    connect(input,&QIODevice::readyRead,this,&SsbController::capture);
-    connect(source,&QAudioSource::stateChanged,this,[this](QAudio::State state){
-        if(active && state==QAudio::StoppedState)fail(tr("Microphone error; PTT released"));
-    });
     emit changed();return true;
 }
 void SsbController::stop(){
-    bool was=active;active=false;guard.stop();
+    bool was=active;active=false;++microphoneGeneration;guard.stop();
     if(source){source->disconnect(this);source->stop();source->deleteLater();source=nullptr;}
     input=nullptr;pending.clear();packet.clear();peak=0;
     if(was && hooks.end)hooks.end();

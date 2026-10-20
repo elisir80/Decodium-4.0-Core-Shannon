@@ -3295,6 +3295,9 @@ private:
     // Operator-selected CQ tokens between "CQ" and our callsign (for
     // example "CQ WWA").  Auto CQ must not discard them when TX6 is rebuilt.
     QString m_customCqPrefix;
+    // Complete TX6 text entered by the operator. This also represents an
+    // intentional omission, e.g. "CQ YI1CW" without the grid.
+    QString m_customCqMessage;
     bool m_skipCustomCqPrefixRecovery {false};
     int&    m_currentTx = m_seqState.currentTx;
     QString& m_dxCall = m_seqState.dxCall;

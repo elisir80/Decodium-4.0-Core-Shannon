@@ -67,11 +67,20 @@ bool DecodiumThemeManager::glassTransparencySupported() const
 #if defined(Q_OS_WIN) || defined(Q_OS_MACOS)
     return true;
 #elif defined(Q_OS_LINUX)
-    // Wayland compositors are required to composite client surfaces.  X11
-    // is supported when a compositor is present; users of an uncomposited
-    // X11 desktop can use DECODIUM_FORCE_OPAQUE_GLASS.
-    return platform.startsWith(QStringLiteral("wayland"))
-        || platform.startsWith(QStringLiteral("xcb"));
+    // A transparent top-level QQuickWindow is not reliable across the Linux
+    // compositor/driver matrix.  In particular, some Mesa/X11 and Wayland
+    // combinations feed a translucent client surface back into the compositor
+    // and can recurse the window image until the GPU is saturated.  This was
+    // observed after opening then closing a CW or SSB pop-out: the next start
+    // could display nested Decodium frames and freeze the desktop.
+    //
+    // Keep the Liquid Glass palette, but make its native surfaces opaque on
+    // Linux by default.  Advanced users with a known-good compositor can
+    // explicitly opt in; the safe default must not depend on driver probing
+    // that Qt cannot provide.
+    return qEnvironmentVariableIsSet("DECODIUM_ENABLE_LINUX_GLASS")
+        && (platform.startsWith(QStringLiteral("wayland"))
+            || platform.startsWith(QStringLiteral("xcb")));
 #else
     return false;
 #endif

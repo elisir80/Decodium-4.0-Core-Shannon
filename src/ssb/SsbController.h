@@ -51,6 +51,8 @@ signals:
     void changed();
     void devicesChanged();
 private:
+    bool openMicrophone();
+    void recoverMicrophone();
     void capture();
     void fail(QString const& text);
     void save();
@@ -66,6 +68,8 @@ private:
     QVector<short> packet;
     QString deviceId, message;
     bool active=false;
+    int microphoneRestartAttempts=0;
+    quint64 microphoneGeneration=0;
     double peak=0;
     int phase=0, lead=0;
 };

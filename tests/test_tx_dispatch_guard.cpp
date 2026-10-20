@@ -33,6 +33,7 @@ private slots:
     void lifecycleTransitionsInvalidateDeferredRequests();
     void deferredCallbacksCheckRequestGeneration();
     void jttyUsesNativeManualDispatchAndBlocksGenericStart();
+    void cwExitVerifiesRadioModeAfterStartupCw();
 };
 
 void TestTxDispatchGuard::commonGuardIsWiredIntoTxEntryPoints()
@@ -173,6 +174,27 @@ void TestTxDispatchGuard::jttyUsesNativeManualDispatchAndBlocksGenericStart()
     QVERIFY(app.contains(QStringLiteral("&DecodiumBridge::jttyPanelTransmitRequested")));
     QVERIFY(app.contains(QStringLiteral("jtty.send (text)")));
     QVERIFY(app.contains(QStringLiteral("&DecodiumBridge::jttyAbortRequested")));
+}
+
+void TestTxDispatchGuard::cwExitVerifiesRadioModeAfterStartupCw()
+{
+    const QString bridge = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
+    QVERIFY(!bridge.isEmpty());
+
+    const QString setMode = functionBody(
+        bridge,
+        QStringLiteral("void DecodiumBridge::setMode(const QString& v)"),
+        QStringLiteral("void DecodiumBridge::setMonitoring(bool v)"));
+    QVERIFY(!setMode.isEmpty());
+
+    // A mode restored from the physical rig at startup has no earlier local
+    // CW entry snapshot. Its return target must still be verified, otherwise
+    // a delayed CAT state report can put the desired state back to CW.
+    QVERIFY(setMode.contains(QStringLiteral("QString cwExitVerifyMode;")));
+    QVERIFY(setMode.contains(QStringLiteral("cwExitVerifyMode = cwExitRestoreMode;")));
+    QVERIFY(setMode.contains(QStringLiteral("kCwExitVerifyDelaysMs[] = {700, 1700}")));
+    QVERIFY(setMode.contains(QStringLiteral("mode-change/cw-exit-verify")));
+    QVERIFY(setMode.contains(QStringLiteral("setRigMode() always writes desired PTT=false")));
 }
 
 QTEST_MAIN(TestTxDispatchGuard)

@@ -48,6 +48,7 @@ extern "C" void superldpc_simd_gate_truth_clear_c () { ++gateCalls; }
 
 extern "C" void superldpc_set_enabled_c (int);
 extern "C" int superldpc_is_enabled_c ();
+extern "C" int superldpc_is_available_c ();
 extern "C" void superldpc_set_ft8_mode_c (int);
 extern "C" int superldpc_extrinsic174_91_c (float const*, int, float, float*);
 extern "C" void superldpc_gate_dump_open_c (char const*);
@@ -82,6 +83,13 @@ int main (int argc, char** argv)
     // An enabled saved setting must not bypass CPU/OS or emergency guards.
     superldpc_set_enabled_c (scenario != "ui-disabled");
     bool const expectedSimd = scenario == "supported";
+#if defined(DECODIUM_SUPERLDPC_TESTING)
+    // Hardware eligibility must not change with UI/environment overrides.
+    if (superldpc_is_available_c () != int (cpuFeatures == 31)) {
+        std::cerr << "incorrect hardware availability: " << scenario << '\n';
+        return 1;
+    }
+#endif
     if (superldpc_is_enabled_c () != int (expectedSimd)) {
         std::cerr << "incorrect runtime selection: " << scenario << '\n';
         return 1;
@@ -115,6 +123,9 @@ int main (int argc, char** argv)
     }
     // A UI change between checking availability and probing is also safe.
     superldpc_set_enabled_c (0);
+#if defined(DECODIUM_SUPERLDPC_TESTING)
+    if (superldpc_is_available_c () != int (cpuFeatures == 31)) return 1;
+#endif
     extrinsic.fill (99.0f);
     if (superldpc_extrinsic174_91_c (llr.data (), 2, 2.0f, extrinsic.data ()) != 0
         || !std::all_of (extrinsic.begin (), extrinsic.end (), [] (float v) { return v == 0; })

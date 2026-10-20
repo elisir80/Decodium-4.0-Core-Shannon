@@ -22,6 +22,11 @@ target_compile_definitions (test_qso_waterfall_recovery PRIVATE DECODIUM_SOURCE_
 target_link_libraries (test_qso_waterfall_recovery Qt6::Test Qt6::Core)
 add_test (NAME test_qso_waterfall_recovery COMMAND $<TARGET_FILE:test_qso_waterfall_recovery>)
 
+add_executable (test_waterfall_signal_selection test_waterfall_signal_selection.cpp)
+target_compile_definitions (test_waterfall_signal_selection PRIVATE DECODIUM_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+target_link_libraries (test_waterfall_signal_selection Qt6::Test Qt6::Core)
+add_test (NAME test_waterfall_signal_selection COMMAND $<TARGET_FILE:test_waterfall_signal_selection>)
+
 add_executable (test_panadapter_gpu_recovery test_panadapter_gpu_recovery.cpp)
 target_compile_definitions (test_panadapter_gpu_recovery PRIVATE DECODIUM_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
 target_link_libraries (test_panadapter_gpu_recovery Qt6::Test Qt6::Core)
@@ -491,6 +496,10 @@ target_link_libraries (test_udp_client_id wsjt_qt Qt6::Test Qt6::Network Qt6::Co
 add_test (NAME test_udp_client_id COMMAND $<TARGET_FILE:test_udp_client_id>)
 
 add_executable (test_ftx_weak_decode test_ftx_weak_decode.cpp)
+add_executable (test_custom_cq_persistence test_custom_cq_persistence.cpp)
+target_link_libraries (test_custom_cq_persistence Qt6::Test Qt6::Core)
+target_compile_definitions (test_custom_cq_persistence PRIVATE DECODIUM_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
+add_test (NAME test_custom_cq_persistence COMMAND $<TARGET_FILE:test_custom_cq_persistence>)
 add_executable (test_q65_doppler test_q65_doppler.cpp
   ../src/services/Q65DopplerTracker.cpp ../src/services/Q65DopplerTracker.h)
 target_link_libraries (test_q65_doppler wsjt_qt wsjt_cxx wsjt_fort Qt6::Test Qt6::Quick Qt6::Qml)
@@ -566,6 +575,18 @@ if (DECODIUM_SUPERLDPC_ARM64_TARGET OR DECODIUM_SUPERLDPC_X86_TARGET)
     add_test (NAME test_superldpc_cpu_${cpu_case}
       COMMAND $<TARGET_FILE:test_superldpc_cpu_fallback> ${cpu_case})
   endforeach ()
+
+  add_executable (test_ft2_legacy_cpu
+    test_ft2_legacy_cpu.cpp
+    ../Detector/superldpc/decodium_dispatch.cpp)
+  target_compile_definitions (test_ft2_legacy_cpu PRIVATE
+    DECODIUM_SUPERLDPC_TESTING=1 DECODIUM_SUPERLDPC_AVX2_BUILT=1)
+  target_link_libraries (test_ft2_legacy_cpu wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
+  if (MINGW)
+    target_link_options (test_ft2_legacy_cpu PRIVATE -Wl,--stack,67108864)
+  endif ()
+  add_test (NAME test_ft2_legacy_cpu COMMAND $<TARGET_FILE:test_ft2_legacy_cpu>)
+  set_tests_properties (test_ft2_legacy_cpu PROPERTIES TIMEOUT 45)
 endif ()
 
 add_executable (test_secure_settings test_secure_settings.cpp)
@@ -788,7 +809,8 @@ if (TARGET test_superldpc_neon)
   list (APPEND _decodium_regression_test_targets test_superldpc_neon)
 endif ()
 if (TARGET test_superldpc_dispatch)
-  list (APPEND _decodium_regression_test_targets test_superldpc_dispatch test_superldpc_cpu_fallback)
+  list (APPEND _decodium_regression_test_targets
+    test_superldpc_dispatch test_superldpc_cpu_fallback test_ft2_legacy_cpu)
 endif ()
 if (TARGET test_decortty_tx)
   list (APPEND _decodium_regression_test_targets test_decortty_tx)

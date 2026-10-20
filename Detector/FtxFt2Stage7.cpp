@@ -244,6 +244,7 @@ extern "C"
   // esplicitamente anche qui: un thread che avesse gia' decodificato FT8
   // lascerebbe altrimenti a FT2 le soglie larghe di FT8.
   void superldpc_set_ft8_mode_c (int on);
+  int superldpc_is_available_c ();
   // superldpc (Detector/superldpc/): stessa firma, backend AVX2/FMA su x86 o
   // NEON su ARM64. Ricade da solo su ftx_decode174_91_c se il backend SIMD
   // richiesto non e' disponibile o se Keff != 91.
@@ -822,9 +823,32 @@ std::atomic<bool>& stage7_cancel_requested ()
   return requested;
 }
 
+// Only the non-SIMD FT2 path gets a real-time budget. Scope it to one decode
+// on this thread so it cannot leak into FT8/FT4 or a later FT2 invocation.
+thread_local std::chrono::steady_clock::time_point compatibility_deadline {};
+
+struct CompatibilityBudget
+{
+  std::chrono::steady_clock::time_point previous {compatibility_deadline};
+  CompatibilityBudget ()
+  {
+    compatibility_deadline = superldpc_is_available_c ()
+        ? std::chrono::steady_clock::time_point {}
+        : std::chrono::steady_clock::now () + std::chrono::milliseconds (2000);
+  }
+  ~CompatibilityBudget () { compatibility_deadline = previous; }
+};
+
+bool compatibility_budget_expired ()
+{
+  return compatibility_deadline != std::chrono::steady_clock::time_point {}
+      && std::chrono::steady_clock::now () >= compatibility_deadline;
+}
+
 bool stage7_should_cancel ()
 {
-  return stage7_cancel_requested ().load (std::memory_order_relaxed);
+  return stage7_cancel_requested ().load (std::memory_order_relaxed)
+      || compatibility_budget_expired ();
 }
 
 int idf_index (int idf)
@@ -2890,7 +2914,11 @@ DecodePassResult run_decode_passes (Stage7State const& state, ApSetup const& set
       return atteso.ok ? atteso : result;
     }
 
-  int maxosd = 3;
+  bool const compatibility = !superldpc_is_available_c ();
+  // The scalar decoder's deep OSD dominates runtime on pre-AVX2 CPUs.
+  // Keep BP and all AP passes/validation, but use one order-1 OSD search
+  // on the channel LLRs instead of four order-3 searches per pass.
+  int maxosd = compatibility ? 0 : 3;
   if (!doosd)
     {
       maxosd = -1;
@@ -2916,17 +2944,32 @@ DecodePassResult run_decode_passes (Stage7State const& state, ApSetup const& set
 
   // Taratura FT2: soglia stretta sui bit ribaltati, contro i fantasmi.
   superldpc_set_ft8_mode_c (0);
-  superldpc_decode174_91_batch_c (nprep, batch_llr.data (), batch_apmask.data (),
-                                 91, maxosd, 3,
-                                 batch_msg.data (), batch_cw.data (),
-                                 batch_ntype.data (), batch_nhard.data (),
-                                 batch_dmin.data ());
+  if (!compatibility)
+    {
+      superldpc_decode174_91_batch_c (nprep, batch_llr.data (), batch_apmask.data (),
+                                     91, maxosd, 3,
+                                     batch_msg.data (), batch_cw.data (),
+                                     batch_ntype.data (), batch_nhard.data (),
+                                     batch_dmin.data ());
+    }
 
   for (int k = 0; k < nprep; ++k)
     {
       if (stage7_should_cancel ())
         {
           return result;
+        }
+      if (compatibility)
+        {
+          // Decode lazily: accept the first valid pass and honour cancellation
+          // between short scalar calls, without computing an entire batch.
+          ftx_decode174_91_c (prepared[static_cast<size_t> (k)].llr.data (),
+                              91, maxosd, 1,
+                              prepared[static_cast<size_t> (k)].apmask.data (),
+                              batch_msg.data () + static_cast<size_t> (k) * kFt2Message91,
+                              batch_cw.data () + static_cast<size_t> (k) * kFt2Codeword,
+                              batch_ntype.data () + k, batch_nhard.data () + k,
+                              batch_dmin.data () + k);
         }
       int const ipass = prepared[static_cast<size_t> (k)].ipass;
       int const iaptype = prepared[static_cast<size_t> (k)].iaptype;
@@ -3072,6 +3115,8 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
       return;
     }
 
+  CompatibilityBudget const budget;
+  int ndecodes = 0;
   Stage7State& state = stage7_state ();
   ensure_tweaks (state);
   ensure_symbol_tables (state);
@@ -3080,7 +3125,7 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
   // Marca temporale unica per tutti i candidati di questo ciclo (dump LLR).
   double const inizio_ciclo_utc = llr_dump_adesso_utc ();
   decodium::txmsg::Decode77Context context = make_decode77_context (mycall, hiscall);
-  auto abort_if_cancelled = [&state, nout] () {
+  auto abort_if_cancelled = [&state, &ndecodes, nout] () {
     if (!stage7_should_cancel ())
       {
         return false;
@@ -3088,7 +3133,11 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
     reset_average_state (state);
     if (nout)
       {
-        *nout = 0;
+        // A compatibility time limit ends the search, not the valid results
+        // already collected. Explicit stop/mode-change cancellation still
+        // discards them as before.
+        *nout = stage7_cancel_requested ().load (std::memory_order_relaxed)
+            ? 0 : std::min (ndecodes, kFt2MaxLines);
       }
     return true;
   };
@@ -3144,7 +3193,6 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
   if (ndepth0 >= 2) syncmin = 0.78f;
   if (ndepth0 >= 3) syncmin = 0.70f;
 
-  int ndecodes = 0;
   int nwork_decodes = 0;
   int nd1 = 0;
   int nd2 = 0;

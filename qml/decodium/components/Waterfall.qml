@@ -25,6 +25,12 @@ Item {
     property var spectrumDecodeLabels: []
     property bool dxClusterRefreshPending: false
     readonly property bool ft2LinkMode: bridge && String(bridge.mode || "").toUpperCase() === "FT2-LINK"
+    // Il cursore RX esisteva gia' per i modi FT/JTTY.  In CW il decoder ha
+    // anche un filtro proprio: questa proprieta' rende il segnale scelto nel
+    // waterfall un vero aggancio del demodulatore, non soltanto una riga UI.
+    readonly property bool cwModeActive: bridge && String(bridge.mode || "").toUpperCase() === "CW"
+    readonly property int cwSelectedToneHz: (typeof cwModule !== "undefined" && cwModule)
+                                             ? Math.round(Number(cwModule.decoderToneLock || 0)) : 0
 
     // Altezza minima/massima del grafico spettro (regolabile tramite drag)
     // 1.0.288 — vincoli rilassati: spettro e cascata ridimensionabili quasi liberamente
@@ -140,6 +146,38 @@ Item {
 
     function isValidClickableAudioFreq(freq) {
         return freq >= 100 && freq <= 5000
+    }
+
+    // L'asse orizzontale del waterfall e' gia' in Hz audio.  Il destro
+    // mantiene il comportamento storico (marcatore RX) e, quando si e' in
+    // CW, blocca anche il decoder sulla portante scelta.  Non tocca la
+    // frequenza della radio: e' quindi sicuro durante la ricezione e utile
+    // con piu' segnali CW nello stesso passabanda.
+    function selectReceiveSignal(freq) {
+        var clean = Math.round(Number(freq))
+        if (!isFinite(clean) || !waterfallPanel.isValidClickableAudioFreq(clean))
+            return
+
+        if (bridge && typeof bridge.setRxAudioFreqFromClick === "function")
+            bridge.setRxAudioFreqFromClick(clean)
+        waterfallPanel.frequencySelected(clean)
+
+        if (!waterfallPanel.cwModeActive
+                || typeof cwModule === "undefined" || !cwModule)
+            return
+        // ensureStarted() must precede the assignment: loading the saved CW
+        // profile afterwards would otherwise overwrite the click selection.
+        cwModule.ensureStarted()
+        cwModule.decoderToneLock = clean
+        console.log("[Waterfall][CW] decoder locked at", clean, "Hz")
+    }
+
+    function clearCwSignalSelection() {
+        if (typeof cwModule === "undefined" || !cwModule)
+            return
+        cwModule.ensureStarted()
+        cwModule.decoderToneLock = 0
+        console.log("[Waterfall][CW] decoder returned to auto tone")
     }
 
     function setPaletteIndex(index, persist) {
@@ -961,6 +999,50 @@ Item {
                 }
                 Text { text: qsTr("Cluster"); color: dxClusterCheck.checked ? "#FFC800" : textSec; font.pixelSize: 10 }
 
+                // In CW, right-click on a trace locks the decoder to that
+                // carrier.  This compact control makes the selected tone and
+                // the way back to automatic search visible at all times.
+                Rectangle {
+                    id: cwSignalSelectionControl
+                    visible: waterfallPanel.cwModeActive
+                    width: Math.max(104, cwSignalSelectionText.implicitWidth + 14)
+                    height: 20
+                    radius: 3
+                    color: cwSignalSelectionMouse.containsMouse
+                           ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.24)
+                           : Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.72)
+                    border.color: waterfallPanel.cwSelectedToneHz > 0 ? "#ffb000" : accentGreen
+                    border.width: 1
+
+                    Text {
+                        id: cwSignalSelectionText
+                        anchors.centerIn: parent
+                        text: waterfallPanel.cwSelectedToneHz > 0
+                              ? qsTr("CW %1 Hz  ×").arg(waterfallPanel.cwSelectedToneHz)
+                              : qsTr("CW: right-click signal")
+                        color: waterfallPanel.cwSelectedToneHz > 0 ? "#ffd166" : accentGreen
+                        font.pixelSize: 10
+                        font.bold: true
+                    }
+
+                    MouseArea {
+                        id: cwSignalSelectionMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: waterfallPanel.cwSelectedToneHz > 0
+                                     ? Qt.PointingHandCursor : Qt.ArrowCursor
+                        onClicked: {
+                            if (waterfallPanel.cwSelectedToneHz > 0)
+                                waterfallPanel.clearCwSignalSelection()
+                        }
+                    }
+                    ToolTip.visible: cwSignalSelectionMouse.containsMouse
+                    ToolTip.delay: 350
+                    ToolTip.text: waterfallPanel.cwSelectedToneHz > 0
+                                  ? qsTr("CW decoder locked here. Click to return to automatic tone search.")
+                                  : qsTr("Right-click a CW carrier in the waterfall to decode that signal. This does not retune the radio.")
+                }
+
                 // Lo spaziatore che spingeva a destra il pulsante di chiusura non
                 // serve piu': in una fila che va a capo l'ultimo elemento sta dove
                 // arriva, e uno spaziatore elastico lo spingerebbe da solo su una
@@ -1279,7 +1361,7 @@ Item {
             }
 
             onFrequencySelected: function(freq) {
-                waterfallPanel.frequencySelected(freq)        // RX
+                waterfallPanel.selectReceiveSignal(freq)      // RX / CW decoder lock
             }
             onTxFrequencySelected: function(freq) {
                 waterfallPanel.txFrequencySelected(freq)      // TX
@@ -1706,6 +1788,33 @@ Item {
                     Rectangle { x: -3; width: 7; height: parent.height; color: "#00e5ff"; opacity: 0.27 }
                     Rectangle { x: -1; width: 3; height: parent.height; color: "#00e5ff"; opacity: 0.94 }
                     Rectangle { x: 0; width: 1; height: parent.height; color: "#b4ffff" }
+                }
+
+                // Il marcatore arancione e' distinto dalla riga RX azzurra:
+                // quest'ultima e' il target generico del programma, mentre
+                // questa dice con precisione quale portante sta demodulando
+                // il decoder CW quando l'operatore l'ha scelta a mano.
+                Item {
+                    id: cwDecoderLockMarker
+                    readonly property int toneHz: waterfallPanel.cwSelectedToneHz
+                    readonly property real markerX: spectrumGpuOverlay.xForFreq(toneHz)
+                    x: Math.round(markerX)
+                    y: 0
+                    width: 1
+                    height: parent.height
+                    z: 45
+                    visible: waterfallPanel.cwModeActive && toneHz > 0
+                             && markerX >= 0 && markerX < spectrumGpuOverlay.width
+                    Rectangle { x: -4; width: 9; height: parent.height; color: "#ffb000"; opacity: 0.20 }
+                    Rectangle { x: -1; width: 3; height: parent.height; color: "#ffb000"; opacity: 0.95 }
+                    Text {
+                        x: 5
+                        y: 2
+                        text: "CW " + parent.toneHz + " Hz"
+                        color: "#ffd166"
+                        font.pixelSize: 9
+                        font.bold: true
+                    }
                 }
 
                 Item {

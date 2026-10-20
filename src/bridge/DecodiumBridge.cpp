@@ -17260,11 +17260,13 @@ void DecodiumBridge::regenerateTxMessages()
     // usare type-4 senza locator, altrimenti il packing standard li tronca.
     if (m_skipCustomCqPrefixRecovery) {
         m_skipCustomCqPrefixRecovery = false;
-    } else if (m_customCqPrefix.isEmpty()) {
+    } else if (m_customCqPrefix.isEmpty() && m_customCqMessage.isEmpty()) {
         m_customCqPrefix = customCqPrefixFromMessage(m_tx6, m_callsign);
     }
-    QString newTx6 = ftxCqMessageWithCustomPrefix(
-        standardFtxCqMessage(m_callsign, grid4, mode), m_customCqPrefix);
+    QString newTx6 = m_customCqMessage.isEmpty()
+        ? ftxCqMessageWithCustomPrefix(
+              standardFtxCqMessage(m_callsign, grid4, mode), m_customCqPrefix)
+        : m_customCqMessage;
     setTx6(newTx6);
 
     // TX1-5: rigenerati solo se dxCall è noto
@@ -19082,10 +19084,17 @@ void DecodiumBridge::setMode(const QString& v) {
         QString const rttyRestoreMode = m_rttyRigModeState.restoreTarget(
             rttyCatContext(), configuredRigMode, QDateTime::currentMSecsSinceEpoch());
         QString cwExitRestoreMode;
+        QString cwExitVerifyMode;
         if (leavingCw) {
             cwExitRestoreMode = m_catModeBeforeCw.trimmed().toUpper();
             if (cwExitRestoreMode.isEmpty())
                 cwExitRestoreMode = configuredRigMode;
+            // CW can have been adopted from the radio during CAT startup,
+            // before there was an application-side CW entry from which to
+            // take a CAT-mode snapshot.  Keep an explicit target for the
+            // delayed verification in that case too: an old CW state reply
+            // must not overwrite the first DATA/USB request.
+            cwExitVerifyMode = cwExitRestoreMode;
             m_catModeBeforeCw.clear();
             bridgeLog(QStringLiteral("CW exit CAT restore: target=%1 applicationMode=%2")
                           .arg(cwExitRestoreMode.isEmpty()
@@ -19106,19 +19115,34 @@ void DecodiumBridge::setMode(const QString& v) {
             && !canonicalApplicationDecodeMode(normalizedMode).isEmpty()) {
             m_hamlibCat->setRigMode(normalizedMode);
         }
-        if (!cwExitRestoreMode.isEmpty() && monitorShouldStayActive) {
-            // Some radios apply the mode after the preceding QSY/backend
-            // hand-off. Reassert once after CAT settles without disturbing a
-            // newer mode change.
-            QTimer::singleShot(900, this, [this, rttyRigGeneration, cwExitRestoreMode]() {
-                if (rttyRigGeneration != m_rttyRigModeGeneration
-                    || m_mode == QStringLiteral("CW")
-                    || m_transmitting || m_tuning) {
-                    return;
-                }
-                applyConfiguredCatRigMode(QStringLiteral("mode-change/cw-exit-settled"),
-                                           cwExitRestoreMode);
-            });
+        if (!cwExitVerifyMode.isEmpty()) {
+            // The first state report after opening a rig already left in CW
+            // can arrive after the user's first mode selection. It restores
+            // the manager's desired state to CW, even though the change to
+            // DATA-U/USB was queued correctly. Reassert twice after the CAT
+            // queue has drained; this is deliberately PTT-safe because
+            // setRigMode() always writes desired PTT=false.
+            static constexpr int kCwExitVerifyDelaysMs[] = {700, 1700};
+            for (int const delayMs : kCwExitVerifyDelaysMs) {
+                QTimer::singleShot(delayMs, this,
+                                   [this, rttyRigGeneration, cwExitVerifyMode, delayMs]() {
+                    if (rttyRigGeneration != m_rttyRigModeGeneration
+                        || m_mode == QStringLiteral("CW")
+                        || m_transmitting || m_tuning
+                        || !m_catConnected) {
+                        return;
+                    }
+                    if (m_catMode.compare(cwExitVerifyMode, Qt::CaseInsensitive) == 0) {
+                        bridgeLog(QStringLiteral("CW exit CAT verify after %1 ms: mode confirmed %2")
+                                      .arg(delayMs).arg(cwExitVerifyMode));
+                        return;
+                    }
+                    bridgeLog(QStringLiteral("CW exit CAT verify after %1 ms: reported=%2, reasserting %3")
+                                  .arg(delayMs).arg(m_catMode, cwExitVerifyMode));
+                    applyConfiguredCatRigMode(QStringLiteral("mode-change/cw-exit-verify"),
+                                               cwExitVerifyMode);
+                });
+            }
         }
         syncActiveCatTxSplitFrequency(QStringLiteral("mode-change"));
         quint64 const recoverySessionId = nativePcmToLegacyRxHandoff
@@ -29966,6 +29990,12 @@ void DecodiumBridge::setTxMessage(int n, const QString& message)
     case 5: setTx5(normalized); break;
     case 6:
         m_customCqPrefix = customCqPrefixFromMessage(normalized, m_callsign);
+        // The TX panel is an explicit operator edit. Preserve the complete
+        // CQ so a QSO completion or restart cannot restore a removed grid.
+        m_customCqMessage = normalized == standardFtxCqMessage(
+            m_callsign, m_grid.left(4), m_mode.trimmed().toUpper())
+            ? QString {}
+            : normalized;
         setTx6(normalized);
         break;
     default: break;
@@ -30017,6 +30047,7 @@ QString DecodiumBridge::validateTxMessage(const QString& message) const
 void DecodiumBridge::resetStandardTxMessages()
 {
     m_customCqPrefix.clear();
+    m_customCqMessage.clear();
     m_skipCustomCqPrefixRecovery = true;
     regenerateTxMessages();
 }
@@ -36430,6 +36461,7 @@ void DecodiumBridge::saveSettingsInternal(bool asynchronous)
     s.setValue("decodeDepthMigratedFromLegacy", true);
     setLegacyIniValue(QStringLiteral("SingleDecode"), m_singleDecode);
     s.setValue("tx6", m_tx6);
+    s.setValue("customTx6Message", m_customCqMessage);
     s.remove("dxCall");
     s.remove("dxGrid");
     s.remove("tx1");
@@ -37612,11 +37644,13 @@ void DecodiumBridge::genStdMsgs(const QString& hisCall, const QString& hisGrid)
                                  m_sendRR73, false, mode));           // RR73 o RRR
     setTx5(standardFtxQsoMessage(5, hisCall, m_callsign, mygr, rptSent,
                                  m_sendRR73, false, mode));           // 73
-    if (m_customCqPrefix.isEmpty()) {
+    if (m_customCqPrefix.isEmpty() && m_customCqMessage.isEmpty()) {
         m_customCqPrefix = customCqPrefixFromMessage(m_tx6, m_callsign);
     }
-    setTx6(ftxCqMessageWithCustomPrefix(
-        standardFtxCqMessage(m_callsign, mygr, mode), m_customCqPrefix)); // CQ
+    setTx6(m_customCqMessage.isEmpty()
+        ? ftxCqMessageWithCustomPrefix(
+              standardFtxCqMessage(m_callsign, mygr, mode), m_customCqPrefix)
+        : m_customCqMessage); // CQ
     Q_UNUSED(hisGrid)
 }
 
@@ -42937,6 +42971,16 @@ void DecodiumBridge::loadSettings()
     m_tx4 = s.value("tx4", "").toString();
     m_tx5 = s.value("tx5", "").toString();
     m_tx6 = s.value("tx6", "").toString();
+    m_customCqMessage = s.value("customTx6Message", QString()).toString().trimmed().toUpper();
+    // Profiles written before customTx6Message used TX6 alone. Preserve an
+    // existing value only when it differs from the generated CQ.
+    if (!s.contains("customTx6Message") && !m_tx6.trimmed().isEmpty()) {
+        QString const generatedTx6 = standardFtxCqMessage(
+            m_callsign, m_grid.left(4), m_mode.trimmed().toUpper());
+        if (m_tx6.trimmed().compare(generatedTx6, Qt::CaseInsensitive) != 0) {
+            m_customCqMessage = m_tx6.trimmed().toUpper();
+        }
+    }
     m_rxFrequency = s.value("rxFrequency", 1500).toInt();
     m_txFrequency = qBound(0, s.value("txFrequency", s.value("TXFrequency", 1500)).toInt(), 3000);
     m_holdTxFreq = s.value(QStringLiteral("HoldTxFreq"),

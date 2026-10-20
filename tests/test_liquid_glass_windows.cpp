@@ -28,6 +28,7 @@ private slots:
     void cwFunctionKeysOverrideDashboardShortcuts();
     void jttyWindowKeepsOperationalContrast();
     void restoredPopoutsWaitForStartupPresentation();
+    void linuxUsesSafeOpaqueGlassFallback();
 };
 
 void TestLiquidGlassWindows::shellIsCrossPlatformAndThemeGated()
@@ -329,6 +330,33 @@ void TestLiquidGlassWindows::restoredPopoutsWaitForStartupPresentation()
     QVERIFY(main.contains(QStringLiteral("mainWindow.startupPresentationFinished\n                 && mainWindow.dxClusterPanelVisible")));
     QVERIFY(main.contains(QStringLiteral("mainWindow.finishStartupPresentation()")));
     QVERIFY(main.contains(QStringLiteral("visible: mainWindow.startupPresentationFinished\n                             && showWorldClock")));
+}
+
+void TestLiquidGlassWindows::linuxUsesSafeOpaqueGlassFallback()
+{
+    const QString themeManager = readSource(
+        QStringLiteral("src/ui/DecodiumThemeManager.cpp"));
+    const QString themeHeader = readSource(
+        QStringLiteral("src/ui/DecodiumThemeManager.h"));
+    const QString main = readSource(QStringLiteral("qml/decodium/Main.qml"));
+    QVERIFY(!themeManager.isEmpty());
+    QVERIFY(!themeHeader.isEmpty());
+    QVERIFY(!main.isEmpty());
+
+    // Linux does not enable alpha top-level surfaces merely because Qt says
+    // the session is xcb/Wayland: that is insufficient to establish a safe
+    // compositor/driver combination.  It is an explicit opt-in only.
+    QVERIFY(themeManager.contains(QStringLiteral("DECODIUM_ENABLE_LINUX_GLASS")));
+    QVERIFY(themeHeader.contains(QStringLiteral("DECODIUM_ENABLE_LINUX_GLASS=1")));
+
+    // The saved initial mode must not reopen CW/SSB on the next launch after
+    // an operator closed its pop-out in the previous session.
+    const int modeConnection = main.indexOf(QStringLiteral("function onModeChanged()"));
+    QVERIFY(modeConnection >= 0);
+    const QString modeHandler = main.mid(modeConnection, 900);
+    QVERIFY(modeHandler.contains(QStringLiteral("!mainWindow.startupPresentationFinished")));
+    QVERIFY(!main.contains(QStringLiteral(
+        "Component.onCompleted: if (bridge && bridge.mode === \"SSB\") active = true")));
 }
 
 QTEST_APPLESS_MAIN(TestLiquidGlassWindows)

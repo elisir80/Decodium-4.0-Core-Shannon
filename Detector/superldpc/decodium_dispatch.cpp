@@ -430,6 +430,14 @@ extern "C" int superldpc_is_enabled_c ()
     return useSuperLdpc () ? 1 : 0;
 }
 
+// Hardware/OS availability, independent of the LDPC button and emergency
+// override. FT2 compatibility limits must never affect a SIMD-capable CPU
+// merely because the user has chosen the original decoder.
+extern "C" int superldpc_is_available_c ()
+{
+    return cpuCapabilities ().superLdpcUsable () ? 1 : 0;
+}
+
 extern "C" void superldpc_set_ft8_mode_c (int on)
 {
     g_ft8Mode = on != 0;

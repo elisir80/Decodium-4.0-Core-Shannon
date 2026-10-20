@@ -10,6 +10,7 @@ private slots:
     void rejectsDc(){SpeechDsp dsp;dsp.automatic=false;float y=0;for(int i=0;i<48000;++i)y=dsp.process(.5);QVERIFY(std::abs(y)<.00001);}
     void voiceBand(){auto rms=[](double hz){SpeechDsp dsp;dsp.automatic=false;double sum=0;for(int i=0;i<48000;++i){double y=dsp.process(.2*std::sin(2*3.141592653589793*hz*i/48000));if(i>24000)sum+=y*y;}return std::sqrt(sum/24000);};QVERIFY(rms(1000)>rms(8000)*20);QVERIFY(rms(1000)>rms(30)*3);}
     void noImplicitMicrophone(){SsbController c;bool keyed=false;SsbController::Hooks h;h.begin=[&]{keyed=true;return true;};c.setHooks(h);c.setMicrophone("not-an-audio-device");QVERIFY(!c.start());QVERIFY(!keyed);QVERIFY(!c.transmitting());}
+    void stopIsSafeBeforeAndAfterFailedCapture(){SsbController c;c.stop();c.setMicrophone("not-an-audio-device");QVERIFY(!c.start());c.stop();QVERIFY(!c.transmitting());}
     void rxAgcLevelsSignals(){
         RxAgc agc;agc.configure(12000);agc.setMode(RxAgc::Medium);agc.setThresholdDb(-90);
         auto settle=[&](double amp){float peak=0;for(int b=0;b<60;++b){float buf[1200];for(int i=0;i<1200;++i)buf[i]=float(amp*std::sin(2*3.14159265*700*i/12000.));agc.process(buf,1200);if(b>=50)for(float v:buf)peak=std::max(peak,std::abs(v));}return peak;};

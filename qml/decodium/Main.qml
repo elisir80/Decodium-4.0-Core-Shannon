@@ -1935,7 +1935,6 @@ GlassApplicationWindow {
         active: false
         asynchronous: true
         source: "components/SsbWindow.qml"
-        Component.onCompleted: if (bridge && bridge.mode === "SSB") active = true
         onLoaded: { item.show(); item.raise(); item.requestActivate() }
     }
     function showCwWindow() {
@@ -2014,6 +2013,12 @@ GlassApplicationWindow {
     Connections {
         target: bridge
         function onModeChanged() {
+            // The restored mode is emitted while the application is starting.
+            // Do not recreate a CW/SSB window which the operator deliberately
+            // closed in the previous session.  It remains available through
+            // the mode selector or the Show button once startup is complete.
+            if (!mainWindow.startupPresentationFinished)
+                return
             if (bridge.mode === "RTTY")
                 mainWindow.showRttyWindow()
             if (bridge.mode === "JTTY")

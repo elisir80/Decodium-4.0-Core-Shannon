@@ -43,9 +43,9 @@ class DecodiumThemeManager : public QObject
     Q_PROPERTY(QString currentTheme  READ currentTheme   WRITE setCurrentTheme NOTIFY currentThemeChanged)
     Q_PROPERTY(bool   isLightTheme   READ isLightTheme   NOTIFY paletteChanged)
     Q_PROPERTY(bool   isGlassTheme   READ isGlassTheme   NOTIFY paletteChanged)
-    // True when Qt is running on a desktop platform that can present an
-    // alpha-capable top-level window.  Linux sessions without a compositor
-    // can opt into the opaque fallback through DECODIUM_FORCE_OPAQUE_GLASS.
+    // True when Qt is running on a platform where transparent top-level
+    // surfaces are safe by default. Linux uses the robust opaque fallback;
+    // an expert can opt in with DECODIUM_ENABLE_LINUX_GLASS=1.
     Q_PROPERTY(bool   glassTransparencySupported READ glassTransparencySupported CONSTANT)
     // 1.0.305 (#6) — colori UI personalizzati (sfondo + testo) come in v3, sopra il tema.
     Q_PROPERTY(bool    customColorsEnabled READ customColorsEnabled WRITE setCustomColorsEnabled NOTIFY paletteChanged)
