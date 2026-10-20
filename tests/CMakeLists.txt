@@ -332,6 +332,10 @@ add_executable (test_auto_cq_call_policy test_auto_cq_call_policy.cpp)
 target_link_libraries (test_auto_cq_call_policy Qt6::Test Qt6::Core)
 add_test (NAME test_auto_cq_call_policy COMMAND $<TARGET_FILE:test_auto_cq_call_policy>)
 
+add_executable (test_caller_scoring test_caller_scoring.cpp)
+target_link_libraries (test_caller_scoring Qt6::Test Qt6::Core)
+add_test (NAME test_caller_scoring COMMAND $<TARGET_FILE:test_caller_scoring>)
+
 add_executable (test_native_decode_secondary_work test_native_decode_secondary_work.cpp)
 target_link_libraries (test_native_decode_secondary_work Qt6::Test Qt6::Core)
 add_test (NAME test_native_decode_secondary_work COMMAND $<TARGET_FILE:test_native_decode_secondary_work>)
@@ -765,6 +769,7 @@ set (_decodium_regression_test_targets
   test_rtty_rx_recovery
   test_rtty_rig_mode_state
   test_auto_cq_call_policy
+  test_caller_scoring
   test_native_decode_secondary_work
   test_adif_udp_payload
   test_amplifier_telemetry

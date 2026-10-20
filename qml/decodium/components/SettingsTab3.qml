@@ -903,6 +903,33 @@ Default: OFF.")
                     ToolTip.text: qsTr("While calling CQ (AutoCQ), keeps the decode depth at full (OSD + 4th subtraction pass + weak-signal averaging) instead of reducing it to 2.\n\nHelps you hear weak responders. Reduces automatically under CPU pressure anyway.\n\nDefault: OFF.")
                 }
 
+                // Scelta del prossimo caller in coda con punteggio (opt-in)
+                Text {
+                    text: qsTr("Best caller first:")
+                    color: textSecondary
+                    font.pixelSize: 12
+                    elide: Text.ElideRight
+                    verticalAlignment: Text.AlignVCenter
+                    Layout.preferredWidth: autoSequenceGrid.labelWidth
+                    Layout.preferredHeight: controlHeight
+                }
+                CheckBox {
+                    id: callerScoringCheck
+                    objectName: "callerScoringCheck"
+                    Layout.preferredWidth: autoSequenceGrid.checkWidth
+                    Layout.preferredHeight: controlHeight
+                    checked: bridge ? bridge.callerScoring : false
+                    onToggled: {
+                        if (bridge) bridge.setCallerScoring(checked)
+                    }
+                    indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                    contentItem: Text { text: ""; leftPadding: 24 }
+                    hoverEnabled: true
+                    ToolTip.visible: hovered
+                    ToolTip.delay: 400
+                    ToolTip.text: qsTr("When several stations call you (AutoCQ / multi-answer), answers the best one first instead of the first to arrive.\n\nThe score favours strong signals, new DXCC entities (more if new on any band, less if only new on this band) and stations that have waited longer. Stations already worked on this band are moved down.\n\nAn order you set by hand in the queue is never changed.\n\nDefault: OFF.")
+                }
+
                 // 1.0.289 — FT2 #3: chiusura rapida partner forti
                 Text {
                     text: qsTr("FT2: close strong partners earlier:")

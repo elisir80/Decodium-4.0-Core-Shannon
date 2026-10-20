@@ -63,6 +63,7 @@ class DecodiumCloudlogLite;
 class DecodiumDecoLogLink;
 class DecodiumQrzLogbookLite;
 class DecodiumWsprUploader;
+namespace decodium::seq { struct CallerScoreInput; }
 class DxccLookup;
 class DecodiumLegacyBackend;
 #include "DecodiumDiagnostics.h"
@@ -678,6 +679,8 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(bool ft2ConservativeTiming READ ft2ConservativeTiming WRITE setFt2ConservativeTiming NOTIFY ft2ConservativeTimingChanged)
     // 1.0.289 — FT2 enhancement toggles (opt-in, default OFF = comportamento 1.0.288)
     Q_PROPERTY(bool ft2FullDecodeInAutoCq READ ft2FullDecodeInAutoCq WRITE setFt2FullDecodeInAutoCq NOTIFY ft2FullDecodeInAutoCqChanged)
+    // Opt-in: sceglie il prossimo caller in coda con un punteggio (SNR, nuovo DXCC, gia' lavorato, attesa).
+    Q_PROPERTY(bool callerScoring READ callerScoring WRITE setCallerScoring NOTIFY callerScoringChanged)
     Q_PROPERTY(bool ft8DeepDecodeInTx READ ft8DeepDecodeInTx WRITE setFt8DeepDecodeInTx NOTIFY ft8DeepDecodeInTxChanged)
     Q_PROPERTY(bool ft8SubpassHarvest READ ft8SubpassHarvest WRITE setFt8SubpassHarvest NOTIFY ft8SubpassHarvestChanged)
     Q_PROPERTY(bool ft2QuickGiveUpStrong READ ft2QuickGiveUpStrong WRITE setFt2QuickGiveUpStrong NOTIFY ft2QuickGiveUpStrongChanged)
@@ -2272,6 +2275,7 @@ signals:
     void ft8FastSequenceChanged();     // 1.0.317 — grace ridotta + late-decode accept FT8
     void ft2ConservativeTimingChanged(); // 1.0.367 — finestra TX FT2 async stretta (no frame troncati)
     void ft2FullDecodeInAutoCqChanged();  // 1.0.289
+    void callerScoringChanged();
     void ft8DeepDecodeInTxChanged();      // 1.0.299 — deep decode-list-only durante TX
     void ft8SubpassHarvestChanged();      // F0 subpass harvest opt-in
     void ft2QuickGiveUpStrongChanged();   // 1.0.289
@@ -3168,6 +3172,7 @@ private:
     bool m_ft2Conservative {false};
     // 1.0.289 — FT2 enhancement toggles (opt-in, default OFF = comportamento 1.0.288)
     bool m_ft2FullDecodeInAutoCq {false};  // #1: piena profondità decode durante attesa AutoCQ
+    bool m_callerScoring {false};          // opt-in: coda caller ordinata per punteggio (default OFF = FIFO)
     bool m_ft2QuickGiveUpStrong {false};   // #3: cap RR73 ridotto sui partner forti che spariscono
     // 1.0.437 - opt-in: bonus signoff retries per partner debole (FTX). Default OFF = byte-identico.
     bool m_ftxWeakSignoffBoost {false};
@@ -4283,6 +4288,14 @@ private:
     bool        m_foxMode   {false};
     bool        m_houndMode {false};
     QStringList m_callerQueue;
+    // Arrivo in coda (base call -> ms epoch) per il punteggio; l'ordine manuale (drag, promozione
+    // da click) ha sempre la precedenza e sospende il riordino finche' la coda non si svuota.
+    QHash<QString, qint64> m_callerQueueArrivalMs;
+    bool m_callerQueueManualOrder {false};
+    QSet<QString> m_callerQueuePinned;   // stazioni accodate con un clic: il punteggio non le supera
+    void rankCallerQueue(const QString& why);
+    decodium::seq::CallerScoreInput callerScoreInputFor(const QString& base, int snrDb, bool snrKnown, qint64 waitMs) const;
+    QStringList scoredCallerRowOrder(const QStringList& rows);
     static constexpr int FOX_QUEUE_MAX = 20;
 
     // B9 — Active Stations model
@@ -4525,6 +4538,8 @@ public:
     // 1.0.289 — FT2 enhancement toggles
     Q_INVOKABLE bool ft2FullDecodeInAutoCq() const { return m_ft2FullDecodeInAutoCq; }
     Q_INVOKABLE void setFt2FullDecodeInAutoCq(bool v);
+    Q_INVOKABLE bool callerScoring() const { return m_callerScoring; }
+    Q_INVOKABLE void setCallerScoring(bool v);
     Q_INVOKABLE bool ft2QuickGiveUpStrong() const { return m_ft2QuickGiveUpStrong; }
     Q_INVOKABLE void setFt2QuickGiveUpStrong(bool v);
     Q_INVOKABLE bool ftxWeakSignoffBoost() const { return m_ftxWeakSignoffBoost; }

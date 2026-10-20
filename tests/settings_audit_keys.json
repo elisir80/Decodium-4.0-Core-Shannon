@@ -46,6 +46,7 @@
   "CallFeature/TargetCallSign",
   "CallFeature/TimeoutS",
   "CallerRetriesAlwaysHard",
+  "CallerScoring",
   "CatShareClientAddress",
   "CheckSWR",
   "CloudLogStationID",

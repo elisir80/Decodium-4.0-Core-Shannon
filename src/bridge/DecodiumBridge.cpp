@@ -3,6 +3,7 @@
 #include "AdifExportSanitizer.h"
 #include "Network/AdifUdpPayload.hpp"
 #include "Sequencer/AutoCqCallPolicy.hpp"
+#include "Sequencer/CallerScoring.hpp"
 
 #if DECODIUM_HAS_SSTV
 #include "src/sstv/integration/SstvQsoLog.h"
@@ -7970,6 +7971,18 @@ void DecodiumBridge::setFt2FullDecodeInAutoCq(bool v)
     settings.setValue(QStringLiteral("Ft2FullDecodeInAutoCq"), v);
     emit ft2FullDecodeInAutoCqChanged();
     bridgeLog(QStringLiteral("[FT2WS] Full decode in AutoCQ %1").arg(v ? "ON" : "OFF"));
+}
+
+void DecodiumBridge::setCallerScoring(bool v)
+{
+    if (m_callerScoring == v) return;
+    m_callerScoring = v;
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
+    settings.setValue(QStringLiteral("CallerScoring"), v);
+    emit callerScoringChanged();
+    bridgeLog(QStringLiteral("CallerScoring %1").arg(v ? "ON" : "OFF"));
+    if (v) rankCallerQueue(QStringLiteral("enabled"));
 }
 
 void DecodiumBridge::setFt2QuickGiveUpStrong(bool v)
@@ -25983,7 +25996,9 @@ void DecodiumBridge::mamEnqueueClickedStation(const QString& callFull, int audio
     // uno slot si libera (stessa via dei caller spontanei).
     if (m_mamSlots.size() >= m_mamMaxStreams) {
         int const qFreq = qBound(200, audioFreqHz > 0 ? audioFreqHz : m_rxFrequency, 4000);
+        m_callerQueuePinned.insert(normalizedBaseCall(base));   // scelta dell'operatore: il punteggio non la supera
         enqueueCallerInternal(base, qFreq, -10, true);
+        rankCallerQueue(QStringLiteral("click"));
         bridgeLog(QStringLiteral("MAM click-enqueue (queued, no free slot): %1 @ %2Hz")
                       .arg(base).arg(qFreq));
         return;
@@ -26045,6 +26060,7 @@ void DecodiumBridge::mamPromoteQueuedCaller(const QString& callFull)
     // mamPromoteFromQueue() contiene la singola fonte di verita' per creare
     // uno slot da un caller in attesa (TX2, report e frequenza). Portiamo la
     // riga scelta in testa e riutilizziamo esattamente quel percorso.
+    m_callerQueueManualOrder = true;   // la scelta dell'utente batte il punteggio
     if (queueIndex > 0) {
         m_callerQueue.move(queueIndex, 0);
         emit callerQueueChanged();
@@ -26487,6 +26503,7 @@ void DecodiumBridge::mamPromoteFromQueue()
     // Signoffs proven by a late R+report have priority over new callers and
     // retain their original exchange state; the compact normal queue does not.
     mamPromoteLateReportRecoveries();
+    rankCallerQueue(QStringLiteral("mam-promote"));
     qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
     int const slotsBefore = m_mamSlots.size();
     while (m_mamSlots.size() < m_mamMaxStreams && !m_callerQueue.isEmpty()) {
@@ -39644,9 +39661,172 @@ bool DecodiumBridge::enqueueCallerInternal(const QString& call,
             entry += QStringLiteral(" %1").arg(snr);
         }
     }
+    if (m_callerQueue.isEmpty()) {
+        m_callerQueueManualOrder = false;
+        m_callerQueueArrivalMs.clear();
+    }
     m_callerQueue.append(entry);
+    if (!m_callerQueueArrivalMs.contains(queuedCall)) {
+        m_callerQueueArrivalMs.insert(queuedCall, QDateTime::currentMSecsSinceEpoch());
+    }
     emit callerQueueChanged();
+    rankCallerQueue(QStringLiteral("enqueue"));
     return true;
+}
+
+// Riordina m_callerQueue per punteggio decrescente (stabile: a parita' resta l'ordine di arrivo).
+// Spento di default; l'ordine scelto a mano dall'utente non viene mai toccato.
+decodium::seq::CallerScoreInput DecodiumBridge::callerScoreInputFor(const QString& base,
+                                                                    int snrDb,
+                                                                    bool snrKnown,
+                                                                    qint64 waitMs) const
+{
+    decodium::seq::CallerScoreInput in;
+    in.snrDb = snrDb;
+    in.snrKnown = snrKnown;
+    in.waitMs = waitMs;
+    if (base.isEmpty()) {
+        return in;
+    }
+    QString const curBand = freqHzToBandToken(m_frequency);
+    in.workedEver = m_worked.callEver.contains(base);
+    QString const bandKey = workedCallBandKey(curBand, base);
+    in.workedBand = !bandKey.isEmpty()
+        && (m_worked.callByBand.contains(bandKey) || m_worked.callTodayByBand.contains(bandKey));
+    if (m_dxccLookup && m_dxccLookup->isLoaded()) {
+        DxccEntity const ent = m_dxccLookup->lookup(base);
+        if (ent.isValid()) {
+            in.newDxccEver = !m_worked.dxccEver.contains(ent.name);
+            in.newDxccBand = !curBand.isEmpty()
+                && !m_worked.dxccByBand.contains(curBand + QLatin1Char('|') + ent.name);
+        }
+    }
+    return in;
+}
+
+void DecodiumBridge::rankCallerQueue(const QString& why)
+{
+    // I "pin" valgono solo per chi e' ancora in coda.
+    if (!m_callerQueuePinned.isEmpty()) {
+        QSet<QString> queued;
+        for (QString const& entry : m_callerQueue) {
+            QStringList const parts = entry.split(' ', Qt::SkipEmptyParts);
+            if (!parts.isEmpty()) queued.insert(normalizedBaseCall(parts.first()));
+        }
+        m_callerQueuePinned.intersect(queued);
+    }
+    if (!m_callerScoring || m_callerQueueManualOrder || m_callerQueue.size() < 2) {
+        return;
+    }
+    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+
+    QVector<decodium::seq::CallerScoreInput> inputs;
+    inputs.reserve(m_callerQueue.size());
+    for (QString const& entry : m_callerQueue) {
+        QStringList const parts = entry.split(' ', Qt::SkipEmptyParts);
+        QString const base = parts.isEmpty() ? QString {} : normalizedBaseCall(parts.first());
+        auto const arrival = m_callerQueueArrivalMs.constFind(base);
+        qint64 const waitMs = arrival != m_callerQueueArrivalMs.constEnd()
+            ? qMax<qint64>(0, nowMs - arrival.value()) : 0;
+        bool const snrKnown = parts.size() >= 3;
+        decodium::seq::CallerScoreInput in = callerScoreInputFor(base,
+                                          snrKnown ? qBound(-50, parts.at(2).toInt(), 49) : -10,
+                                          snrKnown,
+                                          waitMs);
+        in.pinned = m_callerQueuePinned.contains(base);
+        inputs.append(in);
+    }
+
+    QVector<int> const order = decodium::seq::rankCallers(inputs);
+    bool changed = false;
+    for (int i = 0; i < order.size(); ++i) {
+        if (order.at(i) != i) { changed = true; break; }
+    }
+    if (!changed) {
+        return;
+    }
+
+    QStringList ranked;
+    ranked.reserve(order.size());
+    QStringList summary;
+    for (int idx : order) {
+        ranked.append(m_callerQueue.at(idx));
+        QStringList const parts = m_callerQueue.at(idx).split(' ', Qt::SkipEmptyParts);
+        summary.append(QStringLiteral("%1=%2")
+                           .arg(parts.isEmpty() ? QString {} : parts.first())
+                           .arg(decodium::seq::callerScore(inputs.at(idx)), 0, 'f', 1));
+    }
+    m_callerQueue = ranked;
+    bridgeLog(QStringLiteral("CallerScoring (%1): %2").arg(why, summary.join(QStringLiteral(", "))));
+    emit callerQueueChanged();
+}
+
+// Con AutoCQ a riposo (nessun dxCall) e piu' stazioni che rispondono nello stesso periodo, la prima
+// riga elaborata avvia il QSO e le altre vanno in coda. Ritorna le righe con le sole chiamate dirette
+// a noi riordinate per punteggio (la migliore per prima); le altre righe restano dove sono.
+// Serve solo a decidere l'ordine di alimentazione del sequencer: la lista decodifiche non cambia.
+QStringList DecodiumBridge::scoredCallerRowOrder(const QStringList& rows)
+{
+    if (!m_callerScoring || !m_autoCqRepeat || rows.size() < 2 || !m_dxCall.trimmed().isEmpty()) {
+        return rows;
+    }
+    QString const myCallUpper = m_callsign.trimmed().toUpper();
+    QString const myBaseUpper = normalizedBaseCall(myCallUpper);
+    if (myCallUpper.isEmpty()) {
+        return rows;
+    }
+
+    QVector<int> rowIdx;
+    QVector<decodium::seq::CallerScoreInput> inputs;
+    QStringList names;
+    for (int i = 0; i < rows.size(); ++i) {
+        QStringList const f = parseFt8Row(rows.at(i));
+        if (f.size() < 5) {
+            continue;
+        }
+        QStringList const parts = f.at(4).simplified().split(QLatin1Char(' '), Qt::SkipEmptyParts);
+        if (parts.size() < 2 || !tokenMatchesCall(parts.first(), myCallUpper, myBaseUpper)) {
+            continue;
+        }
+        QString const lastToken = normalizeCallToken(parts.last()).trimmed().toUpper();
+        if (lastToken == QStringLiteral("73") || lastToken == QStringLiteral("RR73")
+            || lastToken == QStringLiteral("RRR")) {
+            continue;
+        }
+        QString const partnerBase = normalizedBaseCall(
+            inferPartnerFromDirectedMessage(f.at(4), myCallUpper, myBaseUpper));
+        if (partnerBase.isEmpty() || partnerBase == myBaseUpper
+            || isRecentAutoCqDuplicate(partnerBase, m_frequency, m_mode)) {
+            continue;   // il sequencer lo scarterebbe comunque: resta dov'e'
+        }
+        int const snr = decodeSnrOrDefault(f.value(1), -99);
+        inputs.append(callerScoreInputFor(partnerBase, snr, snr > -99, 0));
+        rowIdx.append(i);
+        names.append(partnerBase);
+    }
+    if (rowIdx.size() < 2) {
+        return rows;
+    }
+
+    QVector<int> const order = decodium::seq::rankCallers(inputs);
+    bool changed = false;
+    for (int k = 0; k < order.size(); ++k) {
+        if (order.at(k) != k) { changed = true; break; }
+    }
+    if (!changed) {
+        return rows;
+    }
+
+    QStringList out = rows;
+    QStringList summary;
+    for (int k = 0; k < order.size(); ++k) {
+        out[rowIdx.at(k)] = rows.at(rowIdx.at(order.at(k)));
+        summary.append(QStringLiteral("%1=%2")
+                           .arg(names.at(order.at(k)))
+                           .arg(decodium::seq::callerScore(inputs.at(order.at(k))), 0, 'f', 1));
+    }
+    bridgeLog(QStringLiteral("CallerScoring (slot): %1").arg(summary.join(QStringLiteral(", "))));
+    return out;
 }
 
 // === advanceQsoState — GitHub TxController clone ===
@@ -42875,6 +43055,7 @@ void DecodiumBridge::loadSettings()
     m_ft2Tx2ResendOnStall     = s.value(QStringLiteral("Ft2Tx2ResendOnStall"),     true).toBool();
     // 1.0.289 — FT2 enhancement toggles (opt-in, default OFF = comportamento 1.0.288)
     m_ft2FullDecodeInAutoCq = decodium::profiledSettingsValue(QString(), QStringLiteral("Ft2FullDecodeInAutoCq"), false).toBool();
+    m_callerScoring         = decodium::profiledSettingsValue(QString(), QStringLiteral("CallerScoring"), false).toBool();
     m_ft2QuickGiveUpStrong  = decodium::profiledSettingsValue(QString(), QStringLiteral("Ft2QuickGiveUpStrong"),  false).toBool();
     m_ft2AdaptiveDecode     = decodium::profiledSettingsValue(QString(), QStringLiteral("Ft2AdaptiveDecode"),     false).toBool();
     m_ft2ApHashCache        = decodium::profiledSettingsValue(QString(), QStringLiteral("Ft2ApHashCache"),        false).toBool();
@@ -49737,7 +49918,8 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
             }
         }
     } else if (!autoCallStarted && (autoSeqActive || ft2SignoffRescueScan)) {
-        for (QString const& row : std::as_const(rows)) {
+        QStringList const feedRows = scoredCallerRowOrder(rows);
+        for (QString const& row : feedRows) {
             QStringList const fields = parseFt8Row(row);
             if (fields.size() < 5) {
                 continue;
@@ -50772,7 +50954,8 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
         bool partnerDtValid = false;
         QString const myCallUpper = m_callsign.trimmed().toUpper();
         QString const myBaseUpper = normalizedBaseCall(myCallUpper);
-        for (const auto& row : rows) {
+        QStringList const feedRows = scoredCallerRowOrder(rows);
+        for (const auto& row : feedRows) {
             QStringList f = parseFt8Row(row);
             if (f.size() < 5) continue;
             bool const apCacheRescuedDecode =
@@ -57422,6 +57605,7 @@ void DecodiumBridge::processNextInQueue()
     }
 
     removeActiveMamCallerFromQueue(QStringLiteral("process-next"));
+    rankCallerQueue(QStringLiteral("process-next"));
 
     while (!m_callerQueue.isEmpty()) {
         QString entry = m_callerQueue.takeFirst();
@@ -57495,7 +57679,9 @@ void DecodiumBridge::processNextInQueue()
 
 void DecodiumBridge::enqueueStation(const QString& call)
 {
+    m_callerQueuePinned.insert(normalizedBaseCall(call));   // accodata a mano: il punteggio non la supera
     enqueueCallerInternal(call);
+    rankCallerQueue(QStringLiteral("manual-enqueue"));
 }
 
 void DecodiumBridge::dequeueStation(const QString& call)
@@ -57524,6 +57710,7 @@ void DecodiumBridge::moveCallerQueueItem(int fromIndex, int toIndex)
 
     QString const entry = m_callerQueue.takeAt(fromIndex);
     m_callerQueue.insert(boundedTarget, entry);
+    m_callerQueueManualOrder = true;   // ordine scelto a mano: il punteggio non lo riordina piu'
     bridgeLog(QStringLiteral("callerQueue: manual move %1 -> %2 entry=%3")
                   .arg(fromIndex + 1)
                   .arg(boundedTarget + 1)
@@ -57535,6 +57722,9 @@ void DecodiumBridge::clearCallerQueue()
 {
     if (m_callerQueue.isEmpty()) return;
     m_callerQueue.clear();
+    m_callerQueueManualOrder = false;
+    m_callerQueueArrivalMs.clear();
+    m_callerQueuePinned.clear();
     emit callerQueueChanged();
 }
 
