@@ -10,7 +10,7 @@ QtObject {
     property bool dark: true
 
     readonly property color bgDeep: dark ? "#060910" : "#C9D0DB"
-    readonly property color bgPanel: dark ? "#0D141F" : "#FBFCFE"
+    readonly property color bgPanel: dark ? "#0D141F" : "#E9EEF5"
     readonly property color bgElevated: dark ? "#131C2A" : "#EAEFF6"
     readonly property color bgHeader: dark ? "#16202F" : "#DCE3EE"
 
