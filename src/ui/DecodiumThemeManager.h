@@ -3,6 +3,7 @@
 #include <QColor>
 #include <QString>
 #include <QStringList>
+#include <QTimer>
 
 class DecodiumThemeManager : public QObject
 {
@@ -53,9 +54,13 @@ class DecodiumThemeManager : public QObject
     // DX-Pedition Fase 1 — accent swappabile (solo tema "Darkcodium") + densità (metrica)
     Q_PROPERTY(QString accentVariant       READ accentVariant       WRITE setAccentVariant       NOTIFY paletteChanged)
     Q_PROPERTY(QString density             READ density             WRITE setDensity             NOTIFY densityChanged)
+    // Luminosita' e contrasto regolabili (-100..+100, 0 = tema originale), salvati per tema.
+    Q_PROPERTY(int brightness READ brightness WRITE setBrightness NOTIFY paletteChanged)
+    Q_PROPERTY(int contrast   READ contrast   WRITE setContrast   NOTIFY paletteChanged)
 
 public:
     explicit DecodiumThemeManager(QObject* parent = nullptr);
+    ~DecodiumThemeManager() override { flushLook(); }
 
     QColor bgDeep()         const;
     QColor bgMedium()       const;
@@ -115,6 +120,14 @@ public:
     QString density() const { return m_density; }
     void    setDensity(const QString& name);
     // Helper metrica densità (compact/regular/comfy) — non colori.
+    // Luminosita': sposta la chiarezza di sfondi, pannelli e filetti.
+    // Contrasto: scala la distanza di chiarezza di testi/accenti (e dei livelli di
+    // sfondo) dallo sfondo pagina. Entrambi 0 = palette originale invariata.
+    int  brightness() const { return m_brightness; }
+    void setBrightness(int v);
+    int  contrast() const { return m_contrast; }
+    void setContrast(int v);
+    Q_INVOKABLE void resetLook();
     Q_INVOKABLE int densityRowHeight()   const;
     Q_INVOKABLE int densityFontSize()    const;
     Q_INVOKABLE int densityPanelHeight() const;
@@ -176,6 +189,17 @@ private:
     QColor customText() const;
     static QColor elevate(const QColor& base, double factor);  // sfumatura lightness-aware per i livelli bg
 
+    QColor adjustSurface(const QColor& c) const;   // sfondi, pannelli, filetti
+    QColor adjustForeground(const QColor& c) const;   // testi e accenti
+    double rawBgDeepLightness() const;
+    void   loadLookForTheme();
+    void   flushLook();   // scrive su disco i valori pendenti (salvataggio ritardato)
+    void   scheduleLookSave();
+
+    int     m_brightness {0};
+    int     m_contrast {0};
+    bool    m_lookDirty {false};
+    QTimer  m_lookSaveTimer;
     QString m_currentTheme {"Ocean Blue"};
     bool    m_customColorsEnabled {false};
     QString m_customBgColor;    // "#RRGGBB" o vuoto

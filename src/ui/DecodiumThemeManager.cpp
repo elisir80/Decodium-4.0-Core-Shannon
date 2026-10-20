@@ -4,6 +4,8 @@
 #include <QGuiApplication>
 #include <QSettings>
 
+#include <algorithm>
+
 namespace
 {
 QVariant profiledThemeValue(const QString& key,
@@ -256,6 +258,10 @@ DecodiumThemeManager::DecodiumThemeManager(QObject* parent)
         && stored != "Liquid Glass")
         stored = startupTheme;
     m_currentTheme = stored;
+    m_lookSaveTimer.setSingleShot(true);
+    m_lookSaveTimer.setInterval(600);
+    connect(&m_lookSaveTimer, &QTimer::timeout, this, [this]() { flushLook(); });
+    loadLookForTheme();
     // DX-Pedition Fase 1 — accent variant + densità (store Decodium3 esplicito, opt-in)
     {
         QString const av =
@@ -367,6 +373,97 @@ void DecodiumThemeManager::setCustomTextColor(const QString& hex)
     if (m_customColorsEnabled) emit paletteChanged();
 }
 
+// Luminosita' / contrasto -----------------------------------------------------
+void DecodiumThemeManager::loadLookForTheme()
+{
+    m_brightness = std::clamp(profiledThemeValue(
+        QStringLiteral("theme/brightness/") + m_currentTheme, 0,
+        QStringLiteral("Decodium")).toInt(), -100, 100);
+    m_contrast = std::clamp(profiledThemeValue(
+        QStringLiteral("theme/contrast/") + m_currentTheme, 0,
+        QStringLiteral("Decodium")).toInt(), -100, 100);
+}
+
+void DecodiumThemeManager::setBrightness(int v)
+{
+    v = std::clamp(v, -100, 100);
+    if (m_brightness == v) return;
+    m_brightness = v;
+    scheduleLookSave();
+    emit paletteChanged();
+}
+
+void DecodiumThemeManager::setContrast(int v)
+{
+    v = std::clamp(v, -100, 100);
+    if (m_contrast == v) return;
+    m_contrast = v;
+    scheduleLookSave();
+    emit paletteChanged();
+}
+
+void DecodiumThemeManager::resetLook()
+{
+    if (m_brightness == 0 && m_contrast == 0) return;
+    m_brightness = 0;
+    m_contrast = 0;
+    scheduleLookSave();
+    emit paletteChanged();
+}
+
+// Il cursore QML emette decine di valori al secondo: il file INI del profilo viene
+// scritto una sola volta a trascinamento finito.
+void DecodiumThemeManager::scheduleLookSave()
+{
+    m_lookDirty = true;
+    m_lookSaveTimer.start();
+}
+
+void DecodiumThemeManager::flushLook()
+{
+    m_lookSaveTimer.stop();
+    if (!m_lookDirty) return;
+    m_lookDirty = false;
+    setProfiledThemeValue(QStringLiteral("theme/brightness/") + m_currentTheme, m_brightness,
+                          QStringLiteral("Decodium"));
+    setProfiledThemeValue(QStringLiteral("theme/contrast/") + m_currentTheme, m_contrast,
+                          QStringLiteral("Decodium"));
+}
+
+double DecodiumThemeManager::rawBgDeepLightness() const
+{
+    QColor const c = customBg();
+    return (c.isValid() ? c : currentPalette().bgDeep).lightnessF();
+}
+
+namespace
+{
+QColor withLightness(const QColor& c, double l)
+{
+    float h, s, ol, a;
+    c.getHslF(&h, &s, &ol, &a);
+    return QColor::fromHslF(h < 0 ? 0.0f : h, s, static_cast<float>(std::clamp(l, 0.0, 1.0)), a);
+}
+}
+
+QColor DecodiumThemeManager::adjustSurface(const QColor& c) const
+{
+    if (!c.isValid() || (m_brightness == 0 && m_contrast == 0)) return c;
+    double const k = 1.0 + m_contrast / 100.0 * 0.45;
+    double const refRaw = rawBgDeepLightness();
+    double const refAdj = std::clamp(refRaw + m_brightness / 100.0 * 0.20, 0.0, 1.0);
+    return withLightness(c, refAdj + (c.lightnessF() - refRaw) * k);
+}
+
+QColor DecodiumThemeManager::adjustForeground(const QColor& c) const
+{
+    if (!c.isValid() || (m_brightness == 0 && m_contrast == 0)) return c;
+    double const k = 1.0 + m_contrast / 100.0 * 0.45;
+    double const refRaw = rawBgDeepLightness();
+    double const refAdj = std::clamp(refRaw + m_brightness / 100.0 * 0.20, 0.0, 1.0);
+    return withLightness(c, refAdj + (c.lightnessF() - refAdj) * k);
+}
+
 const DecodiumThemeManager::ThemePalette& DecodiumThemeManager::currentPalette() const
 {
     if (m_currentTheme == "Stellar Light") return s_stellarLight;
@@ -380,7 +477,9 @@ void DecodiumThemeManager::setCurrentTheme(const QString& name)
     if (m_currentTheme == name) return;
     if (name != "Ocean Blue" && name != "Stellar Light" && name != "Darkcodium"
         && name != "Liquid Glass") return;
+    flushLook();
     m_currentTheme = name;
+    loadLookForTheme();
     setProfiledThemeValue(QStringLiteral("theme/current"), name,
                           QStringLiteral("Decodium"));
     emit currentThemeChanged();
@@ -457,54 +556,54 @@ bool DecodiumThemeManager::isLightTheme() const
 QColor DecodiumThemeManager::bgDeep() const
 {
     QColor const c = customBg();
-    return c.isValid() ? c : currentPalette().bgDeep;
+    return adjustSurface(c.isValid() ? c : currentPalette().bgDeep);
 }
 QColor DecodiumThemeManager::bgMedium() const
 {
     QColor const c = customBg();
-    return c.isValid() ? elevate(c, 0.18) : currentPalette().bgMedium;
+    return adjustSurface(c.isValid() ? elevate(c, 0.18) : currentPalette().bgMedium);
 }
 QColor DecodiumThemeManager::bgLight() const
 {
     QColor const c = customBg();
-    return c.isValid() ? elevate(c, 0.40) : currentPalette().bgLight;
+    return adjustSurface(c.isValid() ? elevate(c, 0.40) : currentPalette().bgLight);
 }
-QColor DecodiumThemeManager::primaryColor()   const { return currentPalette().primaryColor; }
-QColor DecodiumThemeManager::secondaryColor() const { return currentPalette().secondaryColor; }
+QColor DecodiumThemeManager::primaryColor()   const { return adjustForeground(currentPalette().primaryColor); }
+QColor DecodiumThemeManager::secondaryColor() const { return adjustForeground(currentPalette().secondaryColor); }
 QColor DecodiumThemeManager::accentColor() const
 {
     if (m_currentTheme == "Darkcodium") {
-        QColor a, d, p; accentTriple(a, d, p); return a;
+        QColor a, d, p; accentTriple(a, d, p); return adjustForeground(a);
     }
-    return currentPalette().accentColor;
+    return adjustForeground(currentPalette().accentColor);
 }
-QColor DecodiumThemeManager::warningColor()   const { return currentPalette().warningColor; }
-QColor DecodiumThemeManager::errorColor()     const { return currentPalette().errorColor; }
+QColor DecodiumThemeManager::warningColor()   const { return adjustForeground(currentPalette().warningColor); }
+QColor DecodiumThemeManager::errorColor()     const { return adjustForeground(currentPalette().errorColor); }
 QColor DecodiumThemeManager::textPrimary() const
 {
     QColor const c = customText();
-    return c.isValid() ? c : currentPalette().textPrimary;
+    return adjustForeground(c.isValid() ? c : currentPalette().textPrimary);
 }
 QColor DecodiumThemeManager::textSecondary() const
 {
     QColor c = customText();
-    if (c.isValid()) { c.setAlphaF(0.62); return c; }
-    return currentPalette().textSecondary;
+    if (c.isValid()) { c.setAlphaF(0.62); return adjustForeground(c); }
+    return adjustForeground(currentPalette().textSecondary);
 }
-QColor DecodiumThemeManager::successColor()   const { return currentPalette().successColor; }
-QColor DecodiumThemeManager::glassOverlay()   const { return currentPalette().glassOverlay; }
-QColor DecodiumThemeManager::glassBorder()    const { return currentPalette().glassBorder; }
-QColor DecodiumThemeManager::borderColor()    const { return currentPalette().borderColor; }
-QColor DecodiumThemeManager::borderSoft()     const { return currentPalette().borderSoft; }
+QColor DecodiumThemeManager::successColor()   const { return adjustForeground(currentPalette().successColor); }
+QColor DecodiumThemeManager::glassOverlay()   const { return adjustSurface(currentPalette().glassOverlay); }
+QColor DecodiumThemeManager::glassBorder()    const { return adjustSurface(currentPalette().glassBorder); }
+QColor DecodiumThemeManager::borderColor()    const { return adjustSurface(currentPalette().borderColor); }
+QColor DecodiumThemeManager::borderSoft()     const { return adjustSurface(currentPalette().borderSoft); }
 QColor DecodiumThemeManager::panelColor() const
 {
     QColor const c = customBg();
-    return c.isValid() ? elevate(c, 0.40) : currentPalette().panelColor;
+    return adjustSurface(c.isValid() ? elevate(c, 0.40) : currentPalette().panelColor);
 }
 QColor DecodiumThemeManager::panelHeader() const
 {
     QColor const c = customBg();
-    return c.isValid() ? elevate(c, 0.26) : currentPalette().panelHeader;
+    return adjustSurface(c.isValid() ? elevate(c, 0.26) : currentPalette().panelHeader);
 }
 QColor DecodiumThemeManager::rowMatchBg()     const { return currentPalette().rowMatchBg; }
 QColor DecodiumThemeManager::rowMatchBorder() const { return currentPalette().rowMatchBorder; }

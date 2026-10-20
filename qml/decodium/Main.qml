@@ -8042,6 +8042,145 @@ GlassApplicationWindow {
                 }
 
 
+
+                // Luminosita' e contrasto dell'interfaccia: -100..+100, 0 = tema originale.
+                // Valori salvati per tema; clic sull'icona = azzera quel cursore.
+                Rectangle {
+                    id: lookTile
+                    width: 118
+                    height: 74
+                    radius: 8
+                    color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.9)
+                    border.color: glassBorder
+                    border.width: 1
+
+                    readonly property var tm: bridge.themeManager
+
+                    component LookSlider: Item {
+                        id: ls
+                        property string icon: ""
+                        property string tip: ""
+                        property int sliderValue: 0
+                        property color fgColor: "#000000"
+                        property color mutedColor: "#000000"
+                        property color hotColor: "#000000"
+                        property color knobColor: "#000000"
+                        property color lineColor: "#000000"
+                        signal valueEdited(int v)
+                        signal resetRequested()
+                        width: 106
+                        height: 26
+
+                        Text {
+                            id: lsIcon
+                            anchors.left: parent.left
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 16
+                            horizontalAlignment: Text.AlignHCenter
+                            text: ls.icon
+                            font.pixelSize: 14
+                            font.bold: true
+                            color: lsIconMA.containsMouse ? ls.hotColor : ls.fgColor
+
+                            MouseArea {
+                                id: lsIconMA
+                                anchors.fill: parent
+                                anchors.margins: -3
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: ls.resetRequested()
+                            }
+                        }
+
+                        Slider {
+                            id: lsSlider
+                            anchors.left: lsIcon.right
+                            anchors.leftMargin: 2
+                            anchors.right: lsValue.left
+                            anchors.verticalCenter: parent.verticalCenter
+                            height: 20
+                            from: -100; to: 100; stepSize: 5
+                            padding: 0
+                            value: ls.sliderValue
+                            onMoved: ls.valueEdited(Math.round(value))
+
+                            background: Rectangle {
+                                x: lsSlider.leftPadding
+                                y: lsSlider.topPadding + lsSlider.availableHeight / 2 - height / 2
+                                width: lsSlider.availableWidth
+                                height: 4
+                                radius: 2
+                                color: Qt.rgba(ls.fgColor.r, ls.fgColor.g, ls.fgColor.b, 0.22)
+
+                                // tacca dello zero (tema originale)
+                                Rectangle {
+                                    x: parent.width / 2 - 1
+                                    y: -2
+                                    width: 2
+                                    height: 8
+                                    color: Qt.rgba(ls.fgColor.r, ls.fgColor.g, ls.fgColor.b, 0.55)
+                                }
+                            }
+                            handle: Rectangle {
+                                x: lsSlider.leftPadding + lsSlider.visualPosition * (lsSlider.availableWidth - width)
+                                y: lsSlider.topPadding + lsSlider.availableHeight / 2 - height / 2
+                                width: 12
+                                height: 12
+                                radius: 6
+                                color: lsSlider.pressed ? ls.hotColor : ls.knobColor
+                                border.color: ls.lineColor
+                                border.width: 1
+                            }
+
+                            ToolTip.visible: hovered || pressed
+                            ToolTip.delay: 400
+                            ToolTip.text: ls.tip + ": " + (ls.sliderValue > 0 ? "+" : "") + ls.sliderValue
+                        }
+
+                        Text {
+                            id: lsValue
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 26
+                            horizontalAlignment: Text.AlignRight
+                            text: (ls.sliderValue > 0 ? "+" : "") + ls.sliderValue
+                            font.pixelSize: 9
+                            color: ls.mutedColor
+                        }
+                    }
+
+                    Column {
+                        anchors.centerIn: parent
+                        spacing: 4
+
+                        LookSlider {
+                            icon: "☼"
+                            fgColor: textPrimary
+                            mutedColor: textSecondary
+                            hotColor: secondaryCyan
+                            knobColor: primaryBlue
+                            lineColor: glassBorder
+                            tip: qsTr("Brightness")
+                            sliderValue: lookTile.tm ? lookTile.tm.brightness : 0
+                            onValueEdited: function(v) { if (lookTile.tm) lookTile.tm.brightness = v }
+                            onResetRequested: { if (lookTile.tm) lookTile.tm.brightness = 0 }
+                        }
+
+                        LookSlider {
+                            icon: "◐"
+                            fgColor: textPrimary
+                            mutedColor: textSecondary
+                            hotColor: secondaryCyan
+                            knobColor: primaryBlue
+                            lineColor: glassBorder
+                            tip: qsTr("Contrast")
+                            sliderValue: lookTile.tm ? lookTile.tm.contrast : 0
+                            onValueEdited: function(v) { if (lookTile.tm) lookTile.tm.contrast = v }
+                            onResetRequested: { if (lookTile.tm) lookTile.tm.contrast = 0 }
+                        }
+                    }
+                }
+
             } // End headerFlow
 
             // ── Ghost del World Clock durante il drag dalla maniglia ──
