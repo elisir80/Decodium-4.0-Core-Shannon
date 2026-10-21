@@ -520,6 +520,21 @@ endif ()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   set_source_files_properties (Detector/LegacyDspIoHelpers.cpp PROPERTIES COMPILE_FLAGS "-Wno-error=stringop-overflow -Wno-error=stringop-overread")
+# MinGW GCC with -fdata-sections puts zero-initialised globals in .data instead of .bss,
+# so the exe carried ~56 MB of stored zeros (dec_data 46 MB, jt65 storage, osd tables).
+# -fno-data-sections on the files that define them puts them back in .bss.
+if (MINGW)
+  set_source_files_properties (widgets/mainwindow.cpp Detector/LegacyDspIoHelpers.cpp lib/wsprd/osdwspr.c
+    PROPERTIES COMPILE_OPTIONS "-fno-data-sections")
+endif ()
+# std::complex<float> products compile to calls of __mulsc3 (C99 Annex G NaN/Inf recovery) unless
+# -fcx-limited-range is given. The FT8/FT4/FT2 DSP multiplies millions of finite samples per slot
+# (sync correlation, tweaks, subtraction) and never relies on Inf*Inf recovery, so use the plain
+# 4-multiply formula: same results on finite data, no call, loops can inline.
+set_property (SOURCE
+  Detector/FtxSync.cpp Detector/FtxBitmetrics.cpp Detector/FtxFt2Stage7.cpp Detector/FtxSubtract.cpp
+  Detector/FtxDownsample.cpp Detector/FtxSharedDsp.cpp Detector/FtxTweak.cpp Detector/FtxCandidates.cpp
+  APPEND PROPERTY COMPILE_OPTIONS "-fcx-limited-range")
 endif ()
 
 set (wsjt_qtmm_CXXSRCS

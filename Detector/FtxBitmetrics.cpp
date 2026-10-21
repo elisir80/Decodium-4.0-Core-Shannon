@@ -10,6 +10,7 @@
 #include <fftw3.h>
 
 #include "Detector/FftCompat.hpp"
+#include "Detector/FtxFastMath.hpp"
 
 namespace
 {
@@ -874,8 +875,8 @@ void run_ft2_bitmetrics_impl (Complex const* cd, float* bitmetrics, int* badsync
                 {
                   bool const set = one[static_cast<size_t> (i)][static_cast<size_t> (ibmax - ib)];
                   float const pval = beta_eff * sp[static_cast<size_t> (i)];
-                  if (set) lse1 += std::exp (pval - maxp1);
-                  else lse0 += std::exp (pval - maxp0);
+                  if (set) lse1 += decodium::ftx_expf (pval - maxp1);
+                  else lse0 += decodium::ftx_expf (pval - maxp0);
                 }
 
               bm_at (bitmetrics, rows, ipt + ib - 1, nseq - 1) =
@@ -981,8 +982,8 @@ void run_ft2_bitmetrics_impl (Complex const* cd, float* bitmetrics, int* badsync
                 {
                   bool const set = one[static_cast<size_t> (i)][static_cast<size_t> (1 - ib)];
                   float const pval = beta_eq * sp_eq[static_cast<size_t> (i)];
-                  if (set) lse1 += std::exp (pval - maxp1);
-                  else lse0 += std::exp (pval - maxp0);
+                  if (set) lse1 += decodium::ftx_expf (pval - maxp1);
+                  else lse0 += decodium::ftx_expf (pval - maxp0);
                 }
               bmet_eq[static_cast<size_t> (ipt + ib - 1)] =
                 ((maxp1 + std::log (std::max (lse1, kTiny))) -
@@ -1960,8 +1961,8 @@ extern "C" void ftx_ft2_bitmetrics_coherent_c (Complex const* cd, float* rows_ou
       float lse1 = 0.0f, lse0 = 0.0f;
       for (int i = 0; i < 4; ++i)
         {
-          if ((i & (1 << mio)) != 0) lse1 += std::exp (w[i] - max1);
-          else lse0 += std::exp (w[i] - max0);
+          if ((i & (1 << mio)) != 0) lse1 += decodium::ftx_expf (w[i] - max1);
+          else lse0 += decodium::ftx_expf (w[i] - max0);
         }
       m[static_cast<size_t> (r)] = (max1 + std::log (std::max (lse1, kTiny)))
                                    - (max0 + std::log (std::max (lse0, kTiny)));
@@ -2072,8 +2073,8 @@ extern "C" void ftx_ft2_bitmetrics_accum_c (Complex const* cs, float const* beta
               for (int i = 0; i < nt; ++i)
                 {
                   bool const set = one[static_cast<size_t> (i)][static_cast<size_t> (ibmax - ib)];
-                  if (set) lse1 += std::exp (sp[static_cast<size_t> (i)] - maxp1);
-                  else lse0 += std::exp (sp[static_cast<size_t> (i)] - maxp0);
+                  if (set) lse1 += decodium::ftx_expf (sp[static_cast<size_t> (i)] - maxp1);
+                  else lse0 += decodium::ftx_expf (sp[static_cast<size_t> (i)] - maxp0);
                 }
               bm_at (bitmetrics, rows, ipt + ib - 1, nseq - 1) =
                 (maxp1 + std::log (std::max (lse1, kTiny))) -

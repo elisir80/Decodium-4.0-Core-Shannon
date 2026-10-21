@@ -43,6 +43,8 @@ class DecodiumThemeManager : public QObject
     Q_PROPERTY(QString currentTheme  READ currentTheme   WRITE setCurrentTheme NOTIFY currentThemeChanged)
     Q_PROPERTY(bool   isLightTheme   READ isLightTheme   NOTIFY paletteChanged)
     Q_PROPERTY(bool   isGlassTheme   READ isGlassTheme   NOTIFY paletteChanged)
+    // "Light": Ocean Blue colours, opaque and flat. The bridge reports uiQuality "Low" while it is active.
+    Q_PROPERTY(bool   isFlatTheme    READ isFlatTheme    NOTIFY paletteChanged)
     // True when Qt is running on a platform where transparent top-level
     // surfaces are safe by default. Linux uses the robust opaque fallback;
     // an expert can opt in with DECODIUM_ENABLE_LINUX_GLASS=1.
@@ -93,11 +95,12 @@ public:
     QColor txColor()        const;
     QColor rxColor()        const;
 
-    QStringList availableThemes() const { return {"Ocean Blue", "Stellar Light", "Darkcodium", "Liquid Glass"}; }
+    QStringList availableThemes() const { return {"Ocean Blue", "Stellar Light", "Darkcodium", "Liquid Glass", "Light"}; }
     QString currentTheme() const { return m_currentTheme; }
     void setCurrentTheme(const QString& name);
     bool isLightTheme() const;
     bool isGlassTheme() const { return m_currentTheme == QStringLiteral("Liquid Glass"); }
+    bool isFlatTheme() const { return m_currentTheme == QStringLiteral("Light"); }
     bool glassTransparencySupported() const;
 
     // Decode colours intended for light surfaces.  The normal WSJT-X palette
@@ -179,6 +182,7 @@ private:
     static const ThemePalette s_stellarLight;
     static const ThemePalette s_dxPedition;
     static const ThemePalette s_liquidGlass;
+    static const ThemePalette s_flatLight;
 
     const ThemePalette& currentPalette() const;
     // DX-Pedition Fase 1 — tripletta accent del variant scelto (solo tema DX-Pedition)

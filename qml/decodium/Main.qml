@@ -11834,7 +11834,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         id: slowPcOfferTimer
         interval: 5000
         repeat: false
-        running: !!bridge && !bridge.lowEndMode && !mainWindow.settingBool("LowEndModeOffered", false)
+        running: !!bridge && !bridge.lowEndMode && !mainWindow.settingBool("LowEndModeOffered", false) && bridge.looksLikeWeakComputer()
         onTriggered: {
             if (bridge && !bridge.lowEndMode && !mainWindow.settingBool("LowEndModeOffered", false))
                 slowPcOfferDialog.open()

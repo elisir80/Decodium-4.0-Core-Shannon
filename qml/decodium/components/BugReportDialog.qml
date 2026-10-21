@@ -339,6 +339,21 @@ Dialog {
                 }
             }
 
+            // Apre il pannello web diagnostic.ft2.it con nominativo, area e versione
+            // gia' compilati: l'utente trascina il log da AppData e descrive il problema.
+            Button {
+                text: qsTr("Open diagnostic panel")
+                Material.background: "#2a4a6a"
+                onClicked: {
+                    var call = (bridge && bridge.callsign) ? bridge.callsign.trim().toUpperCase() : ""
+                    var cat = bugDialog.reportCategory()
+                    var url = "https://diagnostic.ft2.it/?cat=" + encodeURIComponent(cat)
+                            + "&call=" + encodeURIComponent(call)
+                            + "&v=" + encodeURIComponent(Qt.application.version)
+                    Qt.openUrlExternally(url)
+                }
+            }
+
             Item { Layout.fillWidth: true }
 
             Button {

@@ -1257,6 +1257,8 @@ public:
     bool   lowCpuModeEnabled()    const { return m_lowCpuModeEnabled; }
     bool   lowEndMode()           const { return m_lowEndMode; }
     Q_INVOKABLE void setLowEndMode(bool enabled);
+    // True when this computer looks weak enough that the first-run Slow-PC offer makes sense.
+    Q_INVOKABLE bool looksLikeWeakComputer() const;
     bool resetSafeGraphicsNextLaunch() const { return m_resetSafeGraphicsNextLaunch; }
     Q_INVOKABLE void setResetSafeGraphicsNextLaunch(bool enabled);
     Q_INVOKABLE void setLowCpuModeEnabled(bool enabled);
@@ -4581,7 +4583,9 @@ public:
     Q_INVOKABLE void setSmoothDecodeFlow(bool v);
 
     // 1.0.180 — UI Revolution
-    Q_INVOKABLE QString uiQuality() const { return m_uiQuality; }
+    // The "Light" theme is the flat look: while it is selected the effects switched off by "Low" are off,
+    // without touching the quality the user chose (it comes back when another theme is selected).
+    Q_INVOKABLE QString uiQuality() const;
     Q_INVOKABLE void    setUiQuality(QString const& v);
     Q_INVOKABLE bool    uiFramelessPopouts() const { return m_uiFramelessPopouts; }
     Q_INVOKABLE void    setUiFramelessPopouts(bool v);

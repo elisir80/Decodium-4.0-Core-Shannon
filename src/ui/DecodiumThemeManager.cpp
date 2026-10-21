@@ -119,6 +119,44 @@ const DecodiumThemeManager::ThemePalette DecodiumThemeManager::s_oceanBlue {
     /* isLight        */ false
 };
 
+// "Light": the Ocean Blue colours with every translucent token replaced by the opaque colour it
+// produces over the Ocean panels (a dark theme, "light" means light on the machine). Together with
+// uiQuality "Low", which the bridge reports while this theme is selected, the window has no
+// gradients, no pulsing LEDs and no alpha-blended borders: solid fills only, so older graphics
+// hardware has far less to composite and redraws only when something actually changes.
+const DecodiumThemeManager::ThemePalette DecodiumThemeManager::s_flatLight {
+    /* bgDeep         */ QColor("#0A0F1A"),
+    /* bgMedium       */ QColor("#111827"),
+    /* bgLight        */ QColor("#1E2D42"),
+    /* primaryColor   */ QColor("#4A90E2"),
+    /* secondaryColor */ QColor("#00D4FF"),
+    /* accentColor    */ QColor("#00FF88"),
+    /* warningColor   */ QColor("#FF8C00"),
+    /* errorColor     */ QColor("#FF5F56"),
+    /* textPrimary    */ QColor("#E8F4FD"),
+    /* textSecondary  */ QColor("#89B4D0"),
+    /* successColor   */ QColor("#4CAF50"),
+    /* glassOverlay   */ QColor("#1E2D42"),   // opaque panel
+    /* glassBorder    */ QColor("#2C4C74"),   // #4A90E2 @ 31 % over the panel
+    /* borderColor    */ QColor("#2C4C74"),
+    /* borderSoft     */ QColor("#253D5B"),   // #4A90E2 @ 16 % over the panel
+    /* panelColor     */ QColor("#1E2D42"),
+    /* panelHeader    */ QColor("#283C57"),
+    /* rowMatchBg     */ QColor("#0E3A35"),   // #00FF88 @ 15 % over the medium background
+    /* rowMatchBorder */ QColor("#00FF88"),
+    /* ledRed         */ QColor("#FF5F56"),
+    /* ledBlue        */ QColor("#4A90E2"),
+    /* ledYellow      */ QColor("#FFD700"),
+    /* ledMagenta     */ QColor("#FF00FF"),
+    /* accentDim      */ QColor(),
+    /* accentDeep     */ QColor(),
+    /* pileColor      */ QColor(),
+    /* gridColor      */ QColor(),
+    /* txColor        */ QColor(),
+    /* rxColor        */ QColor(),
+    /* isLight        */ false
+};
+
 // Tema chiaro rifatto 1.0.526: schede bianche su fondo chiaro freddo, bordi
 // sottili e testo ardesia. L'identita' resta pero' nostra: l'accento e' un
 // verde-teal (non il blu/ciano altrui) e il fondo pagina e' appena piu'
@@ -264,7 +302,7 @@ DecodiumThemeManager::DecodiumThemeManager(QObject* parent)
                               QStringLiteral("Decodium"));
     }
     if (stored != "Ocean Blue" && stored != "Stellar Light" && stored != "Darkcodium"
-        && stored != "Liquid Glass")
+        && stored != "Liquid Glass" && stored != "Light")
         stored = startupTheme;
     m_currentTheme = stored;
     m_lookSaveTimer.setSingleShot(true);
@@ -478,6 +516,7 @@ const DecodiumThemeManager::ThemePalette& DecodiumThemeManager::currentPalette()
     if (m_currentTheme == "Stellar Light") return s_stellarLight;
     if (m_currentTheme == "Darkcodium")   return s_dxPedition;
     if (m_currentTheme == "Liquid Glass") return s_liquidGlass;
+    if (m_currentTheme == "Light")        return s_flatLight;
     return s_oceanBlue;
 }
 
@@ -485,7 +524,7 @@ void DecodiumThemeManager::setCurrentTheme(const QString& name)
 {
     if (m_currentTheme == name) return;
     if (name != "Ocean Blue" && name != "Stellar Light" && name != "Darkcodium"
-        && name != "Liquid Glass") return;
+        && name != "Liquid Glass" && name != "Light") return;
     flushLook();
     m_currentTheme = name;
     loadLookForTheme();

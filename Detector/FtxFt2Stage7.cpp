@@ -209,6 +209,8 @@ extern "C"
                              float* sbase);
   void ftx_sync2d_c (Complex const* cd0, int np, int i0, Complex const* ctwk,
                      int itwk, float* sync);
+  void ftx_sync2d_scan_c (Complex const* cd0, int np, int ibmin, int ibmax, int ibstp,
+                          Complex const* ctwk, int itwk, float* sync_best, int* ibest);
   void ftx_ft2_bitmetrics_c (Complex const* cd, float* bitmetrics, int* badsync);
   void ftx_ft2_symbol_mags_c (Complex const* cd, float* mags);
   // Accumulo fra slot (DECODIUM_FT2_ACCUMULO): spettri di simbolo di una
@@ -3574,18 +3576,18 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
                         {
                           return;
                         }
-                      for (int istart = ibmin; istart <= ibmax; istart += ibstp)
+                      // One scan per frequency step: the tweaked sync templates are built once for
+                      // all the start offsets (same first-strict-maximum rule as the per-offset loop).
+                      float scan_sync = 0.0f;
+                      int scan_ibest = 0;
+                      ftx_sync2d_scan_c (cd2.data (), kFt2NdMax, ibmin, ibmax, ibstp,
+                                         state.ctwk2[static_cast<size_t> (idf_index (idf))].data (),
+                                         1, &scan_sync, &scan_ibest);
+                      if (scan_sync > smax)
                         {
-                          float sync = 0.0f;
-                          ftx_sync2d_c (cd2.data (), kFt2NdMax, istart,
-                                        state.ctwk2[static_cast<size_t> (idf_index (idf))].data (),
-                                        1, &sync);
-                          if (sync > smax)
-                            {
-                              smax = sync;
-                              ibest = istart;
-                              idfbest = idf;
-                            }
+                          smax = scan_sync;
+                          ibest = scan_ibest;
+                          idfbest = idf;
                         }
                     }
                 }

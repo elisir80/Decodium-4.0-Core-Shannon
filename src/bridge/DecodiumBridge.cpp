@@ -8332,6 +8332,14 @@ void DecodiumBridge::setSmoothDecodeFlow(bool v)
     }
 }
 
+QString DecodiumBridge::uiQuality() const
+{
+    if (m_themeManager && m_themeManager->isFlatTheme()) {
+        return QStringLiteral("Low");
+    }
+    return m_uiQuality;
+}
+
 // 1.0.180 — UI Revolution: setter per uiQuality (Low/Medium/High).
 // Persistito su QSettings "UI/Quality". Restart richiesto per alcune
 // componenti che leggono il valore solo a init (es. ShaderEffect chain).
@@ -9439,7 +9447,7 @@ int DecodiumBridge::decodeUiRowsPerCycle() const
     } else if (cores <= 12) {
         budget = 32;
     }
-    if (m_uiQuality.compare(QStringLiteral("Low"), Qt::CaseInsensitive) == 0) {
+    if (uiQuality().compare(QStringLiteral("Low"), Qt::CaseInsensitive) == 0) {
         budget = qMin(budget, 20);
     }
     if (isUiStallActive(90, 2500)) {
@@ -10242,6 +10250,9 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
             this, queueAudioDeviceCacheRefresh);
 
     m_themeManager    = new DecodiumThemeManager(this);
+    // The effective quality follows the flat "Light" theme: tell the QML bindings when it changes.
+    connect(m_themeManager, &DecodiumThemeManager::currentThemeChanged,
+            this, &DecodiumBridge::uiQualityChanged);
     m_propagationManager = new DecodiumPropagationManager(this);
     m_satelliteTracking = new SatelliteTrackingService(this);
     m_q65Doppler = new Q65DopplerTracker(this);
@@ -16312,6 +16323,33 @@ void DecodiumBridge::setLowCpuModeEnabled(bool enabled)
     emit statusMessage(m_lowCpuModeEnabled
                        ? QStringLiteral("Low CPU mode attiva: FT max 2 thread, waterfall ridotta, deep/early limitati")
                        : QStringLiteral("Low CPU mode disattiva"));
+}
+
+// First-run Slow-PC offer: only on computers that plausibly need it, so a fast machine
+// is not asked a question it has no use for (the switch stays in Settings for everyone).
+// Weak = 4 logical cores or fewer, under 8 GB of RAM, or a previous start that was slow
+// or whose graphics start-up failed (the flags main_qml leaves in the temp folder).
+bool DecodiumBridge::looksLikeWeakComputer() const
+{
+    int const cores = qMax(1, QThread::idealThreadCount());
+    qint64 ramMb = -1;
+#ifdef Q_OS_WIN
+    MEMORYSTATUSEX status {};
+    status.dwLength = sizeof(status);
+    if (GlobalMemoryStatusEx(&status)) {
+        ramMb = static_cast<qint64>(status.ullTotalPhys / (1024ull * 1024ull));
+    }
+#endif
+    QDir const temp {QStandardPaths::writableLocation(QStandardPaths::TempLocation)};
+    bool const slowStartBefore = temp.exists(QStringLiteral("decodium-slow-qml-startup.flag"))
+        || temp.exists(QStringLiteral("decodium-gpu-startup-pending.flag"));
+    bool const weak = cores <= 4 || (ramMb >= 0 && ramMb < 8192) || slowStartBefore;
+    bridgeLog(QStringLiteral("SlowPcOffer: cores=%1 ram_mb=%2 slow_start_before=%3 weak=%4")
+                  .arg(cores)
+                  .arg(ramMb)
+                  .arg(int(slowStartBefore))
+                  .arg(int(weak)));
+    return weak;
 }
 
 // 1.0.497 — Modalità PC lento (master). Orchestra in blocco le leve runtime che
