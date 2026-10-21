@@ -939,6 +939,10 @@ filtrul stației este mai larg decât trebuie.</translation>
         <source>Posted! Open the groups: %1</source>
         <translation>Publicat! Deschide grupurile: %1</translation>
     </message>
+    <message>
+        <source>Open diagnostic panel</source>
+        <translation>Deschide panoul de diagnosticare</translation>
+    </message>
 </context>
 <context>
     <name>CAboutDlg</name>
@@ -12879,10 +12883,10 @@ The default templates are sent as compact native frames.</source>
     </message>
     <message>
         <location filename="../qml/decodium/Main.qml" line="11507"/>
-        <source>If Decodium feels slow or the graphics freeze on this computer, you can turn on Slow-PC mode: it switches to OpenGL graphics (stable on older video cards), lightens CPU usage, and hides the heavy Live Map.
+        <source>If Decodium feels slow or the graphics freeze on this computer, you can turn on Slow-PC mode: it uses conservative graphics settings (stable on older video cards), lightens CPU usage, and hides the heavy Live Map.
 
 Turn it on now? You can change this anytime in Settings.</source>
-        <translation>Dacă Decodium pare lent sau grafica îngheață pe acest calculator, poți porni modul pentru calculatoare lente: trece la grafica OpenGL (stabilă pe plăci video mai vechi), reduce încărcarea procesorului și ascunde harta în direct, care este grea.
+        <translation>Dacă Decodium pare lent sau grafica îngheață pe acest calculator, poți porni modul pentru calculatoare lente: folosește setări grafice prudente (stabile pe plăci video mai vechi), reduce încărcarea procesorului și ascunde harta în direct, care este grea.
 
 Îl pornim acum? Poți schimba oricând din Setări.</translation>
     </message>

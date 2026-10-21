@@ -936,6 +936,10 @@ but the radio&apos;s filter is wider than it needs.</source>
         <source>Posted! Open the groups: %1</source>
         <translation>Опубликовано! Откройте группы: %1</translation>
     </message>
+    <message>
+        <source>Open diagnostic panel</source>
+        <translation>Открыть панель диагностики</translation>
+    </message>
 </context>
 <context>
     <name>CAboutDlg</name>
@@ -12874,10 +12878,10 @@ The default templates are sent as compact native frames.</source>
     </message>
     <message>
         <location filename="../qml/decodium/Main.qml" line="11507"/>
-        <source>If Decodium feels slow or the graphics freeze on this computer, you can turn on Slow-PC mode: it switches to OpenGL graphics (stable on older video cards), lightens CPU usage, and hides the heavy Live Map.
+        <source>If Decodium feels slow or the graphics freeze on this computer, you can turn on Slow-PC mode: it uses conservative graphics settings (stable on older video cards), lightens CPU usage, and hides the heavy Live Map.
 
 Turn it on now? You can change this anytime in Settings.</source>
-        <translation>Если Decodium работает медленно или графика зависает на этом компьютере, можно включить Режим медленного ПК: он переключается на графику OpenGL (стабильную на старых видеокартах), снижает нагрузку на CPU и скрывает тяжёлую Живую карту.
+        <translation>Если Decodium работает медленно или графика зависает на этом компьютере, можно включить Режим медленного ПК: он использует щадящие настройки графики (стабильные на старых видеокартах), снижает нагрузку на CPU и скрывает тяжёлую Живую карту.
 
 Включить сейчас? Это можно изменить в любой момент в Настройках.</translation>
     </message>

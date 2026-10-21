@@ -929,6 +929,10 @@ Shift 为 100 Hz，Ctrl 为 10 kHz。</translation>
         <source>Posted! Open the groups: %1</source>
         <translation>已发布！打开群组: %1</translation>
     </message>
+    <message>
+        <source>Open diagnostic panel</source>
+        <translation>打开诊断面板</translation>
+    </message>
 </context>
 <context>
     <name>CAboutDlg</name>
@@ -12854,10 +12858,10 @@ The default templates are sent as compact native frames.</source>
     </message>
     <message>
         <location filename="../qml/decodium/Main.qml" line="11507"/>
-        <source>If Decodium feels slow or the graphics freeze on this computer, you can turn on Slow-PC mode: it switches to OpenGL graphics (stable on older video cards), lightens CPU usage, and hides the heavy Live Map.
+        <source>If Decodium feels slow or the graphics freeze on this computer, you can turn on Slow-PC mode: it uses conservative graphics settings (stable on older video cards), lightens CPU usage, and hides the heavy Live Map.
 
 Turn it on now? You can change this anytime in Settings.</source>
-        <translation>如果 Decodium 在这台电脑上运行缓慢或图形卡顿，您可以开启低速电脑模式：它会切换到 OpenGL 图形（在旧显卡上更稳定），降低 CPU 占用，并隐藏占用资源的实时地图。
+        <translation>如果 Decodium 在这台电脑上运行缓慢或图形卡顿，您可以开启低速电脑模式：它会使用保守的图形设置（在旧显卡上更稳定），降低 CPU 占用，并隐藏占用资源的实时地图。
 
 现在开启吗？您可以随时在设置中更改。</translation>
     </message>

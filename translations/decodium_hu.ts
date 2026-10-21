@@ -931,6 +931,10 @@ szűrője szélesebb a kelleténél.</translation>
         <source>Posted! Open the groups: %1</source>
         <translation>Közzétéve! Nyisd meg a csoportokat: %1</translation>
     </message>
+    <message>
+        <source>Open diagnostic panel</source>
+        <translation>Diagnosztikai panel megnyitása</translation>
+    </message>
 </context>
 <context>
     <name>CAboutDlg</name>
@@ -12859,10 +12863,10 @@ Az alapértelmezett sablonok tömör natív keretekként mennek ki.</translation
     </message>
     <message>
         <location filename="../qml/decodium/Main.qml" line="11507"/>
-        <source>If Decodium feels slow or the graphics freeze on this computer, you can turn on Slow-PC mode: it switches to OpenGL graphics (stable on older video cards), lightens CPU usage, and hides the heavy Live Map.
+        <source>If Decodium feels slow or the graphics freeze on this computer, you can turn on Slow-PC mode: it uses conservative graphics settings (stable on older video cards), lightens CPU usage, and hides the heavy Live Map.
 
 Turn it on now? You can change this anytime in Settings.</source>
-        <translation>Ha a Decodium lassúnak tűnik, vagy a grafika lefagy ezen a számítógépen, bekapcsolhatja a Lassú PC módot: OpenGL grafikára vált (régebbi videokártyákon stabil), csökkenti a CPU-terhelést, és elrejti a nagy erőforrásigényű Élő térképet.
+        <translation>Ha a Decodium lassúnak tűnik, vagy a grafika lefagy ezen a számítógépen, bekapcsolhatja a Lassú PC módot: óvatos grafikai beállításokat használ (régebbi videokártyákon stabil), csökkenti a CPU-terhelést, és elrejti a nagy erőforrásigényű Élő térképet.
 
 Bekapcsolja most? Ezt bármikor módosíthatja a Beállításokban.</translation>
     </message>

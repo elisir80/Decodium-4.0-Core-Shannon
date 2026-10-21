@@ -11864,7 +11864,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
 
             Text {
                 anchors.fill: parent
-                text: qsTr("If Decodium feels slow or the graphics freeze on this computer, you can turn on Slow-PC mode: it switches to OpenGL graphics (stable on older video cards), lightens CPU usage, and hides the heavy Live Map.\n\nTurn it on now? You can change this anytime in Settings.")
+                text: qsTr("If Decodium feels slow or the graphics freeze on this computer, you can turn on Slow-PC mode: it uses conservative graphics settings (stable on older video cards), lightens CPU usage, and hides the heavy Live Map.\n\nTurn it on now? You can change this anytime in Settings.")
                 color: textPrimary
                 wrapMode: Text.WordWrap
                 verticalAlignment: Text.AlignVCenter

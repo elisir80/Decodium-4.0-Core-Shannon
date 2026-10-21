@@ -933,6 +933,10 @@ filtre de la ràdio és més ample del que cal.</translation>
         <source>Posted! Open the groups: %1</source>
         <translation>Publicat! Obre els grups: %1</translation>
     </message>
+    <message>
+        <source>Open diagnostic panel</source>
+        <translation>Obre el tauler de diagnòstic</translation>
+    </message>
 </context>
 <context>
     <name>CAboutDlg</name>
@@ -12867,10 +12871,10 @@ Les plantilles per defecte s&apos;envien com a trames natives compactes.</transl
     </message>
     <message>
         <location filename="../qml/decodium/Main.qml" line="11507"/>
-        <source>If Decodium feels slow or the graphics freeze on this computer, you can turn on Slow-PC mode: it switches to OpenGL graphics (stable on older video cards), lightens CPU usage, and hides the heavy Live Map.
+        <source>If Decodium feels slow or the graphics freeze on this computer, you can turn on Slow-PC mode: it uses conservative graphics settings (stable on older video cards), lightens CPU usage, and hides the heavy Live Map.
 
 Turn it on now? You can change this anytime in Settings.</source>
-        <translation>Si Decodium va lent o els gràfics es congelen en aquest ordinador, podeu activar el Mode PC lent: canvia als gràfics OpenGL (estables en targetes de vídeo antigues), alleugereix l&apos;ús de la CPU i amaga el pesat Mapa en directe.
+        <translation>Si Decodium va lent o els gràfics es congelen en aquest ordinador, podeu activar el Mode PC lent: utilitza una configuració gràfica conservadora (estable en targetes de vídeo antigues), alleugereix l&apos;ús de la CPU i amaga el pesat Mapa en directe.
 
 Voleu activar-lo ara? Podeu canviar-ho en qualsevol moment a la Configuració.</translation>
     </message>

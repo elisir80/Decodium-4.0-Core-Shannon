@@ -930,6 +930,10 @@ Shift で 100 Hz、Ctrl で 10 kHz。</translation>
         <source>Posted! Open the groups: %1</source>
         <translation>投稿しました！グループを開く: %1</translation>
     </message>
+    <message>
+        <source>Open diagnostic panel</source>
+        <translation>診断パネルを開く</translation>
+    </message>
 </context>
 <context>
     <name>CAboutDlg</name>
@@ -12857,10 +12861,10 @@ The default templates are sent as compact native frames.</source>
     </message>
     <message>
         <location filename="../qml/decodium/Main.qml" line="11507"/>
-        <source>If Decodium feels slow or the graphics freeze on this computer, you can turn on Slow-PC mode: it switches to OpenGL graphics (stable on older video cards), lightens CPU usage, and hides the heavy Live Map.
+        <source>If Decodium feels slow or the graphics freeze on this computer, you can turn on Slow-PC mode: it uses conservative graphics settings (stable on older video cards), lightens CPU usage, and hides the heavy Live Map.
 
 Turn it on now? You can change this anytime in Settings.</source>
-        <translation>このコンピューターでDecodiumの動作が遅い、またはグラフィックが固まる場合は、低速PCモードをオンにできます。OpenGLグラフィック（古いビデオカードでも安定）に切り替え、CPU使用率を軽減し、重いライブマップを非表示にします。
+        <translation>このコンピューターでDecodiumの動作が遅い、またはグラフィックが固まる場合は、低速PCモードをオンにできます。安定性を重視したグラフィック設定（古いビデオカードでも安定）を使い、CPU使用率を軽減し、重いライブマップを非表示にします。
 
 今すぐオンにしますか？設定でいつでも変更できます。</translation>
     </message>

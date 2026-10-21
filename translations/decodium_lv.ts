@@ -941,6 +941,10 @@ radiostacijas filtrs ir platāks nekā vajag.</translation>
         <source>Posted! Open the groups: %1</source>
         <translation>Publicēts! Atveriet grupas: %1</translation>
     </message>
+    <message>
+        <source>Open diagnostic panel</source>
+        <translation>Atvērt diagnostikas paneli</translation>
+    </message>
 </context>
 <context>
     <name>CAboutDlg</name>
@@ -12885,10 +12889,10 @@ Noklusējuma veidnes tiek sūtītas kā kompakti vietējie kadri.</translation>
     </message>
     <message>
         <location filename="../qml/decodium/Main.qml" line="11507"/>
-        <source>If Decodium feels slow or the graphics freeze on this computer, you can turn on Slow-PC mode: it switches to OpenGL graphics (stable on older video cards), lightens CPU usage, and hides the heavy Live Map.
+        <source>If Decodium feels slow or the graphics freeze on this computer, you can turn on Slow-PC mode: it uses conservative graphics settings (stable on older video cards), lightens CPU usage, and hides the heavy Live Map.
 
 Turn it on now? You can change this anytime in Settings.</source>
-        <translation>Ja Decodium šajā datorā darbojas lēni vai grafika sastingst, varat ieslēgt Lēna datora režīmu: tas pārslēdzas uz OpenGL grafiku (stabila vecākām videokartēm), samazina CPU noslodzi un paslēpj resursietilpīgo Live Map.
+        <translation>Ja Decodium šajā datorā darbojas lēni vai grafika sastingst, varat ieslēgt Lēna datora režīmu: tas izmanto piesardzīgus grafikas iestatījumus (stabili vecākām videokartēm), samazina CPU noslodzi un paslēpj resursietilpīgo Live Map.
 
 Ieslēgt tagad? To jebkurā laikā varat mainīt sadaļā Settings.</translation>
     </message>

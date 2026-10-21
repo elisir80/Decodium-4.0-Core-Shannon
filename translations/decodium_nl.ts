@@ -937,6 +937,10 @@ het filter van de radio is breder dan nodig.</translation>
         <source>Posted! Open the groups: %1</source>
         <translation>Geplaatst! Open de groepen: %1</translation>
     </message>
+    <message>
+        <source>Open diagnostic panel</source>
+        <translation>Diagnosepaneel openen</translation>
+    </message>
 </context>
 <context>
     <name>CAboutDlg</name>
@@ -12875,10 +12879,10 @@ De standaardsjablonen gaan als compacte native frames de lucht in.</translation>
     </message>
     <message>
         <location filename="../qml/decodium/Main.qml" line="11507"/>
-        <source>If Decodium feels slow or the graphics freeze on this computer, you can turn on Slow-PC mode: it switches to OpenGL graphics (stable on older video cards), lightens CPU usage, and hides the heavy Live Map.
+        <source>If Decodium feels slow or the graphics freeze on this computer, you can turn on Slow-PC mode: it uses conservative graphics settings (stable on older video cards), lightens CPU usage, and hides the heavy Live Map.
 
 Turn it on now? You can change this anytime in Settings.</source>
-        <translation>Als Decodium traag aanvoelt of de graphics vastlopen op deze computer, kunt u de Trage-pc-modus inschakelen: hij schakelt over naar OpenGL-graphics (stabiel op oudere videokaarten), verlaagt het CPU-gebruik en verbergt de zware Live kaart.
+        <translation>Als Decodium traag aanvoelt of de graphics vastlopen op deze computer, kunt u de Trage-pc-modus inschakelen: hij gebruikt voorzichtige grafische instellingen (stabiel op oudere videokaarten), verlaagt het CPU-gebruik en verbergt de zware Live kaart.
 
 Nu inschakelen? U kunt dit altijd wijzigen in Instellingen.</translation>
     </message>

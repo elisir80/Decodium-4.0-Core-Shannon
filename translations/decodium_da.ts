@@ -934,6 +934,10 @@ filter er bredere end nødvendigt.</translation>
         <source>Posted! Open the groups: %1</source>
         <translation>Offentliggjort! Åbn grupperne: %1</translation>
     </message>
+    <message>
+        <source>Open diagnostic panel</source>
+        <translation>Åbn diagnosepanel</translation>
+    </message>
 </context>
 <context>
     <name>CAboutDlg</name>
@@ -12867,10 +12871,10 @@ Standardskabelonerne sendes som kompakte native rammer.</translation>
     </message>
     <message>
         <location filename="../qml/decodium/Main.qml" line="11507"/>
-        <source>If Decodium feels slow or the graphics freeze on this computer, you can turn on Slow-PC mode: it switches to OpenGL graphics (stable on older video cards), lightens CPU usage, and hides the heavy Live Map.
+        <source>If Decodium feels slow or the graphics freeze on this computer, you can turn on Slow-PC mode: it uses conservative graphics settings (stable on older video cards), lightens CPU usage, and hides the heavy Live Map.
 
 Turn it on now? You can change this anytime in Settings.</source>
-        <translation>Hvis Decodium føles langsom, eller grafikken fryser på denne computer, kan du slå Langsom-PC-tilstand til: den skifter til OpenGL-grafik (stabil på ældre grafikkort), letter CPU-forbruget og skjuler det tunge Live-kort.
+        <translation>Hvis Decodium føles langsom, eller grafikken fryser på denne computer, kan du slå Langsom-PC-tilstand til: den bruger forsigtige grafikindstillinger (stabile på ældre grafikkort), letter CPU-forbruget og skjuler det tunge Live-kort.
 
 Vil du slå den til nu? Du kan ændre dette når som helst i Indstillinger.</translation>
     </message>

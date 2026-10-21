@@ -54,6 +54,8 @@ constexpr int kMaxAdifRecords = 500000;
 // itself remains untouched; only metadata derived from it is rebuilt.
 constexpr int kAdifImportFormatVersion = 4;
 constexpr int kMaxPendingLiveSpots = 512;
+constexpr int kQueryDebounceMs = 60;       // user-driven changes
+constexpr qint64 kPassiveQueryMinMs = 2500; // data-arrival refreshes (decodes, PSK)
 constexpr int kRosterLimit = 100;
 constexpr int kRosterCandidateLimit = 500;
 constexpr qint64 kLiveRetentionMs = 30LL * 24LL * 60LL * 60LL * 1000LL;
@@ -2130,9 +2132,12 @@ MapIntelligenceService::MapIntelligenceService(QObject* parent,
 
     m_queryTimer = new QTimer(this);
     m_queryTimer->setSingleShot(true);
-    m_queryTimer->setInterval(60);
+    m_queryTimer->setInterval(kQueryDebounceMs);
     connect(m_queryTimer, &QTimer::timeout, this, [this] {
-        queueSnapshotQuery(m_queryGeneration.load());
+        // A passive query waited for its turn without bumping the generation:
+        // bump now so that an older, slower worker cannot overwrite this result.
+        m_lastQueryClock.start();
+        queueSnapshotQuery(m_queryGeneration.fetch_add(1, std::memory_order_relaxed) + 1);
     });
 
     m_liveFlushTimer = new QTimer(this);
@@ -4121,7 +4126,7 @@ void MapIntelligenceService::queuePskSpots(const QVariantList& rows,
             if (!error.isEmpty()) {
                 qWarning().noquote() << "[MAPINT] PSK spot batch failed:" << error;
             }
-            guard->scheduleQuery();
+            guard->schedulePassiveQuery();
         }, Qt::QueuedConnection);
     }));
 }
@@ -4150,7 +4155,25 @@ void MapIntelligenceService::scheduleQuery()
     // ordering is sufficient and avoids GCC 15's false stringop-overflow
     // diagnostic for the overloaded atomic pre-increment in Qt functors.
     m_queryGeneration.fetch_add(1, std::memory_order_relaxed);
-    m_queryTimer->start();
+    m_queryTimer->start(kQueryDebounceMs);
+}
+
+// New decodes and PSK spots refresh the snapshot, but a single snapshot is ~190 SQL
+// statements over the whole database: running one per decode flush kept a worker thread
+// and the disk busy during FT2/FT8 traffic whether or not anything on screen could show
+// the difference. Results are still published every 0.5 s at most (m_snapshotFlushTimer);
+// here the data-arrival triggers are limited to one query per kPassiveQueryMinMs. Every
+// user-driven change (filters, layers, import) keeps using scheduleQuery() and is not delayed.
+void MapIntelligenceService::schedulePassiveQuery()
+{
+    if (m_queryTimer->isActive()) {
+        return;     // a query is already queued: it will see this data too
+    }
+    qint64 wait = kQueryDebounceMs;
+    if (m_lastQueryClock.isValid()) {
+        wait = qMax<qint64>(kQueryDebounceMs, kPassiveQueryMinMs - m_lastQueryClock.elapsed());
+    }
+    m_queryTimer->start(static_cast<int>(wait));
 }
 
 void MapIntelligenceService::flushPendingLiveSpots()
@@ -4191,7 +4214,7 @@ void MapIntelligenceService::flushPendingLiveSpots()
             if (!error.isEmpty()) {
                 qWarning().noquote() << "[MAPINT] live spot batch failed:" << error;
             }
-            guard->scheduleQuery();
+            guard->schedulePassiveQuery();
         }, Qt::QueuedConnection);
     }));
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QElapsedTimer>
 #include <QByteArray>
 #include <QList>
 #include <QObject>
@@ -454,6 +455,7 @@ signals:
 
 private slots:
     void scheduleQuery();
+    void schedulePassiveQuery();
     void flushPendingLiveSpots();
     void flushPendingSnapshot();
     void flushSnapshotNotifications();
@@ -731,6 +733,7 @@ private:
     MapPskFeedService* m_pskFeedService {nullptr};
     QThreadPool m_workerPool;
     QTimer* m_queryTimer {nullptr};
+    QElapsedTimer m_lastQueryClock;
     QTimer* m_liveFlushTimer {nullptr};
     QTimer* m_snapshotFlushTimer {nullptr};
     QTimer* m_snapshotNotificationTimer {nullptr};
