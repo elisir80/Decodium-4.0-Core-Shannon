@@ -159,10 +159,23 @@ FT2REAL_SETS = {
 }
 FT2REAL_LEVELS = '-12,-9,-6,-3'
 FT2REAL_PER_LEVEL = 50
+# FT4 on the same recordings (7.5 s slots, a bit more sensitive: levels one step lower)
+FT4REAL_SETS = {
+    'f4train': ('decodium_20260907_180610.wav', 31, []),
+    'f4held': ('decodium_20260909_145733.wav', 32, []),
+    'f4held2': ('decodium_20260905_003849.wav', 33, []),
+}
+FT4REAL_LEVELS = '-15,-12,-9,-6'
+
+
+def _real_cfg(name):
+    if name in FT4REAL_SETS:
+        return FT4REAL_SETS[name], 'ft4', FT4REAL_LEVELS
+    return FT2REAL_SETS[name], 'ft2', FT2REAL_LEVELS
 
 
 def ft2real_set(build, work, name):
-    rec, seed, extra = FT2REAL_SETS[name]
+    (rec, seed, extra), mode, levels = _real_cfg(name)
     out = os.path.join(work, 'real_' + name)
     if not os.path.isfile(os.path.join(out, 'verita.json')):
         e = env()
@@ -170,8 +183,8 @@ def ft2real_set(build, work, name):
         bg = os.path.join(REC_DIR, rec)
         if not os.path.isfile(bg):
             sys.exit('background recording missing: %s' % bg)
-        subprocess.run([sys.executable, os.path.join(HERE, 'mescola_ft2.py'), '--sfondo', bg, '--out', out,
-                        '--livelli', FT2REAL_LEVELS, '--per-livello', str(FT2REAL_PER_LEVEL), '--seed', str(seed)] + extra,
+        subprocess.run([sys.executable, os.path.join(HERE, 'mescola_%s.py' % mode), '--sfondo', bg, '--out', out,
+                        '--livelli', levels, '--per-livello', str(FT2REAL_PER_LEVEL), '--seed', str(seed)] + extra,
                        check=True, env=e, capture_output=True)
     return out
 
@@ -181,7 +194,8 @@ def run_ft2real_one(build, work, name):
     e = env()
     e['DECODIUM_AI_BUILD'] = build
     t0 = time.time()
-    p = subprocess.run([sys.executable, os.path.join(HERE, 'verita_ft2.py'), '--slot', out, '--ndepth', '3'],
+    mode = _real_cfg(name)[1]
+    p = subprocess.run([sys.executable, os.path.join(HERE, 'verita_%s.py' % mode), '--slot', out, '--ndepth', '3'],
                        env=e, capture_output=True, text=True, encoding='utf-8', errors='replace')
     levels = {}
     for m in re.finditer(r'^\|\s*([+-]\d+) dB \|\s*(\d+) \|\s*(\d+) \|', p.stdout, re.M):
@@ -195,9 +209,9 @@ def run_ft2real_one(build, work, name):
     return r
 
 
-def run_ft2real(build, jobs):
+def run_ft2real(build, jobs, sets=None):
     work = DEFAULT_WORK
-    names = list(FT2REAL_SETS)
+    names = list(sets or FT2REAL_SETS)
     for n in names:
         ft2real_set(build, work, n)
     with cf.ThreadPoolExecutor(max_workers=min(jobs, len(names))) as ex:
@@ -217,6 +231,8 @@ def cmd_run(a):
         out['suites']['ft2'] = run_ft2(build, a.work, a.jobs)
     if 'ft2real' in suites:
         out['suites']['ft2real'] = run_ft2real(build, a.jobs)
+    if 'ft4real' in suites:
+        out['suites']['ft4real'] = run_ft2real(build, a.jobs, FT4REAL_SETS)
     if 'ft8' in suites:
         out['suites']['ft8'] = run_ft8(build, a.ft8_snr, a.ft8_trials)
     os.makedirs(RESULTS, exist_ok=True)
@@ -239,10 +255,11 @@ def show(o):
             g = ft2[k]
             print('  ft2 %-7s decoded %3d/%3d false %d cpu %d ms lat %.2f s thr %.2f dB' % (
                 k, g['decoded'], g['tx'], g['false'], g['cpu_mean_ms'], g['lat_mean_s'], g['thr50_db']))
-    fr = o['suites'].get('ft2real')
-    if fr:
+    for key in ('ft2real', 'ft4real'):
+      fr = o['suites'].get(key)
+      if fr:
         for r in fr['sets']:
-            print('  ft2real %-7s decoded %3d/%3d false %s  by level %s  (%ss)' % (
+            print('  ' + key + ' %-7s decoded %3d/%3d false %s  by level %s  (%ss)' % (
                 r['name'], r['ok'], r['n'], r['false'],
                 ' '.join('%s:%d/%d' % (k, v[0], v[1]) for k, v in sorted(r['levels'].items())), r['secs']))
     ft8 = o['suites'].get('ft8')

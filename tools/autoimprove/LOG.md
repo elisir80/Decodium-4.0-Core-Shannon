@@ -3,6 +3,29 @@
 Newest first. Every round: hypothesis, measurement, verdict. Negative results stay here so they
 are not tried again. Numbers: `rx_score.py` on build 1.0.708 + the change, same scenes.
 
+## Round 3 (2026-10-23) - the same sync-word search for FT4
+
+Question: does FT4 gain from candidates found through the sync words? Yes.
+New tools: `tests/ft4_make_test_wav` (FT4 clean signal), `mescola_ft4.py`/`verita_ft4.py` (real-noise
+slots, one decoder process per slot: `ft4_stage_compare` takes ONE wav), `ft4_awgn.py` (white-noise
+threshold), suite `ft4real` in `rx_score.py` (levels -15..-6 dB, 3 recordings, 200 slots each).
+
+`ftx_ft4_sync_candidates_c` is the FT2 search with FT4 geometry (symbol 576 samples, hop 144, FFT 2304; still
+4 frames per symbol and 4 cells per tone). Decoder: `DECODIUM_FT4_SYNC2D` / `ftx_ft4_set_sync_candidates_c`
+(DecodiumBridge sets mode 1), `_N` default 6, `_LEGACY` default 5.
+
+| | f4train | f4held | f4held2 | white noise -21..-17 (40 each) | false lines, 960 bg slots |
+|---|---|---|---|---|---|
+| 1.0.709 | 96 | 55 | 90 | 156 | 3 |
+| mode 1 | 125 (+30 %) | 90 (+64 %) | 118 (+31 %) | 156 | 2 (+1 in another 240) |
+
+TRAP found on the way: FT4's spectral candidate list is ordered by FREQUENCY, not by power (FT2's is by power).
+Keeping "the first 5" legacy candidates dropped the weak true signal in white noise (-20 dB: 9/20 instead of
+14/20); the legacy candidates must be taken by descending power (`by_power`). With that, white noise is identical
+to the baseline. Time per set also drops (13 s -> 8 s on f4train).
+The FT4 decoder already produced a few garbage lines on plain background (3 in 960 slots) before; mode 1 does not
+add to them.
+
 ## Round 2 (2026-10-22) - a better centre estimate was the wrong fix; sync-pattern candidates
 
 Question: can a more precise centre of the 4-tone group (instead of the tone-alias trick of round 1)

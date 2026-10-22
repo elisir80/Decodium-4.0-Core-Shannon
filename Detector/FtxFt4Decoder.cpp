@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <cctype>
 #include <chrono>
 #include <cmath>
@@ -13,6 +14,7 @@
 #include <iomanip>
 #include <iostream>
 #include <mutex>
+#include <numeric>
 #include <sstream>
 #include <string>
 #include <thread>
@@ -93,6 +95,55 @@ extern "C"
                                     char msg37[38], int* i4);
   int ftx_encode174_91_message77_c (signed char const* message77, signed char* codeword_out);
   int ftx_ft2_message77_to_itone_c (signed char const* message77, int* itone_out);
+}
+
+
+extern "C" int ftx_ft4_sync_candidates_c (float const* dd, int nmax, float fa, float fb, int maxn,
+                                          float* freq_out, float* score_out);
+
+// Candidati dal sincronismo anche per FT4 (stessa ricerca di FT2, vedi
+// ftx_ft2_sync_candidates_c in FtxCandidates.cpp). DECODIUM_FT4_SYNC2D: 0 spento (default,
+// bit-identico), 1 prima i candidati del sincronismo e poi i primi cinque dello spettro medio,
+// 2 solo quelli del sincronismo. _N (default 6), _LEGACY (default 5).
+std::atomic<int> g_ft4_sync_candidates_ui {0};
+
+extern "C" void ftx_ft4_set_sync_candidates_c (int mode)
+{
+  g_ft4_sync_candidates_ui.store (std::clamp (mode, 0, 2));
+}
+
+int ft4_sync_candidates_mode ()
+{
+  static int const env_value = [] {
+    char const* e = std::getenv ("DECODIUM_FT4_SYNC2D");
+    return (e && e[0] != 0) ? std::clamp (std::atoi (e), 0, 2) : -1;
+  }();
+  return env_value >= 0 ? env_value : g_ft4_sync_candidates_ui.load ();
+}
+
+int ft4_sync_candidates_env (char const* name, int fallback, int hi)
+{
+  char const* e = std::getenv (name);
+  int const n = e ? std::atoi (e) : 0;
+  return n > 0 ? std::min (n, hi) : fallback;
+}
+
+// Stima di potenza del gruppo di toni attorno a f0 nella forma del secondo campo di
+// getcandidates4 (rapporto dello spettro medio lisciato sul fondo): da qui l'SNR mostrato.
+float ft4_lump_snr_field (float const* savg, float const* sbase, float f0)
+{
+  constexpr float kDfHz = 12000.0f / 2304.0f;
+  int const c = static_cast<int> (std::lround ((f0 + 31.25f) / kDfHz)) - 1;
+  if (c < 7 || c > kFt4Nh1 - 8 || sbase[c] <= 0.0f)
+    {
+      return 1.0f;
+    }
+  float sum = 0.0f;
+  for (int j = c - 7; j <= c + 7; ++j)
+    {
+      sum += savg[j];
+    }
+  return std::max (1.0f, (sum / 15.0f) / sbase[c]);
 }
 
 template <typename T>
@@ -1538,6 +1589,64 @@ void run_ft4_decode (short const* iwave,
       ftx_getcandidates4_c (dd.data (), static_cast<float> (nfa), static_cast<float> (nfb),
                             syncmin_pass, static_cast<float> (nfqso), kFt4MaxCand,
                             savg.data (), candidate.data (), &ncand, sbase.data ());
+      if (int const sync_mode = ft4_sync_candidates_mode (); sync_mode > 0)
+        {
+          std::array<float, 64> sf {};
+          std::array<float, 64> ss {};
+          int const ns = ftx_ft4_sync_candidates_c (dd.data (), kFt4Nmax, static_cast<float> (nfa),
+                                                    static_cast<float> (nfb),
+                                                    ft4_sync_candidates_env ("DECODIUM_FT4_SYNC2D_N", 6, 40),
+                                                    sf.data (), ss.data ());
+          std::array<float, 2 * kFt4MaxCand> merged {};
+          int nm = 0;
+          for (int k = 0; k < ns && nm < kFt4MaxCand; ++k)
+            {
+              merged[static_cast<size_t> (nm * 2)] = sf[static_cast<size_t> (k)];
+              merged[static_cast<size_t> (nm * 2 + 1)] =
+                  ft4_lump_snr_field (savg.data (), sbase.data (), sf[static_cast<size_t> (k)]);
+              // se lo spettro medio ha gia' un candidato vicino, vale la sua stima di potenza
+              // (alcuni cancelli del decoder la usano come soglia)
+              for (int j = 0; j < ncand; ++j)
+                {
+                  if (std::fabs (candidate[static_cast<size_t> (j * 2)] - sf[static_cast<size_t> (k)]) < 15.0f)
+                    {
+                      merged[static_cast<size_t> (nm * 2 + 1)] = std::max (merged[static_cast<size_t> (nm * 2 + 1)],
+                                                                        candidate[static_cast<size_t> (j * 2 + 1)]);
+                    }
+                }
+              ++nm;
+            }
+          if (sync_mode == 1)
+            {
+              int const nsync = nm;
+              int const legacy_max = ft4_sync_candidates_env ("DECODIUM_FT4_SYNC2D_LEGACY", 5, kFt4MaxCand);
+              // la lista dello spettro medio e' in ordine di frequenza: si tengono i piu' forti
+              std::vector<int> by_power (static_cast<size_t> (ncand));
+              std::iota (by_power.begin (), by_power.end (), 0);
+              std::stable_sort (by_power.begin (), by_power.end (), [&candidate] (int a, int c) {
+                return candidate[static_cast<size_t> (a * 2 + 1)] > candidate[static_cast<size_t> (c * 2 + 1)];
+              });
+              for (int jj = 0; jj < ncand && nm < kFt4MaxCand && nm - nsync < legacy_max; ++jj)
+                {
+                  int const j = by_power[static_cast<size_t> (jj)];
+                  float const fj = candidate[static_cast<size_t> (j * 2)];
+                  bool vicino = false;
+                  for (int k = 0; k < nsync && !vicino; ++k)
+                    {
+                      vicino = std::fabs (merged[static_cast<size_t> (k * 2)] - fj) < 10.0f;
+                    }
+                  if (!vicino)
+                    {
+                      merged[static_cast<size_t> (nm * 2)] = fj;
+                      merged[static_cast<size_t> (nm * 2 + 1)] = candidate[static_cast<size_t> (j * 2 + 1)];
+                      ++nm;
+                    }
+                }
+            }
+          candidate.fill (0.0f);
+          std::copy (merged.begin (), merged.begin () + static_cast<size_t> (nm * 2), candidate.begin ());
+          ncand = nm;
+        }
       append_ft4_harvest_grid_candidates (depth, nfa, nfb, isp == nsp,
                                           candidate.data (), &ncand, kFt4MaxCand);
       trace_ft4_expected_candidate_list (isp, syncmin_pass, candidate.data (), ncand);

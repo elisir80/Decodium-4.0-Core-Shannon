@@ -587,15 +587,18 @@ extern "C" void ftx_getcandidates4_c (float const* dd, float fa, float fb, float
 //
 // dd: nmax campioni a 12 kHz. Restituisce il numero di candidati scritti (freq = frequenza
 // del tono 0, come f0 di getcandidates2; score = somma dei 16 rapporti, ~4 su solo rumore).
-extern "C" int ftx_ft2_sync_candidates_c (float const* dd, int nmax, float fa, float fb,
-                                          int maxn, float* freq_out, float* score_out)
+//
+// La stessa ricerca serve FT4 (stessa struttura di trama e stesse parole di sincronismo): cambiano
+// solo la durata del simbolo (576 campioni), il passo (144) e la FFT (2304), sempre quattro frame
+// per simbolo e quattro celle fra un tono e l'altro.
+static int sync_candidates_impl (float const* dd, int nmax, int const kNsps, int const kHop,
+                                 int const kNfft, float fa, float fb, int maxn,
+                                 float* freq_out, float* score_out)
 {
-  constexpr int kNsps = 288;
-  constexpr int kHop = 72;
-  constexpr int kNfft = 1152;
   constexpr int kSyncSymbols = 4 * 4;
   constexpr int kFrameSymbols = 103;
-  constexpr float kDf = kSampleRate / static_cast<float> (kNfft);
+  float const kDf = kSampleRate / static_cast<float> (kNfft);
+  float const tone_spacing = kSampleRate / static_cast<float> (kNsps);
   static int const kWords[4][4] = {{0, 1, 3, 2}, {1, 0, 2, 3}, {2, 3, 1, 0}, {3, 2, 0, 1}};
   static int const kWordStart[4] = {0, 33, 66, 99};
 
@@ -605,7 +608,7 @@ extern "C" int ftx_ft2_sync_candidates_c (float const* dd, int nmax, float fa, f
     {
       return 0;
     }
-  int const nbins = std::min (kNfft / 2, static_cast<int> ((fb + 3.0f * 41.67f) / kDf) + 8);
+  int const nbins = std::min (kNfft / 2, static_cast<int> ((fb + 3.0f * tone_spacing) / kDf) + 8);
   int const blo = std::max (2, static_cast<int> (fa / kDf));
   int const bhi = std::min (nbins - 14, static_cast<int> (fb / kDf));
   if (bhi <= blo)
@@ -618,14 +621,11 @@ extern "C" int ftx_ft2_sync_candidates_c (float const* dd, int nmax, float fa, f
     {
       return 0;
     }
-  static std::vector<float> const window = [] {
-    std::vector<float> w (static_cast<size_t> (kNsps));
-    for (int i = 0; i < kNsps; ++i)
-      {
-        w[static_cast<size_t> (i)] = 0.5f - 0.5f * std::cos (2.0f * kPi * static_cast<float> (i) / static_cast<float> (kNsps - 1));
-      }
-    return w;
-  }();
+  std::vector<float> window (static_cast<size_t> (kNsps));
+  for (int i = 0; i < kNsps; ++i)
+    {
+      window[static_cast<size_t> (i)] = 0.5f - 0.5f * std::cos (2.0f * kPi * static_cast<float> (i) / static_cast<float> (kNsps - 1));
+    }
 
   // Potenza per frame e cella, e l'inverso del totale dei quattro toni per ogni cella base.
   std::vector<float> power (static_cast<size_t> (nfr) * static_cast<size_t> (nbins), 0.0f);
@@ -728,4 +728,16 @@ extern "C" int ftx_ft2_sync_candidates_c (float const* dd, int nmax, float fa, f
     }
   (void) kSyncSymbols;
   return n;
+}
+
+extern "C" int ftx_ft2_sync_candidates_c (float const* dd, int nmax, float fa, float fb,
+                                          int maxn, float* freq_out, float* score_out)
+{
+  return sync_candidates_impl (dd, nmax, 288, 72, 1152, fa, fb, maxn, freq_out, score_out);
+}
+
+extern "C" int ftx_ft4_sync_candidates_c (float const* dd, int nmax, float fa, float fb,
+                                          int maxn, float* freq_out, float* score_out)
+{
+  return sync_candidates_impl (dd, nmax, 576, 144, 2304, fa, fb, maxn, freq_out, score_out);
 }
