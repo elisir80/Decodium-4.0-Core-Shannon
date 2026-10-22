@@ -32,6 +32,12 @@ target_compile_definitions (test_panadapter_gpu_recovery PRIVATE DECODIUM_SOURCE
 target_link_libraries (test_panadapter_gpu_recovery Qt6::Test Qt6::Core)
 add_test (NAME test_panadapter_gpu_recovery COMMAND $<TARGET_FILE:test_panadapter_gpu_recovery>)
 
+add_executable (test_graphics_pipeline_cache test_graphics_pipeline_cache.cpp)
+target_include_directories (test_graphics_pipeline_cache PRIVATE ${CMAKE_SOURCE_DIR}/src/ui)
+target_compile_definitions (test_graphics_pipeline_cache PRIVATE DECODIUM_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+target_link_libraries (test_graphics_pipeline_cache Qt6::Test Qt6::Core)
+add_test (NAME test_graphics_pipeline_cache COMMAND $<TARGET_FILE:test_graphics_pipeline_cache>)
+
 add_executable (test_audio_mode_change_capture_policy test_audio_mode_change_capture_policy.cpp)
 target_include_directories (test_audio_mode_change_capture_policy PRIVATE ${CMAKE_SOURCE_DIR})
 target_compile_definitions (test_audio_mode_change_capture_policy PRIVATE DECODIUM_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
@@ -88,6 +94,11 @@ add_executable (test_tx_dispatch_guard test_tx_dispatch_guard.cpp)
 target_compile_definitions (test_tx_dispatch_guard PRIVATE DECODIUM_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
 target_link_libraries (test_tx_dispatch_guard Qt6::Test Qt6::Core)
 add_test (NAME test_tx_dispatch_guard COMMAND $<TARGET_FILE:test_tx_dispatch_guard>)
+
+add_executable (test_rigctl_dashboard_controls test_rigctl_dashboard_controls.cpp)
+target_compile_definitions (test_rigctl_dashboard_controls PRIVATE DECODIUM_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+target_link_libraries (test_rigctl_dashboard_controls Qt6::Test Qt6::Core)
+add_test (NAME test_rigctl_dashboard_controls COMMAND $<TARGET_FILE:test_rigctl_dashboard_controls>)
 
 include_directories (
   ${CMAKE_CURRENT_BINARY_DIR}

@@ -16,12 +16,20 @@ import QtQuick.Window
 GlassWindow {
     id: win
 
+    // Window.close() only hides a QQuickWindow. Ask Main.qml to unload the
+    // owning Loader as well, otherwise this large scene and its fast decoder
+    // bindings remain alive in the background until process shutdown.
+    signal releaseRequested()
+
     readonly property var eng: (typeof appEngine !== 'undefined' ? appEngine : null)
     readonly property var cw: (typeof cwModule !== 'undefined' ? cwModule : null)
     // Aprire la finestra e' la sola cosa che avvia il modulo CW.
     Component.onCompleted: {
         restoreTrafficSplitRatio()
-        if (cw) cw.ensureStarted()
+        if (cw) {
+            cw.ensureStarted()
+            cw.refreshTransmitState()
+        }
     }
     readonly property var tm: eng ? eng.themeManager : null
     readonly property bool liquidGlassEnabled: !!(tm && tm.isGlassTheme
@@ -84,7 +92,16 @@ GlassWindow {
 
     // Il decodificatore riceve l'audio solo mentre la finestra e' aperta.
     onVisibleChanged: if (eng) eng.cwInAscolto = visible
-    Component.onDestruction: if (eng) eng.cwInAscolto = false
+    onClosing: function(close) {
+        if (eng) eng.cwInAscolto = false
+        // Closing a window during a macro is also an explicit emergency stop.
+        // Do not close an idle serial keyer merely because the UI is hidden.
+        if (cw && cw.sending) cw.stop()
+        releaseRequested()
+    }
+    Component.onDestruction: {
+        if (eng) eng.cwInAscolto = false
+    }
 
     function clampTrafficSplitRatio(value, availableWidth) {
         var ratio = Number(value)

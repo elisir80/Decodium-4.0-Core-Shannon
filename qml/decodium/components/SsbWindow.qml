@@ -7,6 +7,10 @@ import QtQuick.Window
 
 GlassApplicationWindow {
     id: win
+    // Main.qml unloads the asynchronous Loader after this native window has
+    // accepted its close event. Hiding alone retains the complete SSB scene
+    // graph and all of its signal bindings.
+    signal releaseRequested()
     readonly property var bridge: appEngine
     Material.theme: Material.Dark
     Material.accent: "#44d4df"
@@ -58,9 +62,18 @@ GlassApplicationWindow {
         syncingRadioMode = false
     }
     function updateRadioMode() { bridge.ssbSetRadioMode(dataInput.checked ? (side.currentIndex ? "DIGL" : "DIGU") : (side.currentIndex ? "LSB" : "USB")) }
-    onClosing: voice.stop()
+    function stopWindowActivity() {
+        voice.stop()
+        voiceKeyer.stop()
+        if (speech.working) speech.stopListening()
+        if (assistant.busy) assistant.cancel()
+    }
+    onClosing: function(close) {
+        stopWindowActivity()
+        releaseRequested()
+    }
     onActiveChanged: if (!active) voice.stop()
-    Component.onDestruction: voice.stop()
+    Component.onDestruction: stopWindowActivity()
     onVisibleChanged: if (visible) {
         syncRadioModeFromCat()
         bridge.ssbRefreshControls()

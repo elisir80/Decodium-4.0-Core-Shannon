@@ -2172,7 +2172,7 @@ void DecodiumTransceiverManager::connectRig()
     // Aggiornamenti di stato dal rig → main thread
     connect(xcv, &Transceiver::update,
             this,
-            [this, xcv, attemptConfigurationRevision](Transceiver::TransceiverState const& state, unsigned /*seq*/) {
+            [this, xcv, attemptConfigurationRevision](Transceiver::TransceiverState const& state, unsigned sequence) {
                 if (d->transceiver != xcv) {
                     return;
                 }
@@ -2185,37 +2185,56 @@ void DecodiumTransceiverManager::connectRig()
                         disconnectRigInternal(true);
                     return;
                 }
-                auto const requestedAudio = d->desired.audio();
-                auto const requestedPeriod = d->desired.period();
-                auto const requestedBlocksize = d->desired.blocksize();
-                auto const requestedTxAudio = d->desired.tx_audio();
-                auto const requestedTune = d->desired.tune();
-                auto const requestedQuick = d->desired.quick();
-                auto const requestedJtMode = d->desired.jtmode();
-                auto const requestedSymbolsLength = d->desired.symbolslength();
-                auto const requestedFramesPerSymbol = d->desired.framespersymbol();
-                auto const requestedTrFrequency = d->desired.trfrequency();
-                auto const requestedToneSpacing = d->desired.tonespacing();
-                auto const requestedSynchronize = d->desired.synchronize();
-                auto const requestedFastMode = d->desired.fastmode();
-                auto const requestedDbSnr = d->desired.dbsnr();
-                auto const requestedTrPeriod = d->desired.trperiod();
-                d->desired = state;
-                d->desired.audio(requestedAudio);
-                d->desired.period(requestedPeriod);
-                d->desired.blocksize(requestedBlocksize);
-                d->desired.tx_audio(requestedTxAudio);
-                d->desired.tune(requestedTune);
-                d->desired.quick(requestedQuick);
-                d->desired.jtmode(requestedJtMode);
-                d->desired.symbolslength(requestedSymbolsLength);
-                d->desired.framespersymbol(requestedFramesPerSymbol);
-                d->desired.trfrequency(requestedTrFrequency);
-                d->desired.tonespacing(requestedToneSpacing);
-                d->desired.synchronize(requestedSynchronize);
-                d->desired.fastmode(requestedFastMode);
-                d->desired.dbsnr(requestedDbSnr);
-                d->desired.trperiod(requestedTrPeriod);
+                // Transceiver::update carries the sequence of the most recent
+                // state transaction processed by the CAT worker.  A queued
+                // report can cross a newer GUI request in transit (typically
+                // the initial CW snapshot crossing the first DATA-U request).
+                // Publish that report as the physical state below, but never
+                // copy it back over the newer desired state: doing so silently
+                // changed the next complete CAT transaction back to CW.
+                unsigned const latestRequestedSequence =
+                    d->seqNum.load(std::memory_order_acquire);
+                bool const crossedInTransit = sequence < latestRequestedSequence;
+                if (!crossedInTransit) {
+                    auto const requestedAudio = d->desired.audio();
+                    auto const requestedPeriod = d->desired.period();
+                    auto const requestedBlocksize = d->desired.blocksize();
+                    auto const requestedTxAudio = d->desired.tx_audio();
+                    auto const requestedTune = d->desired.tune();
+                    auto const requestedQuick = d->desired.quick();
+                    auto const requestedJtMode = d->desired.jtmode();
+                    auto const requestedSymbolsLength = d->desired.symbolslength();
+                    auto const requestedFramesPerSymbol = d->desired.framespersymbol();
+                    auto const requestedTrFrequency = d->desired.trfrequency();
+                    auto const requestedToneSpacing = d->desired.tonespacing();
+                    auto const requestedSynchronize = d->desired.synchronize();
+                    auto const requestedFastMode = d->desired.fastmode();
+                    auto const requestedDbSnr = d->desired.dbsnr();
+                    auto const requestedTrPeriod = d->desired.trperiod();
+                    d->desired = state;
+                    d->desired.audio(requestedAudio);
+                    d->desired.period(requestedPeriod);
+                    d->desired.blocksize(requestedBlocksize);
+                    d->desired.tx_audio(requestedTxAudio);
+                    d->desired.tune(requestedTune);
+                    d->desired.quick(requestedQuick);
+                    d->desired.jtmode(requestedJtMode);
+                    d->desired.symbolslength(requestedSymbolsLength);
+                    d->desired.framespersymbol(requestedFramesPerSymbol);
+                    d->desired.trfrequency(requestedTrFrequency);
+                    d->desired.tonespacing(requestedToneSpacing);
+                    d->desired.synchronize(requestedSynchronize);
+                    d->desired.fastmode(requestedFastMode);
+                    d->desired.dbsnr(requestedDbSnr);
+                    d->desired.trperiod(requestedTrPeriod);
+                } else {
+                    qInfo().noquote()
+                        << "[CATDBG] Crossed CAT update kept for telemetry; desired state preserved"
+                        << "reportedSeq=" << sequence
+                        << "latestRequestedSeq=" << latestRequestedSequence
+                        << "reportedMode=" << modeStr(state.mode())
+                        << "desiredMode=" << modeStr(d->desired.mode());
+                }
                 double  freq = static_cast<double>(state.frequency());
                 double  txf  = static_cast<double>(state.tx_frequency());
                 QString mode = modeStr(state.mode());
@@ -2223,7 +2242,9 @@ void DecodiumTransceiverManager::connectRig()
                 bool    spl  = state.split();
                 bool    onl  = state.online();
 
-                if (m_connected != onl) {
+                bool const connectionStateChanged = m_connected != onl;
+                bool const becameOnline = connectionStateChanged && onl;
+                if (connectionStateChanged) {
                     setConnecting(false);
                     m_connected = onl;
                     setAtuState(false, false);
@@ -2236,6 +2257,27 @@ void DecodiumTransceiverManager::connectRig()
                     }
                     if (onl && m_audioAutoStart)
                         emit audioAutoStartChanged();
+                }
+                if (becameOnline) {
+                    // NET rigctl discovers its effective capabilities while
+                    // rig_open() reads the peer's dump_state.  The earlier
+                    // construction-time snapshot is therefore too soon for
+                    // functions such as TUNER, even when DecoDXLog exposes
+                    // them. Re-read on the CAT worker after the first online
+                    // state; direct Hamlib backends simply return the same
+                    // static values.
+                    QPointer<DecodiumTransceiverManager> owner(this);
+                    QPointer<Transceiver> capabilityXcv(xcv);
+                    QMetaObject::invokeMethod(xcv, [owner, capabilityXcv]() {
+                        bool const atu = capabilityXcv && capabilityXcv->supports_atu_control();
+                        bool const power = capabilityXcv && capabilityXcv->supports_power_control();
+                        if (owner) QMetaObject::invokeMethod(owner, [owner, capabilityXcv, atu, power]() {
+                            if (owner && owner->m_connected
+                                && owner->d->transceiver == capabilityXcv) {
+                                owner->setCatCapabilities(atu, power);
+                            }
+                        }, Qt::QueuedConnection);
+                    }, Qt::QueuedConnection);
                 }
                 if (onl && m_coldStartPowerOnPending) {
                     m_coldStartPowerOnPending = false;
@@ -3160,10 +3202,16 @@ void DecodiumTransceiverManager::rememberSerialDevice()
 void DecodiumTransceiverManager::requestRadioPowerOn()
 {
     const QString action = QStringLiteral("Power on");
-    if (m_connected && d->transceiver && m_radioPoweredOffByUser) {
+    QString const transport = m_portType.trimmed().toLower();
+    bool const directCat = transport == QStringLiteral("serial")
+        || transport == QStringLiteral("usb");
+    if (m_connected && d->transceiver && m_radioPoweredOffByUser && directCat) {
         // Radio spenta via CAT con la sessione ancora aperta: il comando di
-        // accensione sulla sessione viva non la sveglia. Si chiude la porta e
-        // si riapre con il risveglio del modello (stesso percorso del cold start).
+        // accensione sulla sessione seriale/USB viva non la sveglia. Si chiude
+        // la porta e si riapre con il risveglio del modello (stesso percorso
+        // del cold start). Una sessione NET rigctl, invece, deve restare aperta:
+        // il server inoltra direttamente set_powerstat e la riapertura del
+        // client causerebbe un primo clic a vuoto e un inutile replay CAT.
         m_radioPoweredOffByUser = false;
         m_coldStartPowerOnPending = true;
         m_coldStartPowerOnWakeSent = false;
@@ -3175,9 +3223,6 @@ void DecodiumTransceiverManager::requestRadioPowerOn()
         return;
     }
     if (!m_connected || !d->transceiver) {
-        QString const transport = m_portType.trimmed().toLower();
-        bool const directCat = transport == QStringLiteral("serial")
-            || transport == QStringLiteral("usb");
         bool const serialCat = transport == QStringLiteral("serial");
         if (!directCat) {
             emit radioActionCompleted(action, false, tr(
@@ -3241,20 +3286,41 @@ void DecodiumTransceiverManager::requestRadioPowerOn()
                                   tr("This radio does not expose power control through Hamlib"));
         return;
     }
+    if (m_radioPoweredOffByUser && !directCat) {
+        qInfo().noquote()
+            << "[CATDBG] Power On after power off: using the live CAT session"
+            << "rig=" << m_rigName
+            << "portType=" << m_portType
+            << "network=" << m_networkPort;
+    }
     QPointer<DecodiumTransceiverManager> owner(this);
     QPointer<Transceiver> xcv = d->transceiver;
-    QMetaObject::invokeMethod(xcv, [owner, xcv, action]() {
+    QMetaObject::invokeMethod(xcv, [owner, xcv, action, directCat]() {
         QString error;
         bool const ok = xcv && xcv->request_power_on(&error);
         if (!xcv) error = QStringLiteral("CAT disconnected before power control could run");
-        if (owner) QMetaObject::invokeMethod(owner, [owner, xcv, action, ok, error]() {
+        if (owner) QMetaObject::invokeMethod(owner, [owner, xcv, action, directCat, ok, error]() {
             if (owner && owner->m_connected && owner->d->transceiver == xcv) {
                 emit owner->radioActionCompleted(action, ok, error);
                 if (ok) {
+                    owner->m_radioPoweredOffByUser = false;
+                    if (!directCat) {
+                        // A live NET rigctl server remains authoritative for
+                        // VFO, mode and split while the radio is asleep. Its
+                        // Power On command is enough: replaying Decodium's
+                        // cached TransceiverState can briefly rewrite the VFO
+                        // and operate the radio's band-filter relays.
+                        qInfo().noquote()
+                            << "[CATDBG] Power On over live network CAT: deferred state replay skipped"
+                            << "rig=" << owner->m_rigName
+                            << "network=" << owner->m_networkPort;
+                        return;
+                    }
                     // Hamlib/NewCAT can acknowledge power-on before the rig
                     // accepts VFO writes. Re-submit the latest desired state
-                    // only after the worker's bounded settle window so a mode
-                    // or frequency request deferred in standby is not lost.
+                    // only after the worker's bounded settle window on direct
+                    // CAT, so a mode or frequency request deferred in standby
+                    // is not lost.
                     QTimer::singleShot(5500, owner.data(), [owner, xcv]() {
                         if (!owner || !owner->m_connected || owner->d->transceiver != xcv)
                             return;

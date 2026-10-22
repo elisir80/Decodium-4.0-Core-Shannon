@@ -22,6 +22,7 @@ private slots:
     void classicThemeRestoresOpaqueSurface();
     void mainAndPopoutsUseGlassShell();
     void classicMainSurfacesAreOpaque();
+    void dashboardMenusKeepReadableGlassContrast();
     void liveMapFramelessPopoutHasAllResizeHandles();
     void dialogsAndHostedPanelsUseGlassSurfaces();
     void cwWindowKeepsOperationalContrastAndHasPersistentTrafficSplitter();
@@ -29,6 +30,7 @@ private slots:
     void jttyWindowKeepsOperationalContrast();
     void restoredPopoutsWaitForStartupPresentation();
     void linuxUsesSafeOpaqueGlassFallback();
+    void closedCwAndSsbPopoutsReleaseTheirSceneGraphs();
 };
 
 void TestLiquidGlassWindows::shellIsCrossPlatformAndThemeGated()
@@ -179,21 +181,65 @@ void TestLiquidGlassWindows::classicMainSurfacesAreOpaque()
         QStringLiteral("function glassWindowSurface(fallbackAlpha)"));
     const int dialogStart = main.indexOf(
         QStringLiteral("function glassDialogSurface(fallbackAlpha)"));
-    const int nextFunctionAfterDialog = main.indexOf(
-        QStringLiteral("function minimizeFloatingWindow"), dialogStart);
+    const int menuStart = main.indexOf(
+        QStringLiteral("function glassMenuSurface()"), dialogStart);
     QVERIFY(windowStart >= 0);
     QVERIFY(dialogStart > windowStart);
-    QVERIFY(nextFunctionAfterDialog > dialogStart);
+    QVERIFY(menuStart > dialogStart);
 
     const QString windowSurface = main.mid(windowStart, dialogStart - windowStart);
     const QString dialogSurface = main.mid(
-        dialogStart, nextFunctionAfterDialog - dialogStart);
+        dialogStart, menuStart - dialogStart);
     QVERIFY(windowSurface.contains(QStringLiteral("return bgDeep")));
     QVERIFY(dialogSurface.contains(QStringLiteral("return bgDeep")));
     QVERIFY(!windowSurface.contains(
         QStringLiteral("Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, fallbackAlpha)")));
     QVERIFY(!dialogSurface.contains(
         QStringLiteral("Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, fallbackAlpha)")));
+}
+
+void TestLiquidGlassWindows::dashboardMenusKeepReadableGlassContrast()
+{
+    const QString main = readSource(QStringLiteral("qml/decodium/Main.qml"));
+    QVERIFY(!main.isEmpty());
+
+    const int menuSurfaceStart = main.indexOf(
+        QStringLiteral("function glassMenuSurface()"));
+    const int nextFunction = main.indexOf(
+        QStringLiteral("function minimizeFloatingWindow"), menuSurfaceStart);
+    QVERIFY(menuSurfaceStart >= 0);
+    QVERIFY(nextFunction > menuSurfaceStart);
+
+    const QString menuSurface = main.mid(
+        menuSurfaceStart, nextFunction - menuSurfaceStart);
+    QVERIFY(menuSurface.contains(QStringLiteral("glassTransparencySupported")));
+    QVERIFY(menuSurface.contains(QStringLiteral("Math.max(0.88, panel.a)")));
+    QVERIFY(menuSurface.contains(QStringLiteral("return bgDeep")));
+
+    const int mainMenuStart = main.indexOf(QStringLiteral("id: mainMenu"));
+    const int languageMenuStart = main.indexOf(
+        QStringLiteral("id: languageSubMenu"), mainMenuStart);
+    QVERIFY(mainMenuStart >= 0);
+    QVERIFY(languageMenuStart > mainMenuStart);
+
+    const QString mainMenu = main.mid(
+        mainMenuStart, languageMenuStart - mainMenuStart);
+    QVERIFY(mainMenu.contains(QStringLiteral("mainWindow.glassMenuSurface()")));
+
+    const int languageMenuEnd = main.indexOf(
+        QStringLiteral("MenuSeparator"), languageMenuStart);
+    QVERIFY(languageMenuEnd > languageMenuStart);
+    const QString languageMenu = main.mid(
+        languageMenuStart, languageMenuEnd - languageMenuStart);
+    QVERIFY(languageMenu.contains(QStringLiteral("mainWindow.glassMenuSurface()")));
+
+    const int clockMenuStart = main.indexOf(QStringLiteral("id: worldClockMenu"));
+    const int clockMenuEnd = main.indexOf(
+        QStringLiteral("MenuItem"), clockMenuStart);
+    QVERIFY(clockMenuStart >= 0);
+    QVERIFY(clockMenuEnd > clockMenuStart);
+    const QString clockMenu = main.mid(clockMenuStart, clockMenuEnd - clockMenuStart);
+    QVERIFY(clockMenu.contains(QStringLiteral("mainWindow.glassMenuSurface()")));
 }
 
 void TestLiquidGlassWindows::liveMapFramelessPopoutHasAllResizeHandles()
@@ -357,6 +403,48 @@ void TestLiquidGlassWindows::linuxUsesSafeOpaqueGlassFallback()
     QVERIFY(modeHandler.contains(QStringLiteral("!mainWindow.startupPresentationFinished")));
     QVERIFY(!main.contains(QStringLiteral(
         "Component.onCompleted: if (bridge && bridge.mode === \"SSB\") active = true")));
+}
+
+void TestLiquidGlassWindows::closedCwAndSsbPopoutsReleaseTheirSceneGraphs()
+{
+    const QString main = readSource(QStringLiteral("qml/decodium/Main.qml"));
+    const QString cw = readSource(QStringLiteral("qml/decodium/components/CwWindow.qml"));
+    const QString ssb = readSource(QStringLiteral("qml/decodium/components/SsbWindow.qml"));
+    const QString bridge = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
+    QVERIFY(!main.isEmpty());
+    QVERIFY(!cw.isEmpty());
+    QVERIFY(!ssb.isEmpty());
+    QVERIFY(!bridge.isEmpty());
+
+    // QQuickWindow::close() hides a window; it does not destroy a Loader item.
+    // Both operator windows must explicitly ask their owner to release them.
+    QVERIFY(cw.contains(QStringLiteral("signal releaseRequested()")));
+    QVERIFY(cw.contains(QStringLiteral("onClosing: function(close)")));
+    QVERIFY(ssb.contains(QStringLiteral("signal releaseRequested()")));
+    QVERIFY(ssb.contains(QStringLiteral("onClosing: function(close)")));
+    QCOMPARE(main.count(QStringLiteral("mainWindow.releaseLoadedWindow(")), 2);
+
+    const int shutdownStart = main.indexOf(QStringLiteral("function shutdownAsyncLoaders()"));
+    const int shutdownEnd = main.indexOf(QStringLiteral("function openSstvWorkspace()"), shutdownStart);
+    QVERIFY(shutdownStart >= 0);
+    QVERIFY(shutdownEnd > shutdownStart);
+    const QString shutdown = main.mid(shutdownStart, shutdownEnd - shutdownStart);
+    QVERIFY(shutdown.contains(QStringLiteral("shutdownLoader(cwWindowLoader)")));
+    QVERIFY(shutdown.contains(QStringLiteral("shutdownLoader(ssbWindowLoader)")));
+
+    // The process exits only after Loader teardown has had an event-loop turn.
+    const int closeStart = main.indexOf(QStringLiteral("onClosing: function(close)"));
+    const int closeEnd = main.indexOf(QStringLiteral("onXChanged:"), closeStart);
+    QVERIFY(closeStart >= 0);
+    QVERIFY(closeEnd > closeStart);
+    const QString closeHandler = main.mid(closeStart, closeEnd - closeStart);
+    QVERIFY(closeHandler.contains(QStringLiteral("shutdownAsyncLoaders()")));
+    QVERIFY(closeHandler.contains(QStringLiteral("applicationQuitTimer.restart()")));
+    QVERIFY(!closeHandler.contains(QStringLiteral("Qt.quit()")));
+
+    // Closing CW must also stop its invisible decoder/scope workload.
+    QVERIFY(bridge.contains(QStringLiteral(
+        "const bool cwTap = m_cwInAscolto && !m_transmitting && !m_tuning;")));
 }
 
 QTEST_APPLESS_MAIN(TestLiquidGlassWindows)

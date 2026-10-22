@@ -412,8 +412,9 @@ private:
     // enumerate again and reopen it normally.
     bool    m_coldStartPowerOnWakeSent {false};
     // Set when the radio was powered off through CAT and the session was kept
-    // open. A later Power On cannot wake a CI-V radio over that live session:
-    // it must reopen the port so Hamlib sends the model's wake-up sequence.
+    // open. A later Power On must reopen a direct serial/USB CAT port so
+    // Hamlib sends the model's wake-up sequence. NET rigctl remains connected
+    // and forwards set_powerstat on that same live session.
     bool    m_radioPoweredOffByUser {false};
     // Identita' fisica della radio sulla porta CAT (deviceKey del rilevatore):
     // resta la stessa quando Windows cambia numero COM dopo uno spegnimento.

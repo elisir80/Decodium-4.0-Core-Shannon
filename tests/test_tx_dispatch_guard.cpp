@@ -179,7 +179,9 @@ void TestTxDispatchGuard::jttyUsesNativeManualDispatchAndBlocksGenericStart()
 void TestTxDispatchGuard::cwExitVerifiesRadioModeAfterStartupCw()
 {
     const QString bridge = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
+    const QString manager = readSource(QStringLiteral("src/radio/DecodiumTransceiverManager.cpp"));
     QVERIFY(!bridge.isEmpty());
+    QVERIFY(!manager.isEmpty());
 
     const QString setMode = functionBody(
         bridge,
@@ -195,6 +197,20 @@ void TestTxDispatchGuard::cwExitVerifiesRadioModeAfterStartupCw()
     QVERIFY(setMode.contains(QStringLiteral("kCwExitVerifyDelaysMs[] = {700, 1700}")));
     QVERIFY(setMode.contains(QStringLiteral("mode-change/cw-exit-verify")));
     QVERIFY(setMode.contains(QStringLiteral("setRigMode() always writes desired PTT=false")));
+
+    // A CAT update emitted before the mode request may be delivered to the
+    // GUI afterwards. Its physical values remain observable, but its old CW
+    // mode must not replace the newer desired DATA-U/USB transaction.
+    QVERIFY(manager.contains(QStringLiteral(
+        "latestRequestedSequence =\n                    d->seqNum.load(std::memory_order_acquire)")));
+    QVERIFY(manager.contains(QStringLiteral(
+        "crossedInTransit = sequence < latestRequestedSequence")));
+    const int guardedMerge = manager.indexOf(QStringLiteral("if (!crossedInTransit)"));
+    const int desiredMerge = manager.indexOf(QStringLiteral("d->desired = state;"));
+    QVERIFY(guardedMerge >= 0);
+    QVERIFY(desiredMerge > guardedMerge);
+    QVERIFY(manager.contains(QStringLiteral(
+        "Crossed CAT update kept for telemetry; desired state preserved")));
 }
 
 QTEST_MAIN(TestTxDispatchGuard)

@@ -183,7 +183,13 @@ void TestCwWindow::liquidGlassCwSurfaceStaysReadableAndTrafficSplitPersists()
     window->setProperty("trafficSplitRatio", 0.61);
     QVERIFY(QMetaObject::invokeMethod(window, "persistTrafficSplitRatio"));
     QCOMPARE(bridge.setting(QStringLiteral("uiCwTrafficSplitRatio")).toDouble(), 0.61);
-    window->hide();
+    QSignalSpy releaseSpy(window, SIGNAL(releaseRequested()));
+    QVERIFY(releaseSpy.isValid());
+    QVERIFY(bridge.cwInAscolto());
+    window->close();
+    QTRY_COMPARE(releaseSpy.count(), 1);
+    QTRY_VERIFY(!window->isVisible());
+    QTRY_VERIFY(!bridge.cwInAscolto());
 }
 
 QTEST_MAIN(TestCwWindow)

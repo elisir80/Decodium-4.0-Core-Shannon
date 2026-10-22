@@ -3354,6 +3354,11 @@ private:
     bool    m_omniRigReconnectInProgress {false};
     bool    m_catTelemetryReconnectPending {false};
     QString m_catMode;
+    // A shared NET rigctl connection must first adopt the server's current
+    // state. Writing emulated split/TX frequency during connectedChanged can
+    // operate the radio's band-filter relays even when RX and TX are equal.
+    bool m_networkRigctlStartupReadOnly {false};
+    quint64 m_networkRigctlStartupSerial {0};
     // Physical rig mode captured before entering the CW workspace.  CW is an
     // application mode, but temporarily changes the radio mode as well.
     QString m_catModeBeforeCw;

@@ -22,6 +22,7 @@ private slots:
     void openMenuBlocksPttEvenIfFocusReturnsToKeyCatcher();
     void textEntryDoesNotTriggerPtt();
     void spaceStillStartsAndStopsPtt();
+    void closeRequestsLoaderReleaseAndStopsActivity();
 
 private:
     QQuickItem *item(const char *name) const;
@@ -222,6 +223,17 @@ void TestSsbWindowFocus::spaceStillStartsAndStopsPtt()
     QTest::keyRelease(m_window, Qt::Key_Space);
     QCOMPARE(m_voice->property("stopCalls").toInt(), stopCalls + 1);
     QVERIFY(!m_voice->property("transmitting").toBool());
+}
+
+void TestSsbWindowFocus::closeRequestsLoaderReleaseAndStopsActivity()
+{
+    QSignalSpy releaseSpy(m_window, SIGNAL(releaseRequested()));
+    QVERIFY(releaseSpy.isValid());
+    const int stopCalls = m_voice->property("stopCalls").toInt();
+    m_window->close();
+    QTRY_COMPARE(releaseSpy.count(), 1);
+    QTRY_VERIFY(!m_window->isVisible());
+    QVERIFY(m_voice->property("stopCalls").toInt() > stopCalls);
 }
 
 QTEST_MAIN(TestSsbWindowFocus)

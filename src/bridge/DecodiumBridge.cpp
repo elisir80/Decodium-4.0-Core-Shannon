@@ -28,6 +28,7 @@
 #include "FtDecodeThreadBudget.hpp"
 #include "LegacyDecodeWindow.hpp"
 #include "PanadapterItem.hpp"
+#include "GraphicsPipelineCache.hpp"
 #include "lib/persistence/DecodeHistoryWorker.h"  // 1.0.238 Phase 5.2 perf roadmap
 #include "DecodiumLogging.hpp"
 #include "DecodiumAlertManager.h"
@@ -6250,6 +6251,18 @@ static inline bool isHamlibFamilyBackend(QString const& backend)
     return normalized == QStringLiteral("hamlib") || normalized == QStringLiteral("tci");
 }
 
+static inline bool isNetworkRigctlCat(QString const& backend, QObject const* manager)
+{
+    if (backend.trimmed().compare(QStringLiteral("hamlib"), Qt::CaseInsensitive) != 0
+        || !manager) {
+        return false;
+    }
+    return manager->property("portType").toString().trimmed()
+               .compare(QStringLiteral("network"), Qt::CaseInsensitive) == 0
+        && manager->property("rigName").toString()
+               .contains(QStringLiteral("rigctl"), Qt::CaseInsensitive);
+}
+
 static inline bool catSignalMatchesBackend(QString const& activeBackend, QString const& signalBackend)
 {
     QString const active = activeBackend.trimmed().toLower();
@@ -11276,6 +11289,35 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
                     QTimer::singleShot(300, this, [this]() { setMonitoring(true); });
                 if (!c && (m_transmitting || m_tuning))
                     QTimer::singleShot(0, this, [this]() { halt(); });
+            }
+
+            bool const networkRigctlStartup = c
+                && isNetworkRigctlCat(m_catBackend, catManagerObj());
+            if (networkRigctlStartup) {
+                m_networkRigctlStartupReadOnly = true;
+                quint64 const startupSerial = ++m_networkRigctlStartupSerial;
+                bridgeLog(QStringLiteral(
+                    "CAT NET rigctl startup: read-only state adoption; mode/VFO/split writes deferred"));
+                QTimer::singleShot(750, this, [this, startupSerial]() {
+                    if (startupSerial != m_networkRigctlStartupSerial)
+                        return;
+                    m_networkRigctlStartupReadOnly = false;
+                    if (m_shuttingDown || !m_catConnected
+                        || !isNetworkRigctlCat(m_catBackend, m_hamlibCat)) {
+                        return;
+                    }
+                    bridgeLog(QStringLiteral(
+                        "CAT NET rigctl startup: state adopted; idle split replay remains suppressed"));
+                    // Once the first rig state is known, a mode write is made
+                    // only if the operator's configured mode truly differs.
+                    // Fake/emulated split is intentionally prepared later by
+                    // the TX path, not while an idle shared CAT connects.
+                    if (!m_startupModeAutoPending)
+                        applyConfiguredCatRigMode(QStringLiteral("network-rigctl-state-ready"));
+                });
+            } else {
+                m_networkRigctlStartupReadOnly = false;
+                ++m_networkRigctlStartupSerial;
             }
             if (c) {
                 ++m_omniRigReconnectSerial;
@@ -18080,6 +18122,13 @@ void DecodiumBridge::syncActiveCatTxSplitFrequency(const QString& reason)
             && m_catBackend != QStringLiteral("cat4om"))
         || !activeCat
         || !activeCat->property("connected").toBool()) {
+        return;
+    }
+
+    if (m_networkRigctlStartupReadOnly
+        && isNetworkRigctlCat(m_catBackend, activeCat)) {
+        bridgeLog(QStringLiteral(
+            "CAT NET rigctl startup: skipped idle TX-frequency/split write (%1)").arg(reason));
         return;
     }
 
@@ -32128,6 +32177,13 @@ void DecodiumBridge::applyConfiguredCatRigMode(const QString& reason,
         return;
     }
 
+    if (m_networkRigctlStartupReadOnly
+        && isNetworkRigctlCat(m_catBackend, m_hamlibCat)) {
+        bridgeLog(QStringLiteral(
+            "CAT NET rigctl startup: deferred mode write until state is known (%1)").arg(reason));
+        return;
+    }
+
     if (hamlibCatFrequencySettleActive(reason)) {
         bridgeLog(QStringLiteral("CAT rig mode sync delayed during QSY settle (%1): %2")
                       .arg(reason, rigMode));
@@ -32367,28 +32423,21 @@ bool DecodiumBridge::configureQuickWindowGraphics(QObject* windowObject)
         return false;
     }
 
-    QString backend = QString::fromLocal8Bit(qgetenv("QSG_RHI_BACKEND"))
-                          .trimmed().toLower();
-    if (backend.isEmpty()) backend = QStringLiteral("auto");
-    backend.replace(QRegularExpression(QStringLiteral("[^a-z0-9_-]")),
-                    QStringLiteral("_"));
-
-    QString const cacheDir =
-        QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
-    QDir().mkpath(cacheDir);
-    QString const cacheFile = cacheDir
-        + QStringLiteral("/qsg_pipeline_cache_main_%1.bin").arg(backend);
+    QString const cacheFile =
+        decodium::graphics_cache::stableCacheFile(QStringLiteral("main"));
+    QString const cacheSaveFile =
+        decodium::graphics_cache::stagingCacheFile(cacheFile);
 
     QQuickGraphicsConfiguration config;
-    config.setAutomaticPipelineCache(true);
-    config.setPipelineCacheSaveFile(cacheFile);
-    bool const canLoad = QFileInfo::exists(cacheFile)
-        && QFileInfo(cacheFile).size() > 0;
+    config.setAutomaticPipelineCache(false);
+    config.setPipelineCacheSaveFile(cacheSaveFile);
+    bool const canLoad = decodium::graphics_cache::isUsableCacheFile(cacheFile);
     if (canLoad) config.setPipelineCacheLoadFile(cacheFile);
     window->setGraphicsConfiguration(config);
 
-    DIAG_INFO(QStringLiteral("[UI] Main window pipeline cache configured before show path=%1 load=%2")
+    DIAG_INFO(QStringLiteral("[UI] Main window transactional pipeline cache configured before show load_path=%1 save_path=%2 seeded=%3")
                   .arg(cacheFile)
+                  .arg(cacheSaveFile)
                   .arg(canLoad));
     return true;
 #else
@@ -53813,12 +53862,12 @@ void DecodiumBridge::ensureAudioSink()
             if (samples.isEmpty())
                 return;
             if (m_mode == "SSB" && !m_decoPortUseRemote) ssbMonitorAudio(samples);
-            // CW: in modalita' CW il decoder resta agganciato alla radio anche
-            // se la finestra viene nascosta o QML perde un aggiornamento di
-            // visibility. La finestra e' un controllo UI, non deve spegnere il
-            // ricevitore. In TX/tuning si scarta il sidetone locale.
-            const bool cwTap = (m_mode == QStringLiteral("CW") || m_cwInAscolto)
-                && !m_transmitting && !m_tuning;
+            // The CW decoder is a window-owned activity. Once the operator
+            // closes that window, continuing to run the decoder and publish
+            // scope updates keeps CPU/GPU work alive invisibly (and used to
+            // aggravate Linux/XFCE scene-graph shutdown). An open CW window
+            // may still listen while another application mode is selected.
+            const bool cwTap = m_cwInAscolto && !m_transmitting && !m_tuning;
             if (cwTap) {
                 m_cwAudioTapSamples += static_cast<quint64>(samples.size());
                 const qint64 nowMs = QDateTime::currentMSecsSinceEpoch();

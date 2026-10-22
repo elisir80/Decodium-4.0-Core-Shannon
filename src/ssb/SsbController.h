@@ -51,8 +51,10 @@ signals:
     void changed();
     void devicesChanged();
 private:
+    QAudioDevice selectedMicrophoneDevice() const;
+    void handleAudioInputsChanged();
     bool openMicrophone();
-    void recoverMicrophone();
+    void recoverMicrophone(const QString& reason);
     void capture();
     void fail(QString const& text);
     void save();
@@ -68,6 +70,7 @@ private:
     QVector<short> packet;
     QString deviceId, message;
     bool active=false;
+    bool microphoneRecoveryPending=false;
     int microphoneRestartAttempts=0;
     quint64 microphoneGeneration=0;
     double peak=0;

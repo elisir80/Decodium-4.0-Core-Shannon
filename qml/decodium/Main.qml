@@ -33,13 +33,16 @@ GlassApplicationWindow {
     readonly property bool dashboardRadioControlsEnabled: !!(bridge && bridge.hamlibCat
         && bridge.hamlibCat.connected && !bridge.decoPortUseRemote
         && !bridge.transmitting && !bridge.tuning)
-    // Power On is also useful when a direct CAT session is not open yet: the
-    // backend will create a one-shot Hamlib connection with auto_power_on.
-    // All other dashboard controls still require an existing CAT session.
+    // Power On is useful both through a live CAT session (including a shared
+    // NET rigctl connection) and, only for direct serial/USB CAT, while the
+    // radio is off and no session exists yet.  The latter case opens a
+    // one-shot Hamlib connection with auto_power_on.
     readonly property bool dashboardPowerOnEnabled: !!(bridge && bridge.hamlibCat
-        && (bridge.hamlibCat.portType === "serial" || bridge.hamlibCat.portType === "usb")
-        && String(bridge.hamlibCat.serialPort || "").trim().length > 0
-        && ["default", "auto", "predefinito"].indexOf(String(bridge.hamlibCat.serialPort || "").trim().toLowerCase()) < 0
+        && ((bridge.hamlibCat.connected && bridge.hamlibCat.powerControlAvailable)
+            || (!bridge.hamlibCat.connected
+                && (bridge.hamlibCat.portType === "serial" || bridge.hamlibCat.portType === "usb")
+                && String(bridge.hamlibCat.serialPort || "").trim().length > 0
+                && ["default", "auto", "predefinito"].indexOf(String(bridge.hamlibCat.serialPort || "").trim().toLowerCase()) < 0))
         && !bridge.hamlibCat.connecting && !bridge.decoPortUseRemote
         && !bridge.transmitting && !bridge.tuning)
     // When the CW pop-out owns the keyboard, its F1-F12 macros must take
@@ -1051,6 +1054,19 @@ GlassApplicationWindow {
         return bgDeep
     }
 
+    // Menus sit directly above the information-dense dashboard and do not
+    // have the dimmed modal backdrop used by dialogs.  A 30% glass surface
+    // lets waterfall labels and decode rows compete with the menu text.  Keep
+    // a small amount of translucency while guaranteeing operational contrast.
+    function glassMenuSurface() {
+        if (bridge && bridge.themeManager && bridge.themeManager.isGlassTheme
+                && bridge.themeManager.glassTransparencySupported) {
+            var panel = bridge.themeManager.panelColor
+            return Qt.rgba(panel.r, panel.g, panel.b, Math.max(0.88, panel.a))
+        }
+        return bgDeep
+    }
+
     function minimizeFloatingWindow(windowRef, minimizedPropName) {
         if (!windowRef || !minimizedPropName || minimizedPropName.length === 0)
             return
@@ -1197,6 +1213,14 @@ GlassApplicationWindow {
 
     // Salva impostazioni bridge al close
     onClosing: function(close) {
+        if (applicationClosing) {
+            // The first close already owns shutdown. Keep the main surface
+            // alive just long enough for applicationQuitTimer to leave the
+            // event loop after all secondary scene graphs have been released.
+            close.accepted = false
+            return
+        }
+        close.accepted = false
         saveTimer.stop()
         windowStateSaveTimer.stop()
         normalWindowGeometryTimer.stop()
@@ -1227,8 +1251,11 @@ GlassApplicationWindow {
         bridge.stopMonitor()
         bridge.shutdown()
         shutdownAsyncLoaders()
-        // Quit application
-        Qt.quit()
+        // Hiding releases the main swapchain while the secondary Loader items
+        // are being destroyed. Quit on a later event-loop turn rather than
+        // tearing every QQuickWindow down recursively inside this close event.
+        mainWindow.hide()
+        applicationQuitTimer.restart()
     }
 
     onXChanged: {
@@ -1831,6 +1858,27 @@ GlassApplicationWindow {
     property bool dxClusterDetached: true   // default detached (era sempre floating)
     property bool dxClusterMinimized: false
     property bool applicationClosing: false
+    // Let Loader destroy every secondary QQuickWindow and let Qt process the
+    // resulting scene-graph teardown before the event loop exits. Exiting in
+    // the same close callback left hidden CW/SSB render resources alive until
+    // engine destruction; on some Linux/XFCE OpenGL stacks that could wedge
+    // the compositor and produce recursively nested window frames next time.
+    Timer {
+        id: applicationQuitTimer
+        interval: 75
+        repeat: false
+        onTriggered: Qt.quit()
+    }
+    function releaseLoadedWindow(loader) {
+        if (!loader || applicationClosing)
+            return
+        // A Window close event is still being dispatched. Unload on the next
+        // event-loop turn so the handler never destroys its own sender.
+        Qt.callLater(function() {
+            if (!mainWindow.applicationClosing && loader)
+                loader.active = false
+        })
+    }
     function shutdownLoader(loader) {
         if (!loader)
             return
@@ -1878,6 +1926,24 @@ GlassApplicationWindow {
             shutdownLoader(historyDialogLoader)
         if (typeof sstvWorkspaceLoader !== "undefined")
             shutdownLoader(sstvWorkspaceLoader)
+        // These are top-level windows created by asynchronous Loaders. A
+        // closed Window is merely hidden by Qt unless its Loader is unloaded;
+        // explicitly destroy them before quitting so no scene graph, timer or
+        // signal binding survives into late engine teardown.
+        if (typeof ssbWindowLoader !== "undefined")
+            shutdownLoader(ssbWindowLoader)
+        if (typeof cwWindowLoader !== "undefined")
+            shutdownLoader(cwWindowLoader)
+        if (typeof rttyWindowLoader !== "undefined")
+            shutdownLoader(rttyWindowLoader)
+        if (typeof jttyWindowLoader !== "undefined")
+            shutdownLoader(jttyWindowLoader)
+        if (typeof rotorWindowLoader !== "undefined")
+            shutdownLoader(rotorWindowLoader)
+        if (typeof decolinkWindowLoader !== "undefined")
+            shutdownLoader(decolinkWindowLoader)
+        if (typeof decoPortWindowLoader !== "undefined")
+            shutdownLoader(decoPortWindowLoader)
     }
 
     // Native SSTV is loaded only on first use. The C++ facade exists in the
@@ -1936,6 +2002,13 @@ GlassApplicationWindow {
         asynchronous: true
         source: "components/SsbWindow.qml"
         onLoaded: { item.show(); item.raise(); item.requestActivate() }
+    }
+    Connections {
+        target: ssbWindowLoader.item
+        ignoreUnknownSignals: true
+        function onReleaseRequested() {
+            mainWindow.releaseLoadedWindow(ssbWindowLoader)
+        }
     }
     function showCwWindow() {
         cwWindowLoader.active = true
@@ -2085,6 +2158,13 @@ GlassApplicationWindow {
             item.show()
             item.raise()
             item.requestActivate()
+        }
+    }
+    Connections {
+        target: cwWindowLoader.item
+        ignoreUnknownSignals: true
+        function onReleaseRequested() {
+            mainWindow.releaseLoadedWindow(cwWindowLoader)
         }
     }
 
@@ -7035,7 +7115,7 @@ GlassApplicationWindow {
 	                            width: 230
 	                            background: Rectangle {
 	                                implicitWidth: 230
-	                                color: mainWindow.glassDialogSurface(0.58)
+	                                color: mainWindow.glassMenuSurface()
 	                                border.color: secondaryCyan
 	                                border.width: 1
 	                                radius: 8
@@ -13225,7 +13305,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         implicitHeight: Math.min(contentItem.implicitHeight + topPadding + bottomPadding, maxVisibleHeight)
         background: Rectangle {
             implicitWidth: 230
-            color: mainWindow.glassDialogSurface(0.58)
+            color: mainWindow.glassMenuSurface()
             border.color: secondaryCyan
             border.width: 1
             radius: 10
@@ -13956,7 +14036,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
 		            width: 205
                     background: Rectangle {
                         implicitWidth: 205
-                        color: mainWindow.glassDialogSurface(0.58)
+                        color: mainWindow.glassMenuSurface()
 		                border.color: secondaryCyan
 		                border.width: 1
 		                radius: 10

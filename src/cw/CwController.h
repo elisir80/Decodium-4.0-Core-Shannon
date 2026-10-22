@@ -213,7 +213,7 @@ public:
     bool sending() const { return m_sending; }
     // Lo stato del keyer CAT dipende dalla radio e puo' cambiare dopo che il
     // controller CW e' stato avviato. Forza il refresh delle proprieta' QML.
-    void refreshTransmitState();
+    Q_INVOKABLE void refreshTransmitState();
     // Le impostazioni CAT possono cambiare mentre la finestra CW e' aperta.
     // Richiudi e rivalida il keyer locale prima che due sottosistemi provino
     // ad aprire la stessa COM/tty.

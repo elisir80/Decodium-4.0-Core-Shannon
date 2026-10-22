@@ -114,9 +114,12 @@ static void clearPortableGraphicsPipelineCaches()
     if (cachePath.isEmpty())
         return;
     QDir cacheDir(cachePath);
-    cacheDir.remove(QStringLiteral("qsg_pipeline_cache.bin"));
     QStringList const cacheFiles = cacheDir.entryList(
-        QStringList {QStringLiteral("qsg_pipeline_cache_main_*.bin")}, QDir::Files);
+        QStringList {
+            QStringLiteral("qsg_pipeline_cache.bin"),
+            QStringLiteral("qsg_pipeline_cache_main_*.bin"),
+            QStringLiteral("qsg_pipeline_cache_v2_*")
+        }, QDir::Files);
     for (const QString& file : cacheFiles)
         cacheDir.remove(file);
 }
@@ -153,6 +156,7 @@ __declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance = 0x00000001;
 #include "DecodiumLogging.hpp"
 #include "DecodiumStorageMigration.hpp"
 #include "DecodiumUpdater.hpp"
+#include "GraphicsPipelineCache.hpp"
 #include "DecodiumCommunityReport.hpp"
 #include "MapIntelligenceService.h"
 #include "controllers/FT2LinkQmlAdapter.hpp"
@@ -1657,7 +1661,15 @@ int main(int argc, char* argv[])
     }
 
 #if !defined(Q_OS_WIN)
-    if (qEnvironmentVariableIsSet("DECODIUM_GRAPHICS_BACKEND")
+    bool const commandLineSoftwareGraphics =
+        hasCommandLineSwitchAny(argc, argv, "--disable-gpu")
+        || hasCommandLineSwitchAny(argc, argv, "--software-renderer");
+    if (commandLineSoftwareGraphics) {
+        qunsetenv("QSG_RHI_BACKEND");
+        qputenv("QT_QUICK_BACKEND", "software");
+        qputenv("QT_OPENGL", "software");
+        L("Qt Quick graphics: command line requested the cross-platform software renderer");
+    } else if (qEnvironmentVariableIsSet("DECODIUM_GRAPHICS_BACKEND")
         && !qEnvironmentVariableIsSet("QSG_RHI_BACKEND")
         && !qEnvironmentVariableIsSet("QT_QUICK_BACKEND")) {
         qputenv("QSG_RHI_BACKEND", qgetenv("DECODIUM_GRAPHICS_BACKEND"));
@@ -1904,15 +1916,6 @@ int main(int argc, char* argv[])
         L("Graphics reset requested: cleared scene-graph caches");
     }
 
-    // 1.0.180 — Pipeline cache shader: build path here, apply via objectCreated
-    // (setGraphicsConfiguration is an instance method on QQuickWindow, must be
-    // called before the scene graph initialises — objectCreated is the right hook).
-    QString const pipelineCacheFile = []() -> QString {
-        QString const dir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
-        QDir().mkpath(dir);
-        return dir + QStringLiteral("/qsg_pipeline_cache.bin");
-    }();
-    L(("Pipeline cache path: " + pipelineCacheFile.toLocal8Bit()).constData());
     L((QByteArray("Qt version: ") + qVersion()).constData());
     L((QByteArray("OS: ") + QSysInfo::prettyProductName().toLocal8Bit()
        + " ABI=" + QSysInfo::buildAbi().toLocal8Bit()
@@ -2899,6 +2902,27 @@ int main(int argc, char* argv[])
         L("Another instance is already running - exiting");
         return -1;
     }
+
+    // Write pipeline caches to a per-process staging file. They replace the
+    // last known-good cache atomically only after the QML windows have been
+    // destroyed and the event loop has exited cleanly. A pending marker from
+    // an interrupted run makes this launch start cache-free automatically.
+    decodium::graphics_cache::PipelineCacheSession pipelineCacheSession {
+        decodium::graphics_cache::cacheDirectory(),
+        startupResetFromCommandLine || startupResetFromSettings
+    };
+    QString const pipelineCacheFile =
+        decodium::graphics_cache::stableCacheFile(QStringLiteral("bootstrap"));
+    QString const pipelineCacheSaveFile =
+        decodium::graphics_cache::stagingCacheFile(pipelineCacheFile);
+    L(("Pipeline cache load path: " + pipelineCacheFile.toLocal8Bit()).constData());
+    L(("Pipeline cache staging path: " + pipelineCacheSaveFile.toLocal8Bit()).constData());
+    if (pipelineCacheSession.recoveredFromInterruptedSession()) {
+        L((QByteArray("Graphics cache recovery: interrupted previous session; discarded files=")
+           + QByteArray::number(pipelineCacheSession.removedFileCount())).constData());
+    }
+    if (!pipelineCacheSession.markerArmed())
+        L("WARNING: graphics cache session marker could not be armed");
 
     QObject::connect(&app, &QCoreApplication::aboutToQuit, []() {
         if (auto *instance = QCoreApplication::instance()) {
@@ -4742,17 +4766,20 @@ int main(int argc, char* argv[])
     // setGraphicsConfiguration is an instance method; objectCreated fires before
     // the scene graph starts, so this is the correct hook per Qt docs.
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated, &app,
-                     [&pipelineCacheFile](QObject *obj, const QUrl &) {
+                     [&pipelineCacheFile, &pipelineCacheSaveFile](QObject *obj, const QUrl &) {
         if (auto *win = qobject_cast<QQuickWindow *>(obj)) {
             QQuickGraphicsConfiguration gc;
-            gc.setPipelineCacheSaveFile(pipelineCacheFile);
-            bool const canLoadPipelineCache = QFileInfo::exists(pipelineCacheFile);
+            gc.setAutomaticPipelineCache(false);
+            gc.setPipelineCacheSaveFile(pipelineCacheSaveFile);
+            bool const canLoadPipelineCache =
+                decodium::graphics_cache::isUsableCacheFile(pipelineCacheFile);
             if (canLoadPipelineCache) {
                 gc.setPipelineCacheLoadFile(pipelineCacheFile);
             }
             win->setGraphicsConfiguration(gc);
-            qInfo() << "[UI] Pipeline cache applied to window:" << pipelineCacheFile
-                    << "load=" << canLoadPipelineCache;
+            qInfo() << "[UI] Transactional pipeline cache applied to window: load="
+                    << pipelineCacheFile << "save=" << pipelineCacheSaveFile
+                    << "seeded=" << canLoadPipelineCache;
         }
     });
 #else
@@ -5177,6 +5204,12 @@ int main(int argc, char* argv[])
 
     int r = app.exec();
     g_shuttingDown.store(true, std::memory_order_relaxed);
+    if (*mainThreadWatchdogInstalled) {
+        pipelineCacheSession.markCleanShutdown();
+        L("Graphics cache session marked clean; staged caches will be promoted after window teardown");
+    } else {
+        L("Graphics cache session left pending because Main.qml never reached ready state");
+    }
     L("app.exec() exited");
     return r;
 }

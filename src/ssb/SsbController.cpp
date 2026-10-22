@@ -9,16 +9,15 @@ SsbController::SsbController(QObject* p):QObject(p) {
     dsp.automatic=s.value("SSB/automatic",true).toBool();
     dsp.lowHz=std::clamp(s.value("SSB/lowCut",200).toInt(),80,500);
     dsp.highHz=std::clamp(s.value("SSB/highCut",2800).toInt(),1800,3500);
-    connect(&devices,&QMediaDevices::audioInputsChanged,this,[this]{
-        if(active) fail(tr("Audio devices changed; PTT released"));
-        emit devicesChanged();
-    });
+    connect(&devices,&QMediaDevices::audioInputsChanged,
+            this,&SsbController::handleAudioInputsChanged);
     guard.setInterval(100);
     connect(&guard,&QTimer::timeout,this,[this]{
         if(!active) return;
         if(!hooks.valid || !hooks.valid()) fail(tr("Radio unavailable or mode changed; PTT released"));
-        else if(lastAudio.elapsed()>1500) fail(tr("Microphone stopped; PTT released"));
         else if(clock.elapsed()>180000) fail(tr("Three-minute TX limit reached; release and press PTT again"));
+        else if(!microphoneRecoveryPending && lastAudio.elapsed()>1500)
+            recoverMicrophone(tr("Microphone stream stopped delivering audio"));
     });
 }
 SsbController::~SsbController(){ stop(); }
@@ -35,10 +34,34 @@ void SsbController::setAutomatic(bool v){dsp.automatic=v;save();}
 void SsbController::setLowCut(int v){dsp.lowHz=std::clamp(v,80,500);save();}
 void SsbController::setHighCut(int v){dsp.highHz=std::clamp(v,1800,3500);save();}
 void SsbController::fail(QString const& text){stop();message=text;emit changed();}
+QAudioDevice SsbController::selectedMicrophoneDevice() const
+{
+    for(const auto& device:QMediaDevices::audioInputs())
+        if(device.id().toBase64()==deviceId.toLatin1())return device;
+    return {};
+}
+
+void SsbController::handleAudioInputsChanged()
+{
+    emit devicesChanged();
+    if(!active)return;
+
+    // PipeWire/PulseAudio and WASAPI may rebuild their graph while the input
+    // stream is being opened.  The device-list signal is therefore not, by
+    // itself, evidence that the selected microphone was unplugged.  Keep a
+    // healthy stream alive; if the selected endpoint really disappeared or
+    // the stream stopped, use the same single bounded recovery as any other
+    // transient capture failure.
+    const QAudioDevice selected=selectedMicrophoneDevice();
+    if(!selected.isNull() && source && source->state()!=QAudio::StoppedState)return;
+    recoverMicrophone(selected.isNull()
+        ? tr("Selected microphone temporarily unavailable")
+        : tr("Microphone stream stopped during an audio-device refresh"));
+}
+
 bool SsbController::openMicrophone()
 {
-    QAudioDevice device;
-    for(const auto& d:QMediaDevices::audioInputs())if(d.id().toBase64()==deviceId.toLatin1())device=d;
+    const QAudioDevice device=selectedMicrophoneDevice();
     if(device.isNull())return false;
 
     source=new QAudioSource(device,format,this);
@@ -50,18 +73,20 @@ bool SsbController::openMicrophone()
     }
     connect(input,&QIODevice::readyRead,this,&SsbController::capture);
     connect(source,&QAudioSource::stateChanged,this,[this](QAudio::State state){
-        if(active && state==QAudio::StoppedState)recoverMicrophone();
+        if(active && state==QAudio::StoppedState)
+            recoverMicrophone(tr("Microphone capture stream stopped"));
     });
     return true;
 }
 
-void SsbController::recoverMicrophone()
+void SsbController::recoverMicrophone(const QString& reason)
 {
-    if(!active)return;
+    if(!active || microphoneRecoveryPending)return;
     if(microphoneRestartAttempts++ >= 1){
         fail(tr("Microphone error; PTT released"));
         return;
     }
+    microphoneRecoveryPending=true;
     const quint64 generation=++microphoneGeneration;
     if(source){source->disconnect(this);source->stop();source->deleteLater();source=nullptr;}
     input=nullptr;
@@ -69,9 +94,16 @@ void SsbController::recoverMicrophone()
     // capture stream is negotiating with the USB radio output. One bounded
     // reopen keeps a held SSB PTT alive without masking a real microphone
     // fault indefinitely.
-    QTimer::singleShot(120,this,[this,generation]{
+    qWarning().noquote() << "[SSB] transient microphone interruption; bounded reopen"
+                         << "reason=" << reason;
+    message=tr("Reopening microphone…");emit changed();
+    QTimer::singleShot(250,this,[this,generation]{
         if(!active || generation!=microphoneGeneration)return;
-        if(!openMicrophone()){fail(tr("Cannot reopen microphone; PTT released"));return;}
+        if(!openMicrophone()){
+            microphoneRecoveryPending=false;
+            fail(tr("Cannot reopen microphone; PTT released"));return;
+        }
+        microphoneRecoveryPending=false;
         lastAudio.restart();message=tr("SSB transmitting");emit changed();
     });
 }
@@ -80,7 +112,7 @@ bool SsbController::start(){
     if(active)return true;
     QAudioDevice device;
     // Explicit selection: never silently substitute the radio RX input.
-    for(const auto& d:QMediaDevices::audioInputs())if(d.id().toBase64()==deviceId.toLatin1())device=d;
+    device=selectedMicrophoneDevice();
     if(device.isNull()){fail(tr("Select a PC microphone"));return false;}
     format.setSampleRate(48000);
     bool supported=false;
@@ -92,15 +124,25 @@ bool SsbController::start(){
         if(supported)break;
     }
     if(!supported){fail(tr("Microphone must support 48 kHz PCM"));return false;}
+    microphoneRestartAttempts=0;microphoneRecoveryPending=false;++microphoneGeneration;
     if(!openMicrophone()){fail(tr("Cannot open microphone"));return false;}
     if(!hooks.begin || !hooks.begin()){fail(tr("PTT refused: check CAT, USB/LSB mode and TX audio output"));return false;}
-    active=true;microphoneRestartAttempts=0;++microphoneGeneration;message=tr("SSB transmitting");peak=0;phase=0;dsp.reset();pending.clear();packet.clear();
+    active=true;message=tr("SSB transmitting");peak=0;phase=0;dsp.reset();pending.clear();packet.clear();
     lead=hooks.leadMs ? std::clamp(hooks.leadMs(),0,1500) : 150;
     clock.start();lastAudio.start();guard.start();
+    const quint64 generation=microphoneGeneration;
+    // A backend can emit Stopped synchronously inside QAudioSource::start(),
+    // before active becomes true. Verify once after activation so that early
+    // notification cannot leave a keyed but dead stream waiting for timeout.
+    QTimer::singleShot(250,this,[this,generation]{
+        if(active && generation==microphoneGeneration
+            && (!source || source->state()==QAudio::StoppedState))
+            recoverMicrophone(tr("Microphone did not remain active after startup"));
+    });
     emit changed();return true;
 }
 void SsbController::stop(){
-    bool was=active;active=false;++microphoneGeneration;guard.stop();
+    bool was=active;active=false;microphoneRecoveryPending=false;++microphoneGeneration;guard.stop();
     if(source){source->disconnect(this);source->stop();source->deleteLater();source=nullptr;}
     input=nullptr;pending.clear();packet.clear();peak=0;
     if(was && hooks.end)hooks.end();
