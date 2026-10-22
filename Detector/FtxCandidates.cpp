@@ -567,3 +567,165 @@ extern "C" void ftx_getcandidates4_c (float const* dd, float fa, float fb, float
   };
   run_get_candidates (config, dd, fa, fb, syncmin, nfqso, maxcand, savg, candidate, ncand, sbase);
 }
+
+
+// ---------------------------------------------------------------------------
+// FT2: candidati dal SINCRONISMO invece che dal picco dello spettro medio.
+//
+// getcandidates2 cerca il massimo dello spettro medio dello slot, lisciato su 15
+// celle: in una banda con segnali forti vicini il gruppo dei quattro toni di una
+// stazione debole viene sommerso dalla spalla di quelle forti, e il "picco" cade
+// su un'altra stazione (sulle registrazioni vere il candidato piu' vicino alla
+// frequenza giusta era oltre il raggio di sincronismo nel 60-70 % dei casi anche a
+// -3 dB). Qui si fa come il sync2d di FT8: spettrogramma di frame lunghi un simbolo
+// (288 campioni, passo 72 = quattro frame per simbolo, FFT 1152 = celle da 10,4 Hz),
+// e per ogni frequenza base e per ogni inizio si sommano i 16 simboli di sincronismo
+// noti (quattro parole da quattro simboli, a 0/33/66/99 simboli dall'inizio), ciascuno
+// come potenza del tono giusto sul totale dei quattro toni di quel simbolo: un
+// interferente forte e costante alza tutti e quattro i toni e non vince solo perche'
+// e' forte. Per ogni frequenza vale il miglior inizio; i massimi locali sono i candidati.
+//
+// dd: nmax campioni a 12 kHz. Restituisce il numero di candidati scritti (freq = frequenza
+// del tono 0, come f0 di getcandidates2; score = somma dei 16 rapporti, ~4 su solo rumore).
+extern "C" int ftx_ft2_sync_candidates_c (float const* dd, int nmax, float fa, float fb,
+                                          int maxn, float* freq_out, float* score_out)
+{
+  constexpr int kNsps = 288;
+  constexpr int kHop = 72;
+  constexpr int kNfft = 1152;
+  constexpr int kSyncSymbols = 4 * 4;
+  constexpr int kFrameSymbols = 103;
+  constexpr float kDf = kSampleRate / static_cast<float> (kNfft);
+  static int const kWords[4][4] = {{0, 1, 3, 2}, {1, 0, 2, 3}, {2, 3, 1, 0}, {3, 2, 0, 1}};
+  static int const kWordStart[4] = {0, 33, 66, 99};
+
+  int const nfr = (nmax - kNsps) / kHop + 1;
+  int const nstart = nfr - 4 * (kFrameSymbols - 1) - 1;        // ultimo inizio che entra
+  if (nstart < 1 || maxn <= 0)
+    {
+      return 0;
+    }
+  int const nbins = std::min (kNfft / 2, static_cast<int> ((fb + 3.0f * 41.67f) / kDf) + 8);
+  int const blo = std::max (2, static_cast<int> (fa / kDf));
+  int const bhi = std::min (nbins - 14, static_cast<int> (fb / kDf));
+  if (bhi <= blo)
+    {
+      return 0;
+    }
+
+  FftBuffers fft (kNfft);
+  if (!fft.valid ())
+    {
+      return 0;
+    }
+  static std::vector<float> const window = [] {
+    std::vector<float> w (static_cast<size_t> (kNsps));
+    for (int i = 0; i < kNsps; ++i)
+      {
+        w[static_cast<size_t> (i)] = 0.5f - 0.5f * std::cos (2.0f * kPi * static_cast<float> (i) / static_cast<float> (kNsps - 1));
+      }
+    return w;
+  }();
+
+  // Potenza per frame e cella, e l'inverso del totale dei quattro toni per ogni cella base.
+  std::vector<float> power (static_cast<size_t> (nfr) * static_cast<size_t> (nbins), 0.0f);
+  std::vector<float> inv_den (static_cast<size_t> (nfr) * static_cast<size_t> (nbins), 0.0f);
+  for (int fr = 0; fr < nfr; ++fr)
+    {
+      float const* src = dd + static_cast<size_t> (fr) * kHop;
+      for (int i = 0; i < kNsps; ++i)
+        {
+          fft.in[i] = src[i] * window[static_cast<size_t> (i)];
+        }
+      std::fill (fft.in + kNsps, fft.in + kNfft, 0.0f);
+      fftwf_execute (fft.plan);
+      float* row = power.data () + static_cast<size_t> (fr) * static_cast<size_t> (nbins);
+      for (int k = 0; k < nbins; ++k)
+        {
+          row[k] = fft.out[k][0] * fft.out[k][0] + fft.out[k][1] * fft.out[k][1];
+        }
+      float* inv = inv_den.data () + static_cast<size_t> (fr) * static_cast<size_t> (nbins);
+      for (int b = 0; b + 12 < nbins; ++b)
+        {
+          float const d = row[b] + row[b + 4] + row[b + 8] + row[b + 12];
+          inv[b] = d > 1e-20f ? 1.0f / d : 0.0f;
+        }
+    }
+
+  std::vector<float> best (static_cast<size_t> (nbins), -1.0f);
+  std::vector<float> acc (static_cast<size_t> (nbins), 0.0f);
+  for (int t0 = 0; t0 <= nstart; ++t0)
+    {
+      std::fill (acc.begin () + blo - 1, acc.begin () + bhi + 2, 0.0f);
+      for (int w = 0; w < 4; ++w)
+        {
+          for (int s = 0; s < 4; ++s)
+            {
+              size_t const fr = static_cast<size_t> (t0 + 4 * (kWordStart[w] + s));
+              float const* row = power.data () + fr * static_cast<size_t> (nbins) + 4 * kWords[w][s];
+              float const* inv = inv_den.data () + fr * static_cast<size_t> (nbins);
+              for (int b = blo - 1; b <= bhi + 1; ++b)
+                {
+                  acc[static_cast<size_t> (b)] += row[b] * inv[b];
+                }
+            }
+        }
+      for (int b = blo - 1; b <= bhi + 1; ++b)
+        {
+          if (acc[static_cast<size_t> (b)] > best[static_cast<size_t> (b)])
+            {
+              best[static_cast<size_t> (b)] = acc[static_cast<size_t> (b)];
+            }
+        }
+    }
+
+  // massimi locali, migliori per primi, con esclusione di +-3 celle
+  std::vector<int> idx;
+  for (int b = blo; b <= bhi; ++b)
+    {
+      float const c = best[static_cast<size_t> (b)];
+      if (c >= best[static_cast<size_t> (b - 1)] && c > best[static_cast<size_t> (b + 1)])
+        {
+          idx.push_back (b);
+        }
+    }
+  std::sort (idx.begin (), idx.end (), [&best] (int a, int b) {
+    return best[static_cast<size_t> (a)] > best[static_cast<size_t> (b)];
+  });
+  std::vector<int> chosen;
+  for (int b : idx)
+    {
+      bool near_chosen = false;
+      for (int j : chosen)
+        {
+          if (std::abs (j - b) <= 3)
+            {
+              near_chosen = true;
+              break;
+            }
+        }
+      if (near_chosen)
+        {
+          continue;
+        }
+      chosen.push_back (b);
+      if (static_cast<int> (chosen.size ()) == maxn)
+        {
+          break;
+        }
+    }
+  int n = 0;
+  for (int b : chosen)
+    {
+      float const l = best[static_cast<size_t> (b - 1)];
+      float const c = best[static_cast<size_t> (b)];
+      float const r = best[static_cast<size_t> (b + 1)];
+      float const den = l - 2.0f * c + r;
+      float const del = den != 0.0f ? 0.5f * (l - r) / den : 0.0f;
+      freq_out[n] = (static_cast<float> (b) + std::max (-0.5f, std::min (0.5f, del))) * kDf;
+      score_out[n] = c;
+      ++n;
+    }
+  (void) kSyncSymbols;
+  return n;
+}

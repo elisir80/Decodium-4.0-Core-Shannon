@@ -3,6 +3,46 @@
 Newest first. Every round: hypothesis, measurement, verdict. Negative results stay here so they
 are not tried again. Numbers: `rx_score.py` on build 1.0.708 + the change, same scenes.
 
+## Round 2 (2026-10-22) - a better centre estimate was the wrong fix; sync-pattern candidates
+
+Question: can a more precise centre of the 4-tone group (instead of the tone-alias trick of round 1)
+give the same gain without the CPU cost?  `centre_lab.py` replays the dumped spectra against the truth:
+a matched filter on the measured lump shape (median of 50 slots: a flat 13-bin / 135 Hz plateau with
+3-bin edges, +6.8 dB at -3 dB) recalls no more true frequencies than the decoder's own 15-cell box
+(k=11 at -3 dB: 36 / 34 / 36 of 50). Looking at the missed slots: the injected lump sits on the shoulder
+of real stations 15-30 dB stronger; the peak of the slot-average spectrum is the NEIGHBOUR, and no
+estimator on that spectrum can find a weak lump hidden by a strong one. Centre estimators: dead end.
+
+What works: candidates from the SYNC WORDS (`ftx_ft2_sync_candidates_c`, FtxCandidates.cpp), the way FT8's
+sync2d does it. Spectrogram of one-symbol frames (288 samples, hop 72, FFT 1152), and for every base
+frequency and start the 16 known sync symbols (4 words x 4 symbols at 0/33/66/99) each scored as power of
+the right tone over the four tones of that symbol (a steady strong interferer raises all four and does not
+win). Best start per frequency, local maxima +-3 bins. Prototype recall at k=11, -3 dB: 43/32/43 of 50
+(decoder 36/16/29); at -6 dB 31/25/36 (decoder 19/16/22).
+
+Stage7: `DECODIUM_FT2_SYNC2D` / `ftx_ft2_set_sync_candidates_c` (0 off = bit-identical, 1 = sync candidates
+first, then the first 5 spectral-peak candidates not within 10 Hz of them, 2 = sync candidates only),
+`..._N` (default 6) and `..._LEGACY` (default 5). The SNR shown for the added candidates comes from the
+lump ratio at their frequency (`ft2_lump_snr_field`). DecodiumBridge sets mode 1 for everybody.
+
+| | ft2real TRAIN | HELDOUT (2 recordings, 400 slots) | AWGN decoded (T/H) | CPU / dispatch | latency | false |
+|---|---|---|---|---|---|---|
+| 1.0.708 | 81 | 96 | 140 / 91 | 226 ms | 0.40 s | 0 |
+| mode 1, N=6, legacy 5 | 105 (+30 %) | 170 (+77 %) | 141 / 93 | 67 ms (-70 %) | 0.37-0.41 s | 0 |
+
+`rx_score.py compare` verdict KEEP under the original rules. Genie ceiling (true frequency handed to the
+decoder) was 108 / 71 on the first two sets: the sync candidates reach 105 / 68, i.e. the candidate search
+is no longer the bottleneck. No false lines on the injected sets, the AWGN scenes, nor 1200 slots of plain
+recorded background (400 each from three recordings).
+Why the CPU falls: ~9 candidates instead of 11-15, and the strong stations are found and subtracted first.
+Mode 2 (sync only) is not safe: weak signals live on the whole burst's energy in the average spectrum
+(sync words are 15 % of it): AWGN decoded 129/240, 88/160.
+
+Bench change: `ft2_async_bench` now accepts a decode shown up to 0.5 s before the end of the transmission
+(CRC-valid decode of a burst missing its last symbols); before, it was counted as false.
+
+The round-1 tone-alias candidates are REMOVED: on top of the sync candidates they add nothing (+0 / +1).
+
 ## Round 1 (2026-10-22) - candidate search on real noise
 
 Baseline (1.0.708, FT2): ft2real decoded TRAIN 81/200, HELDOUT 35/200 (rheld) and 61/200 (rheld2).
@@ -15,7 +55,7 @@ Candidate trace of the 119 missed TRAIN slots: only 35 had a candidate within +-
 48 had it one tone (41.67 Hz) away, 16 two tones away, 5 had none. The peak of the 15-cell smoothed
 spectrum (FtxCandidates.cpp) lands on the wrong tone of the 4-tone FT2 lump when the band is not white.
 
-### KEPT (needs the owner's OK to release): tone-alias candidates
+### Superseded by round 2: tone-alias candidates (removed)
 `DECODIUM_FT2_ALIAS=n` / `ftx_ft2_set_tone_alias_c(n)`: for every candidate also try f0 +- k*41.67 Hz,
 k = 1..n, as extra candidates appended after the normal ones; first search at double step; an alias
 is dropped unless its sync (smax) beats its parent's by 0.10; skipped if the parent already decoded.

@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <functional>
 #include <array>
 #include <atomic>
 #include <chrono>
@@ -208,6 +207,8 @@ extern "C"
   void ftx_getcandidates2_c (float const* dd, float fa, float fb, float syncmin, float nfqso,
                              int maxcand, float* savg, float* candidate, int* ncand,
                              float* sbase);
+  int ftx_ft2_sync_candidates_c (float const* dd, int nmax, float fa, float fb, int maxn,
+                                 float* freq_out, float* score_out);
   void ftx_sync2d_c (Complex const* cd0, int np, int i0, Complex const* ctwk,
                      int itwk, float* sync);
   void ftx_sync2d_scan_c (Complex const* cd0, int np, int ibmin, int ibmax, int ibstp,
@@ -2145,51 +2146,77 @@ int ft2_sync_freq_radius_hz ()
   return v;
 }
 
-constexpr float kFt2ToneSpacingHz = 12000.0f / 288.0f;   // 41,67 Hz
+// Candidati dal sincronismo (ftx_ft2_sync_candidates_c). 0 = spento (bit-identico); 1 = si
+// aggiungono ai candidati dello spettro medio, in testa; 2 = li sostituiscono.
+// Impostato dall'app (ftx_ft2_set_sync_candidates_c); la variabile d'ambiente
+// DECODIUM_FT2_SYNC2D vince su tutto, per i banchi.
+std::atomic<int> g_ft2_sync_candidates_ui {-1};
 
-// Di quanto lo smax di un alias deve superare quello del candidato da cui nasce.
-float ft2_tone_alias_margin ()
+extern "C" void ftx_ft2_set_sync_candidates_c (int mode)
 {
-  static float const v = [] {
-    char const* e = std::getenv ("DECODIUM_FT2_ALIAS_MARGIN");
-    return e ? static_cast<float> (std::atof (e)) : 0.10f;
-  }();
-  return v;
+  g_ft2_sync_candidates_ui.store (mode < 0 ? -1 : std::clamp (mode, 0, 2));
 }
 
-// Solo i primi N candidati (per potenza del picco) generano alias; 0 = tutti.
-int ft2_tone_alias_top ()
-{
-  static int const v = [] {
-    char const* e = std::getenv ("DECODIUM_FT2_ALIAS_TOP");
-    int const n = e ? std::atoi (e) : 0;
-    return std::clamp (n, 0, 64);
-  }();
-  return v;
-}
-
-// Quanti toni sopra e sotto ogni candidato si provano come alias (0 = spento).
-// Il valore lo imposta l'applicazione (ftx_ft2_set_tone_alias_c: 2 normalmente, 0 in
-// Low CPU / PC lento); la variabile d'ambiente DECODIUM_FT2_ALIAS vince su tutto, per i
-// banchi. Senza ne' l'una ne' l'altra e' spento, bit-identico a prima.
-std::atomic<int> g_ft2_tone_alias_ui {-1};
-
-extern "C" void ftx_ft2_set_tone_alias_c (int n)
-{
-  g_ft2_tone_alias_ui.store (n < 0 ? -1 : std::clamp (n, 0, 3));
-}
-
-int ft2_tone_alias_count ()
+int ft2_sync_candidates_mode ()
 {
   static int const env_value = [] {
-    char const* e = std::getenv ("DECODIUM_FT2_ALIAS");
-    return (e && e[0] != '\0') ? std::clamp (std::atoi (e), 0, 3) : -1;
+    char const* e = std::getenv ("DECODIUM_FT2_SYNC2D");
+    return (e && e[0] != '\0') ? std::clamp (std::atoi (e), 0, 2) : -1;
   }();
   if (env_value >= 0)
     {
       return env_value;
     }
-  return std::max (0, g_ft2_tone_alias_ui.load ());
+  return std::max (0, g_ft2_sync_candidates_ui.load ());
+}
+
+int ft2_sync_candidates_count ()
+{
+  static int const v = [] {
+    char const* e = std::getenv ("DECODIUM_FT2_SYNC2D_N");
+    int const n = e ? std::atoi (e) : 0;
+    return n > 0 ? std::min (n, 40) : 6;
+  }();
+  return v;
+}
+
+// In modo 1, quanti candidati dello spettro medio si tengono dopo quelli del sincronismo (default 5).
+int ft2_sync_candidates_legacy ()
+{
+  static int const v = [] {
+    char const* e = std::getenv ("DECODIUM_FT2_SYNC2D_LEGACY");
+    int const n = e ? std::atoi (e) : 0;
+    return n > 0 ? std::min (n, kFt2MaxCand) : 5;
+  }();
+  return v;
+}
+
+float ft2_sync_candidates_min_score ()
+{
+  static float const v = [] {
+    char const* e = std::getenv ("DECODIUM_FT2_SYNC2D_MIN");
+    return e ? static_cast<float> (std::atof (e)) : 0.0f;
+  }();
+  return v;
+}
+
+// Stima di potenza del gruppo dei quattro toni attorno a f0, nella stessa forma del secondo campo
+// che getcandidates2 consegna (rapporto dello spettro medio lisciato sul fondo): da qui viene
+// l'SNR mostrato. Un candidato aggiunto da noi senza questa stima mostrerebbe sempre il minimo.
+float ft2_lump_snr_field (float const* savg, float const* sbase, float f0)
+{
+  constexpr float kDfHz = 12000.0f / 1152.0f;
+  int const c = static_cast<int> (std::lround ((f0 + 62.5f) / kDfHz)) - 1;
+  if (c < 7 || c > kFt2Nh1 - 8 || sbase[c] <= 0.0f)
+    {
+      return 1.0f;
+    }
+  float sum = 0.0f;
+  for (int j = c - 7; j <= c + 7; ++j)
+    {
+      sum += savg[j];
+    }
+  return std::max (1.0f, (sum / 15.0f) / sbase[c]);
 }
 
 // Diagnostica per la deriva DENTRO lo slot (vedi ft2_sync_freq_radius_hz
@@ -3315,6 +3342,55 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
           stage7_debug_logf ("pass=%d ncand=%d", isp, ncand);
         }
 
+      // Candidati dal sincronismo: vedi ftx_ft2_sync_candidates_c.
+      if (int const sync_mode = ft2_sync_candidates_mode (); sync_mode > 0)
+        {
+          std::array<float, 64> sf {};
+          std::array<float, 64> ss {};
+          int const ns = ftx_ft2_sync_candidates_c (dd.data (), kFt2NMax, static_cast<float> (nfa),
+                                                    static_cast<float> (nfb),
+                                                    ft2_sync_candidates_count (), sf.data (), ss.data ());
+          std::array<float, 2 * kFt2MaxCand> merged {};
+          int nm = 0;
+          for (int k = 0; k < ns && nm < kFt2MaxCand; ++k)
+            {
+              if (ss[static_cast<size_t> (k)] < ft2_sync_candidates_min_score ())
+                {
+                  continue;
+                }
+              merged[static_cast<size_t> (nm * 2)] = sf[static_cast<size_t> (k)];
+              merged[static_cast<size_t> (nm * 2 + 1)] =
+                  ft2_lump_snr_field (savg.data (), sbase.data (), sf[static_cast<size_t> (k)]);
+              ++nm;
+            }
+          if (sync_mode == 1)
+            {
+              int const nsync = nm;
+              int const legacy_max = ft2_sync_candidates_legacy ();
+              for (int j = 0; j < ncand && nm < kFt2MaxCand; ++j)
+                {
+                  if (legacy_max > 0 && nm - nsync >= legacy_max)
+                    {
+                      break;
+                    }
+                  float const fj = candidate[static_cast<size_t> (j * 2)];
+                  bool vicino = false;
+                  for (int k = 0; k < nsync && !vicino; ++k)
+                    {
+                      vicino = std::fabs (merged[static_cast<size_t> (k * 2)] - fj) < 10.0f;
+                    }
+                  if (!vicino)
+                    {
+                      merged[static_cast<size_t> (nm * 2)] = fj;
+                      merged[static_cast<size_t> (nm * 2 + 1)] = candidate[static_cast<size_t> (j * 2 + 1)];
+                      ++nm;
+                    }
+                }
+            }
+          candidate = merged;
+          ncand = nm;
+        }
+
       // Candidato ATTESO: dove la memoria ha un messaggio sentito due slot
       // fa e la ricerca non ha trovato niente entro la tolleranza, si forza un
       // candidato a quella frequenza. Per lui i cancelli del sincronismo
@@ -3324,11 +3400,6 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
       std::array<unsigned char, kFt2MaxCand> cand_atteso {};
       std::array<unsigned char, kFt2MaxCand> cand_genie {};   // solo banco, vedi ft2_genie_f
       std::array<unsigned char, kFt2MaxCand> cand_expect {};  // F5: risposta attesa nel tempo
-      std::array<short, kFt2MaxCand> cand_alias_parent {};    // -1: candidato normale
-      std::array<unsigned char, kFt2MaxCand> cand_decoded {}; // ha prodotto una decodifica
-      std::array<float, kFt2MaxCand> cand_best_smax {};       // miglior smax visto su ogni candidato
-      cand_best_smax.fill (-99.0f);
-      cand_alias_parent.fill (-1);
       if (ft2_ap_msg_attivo () && ndepth0 != 1)
         {
           std::array<float, 16> fmem {};
@@ -3516,78 +3587,12 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
             }
         }
 
-      // Candidati ALIAS di tono. Il picco che getcandidates2 sceglie in una banda
-      // FT2 (quattro toni distanti 41,67 Hz) e' spesso un tono diverso da quello
-      // su cui il sincronismo si aspetta di trovare il segnale: nelle prove su
-      // rumore vero la meta' delle decodifiche perse aveva il candidato piu'
-      // vicino a +-1/2 toni dalla frequenza vera, fuori dal raggio di +-12 Hz.
-      // Per ogni candidato si aggiungono, in coda, quelli spostati di +-k toni;
-      // i cancelli del sincronismo (smax, segmento 1, badsync) li scartano se non
-      // c'e' un segnale. Spento di default (DECODIUM_FT2_ALIAS=numero di toni).
-      if (int const nalias = ft2_tone_alias_count (); nalias > 0)
-        {
-          int const norig = ncand;
-          // soglia di potenza del picco per entrare fra i primi N
-          float soglia_top = -1.0e30f;
-          if (int const top = ft2_tone_alias_top (); top > 0 && top < norig)
-            {
-              std::vector<float> pot;
-              pot.reserve (static_cast<size_t> (norig));
-              for (int k = 0; k < norig; ++k)
-                {
-                  pot.push_back (candidate[static_cast<size_t> (k * 2 + 1)]);
-                }
-              std::nth_element (pot.begin (), pot.begin () + (top - 1), pot.end (), std::greater<float> ());
-              soglia_top = pot[static_cast<size_t> (top - 1)];
-            }
-          for (int k = 0; k < norig; ++k)
-            {
-              if (cand_atteso[static_cast<size_t> (k)] != 0
-                  || candidate[static_cast<size_t> (k * 2 + 1)] < soglia_top)
-                {
-                  continue;
-                }
-              for (int s = 1; s <= nalias; ++s)
-                {
-                  for (int sign = -1; sign <= 1; sign += 2)
-                    {
-                      float const fa = candidate[static_cast<size_t> (k * 2)]
-                                       + static_cast<float> (sign * s) * kFt2ToneSpacingHz;
-                      if (fa < static_cast<float> (nfa) || fa > static_cast<float> (nfb)
-                          || ncand >= kFt2MaxCand)
-                        {
-                          continue;
-                        }
-                      bool vicino = false;
-                      for (int j = 0; j < ncand && !vicino; ++j)
-                        {
-                          vicino = std::fabs (candidate[static_cast<size_t> (j * 2)] - fa) < 20.0f;
-                        }
-                      if (!vicino)
-                        {
-                          candidate[static_cast<size_t> (ncand * 2)] = fa;
-                          candidate[static_cast<size_t> (ncand * 2 + 1)] = 1.0f;
-                          cand_alias_parent[static_cast<size_t> (ncand)] = static_cast<short> (k);
-                          ++ncand;
-                        }
-                    }
-                }
-            }
-        }
-
       int newdata = 1;
       for (int icand = 0; icand < ncand; ++icand)
         {
           if (abort_if_cancelled ())
             {
               return;
-            }
-          // L'alias di un candidato che ha gia' decodificato e' solo un tono vicino
-          // dello stesso segnale: si salta.
-          if (short const genitore = cand_alias_parent[static_cast<size_t> (icand)];
-              genitore >= 0 && cand_decoded[static_cast<size_t> (genitore)] != 0)
-            {
-              continue;
             }
           bool const atteso = cand_atteso[static_cast<size_t> (icand)] != 0;
           float const f0 = candidate[static_cast<size_t> (icand * 2)];
@@ -3648,14 +3653,10 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
                   int const sync_radius = ft2_sync_freq_radius_hz ();
                   int idfmin = -sync_radius;
                   int idfmax = sync_radius;
-                  // Un candidato alias e' un'ipotesi in piu': la ricerca grossa va a passo
-                  // doppio (la fine, a passo 1, la recupera: +-4 Hz e +-5 campioni coprono
-                  // meta' passo) e costa un quarto.
-                  bool const alias_cand = cand_alias_parent[static_cast<size_t> (icand)] >= 0;
-                  int idfstp = alias_cand ? 6 : 3;
+                  int idfstp = 3;
                   int ibmin = -688;
                   int ibmax = 2024;
-                  int ibstp = alias_cand ? 8 : 4;
+                  int ibstp = 4;
 
                   if (isync == 1 && async_incremental)
                     {
@@ -3732,8 +3733,6 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
                 {
                   segment1_smax = smax;
                 }
-              cand_best_smax[static_cast<size_t> (icand)] =
-                  std::max (cand_best_smax[static_cast<size_t> (icand)], smax);
 
               float smaxthresh = 0.60f;
               if (ndepth0 >= 3) smaxthresh = 0.50f;
@@ -3746,16 +3745,6 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
               segment_trace.f1 = trace_f1;
               segment_trace.ibest = ibest;
               segment_trace.idfbest = idfbest;
-              // Un alias vale la pena solo se il sincronismo e' MEGLIO di quello che il
-              // candidato da cui nasce ha trovato: altrimenti e' rumore e la catena
-              // di decodifica (la parte costosa) non parte.
-              if (short const genitore = cand_alias_parent[static_cast<size_t> (icand)];
-                  genitore >= 0
-                  && smax < cand_best_smax[static_cast<size_t> (genitore)] + ft2_tone_alias_margin ())
-                {
-                  segment_trace.status = kFt2SearchRejectSmax;
-                  continue;
-                }
               if (smax < smaxthresh && !atteso)
                 {
                   segment_trace.status = kFt2SearchRejectSmax;
@@ -4293,7 +4282,6 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
 
               seen_decodes.push_back (decoded_best.message_fixed);
               ++nwork_decodes;
-              cand_decoded[static_cast<size_t> (icand)] = 1;
               float xsnr = kFt2SnrFloor;
               if (snr > 0.0f)
                 {

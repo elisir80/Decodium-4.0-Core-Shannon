@@ -1014,7 +1014,9 @@ int run (Args const& a)
     }
 
   // Abbinamento alla verita': stesso testo, +/-10 Hz, mostrato fra la fine
-  // della trasmissione e 6 s dopo.
+  // della trasmissione (meno kEarlyDecodeS) e 6 s dopo. Una decodifica che passa la CRC
+  // poco prima della fine dell'ultimo simbolo e' valida: l'LDPC regge la coda mancante.
+  constexpr double kEarlyDecodeS = 0.5;
   std::vector<int> hits (truth.size (), 0);
   std::vector<double> first_latency (truth.size (), -1.0);
   for (auto& s : shown)
@@ -1026,7 +1028,7 @@ int run (Args const& a)
           Tx const& t = truth[k];
           if (t.msg != s.msg || std::abs (t.freq - s.freq) > 10.0) continue;
           double const end = t.t0 + kTxSeconds;
-          if (s.t_show < end - 0.05 || s.t_show > end + 6.0) continue;
+          if (s.t_show < end - kEarlyDecodeS || s.t_show > end + 6.0) continue;
           double const d = s.t_show - end;
           if (d < best_d)
             {
