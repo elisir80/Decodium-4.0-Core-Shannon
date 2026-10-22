@@ -45132,8 +45132,14 @@ int DecodiumBridge::effectiveSpectrumTimerIntervalMs() const
     return configured;
 }
 
+extern "C" void ftx_ft2_set_tone_alias_c(int n);
+
 void DecodiumBridge::applyLowCpuRuntimeProfile(const QString& reason)
 {
+    // FT2 tone-alias candidates (2 tones either side): they recover signals whose spectral
+    // peak lands on the wrong tone in real band noise, for about +25% decoder CPU. Not on
+    // slow computers.
+    ftx_ft2_set_tone_alias_c((m_lowCpuModeEnabled || m_lowEndMode) ? 0 : 2);
     int const ftLimit = effectiveFtThreadLimit();
     applyFtOpenMpThreadLimit(ftLimit);
 
