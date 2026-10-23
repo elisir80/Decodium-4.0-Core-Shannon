@@ -252,6 +252,8 @@ Item {
 
     // Signal for MAM window request
     signal mamWindowRequested()
+    // DigiPileup dialog (modes + info), opened with the right button of PILEUP
+    signal digiPileupRequested()
 
     // ── Ordine pulsanti TX panel (drag&drop magnetico, persistente) ──────────
     // Replica della meccanica STEP 1 (toolbar superiore in Main.qml): modello-
@@ -259,8 +261,8 @@ Item {
     // unica con holdTimer (click-vs-drag) + ghost proxy + snap magnetico.
     // Il Mode selector NON è nel modello (resta primo elemento fisso).
     // 1.0.388 — aggiunto "cqfilter" (selettore livello filtro CQ) accanto a "tune", movibile come gli altri.
-    readonly property string uiTxPanelOrderDefault: "mam,deep,ap,seq,quickqso,enabletx,holdfreq,autocq,call,txphase,alt12,halt,clear,tune,cqfilter,async,hound"
-    readonly property var uiTxPanelKnownIds: ["mam","deep","ap","seq","quickqso","enabletx","holdfreq","autocq","call","txphase","alt12","halt","clear","tune","cqfilter","async","hound"]
+    readonly property string uiTxPanelOrderDefault: "mam,pileup,deep,ap,seq,quickqso,enabletx,holdfreq,autocq,call,txphase,alt12,halt,clear,tune,cqfilter,async,hound"
+    readonly property var uiTxPanelKnownIds: ["mam","pileup","deep","ap","seq","quickqso","enabletx","holdfreq","autocq","call","txphase","alt12","halt","clear","tune","cqfilter","async","hound"]
     property var uiTxPanelOrder: parseTxPanelOrder(String(bridge.getSetting("uiTxPanelOrder", "") || ""))
 
     // Parsa il CSV salvato in una lista di id; ripristina il default se assente/corrotto.
@@ -479,6 +481,7 @@ Item {
                                                || normalizedOperatingMode.indexOf("FST4W-") === 0
     readonly property var ft2LinkHiddenTxPanelIds: ({
         "mam": true,
+        "pileup": true,
         "deep": true,
         "ap": true,
         "seq": true,
@@ -1196,6 +1199,7 @@ Item {
                             function componentForId(id) {
                                 switch (id) {
                                     case "mam":       return comp_mam
+                                    case "pileup":    return comp_pileup
                                     case "deep":      return comp_deep
                                     case "ap":        return comp_ap
                                     case "seq":       return comp_seq
@@ -1412,6 +1416,36 @@ Item {
                                     label: "MAM"
                                     glyph: "⇆"
                                     foreground: (engine && engine.multiAnswerMode) ? warningOrange : textSecondary
+                                    glyphSize: txPanel.toolbarGlyphSize
+                                    labelSize: txPanel.toolbarLabelSize
+                                }
+                            }
+                        }
+
+                        // PILEUP (DigiPileup): sinistro = accende/spegne tutto, destro = apre il pannello modi e info
+                        Component {
+                            id: comp_pileup
+                            Rectangle {
+                                property bool hovered: false
+                                readonly property bool btnVisible: engine && engine.mamModeSupported
+                                readonly property real prefWidth: txPanel.toolbarActionWidth("PILEUP", "⇉")
+                                readonly property string tip: qsTr("DigiPileup: lanes, elastic cycle and power budget for working a pile-up. Left click switches everything on or off, right click opens the modes and info (experimental, default OFF)")
+                                readonly property bool on: engine && engine.digiPileupEnabled
+                                function activate(mouse) {
+                                    if (mouse && mouse.button === Qt.RightButton)
+                                        txPanel.digiPileupRequested()
+                                    else if (engine)
+                                        engine.digiPileupEnabled = !engine.digiPileupEnabled
+                                }
+                                radius: 5
+                                color: on ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.2) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
+                                border.color: on ? accentGreen : (hovered ? secondaryCyan : glassBorder)
+                                border.width: on ? 2 : 1
+                                ToolbarButtonContent {
+                                    anchors.fill: parent
+                                    label: "PILEUP"
+                                    glyph: "⇉"
+                                    foreground: on ? accentGreen : textSecondary
                                     glyphSize: txPanel.toolbarGlyphSize
                                     labelSize: txPanel.toolbarLabelSize
                                 }

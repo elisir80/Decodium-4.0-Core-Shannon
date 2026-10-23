@@ -25864,6 +25864,7 @@ void DecodiumBridge::setMamMultiStream(bool on)
         armPeriodTimerForCurrentMode(sessionId, QStringLiteral("MAM multi-stream enabled"));
     }
     emit mamMultiStreamChanged();
+    emit digiPileupChanged();
     emit mamActiveSlotsChanged();
     bridgeLog(QStringLiteral("MAM multi-stream sequencer toggled: %1").arg(on ? 1 : 0));
 }
@@ -25900,6 +25901,58 @@ void DecodiumBridge::setMamCqSlots(bool on)
     settings.setValue(QStringLiteral("MamCqSlots"), on);
     emit mamCqSlotsChanged();
     bridgeLog(QStringLiteral("MAM parallel CQ slots toggled: %1").arg(on ? 1 : 0));
+}
+
+void DecodiumBridge::setDigiPileupElastic(bool on)
+{
+    if (m_ft2ElasticFox == on) {
+        return;
+    }
+    m_ft2ElasticFox = on;
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
+    settings.setValue(QStringLiteral("Ft2ElasticFox"), on);
+    bridgeLog(QStringLiteral("DigiPileup elastic cycle toggled: %1").arg(on ? 1 : 0));
+    emit digiPileupChanged();
+}
+
+void DecodiumBridge::setDigiPileupBudget(bool on)
+{
+    if (m_mamPowerBudget == on) {
+        return;
+    }
+    m_mamPowerBudget = on;
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
+    settings.setValue(QStringLiteral("MamPowerBudget"), on);
+    bridgeLog(QStringLiteral("DigiPileup power budget toggled: %1").arg(on ? 1 : 0));
+    emit digiPileupChanged();
+}
+
+// Interruttore generale: configura tutto, ma NON abilita il TX ne' l'AutoCQ
+// (restano decisioni dell'operatore, come il pulsante ARM della DX-Pedition).
+void DecodiumBridge::setDigiPileupEnabled(bool on)
+{
+    if (on) {
+        setMamMultiStream(true);
+    }
+    setDigiPileupElastic(on);
+    setDigiPileupBudget(on);
+    emit digiPileupChanged();
+}
+
+QVariantMap DecodiumBridge::digiPileupStatus() const
+{
+    QVariantMap m;
+    m.insert(QStringLiteral("mode"), m_mode);
+    m.insert(QStringLiteral("elasticRunning"), foxElasticActive());
+    m.insert(QStringLiteral("gapHz"), mamMinStreamGapHz());
+    m.insert(QStringLiteral("lastCycleMs"), m_digiLastCycleMs);
+    m.insert(QStringLiteral("lastStreams"), m_digiLastStreams);
+    m.insert(QStringLiteral("lastDeferred"), m_digiLastDeferred);
+    m.insert(QStringLiteral("activeSlots"), m_mamSlots.size());
+    m.insert(QStringLiteral("queued"), m_callerQueue.size());
+    return m;
 }
 
 // Distanza minima fra due stream MAM nello stesso periodo, per modo. Due
@@ -26879,6 +26932,7 @@ void DecodiumBridge::mamDispatchPeriod(bool elastic)
     // l'ampiezza che il suo collegamento richiede (FoxPowerBudget.h).
     bool const budgetOn = m_mamPowerBudget;
     QHash<int, float> budgetGain;
+    int budgetDeferred = 0;
     if (budgetOn) {
         decodium::foxbudget::Config bcfg;
         bcfg.thresholdDb = (m_mode == QStringLiteral("FT2")) ? -13.5
@@ -26902,6 +26956,7 @@ void DecodiumBridge::mamDispatchPeriod(bool elastic)
             }
         }
         decodium::foxbudget::Allocation const alloc = decodium::foxbudget::allocate(cands, bcfg);
+        budgetDeferred = static_cast<int>(alloc.deferred.size());
         QStringList chosenLog, deferredLog;
         for (size_t k = 0; k < alloc.ids.size(); ++k) {
             budgetGain.insert(alloc.ids[k], static_cast<float>(alloc.gains[k]));
@@ -27051,6 +27106,15 @@ void DecodiumBridge::mamDispatchPeriod(bool elastic)
             }
         }
         m_foxElastic.setExpected(std::move(expected));
+    }
+    {
+        qint64 const txStartMs = QDateTime::currentMSecsSinceEpoch();
+        if (m_digiLastTxStartMs > 0) {
+            m_digiLastCycleMs = static_cast<int>(txStartMs - m_digiLastTxStartMs);
+        }
+        m_digiLastTxStartMs = txStartMs;
+        m_digiLastStreams = m_mamMessages.size();
+        m_digiLastDeferred = budgetDeferred;
     }
     startTx();
 }

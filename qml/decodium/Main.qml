@@ -1965,6 +1965,8 @@ GlassApplicationWindow {
             shutdownLoader(mamWindowLoader)
         if (typeof infoDialogLoader !== "undefined")
             shutdownLoader(infoDialogLoader)
+        if (typeof digiPileupDialogLoader !== "undefined")
+            shutdownLoader(digiPileupDialogLoader)
         if (typeof callDialogLoader !== "undefined")
             shutdownLoader(callDialogLoader)
         if (typeof historyDialogLoader !== "undefined")
@@ -3485,6 +3487,10 @@ GlassApplicationWindow {
     }
     function openMamWindow() {
         mamFloatingWindow.showHostedWindow()
+    }
+    function openDigiPileupDialog() {
+        digiPileupDialogLoader.active = true
+        runWhenLoaded(digiPileupDialogLoader, function (item) { item.open() })
     }
     function openInfoDialog(tabIndex) {
         runWhenLoaded(infoDialogLoader, function(item) {
@@ -11727,6 +11733,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                             handleLogPrompt: !txPanelDetached
                             visible: !txPanelDetached
                             onMamWindowRequested: mainWindow.openMamWindow()
+                            onDigiPileupRequested: mainWindow.openDigiPileupDialog()
                             onCallRequested: mainWindow.openCallDialog()
                             onFt2LinkAccessRequested: mainWindow.requestFt2LinkAccess()
 
@@ -12732,6 +12739,21 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         anchors.topMargin: 12
         anchors.rightMargin: 12
         z: 9999
+    }
+
+    Loader {
+        id: digiPileupDialogLoader
+        active: false
+        asynchronous: true
+        source: "components/DigiPileupDialog.qml"
+        property var pendingAction: null
+        onLoaded: {
+            if (pendingAction) {
+                var action = pendingAction
+                pendingAction = null
+                action(item)
+            }
+        }
     }
 
     Loader {

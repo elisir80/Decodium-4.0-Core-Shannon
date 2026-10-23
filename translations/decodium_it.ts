@@ -36011,6 +36011,100 @@ Costa CPU extra durante i QSO. Default: OFF.</translation>
     </message>
 </context>
 <context>
+    <name>DigiPileupDialog</name>
+    <message>
+        <location filename="../qml/decodium/components/DigiPileupDialog.qml" line="99"/>
+        <source>experimental</source>
+        <translation>sperimentale</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DigiPileupDialog.qml" line="169"/>
+        <source>Enable everything</source>
+        <translation>Attiva tutto</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DigiPileupDialog.qml" line="181"/>
+        <source>Turns on multi-stream, the elastic cycle and the power budget together. It does not key the transmitter: enable TX and AutoCQ yourself (the DX-Pedition panel has an ARM button for that).</source>
+        <translation>Accende insieme multi-stream, ciclo elastico e budget di potenza. Non mette in trasmissione: abilita tu il TX e l'AutoCQ (il pannello DX-Pedition ha il pulsante ARM per questo).</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DigiPileupDialog.qml" line="188"/>
+        <source>Modes</source>
+        <translation>Modi</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DigiPileupDialog.qml" line="202"/>
+        <source>Lanes (always on)</source>
+        <translation>Corsie (sempre attive)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DigiPileupDialog.qml" line="208"/>
+        <source>Simultaneous streams are kept the right distance apart for the mode, so they do not damage each other: FT2 170 Hz, FT4 85 Hz, FT8 50 Hz. A caller closer than that to a QSO in progress waits in the queue.</source>
+        <translation>Gli stream simultanei restano alla distanza giusta per il modo, così non si danneggiano a vicenda: FT2 170 Hz, FT4 85 Hz, FT8 50 Hz. Un chiamante più vicino di così a un QSO in corso aspetta in coda.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DigiPileupDialog.qml" line="224"/>
+        <source>Rhythm (elastic cycle, FT2)</source>
+        <translation>Respiro (ciclo elastico, FT2)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DigiPileupDialog.qml" line="230"/>
+        <source>Instead of transmitting every second slot (7.5 s), you transmit again as soon as every station you wrote to has answered, or is clearly not going to. The waiting time of each station is learned, like a network timeout. About 6 s per cycle is realistic. Needs FT2 and multi-stream.</source>
+        <translation>Invece di trasmettere un secondo slot sì e uno no (7,5 s), trasmetti di nuovo appena ogni stazione a cui hai scritto ha risposto, o è chiaro che non risponderà. Il tempo di attesa di ogni stazione viene imparato, come il timeout di una rete. Circa 6 s per ciclo è un valore realistico. Serve FT2 e il multi-stream.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DigiPileupDialog.qml" line="246"/>
+        <source>Power budget</source>
+        <translation>Budget di potenza</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DigiPileupDialog.qml" line="252"/>
+        <source>The transmitter's peak power is shared between the streams: with N equal streams each one loses 20·log10(N) dB. Instead of a fixed number of equal streams, each station gets only the amplitude its own link needs, as many as fit; the others wait for the next frame. A weak station may get a whole frame to itself.</source>
+        <translation>La potenza di picco del trasmettitore si divide tra gli stream: con N stream uguali ciascuno perde 20·log10(N) dB. Invece di un numero fisso di stream uguali, ogni stazione riceve solo l'ampiezza che il suo collegamento richiede, quante ne stanno; le altre aspettano il frame successivo. Una stazione debole può avere un frame tutto per sé.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DigiPileupDialog.qml" line="261"/>
+        <source>Maximum simultaneous streams</source>
+        <translation>Massimo di stream simultanei</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DigiPileupDialog.qml" line="277"/>
+        <source>Status</source>
+        <translation>Stato</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DigiPileupDialog.qml" line="291"/>
+        <source>Mode %1 · minimum distance between streams %2 Hz
+QSOs in progress %3 · callers waiting %4
+Last frame: %5 stream(s), %6 left for the next one · cycle %7
+Elastic cycle running: %8</source>
+        <translation>Modo %1 · distanza minima tra gli stream %2 Hz
+QSO in corso %3 · chiamanti in attesa %4
+Ultimo frame: %5 stream, %6 rimandati al successivo · ciclo %7
+Ciclo elastico attivo: %8</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DigiPileupDialog.qml" line="294"/>
+        <source>yes</source>
+        <translation>sì</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DigiPileupDialog.qml" line="294"/>
+        <source>no</source>
+        <translation>no</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DigiPileupDialog.qml" line="300"/>
+        <source>How to use it</source>
+        <translation>Come si usa</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DigiPileupDialog.qml" line="310"/>
+        <source>&lt;b&gt;Station running the pile-up:&lt;/b&gt; FT2 mode, CAT working as usual. Switch on "Enable everything", then enable TX and AutoCQ (or press ARM in the DX-Pedition panel). Do not raise the ALC: the sum of the streams is already normalised to the same peak as a single signal.&lt;br&gt;&lt;br&gt;&lt;b&gt;Stations calling:&lt;/b&gt; nothing special. Use FT2 normally and double-click the CQ. There is no need to move above 1000 Hz: the answer comes on your own frequency. Do not enable the WSJT-X Fox/Hound special operation. If you call closer than 170 Hz to a QSO in progress you wait in the queue; moving to a free frequency gets you served sooner.&lt;br&gt;&lt;br&gt;&lt;b&gt;Limits:&lt;/b&gt; experimental. Measured on simulations and on recorded signals, not yet on the air. The elastic cycle and the power budget work from the answers of the stations: a station that answers much later than usual may be missed in that cycle and will call again.</source>
+        <translation>&lt;b&gt;Stazione che gestisce il pile-up:&lt;/b&gt; modo FT2, CAT come al solito. Attiva "Attiva tutto", poi abilita il TX e l'AutoCQ (o premi ARM nel pannello DX-Pedition). Non alzare l'ALC: la somma degli stream è già normalizzata allo stesso picco di un segnale singolo.&lt;br&gt;&lt;br&gt;&lt;b&gt;Stazioni che chiamano:&lt;/b&gt; niente di speciale. Usa l'FT2 normalmente e fai doppio clic sul CQ. Non serve spostarsi sopra i 1000 Hz: la risposta arriva sulla tua frequenza. Non attivare l'operazione speciale Fox/Hound di WSJT-X. Se chiami più vicino di 170 Hz a un QSO in corso aspetti in coda; spostarti su una frequenza libera ti fa servire prima.&lt;br&gt;&lt;br&gt;&lt;b&gt;Limiti:&lt;/b&gt; sperimentale. Misurato su simulazioni e su segnali registrati, non ancora in aria. Il ciclo elastico e il budget di potenza lavorano sulle risposte delle stazioni: una stazione che risponde molto più tardi del solito può essere persa in quel ciclo e richiamerà.</translation>
+    </message>
+</context>
+<context>
     <name>TxPanel</name>
     <message>
         <location filename="../qml/decodium/components/TxPanel.qml" line="+1563"/>
@@ -36321,6 +36415,11 @@ Pressione prolungata: modifica messaggio</translation>
         <location line="+34"/>
         <source>Select All</source>
         <translation>Seleziona tutto</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1400"/>
+        <source>DigiPileup: lanes, elastic cycle and power budget for working a pile-up. Left click switches everything on or off, right click opens the modes and info (experimental, default OFF)</source>
+        <translation>DigiPileup: corsie, ciclo elastico e budget di potenza per gestire un pile-up. Click sinistro accende o spegne tutto, click destro apre modi e informazioni (sperimentale, default OFF)</translation>
     </message>
 </context>
 <context>

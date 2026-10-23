@@ -714,6 +714,10 @@ class DecodiumBridge : public QObject
     // libero (m_callerQueue) e stato del modo corrente rispetto al multi-stream.
     Q_PROPERTY(int mamQueueCount READ callerQueueSize NOTIFY callerQueueChanged)
     Q_PROPERTY(bool mamCqSlots READ mamCqSlots WRITE setMamCqSlots NOTIFY mamCqSlotsChanged)
+    // DigiPileup: spaziatura per modo (sempre attiva) + ciclo elastico + budget di potenza.
+    Q_PROPERTY(bool digiPileupEnabled READ digiPileupEnabled WRITE setDigiPileupEnabled NOTIFY digiPileupChanged)
+    Q_PROPERTY(bool digiPileupElastic READ digiPileupElastic WRITE setDigiPileupElastic NOTIFY digiPileupChanged)
+    Q_PROPERTY(bool digiPileupBudget READ digiPileupBudget WRITE setDigiPileupBudget NOTIFY digiPileupChanged)
     Q_PROPERTY(bool mamModeSupported READ mamModeSupported NOTIFY modeChanged)
     Q_PROPERTY(bool mamModeExperimental READ mamModeExperimental NOTIFY modeChanged)
     // 1.0.187 — FT2 Weak-Signal Pack F (v2): partner-memory opt-in.
@@ -2297,6 +2301,7 @@ signals:
     void ft2ApHashCacheChanged();         // 1.0.293
     void ft2AsyncSkipRedundantSyncDecodeChanged();  // 1.0.355
     void mamMultiStreamChanged();      // 1.0.364+ — MAM multi-stream FASE 3
+    void digiPileupChanged();
     void mamMaxStreamsChanged();       // 1.0.364+ — cap stream simultanei
     void mamActiveSlotsChanged();      // 1.0.364+ — lista slot QSO attivi per UI
     void mamTxStreamsChanged();        // payload MAM composto per marker waterfall TX
@@ -3856,6 +3861,10 @@ private:
     bool m_foxElasticGo {false};
     decodium::foxelastic::Cycle m_foxElastic;
     QTimer* m_foxElasticTimer {nullptr};
+    qint64 m_digiLastTxStartMs {0};
+    int m_digiLastCycleMs {0};
+    int m_digiLastStreams {0};
+    int m_digiLastDeferred {0};
     // A station can decode our report only after its slot has reached the
     // retry/silence limit.  Keep that incomplete exchange briefly so an
     // unambiguously directed late R+report can finish it at TX4/RR73 instead
@@ -4710,6 +4719,15 @@ public:
     // pannello DX-Pedition (DxPedTxPanel.qml). Tutti no-op quando non ci sono
     // slot: non toccano il path single-QSO.
     bool    mamCqSlots() const { return m_mamCqSlots; }
+    // DigiPileup. "Enabled" = multi-stream + ciclo elastico + budget tutti accesi;
+    // spegnerlo toglie solo elastico e budget (il multi-stream puo' servire ad altro).
+    bool    digiPileupElastic() const { return m_ft2ElasticFox; }
+    bool    digiPileupBudget() const { return m_mamPowerBudget; }
+    bool    digiPileupEnabled() const { return m_mamMultiStream && m_ft2ElasticFox && m_mamPowerBudget; }
+    void    setDigiPileupElastic(bool on);
+    void    setDigiPileupBudget(bool on);
+    void    setDigiPileupEnabled(bool on);
+    Q_INVOKABLE QVariantMap digiPileupStatus() const;
     void    setMamCqSlots(bool on);
     // Pianifica le frequenze audio dei CQ paralleli: parte dalla frequenza TX e
     // sale a passi di 60 Hz, poi scende, saltando quelle gia' occupate.
