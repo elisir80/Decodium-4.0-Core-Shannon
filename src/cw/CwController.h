@@ -235,6 +235,10 @@ public:
     Q_INVOKABLE QString expandText(const QString& text, const QVariantMap& context) const;
     // Ferma tutto, subito.
     Q_INVOKABLE void stop();
+    // Leaving the CW application mode must also release local keyer ports and
+    // retry timers.  The next ensureStarted() call reopens the selected
+    // backend, so an already-created CW window can safely be used again.
+    Q_INVOKABLE void suspend();
     Q_INVOKABLE void setMacro(int index, const QString& label, const QString& text);
     Q_INVOKABLE void addMacro();
     Q_INVOKABLE void removeMacro(int index);

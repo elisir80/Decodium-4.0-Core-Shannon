@@ -825,6 +825,12 @@ static QString graphicsStartupPendingFlagPath()
         .absoluteFilePath(QStringLiteral("decodium-gpu-startup-pending.flag"));
 }
 
+static QString graphicsRuntimeCrashFlagPath()
+{
+    return QDir {QStandardPaths::writableLocation(QStandardPaths::TempLocation)}
+        .absoluteFilePath(QStringLiteral("decodium-gpu-runtime-crash.flag"));
+}
+
 static QString persistentD3d11FallbackKey()
 {
     return QStringLiteral("Graphics/PersistentD3D11FallbackAfterD3D12Failure");
@@ -1703,6 +1709,7 @@ int main(int argc, char* argv[])
 #ifdef Q_OS_WIN
     QString const slowQmlStartupFlag = slowQmlStartupFlagPath();
     QString const graphicsStartupPendingFlag = graphicsStartupPendingFlagPath();
+    QString const graphicsRuntimeCrashFlag = graphicsRuntimeCrashFlagPath();
     bool const graphicsRecoveryWorker =
         hasCommandLineSwitch(argc, argv, "--decodium-graphics-recovery");
     bool const settingsResetSafeGraphics = resetSafeGraphicsRequestedInSettings();
@@ -1712,6 +1719,7 @@ int main(int argc, char* argv[])
     if (commandLineResetSafeGraphics) {
         removeFileIfExists(slowQmlStartupFlag);
         removeFileIfExists(graphicsStartupPendingFlag);
+        removeFileIfExists(graphicsRuntimeCrashFlag);
         clearPersistentD3d11Fallback();
         if (settingsResetSafeGraphics)
             clearResetSafeGraphicsRequest();
@@ -1804,6 +1812,9 @@ int main(int argc, char* argv[])
     bool const pendingGraphicsStartupMarker = QFile::exists(graphicsStartupPendingFlag);
     QByteArray const pendingGraphicsBackend =
         pendingGraphicsStartupMarker ? graphicsStartupFlagBackend(graphicsStartupPendingFlag) : QByteArray {};
+    bool const runtimeGraphicsCrashMarker = QFile::exists(graphicsRuntimeCrashFlag);
+    QByteArray const runtimeCrashedGraphicsBackend = runtimeGraphicsCrashMarker
+        ? graphicsStartupFlagBackend(graphicsRuntimeCrashFlag) : QByteArray {};
     bool const explicitGraphicsBackend =
         (!decodiumGraphicsBackend.isEmpty() && !lowEndForcedD3d11)
         || !requestedRhiBackend.isEmpty()
@@ -1825,9 +1836,18 @@ int main(int argc, char* argv[])
 
     QByteArray activeWindowsGraphicsMode;
     bool graphicsRecoveryFromPendingMarker = false;
+    bool graphicsRecoveryFromRuntimeCrash = false;
     bool automaticGraphicsFallback = false;
     bool usingPersistedGraphicsFallback = false;
-    if (pendingGraphicsStartupMarker && !commandLineResetSafeGraphics) {
+    if (runtimeGraphicsCrashMarker && !commandLineResetSafeGraphics) {
+        QByteArray const crashedBackend = runtimeCrashedGraphicsBackend.isEmpty()
+            ? QByteArrayLiteral("d3d11") : runtimeCrashedGraphicsBackend;
+        activeWindowsGraphicsMode = fallbackAfter(crashedBackend);
+        graphicsRecoveryFromRuntimeCrash = true;
+        automaticGraphicsFallback = true;
+        L((QByteArray("Windows graphics recovery: runtime driver crash on backend=")
+           + crashedBackend + " next=" + activeWindowsGraphicsMode).constData());
+    } else if (pendingGraphicsStartupMarker && !commandLineResetSafeGraphics) {
         activeWindowsGraphicsMode = fallbackAfter(pendingGraphicsBackend);
         graphicsRecoveryFromPendingMarker = true;
         automaticGraphicsFallback = true;
@@ -1889,6 +1909,13 @@ int main(int argc, char* argv[])
             qunsetenv("QT_OPENGL");
         L((QByteArray("Qt Quick graphics backend selected: ")
            + activeWindowsGraphicsMode).constData());
+    }
+    qputenv("DECODIUM_ACTIVE_WINDOWS_GRAPHICS_MODE", activeWindowsGraphicsMode);
+    if (safeGraphicsRequested) {
+        // WARP/software is the recovery path for an unstable hardware driver.
+        // Do not layer the custom RHI-compute panadapter on top of it; FFTW is
+        // the deterministic and substantially lighter safe-mode fallback.
+        qputenv("DECODIUM_DISABLE_GPU_PANADAPTER_FFT", "1");
     }
     setWindowsAppUserModelId();
 #endif
@@ -4625,7 +4652,7 @@ int main(int argc, char* argv[])
             }
         });
         QObject::connect (&bridge, &DecodiumBridge::cwModeLeaving,
-                          &cwModule, &decodium::cw::CwController::stop);
+                          &cwModule, &decodium::cw::CwController::suspend);
         engine.rootContext ()->setContextProperty ("cwModule", &cwModule);
         L("CW: modulo avviato");
         decodium::ssb::SsbController::Hooks voice;
@@ -4999,9 +5026,11 @@ int main(int argc, char* argv[])
 #endif
 #ifdef Q_OS_WIN
     QTimer::singleShot(8000, &app, [graphicsStartupPendingFlag,
+                                    graphicsRuntimeCrashFlag,
                                     slowQmlStartupFlag,
                                     activeWindowsGraphicsMode,
                                     graphicsRecoveryFromPendingMarker,
+                                    graphicsRecoveryFromRuntimeCrash,
                                     persistentD3d11FallbackUsable,
                                     automaticSafeGraphics,
                                     automaticD3d11Fallback] {
@@ -5020,6 +5049,15 @@ int main(int argc, char* argv[])
                        + activeWindowsGraphicsMode).constData());
                 }
             }
+        }
+        if (graphicsRecoveryFromRuntimeCrash
+            && QFile::exists(graphicsRuntimeCrashFlag)) {
+            QFile::remove(graphicsRuntimeCrashFlag);
+            writePersistentGraphicsFallback(
+                activeWindowsGraphicsMode,
+                QStringLiteral("Automatic recovery after a runtime graphics-driver crash"));
+            L((QByteArray("Windows runtime graphics-crash recovery stable; fallback persisted: ")
+               + activeWindowsGraphicsMode).constData());
         }
         if (persistentD3d11FallbackUsable)
             L("Windows persistent D3D11 fallback remains active; use --reset-safe-graphics to retry D3D12");

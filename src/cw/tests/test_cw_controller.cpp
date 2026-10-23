@@ -797,6 +797,28 @@ private slots:
         QCOMPARE(rig.pieces.size(), after);                     // e non parte nient'altro
     }
 
+    void suspendAllowsCleanRestartAfterLeavingCw()
+    {
+        QSettings s(iniPath(), QSettings::IniFormat);
+        CwController c;
+        KeyRig rig;
+        c.setHooks(rig.hooks());
+        c.deferStart(&s);
+
+        QVERIFY(!c.started());
+        c.ensureStarted();
+        QVERIFY(c.started());
+        c.suspend();
+        QVERIFY(!c.started());
+        QVERIFY(!c.sending());
+
+        c.ensureStarted();
+        QVERIFY(c.started());
+        c.sendText(QStringLiteral("TEST"), {});
+        QTRY_VERIFY_WITH_TIMEOUT(!rig.pieces.isEmpty(), 2000);
+        QTRY_VERIFY_WITH_TIMEOUT(!c.sending(), 5000);
+    }
+
     void aFailedSendDropsThePttAndTellsWhy()
     {
         QSettings s(iniPath(), QSettings::IniFormat);

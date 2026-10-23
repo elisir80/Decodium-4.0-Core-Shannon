@@ -33,6 +33,7 @@ private slots:
     void lifecycleTransitionsInvalidateDeferredRequests();
     void deferredCallbacksCheckRequestGeneration();
     void jttyUsesNativeManualDispatchAndBlocksGenericStart();
+    void enteringCwPreservesTheOperatorDial();
     void cwExitVerifiesRadioModeAfterStartupCw();
 };
 
@@ -176,6 +177,33 @@ void TestTxDispatchGuard::jttyUsesNativeManualDispatchAndBlocksGenericStart()
     QVERIFY(app.contains(QStringLiteral("&DecodiumBridge::jttyAbortRequested")));
 }
 
+void TestTxDispatchGuard::enteringCwPreservesTheOperatorDial()
+{
+    const QString bridge = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
+    QVERIFY(!bridge.isEmpty());
+
+    const QString setMode = functionBody(
+        bridge,
+        QStringLiteral("void DecodiumBridge::setMode(const QString& v)"),
+        QStringLiteral("void DecodiumBridge::setMonitoring(bool v)"));
+    QVERIFY(!setMode.isEmpty());
+
+    // Switching application mode to CW changes the radio mode but must not
+    // select the band's QRP/calling frequency.  Those frequencies are still
+    // used by an explicit band change performed while CW is active.
+    const int preservePolicy = setMode.indexOf(QStringLiteral("bool const preserveOperatorDial"));
+    const int preserveCw = setMode.indexOf(
+        QStringLiteral("normalizedMode == QStringLiteral(\"CW\")"), preservePolicy);
+    const int preserveFrequency = setMode.indexOf(
+        QStringLiteral("m_bandManager->updateFromFrequency(m_frequency)"), preservePolicy);
+    const int automaticQsy = setMode.indexOf(
+        QStringLiteral("m_bandManager->updateForMode(bandMode)"), preservePolicy);
+    QVERIFY(preservePolicy >= 0);
+    QVERIFY(preserveCw > preservePolicy);
+    QVERIFY(preserveFrequency > preserveCw);
+    QVERIFY(automaticQsy > preserveFrequency);
+}
+
 void TestTxDispatchGuard::cwExitVerifiesRadioModeAfterStartupCw()
 {
     const QString bridge = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
@@ -192,6 +220,11 @@ void TestTxDispatchGuard::cwExitVerifiesRadioModeAfterStartupCw()
     // A mode restored from the physical rig at startup has no earlier local
     // CW entry snapshot. Its return target must still be verified, otherwise
     // a delayed CAT state report can put the desired state back to CW.
+    QVERIFY(setMode.contains(QStringLiteral("reportedCatModeBeforeChange")));
+    QVERIFY(setMode.contains(QStringLiteral("leavingReportedRigCw")));
+    QVERIFY(setMode.contains(QStringLiteral("leavingCw || leavingReportedRigCw")));
+    QVERIFY(setMode.contains(QStringLiteral("reportedCatModeBeforeChange == QStringLiteral(\"CW\")")));
+    QVERIFY(setMode.contains(QStringLiteral("reportedCatModeBeforeChange == QStringLiteral(\"CW-R\")")));
     QVERIFY(setMode.contains(QStringLiteral("QString cwExitVerifyMode;")));
     QVERIFY(setMode.contains(QStringLiteral("cwExitVerifyMode = cwExitRestoreMode;")));
     QVERIFY(setMode.contains(QStringLiteral("kCwExitVerifyDelaysMs[] = {700, 1700}")));

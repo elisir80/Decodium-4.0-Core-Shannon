@@ -432,15 +432,29 @@ void TestLiquidGlassWindows::closedCwAndSsbPopoutsReleaseTheirSceneGraphs()
     QVERIFY(shutdown.contains(QStringLiteral("shutdownLoader(cwWindowLoader)")));
     QVERIFY(shutdown.contains(QStringLiteral("shutdownLoader(ssbWindowLoader)")));
 
-    // The process exits only after Loader teardown has had an event-loop turn.
+    // The process exits only after the transient native windows have released
+    // their scene-graph resources and their Loader items are actually gone.
     const int closeStart = main.indexOf(QStringLiteral("onClosing: function(close)"));
     const int closeEnd = main.indexOf(QStringLiteral("onXChanged:"), closeStart);
     QVERIFY(closeStart >= 0);
     QVERIFY(closeEnd > closeStart);
     const QString closeHandler = main.mid(closeStart, closeEnd - closeStart);
     QVERIFY(closeHandler.contains(QStringLiteral("shutdownAsyncLoaders()")));
+    QVERIFY(closeHandler.contains(QStringLiteral("mainWindow.releaseResources()")));
     QVERIFY(closeHandler.contains(QStringLiteral("applicationQuitTimer.restart()")));
     QVERIFY(!closeHandler.contains(QStringLiteral("Qt.quit()")));
+
+    QVERIFY(main.contains(QStringLiteral("function releaseLoaderGraphics(loader)")));
+    QVERIFY(main.contains(QStringLiteral("loader.item.releaseResources()")));
+    QVERIFY(main.contains(QStringLiteral("function shutdownTopLevelLoadersReleased()")));
+    QVERIFY(main.contains(QStringLiteral("shutdownDrainPasses >= 20")));
+    QVERIFY(!main.contains(QStringLiteral("interval: 75")));
+
+    const QString startup = readSource(QStringLiteral("src/app/main_qml.cpp"));
+    QVERIFY(!startup.isEmpty());
+    QVERIFY(startup.contains(QStringLiteral(
+        "&cwModule, &decodium::cw::CwController::suspend")));
+    QVERIFY(main.contains(QStringLiteral("cwModule.ensureStarted()")));
 
     // Closing CW must also stop its invisible decoder/scope workload.
     QVERIFY(bridge.contains(QStringLiteral(

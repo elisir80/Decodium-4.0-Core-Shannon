@@ -1251,10 +1251,13 @@ GlassApplicationWindow {
         bridge.stopMonitor()
         bridge.shutdown()
         shutdownAsyncLoaders()
-        // Hiding releases the main swapchain while the secondary Loader items
-        // are being destroyed. Quit on a later event-loop turn rather than
-        // tearing every QQuickWindow down recursively inside this close event.
+        // Hiding and releaseResources() make the main swapchain non-renderable
+        // while the secondary Loader items are being destroyed.  The drain
+        // timer below waits for those native windows to disappear instead of
+        // assuming that a fixed 75 ms delay is sufficient on every compositor.
         mainWindow.hide()
+        mainWindow.releaseResources()
+        shutdownDrainPasses = 0
         applicationQuitTimer.restart()
     }
 
@@ -1858,16 +1861,45 @@ GlassApplicationWindow {
     property bool dxClusterDetached: true   // default detached (era sempre floating)
     property bool dxClusterMinimized: false
     property bool applicationClosing: false
+    property int shutdownDrainPasses: 0
     // Let Loader destroy every secondary QQuickWindow and let Qt process the
-    // resulting scene-graph teardown before the event loop exits. Exiting in
-    // the same close callback left hidden CW/SSB render resources alive until
-    // engine destruction; on some Linux/XFCE OpenGL stacks that could wedge
-    // the compositor and produce recursively nested window frames next time.
+    // resulting scene-graph teardown before the event loop exits.  A fixed
+    // delay is not a completion signal: OpenGL/X11 can need several render
+    // turns after CW has owned a second native window.
     Timer {
         id: applicationQuitTimer
-        interval: 75
-        repeat: false
-        onTriggered: Qt.quit()
+        interval: 50
+        repeat: true
+        onTriggered: {
+            shutdownAsyncLoaders()
+            shutdownDrainPasses += 1
+            var released = shutdownTopLevelLoadersReleased()
+            if ((released && shutdownDrainPasses >= 2)
+                    || shutdownDrainPasses >= 20) {
+                if (!released)
+                    console.warn("Timed out while draining secondary Qt Quick windows")
+                stop()
+                Qt.quit()
+            }
+        }
+    }
+    function releaseLoaderGraphics(loader) {
+        if (!loader || !loader.item)
+            return
+        try {
+            if (typeof loader.item.hide === "function")
+                loader.item.hide()
+        } catch (e) {
+        }
+        try {
+            // QQuickWindow::releaseResources() explicitly drops cached scene
+            // graph objects and may invalidate the complete per-window render
+            // context. This is the supported Qt path before unloading a
+            // transient native window.
+            if (typeof loader.item.releaseResources === "function")
+                loader.item.releaseResources()
+        } catch (e) {
+        }
     }
     function releaseLoadedWindow(loader) {
         if (!loader || applicationClosing)
@@ -1875,13 +1907,16 @@ GlassApplicationWindow {
         // A Window close event is still being dispatched. Unload on the next
         // event-loop turn so the handler never destroys its own sender.
         Qt.callLater(function() {
-            if (!mainWindow.applicationClosing && loader)
+            if (!mainWindow.applicationClosing && loader) {
+                mainWindow.releaseLoaderGraphics(loader)
                 loader.active = false
+            }
         })
     }
     function shutdownLoader(loader) {
         if (!loader)
             return
+        releaseLoaderGraphics(loader)
         try {
             loader.active = false
         } catch (e) {
@@ -1894,6 +1929,16 @@ GlassApplicationWindow {
             loader.source = ""
         } catch (e) {
         }
+    }
+    function shutdownTopLevelLoadersReleased() {
+        return !ssbWindowLoader.item
+                && !cwWindowLoader.item
+                && !rttyWindowLoader.item
+                && !jttyWindowLoader.item
+                && !rotorWindowLoader.item
+                && !decolinkWindowLoader.item
+                && !decoPortWindowLoader.item
+                && !sstvWorkspaceLoader.item
     }
     function shutdownAsyncLoaders() {
         if (typeof waterfallEmbeddedLoader !== "undefined")
@@ -2011,6 +2056,11 @@ GlassApplicationWindow {
         }
     }
     function showCwWindow() {
+        // suspend() closes every CW-native resource when another application
+        // mode takes ownership. Restart lazily only when the CW window is
+        // actually requested, preserving the no-CW-work-at-startup contract.
+        if (typeof cwModule !== "undefined" && cwModule)
+            cwModule.ensureStarted()
         cwWindowLoader.active = true
         if (cwWindowLoader.item) {
             cwWindowLoader.item.show()

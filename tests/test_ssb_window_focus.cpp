@@ -22,6 +22,7 @@ private slots:
     void openMenuBlocksPttEvenIfFocusReturnsToKeyCatcher();
     void textEntryDoesNotTriggerPtt();
     void spaceStillStartsAndStopsPtt();
+    void heldMousePttSurvivesTransientMicrophoneEnumeration();
     void closeRequestsLoaderReleaseAndStopsActivity();
 
 private:
@@ -223,6 +224,32 @@ void TestSsbWindowFocus::spaceStillStartsAndStopsPtt()
     QTest::keyRelease(m_window, Qt::Key_Space);
     QCOMPARE(m_voice->property("stopCalls").toInt(), stopCalls + 1);
     QVERIFY(!m_voice->property("transmitting").toBool());
+}
+
+void TestSsbWindowFocus::heldMousePttSurvivesTransientMicrophoneEnumeration()
+{
+    auto *button = item("ssbHoldPttButton");
+    QVERIFY(button);
+    QTRY_VERIFY(button->isEnabled());
+    const QPoint point = button->mapToScene(
+        QPointF(button->width() / 2, button->height() / 2)).toPoint();
+
+    QTest::mousePress(m_window, Qt::LeftButton, Qt::NoModifier, point);
+    QTRY_VERIFY(m_voice->property("transmitting").toBool());
+    const int stopCalls = m_voice->property("stopCalls").toInt();
+
+    // PipeWire can momentarily publish an empty input list while rebuilding
+    // its graph. The selected ComboBox row disappears, but a held PTT must
+    // remain pressed so SsbController can perform its bounded stream reopen.
+    QVERIFY(m_voice->setProperty("microphones", QVariantList {}));
+    QTest::qWait(150);
+    QVERIFY(button->isEnabled());
+    QVERIFY(m_voice->property("transmitting").toBool());
+    QCOMPARE(m_voice->property("stopCalls").toInt(), stopCalls);
+
+    QTest::mouseRelease(m_window, Qt::LeftButton, Qt::NoModifier, point);
+    QTRY_VERIFY(!m_voice->property("transmitting").toBool());
+    QCOMPARE(m_voice->property("stopCalls").toInt(), stopCalls + 1);
 }
 
 void TestSsbWindowFocus::closeRequestsLoaderReleaseAndStopsActivity()

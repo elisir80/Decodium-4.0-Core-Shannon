@@ -46,6 +46,15 @@ inline QString graphicsBackendToken()
     QByteArray backend = qgetenv("QSG_RHI_BACKEND").trimmed().toLower();
     if (backend.isEmpty())
         backend = qgetenv("QT_QUICK_BACKEND").trimmed().toLower();
+    // D3D11 hardware and D3D11 WARP do not share the same adapter, driver or
+    // compiled pipeline representation.  Keeping their caches separate is
+    // essential when WARP was selected after a hardware-driver crash: loading
+    // the hardware cache would immediately reintroduce state from the failed
+    // graphics session into the recovery renderer.
+    if (backend == QByteArrayLiteral("d3d11")
+        && qEnvironmentVariableIntValue("QSG_RHI_PREFER_SOFTWARE_RENDERER") != 0) {
+        backend += QByteArrayLiteral("_warp");
+    }
     return sanitisedToken(QString::fromLocal8Bit(backend), QStringLiteral("auto"));
 }
 
@@ -233,4 +242,3 @@ private:
 
 } // namespace graphics_cache
 } // namespace decodium
-

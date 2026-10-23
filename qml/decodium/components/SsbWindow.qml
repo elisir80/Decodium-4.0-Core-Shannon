@@ -206,10 +206,21 @@ GlassApplicationWindow {
         ColumnLayout {
             anchors.fill: parent
         Button {
+            id: holdPttButton
+            objectName: "ssbHoldPttButton"
             Layout.fillWidth: true; Layout.preferredHeight: 64
             text: voice.transmitting ? qsTr("TRANSMITTING — release to receive") : qsTr("HOLD TO TALK • PTT")
             font.bold: true; font.pixelSize: 20
-            enabled: ready && controls.busy !== true && mic.currentIndex>=0
+            // PipeWire/PulseAudio can briefly rebuild the input-device model
+            // after QAudioSource starts.  During that refresh currentIndex is
+            // temporarily -1. Disabling a pressed Button makes Qt emit
+            // canceled, which used to call voice.stop() and drop PTT before
+            // the controller's bounded microphone recovery could run.
+            // Once TX has started, keep the release surface enabled; genuine
+            // CAT/mode/audio failures stop voice through their explicit
+            // safety handlers.
+            enabled: voice.transmitting
+                     || (ready && controls.busy !== true && mic.currentIndex >= 0)
             onPressed: voice.start()
             onReleased: voice.stop()
             onCanceled: voice.stop()

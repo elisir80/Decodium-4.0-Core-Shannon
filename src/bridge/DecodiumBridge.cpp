@@ -18868,6 +18868,15 @@ void DecodiumBridge::setMode(const QString& v) {
             && previousMode != QStringLiteral("CW");
         bool const leavingCw = previousMode == QStringLiteral("CW")
             && normalizedMode != QStringLiteral("CW");
+        // The physical rig can already report CW at startup while Decodium
+        // restores a saved digital application mode.  In that case there is
+        // no application-side CW -> digital transition, but the next explicit
+        // mode selection must still dislodge the rig from its startup CW
+        // state and protect the request from a delayed CAT snapshot.
+        QString const reportedCatModeBeforeChange = m_catMode.trimmed().toUpper();
+        bool const leavingReportedRigCw = normalizedMode != QStringLiteral("CW")
+            && (reportedCatModeBeforeChange == QStringLiteral("CW")
+                || reportedCatModeBeforeChange == QStringLiteral("CW-R"));
         if (enteringCw) {
             QString const previousCatMode = m_catMode.trimmed().toUpper();
             m_catModeBeforeCw = (previousCatMode != QStringLiteral("CW")
@@ -19115,7 +19124,15 @@ void DecodiumBridge::setMode(const QString& v) {
             bandMode = QStringLiteral("Q65");
         }
         m_bandManager->setCurrentMode(bandMode);
-        if (m_preserveFrequencyOnModeChange || normalizedMode == QStringLiteral("SSB")) {
+        // SSB and CW are operating modes, not single-frequency protocols.
+        // Entering either workspace must therefore keep the operator's dial
+        // exactly where it is.  The CW calling/QRP frequencies remain useful
+        // when the operator explicitly changes band while already in CW, but
+        // selecting CW itself must never QSY to one of them.
+        bool const preserveOperatorDial = m_preserveFrequencyOnModeChange
+            || normalizedMode == QStringLiteral("SSB")
+            || normalizedMode == QStringLiteral("CW");
+        if (preserveOperatorDial) {
             m_bandManager->updateFromFrequency(m_frequency);
         } else {
             // updateForMode emits bandFrequencyRequested(), whose sole bridge
@@ -19185,10 +19202,14 @@ void DecodiumBridge::setMode(const QString& v) {
             rttyCatContext(), configuredRigMode, QDateTime::currentMSecsSinceEpoch());
         QString cwExitRestoreMode;
         QString cwExitVerifyMode;
-        if (leavingCw) {
-            cwExitRestoreMode = m_catModeBeforeCw.trimmed().toUpper();
-            if (cwExitRestoreMode.isEmpty())
-                cwExitRestoreMode = configuredRigMode;
+        if (leavingCw || leavingReportedRigCw) {
+            if (leavingCw)
+                cwExitRestoreMode = m_catModeBeforeCw.trimmed().toUpper();
+            if (cwExitRestoreMode.isEmpty()) {
+                cwExitRestoreMode = normalizedMode == QStringLiteral("SSB")
+                    ? m_ssbRadioMode.trimmed().toUpper()
+                    : configuredRigMode;
+            }
             // CW can have been adopted from the radio during CAT startup,
             // before there was an application-side CW entry from which to
             // take a CAT-mode snapshot.  Keep an explicit target for the
@@ -19196,10 +19217,11 @@ void DecodiumBridge::setMode(const QString& v) {
             // must not overwrite the first DATA/USB request.
             cwExitVerifyMode = cwExitRestoreMode;
             m_catModeBeforeCw.clear();
-            bridgeLog(QStringLiteral("CW exit CAT restore: target=%1 applicationMode=%2")
+            bridgeLog(QStringLiteral("CW exit CAT restore: target=%1 applicationMode=%2 reportedBefore=%3")
                           .arg(cwExitRestoreMode.isEmpty()
                                    ? QStringLiteral("none") : cwExitRestoreMode,
-                               normalizedMode));
+                               normalizedMode,
+                               reportedCatModeBeforeChange));
         }
         if (!cwExitRestoreMode.isEmpty()) {
             applyConfiguredCatRigMode(QStringLiteral("mode-change/cw-exit"),
@@ -44964,7 +44986,6 @@ void DecodiumBridge::noteMainThreadMicroStall(qint64 deltaMs)
 {
     if (!mainWindowRenderActive()
         || deltaMs < decodium::decode::Ft8MicroStallGuard::StallThresholdMs
-        || m_mode != QStringLiteral("FT8")
         || !m_monitoring) {
         return;
     }
@@ -44974,6 +44995,38 @@ void DecodiumBridge::noteMainThreadMicroStall(qint64 deltaMs)
     // scene-graph FFT. Keep the decoder thread penalty responsive, but only
     // move the panadapter off the GPU after a genuinely severe UI freeze.
     static constexpr qint64 kGpuPanadapterPauseThresholdMs = 750;
+#if defined(Q_OS_WIN)
+    QByteArray const windowsRhi = qgetenv("QSG_RHI_BACKEND").trimmed().toLower();
+    bool const hardwareD3d11 = windowsRhi == QByteArrayLiteral("d3d11")
+        && qEnvironmentVariableIntValue("QSG_RHI_PREFER_SOFTWARE_RENDERER") == 0;
+    if (hardwareD3d11
+        && deltaMs >= kGpuPanadapterPauseThresholdMs
+        && m_forceGpuPanadapterFft.exchange(false)) {
+        // Intel's D3D11 user-mode driver can enter a Present/device-loss loop
+        // after a long render stall.  Re-probing custom RHI compute in that
+        // session repeatedly recreated the scene graph and eventually crashed
+        // inside igd10um64gen11.DLL.  Preserve the Qt scene graph, but keep the
+        // panadapter on asynchronous FFTW until restart.
+        m_gpuPanadapterFftStallGuard.store(true);
+        m_lastGpuPanadapterProbeMs = nowMs;
+        m_gpuPanadapterStableSinceMs = 0;
+        m_gpuPanadapterRetryNotBeforeMs = 0;
+        setGpuPanadapterFftAvailable(
+            false,
+            QStringLiteral("Windows D3D11 severe UI stall (%1 ms); disabled for this session")
+                .arg(deltaMs));
+        bridgeLog(QStringLiteral(
+            "Panadapter GPU FFT disabled for this Windows D3D11 session after a %1 ms UI stall; async CPU FFTW fallback remains active and GPU retry is suppressed")
+                      .arg(deltaMs));
+    }
+#endif
+
+    // The decoder-thread pressure guard is FT8-specific.  GPU protection
+    // above is deliberately mode-independent because D3D11 Present() and the
+    // panadapter scene graph are shared by FT8, FT4, FT2 and the other modes.
+    if (m_mode != QStringLiteral("FT8"))
+        return;
+
     bool activated = false;
     bool guardActive = false;
     int recentStallCount = 0;
@@ -45031,7 +45084,8 @@ void DecodiumBridge::noteFt8AdaptivePeriod(qint64 periodId)
     if (legacyBackendAvailable()) {
         m_legacyBackend->setFt8DeepThreadPenalty(false);
     }
-    if (m_gpuPanadapterFftStallGuard.exchange(false)) {
+    if (m_forceGpuPanadapterFft.load()
+        && m_gpuPanadapterFftStallGuard.exchange(false)) {
         // Do not blindly re-enable the GPU path: make it eligible for the
         // normal probe after the FT8 guard has observed clean periods.
         m_lastGpuPanadapterProbeMs = 0;

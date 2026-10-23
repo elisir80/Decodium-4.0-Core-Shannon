@@ -933,6 +933,24 @@ void CwController::stop()
     setSending(false, -1);
 }
 
+void CwController::suspend()
+{
+    // stop() releases every transmit path first (CAT PTT, remote keying,
+    // sidetone and queued Morse).  Closing the local keyers afterwards makes
+    // the CW -> digital/SSB transition a complete ownership hand-off instead
+    // of leaving a serial worker and its native handle alive until process
+    // destruction.
+    stop();
+    m_keyerRetryTimer.stop();
+    m_keyer.close();
+    m_winKeyer.close();
+    m_started = false;
+    m_decoder.reset();
+    m_scope.clear();
+    emit decoderScopeChanged();
+    emit txChanged();
+}
+
 void CwController::setSending(bool on, int macroIndex)
 {
     if (m_sending == on && m_activeMacro == macroIndex)

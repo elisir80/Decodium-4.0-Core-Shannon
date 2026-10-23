@@ -640,6 +640,63 @@ void DecodiumLogging::logStartupDiagnostics() {
 // la risposta sta nei primi byte all'indirizzo dell'eccezione (un prefisso
 // VEX C4/C5 significa AVX su una CPU che non lo ha, 0F 0B e' una trappola
 // del compilatore, byte incoerenti significano salto in memoria dati).
+static bool isWindowsGraphicsCrashModule(const QString& moduleName)
+{
+    QString const module = moduleName.trimmed().toLower();
+    return module.startsWith(QStringLiteral("igd"))
+        || module == QStringLiteral("nvwgf2umx.dll")
+        || module == QStringLiteral("atidxx64.dll")
+        || module == QStringLiteral("amdxx64.dll")
+        || module == QStringLiteral("d3d11.dll")
+        || module == QStringLiteral("d3d12.dll")
+        || module == QStringLiteral("d3d12core.dll")
+        || module == QStringLiteral("dxgi.dll");
+}
+
+static void writeWindowsRuntimeGraphicsCrashFlag(const QString& moduleName,
+                                                 DWORD exceptionCode)
+{
+    // The ordinary diagnostic writer is asynchronous.  A crash marker must be
+    // durable before this exception handler returns, therefore use Win32 file
+    // I/O directly and avoid depending on the Qt event loop or writer thread.
+    wchar_t tempPath[MAX_PATH + 1] = {};
+    DWORD const tempLength = GetTempPathW(MAX_PATH, tempPath);
+    if (tempLength == 0 || tempLength >= MAX_PATH)
+        return;
+
+    QString path = QString::fromWCharArray(tempPath);
+    path += QStringLiteral("decodium-gpu-runtime-crash.flag");
+    HANDLE file = CreateFileW(reinterpret_cast<LPCWSTR>(path.utf16()),
+                              GENERIC_WRITE,
+                              FILE_SHARE_READ,
+                              nullptr,
+                              CREATE_ALWAYS,
+                              FILE_ATTRIBUTE_NORMAL | FILE_FLAG_WRITE_THROUGH,
+                              nullptr);
+    if (file == INVALID_HANDLE_VALUE)
+        return;
+
+    QByteArray backend = qgetenv("DECODIUM_ACTIVE_WINDOWS_GRAPHICS_MODE")
+                             .trimmed().toLower();
+    if (backend.isEmpty())
+        backend = qgetenv("QSG_RHI_BACKEND").trimmed().toLower();
+    if (backend.isEmpty())
+        backend = QByteArrayLiteral("d3d11");
+
+    QByteArray payload("backend=");
+    payload += backend;
+    payload += "\nmodule=";
+    payload += moduleName.toUtf8();
+    payload += "\nexception=0x";
+    payload += QByteArray::number(exceptionCode, 16);
+    payload += '\n';
+    DWORD written = 0;
+    WriteFile(file, payload.constData(), static_cast<DWORD>(payload.size()),
+              &written, nullptr);
+    FlushFileBuffers(file);
+    CloseHandle(file);
+}
+
 static LONG WINAPI crashHandler(EXCEPTION_POINTERS* ep) {
     EXCEPTION_RECORD const* rec = ep && ep->ExceptionRecord ? ep->ExceptionRecord : nullptr;
     if (!rec) {
@@ -651,6 +708,7 @@ static LONG WINAPI crashHandler(EXCEPTION_POINTERS* ep) {
                       .arg(rec->ExceptionCode, 8, 16, QChar('0'))
                       .arg(addr, 0, 16)
                       .arg(GetCurrentThreadId());
+    QString moduleName;
     HMODULE mod = nullptr;
     if (GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS
                                | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
@@ -658,11 +716,11 @@ static LONG WINAPI crashHandler(EXCEPTION_POINTERS* ep) {
         && mod) {
         wchar_t path[MAX_PATH] = {};
         DWORD const n = GetModuleFileNameW(mod, path, MAX_PATH);
-        QString name = n ? QString::fromWCharArray(path, static_cast<int>(n)) : QString();
-        int const slash = name.lastIndexOf(QLatin1Char('\\'));
-        if (slash >= 0) name = name.mid(slash + 1);
+        moduleName = n ? QString::fromWCharArray(path, static_cast<int>(n)) : QString();
+        int const slash = moduleName.lastIndexOf(QLatin1Char('\\'));
+        if (slash >= 0) moduleName = moduleName.mid(slash + 1);
         msg += QString(" module=%1+0x%2")
-                   .arg(name.isEmpty() ? QStringLiteral("?") : name)
+                   .arg(moduleName.isEmpty() ? QStringLiteral("?") : moduleName)
                    .arg(addr - reinterpret_cast<quintptr>(mod), 0, 16);
     } else {
         msg += QStringLiteral(" module=fuori-da-ogni-modulo");
@@ -688,6 +746,8 @@ static LONG WINAPI crashHandler(EXCEPTION_POINTERS* ep) {
             byte += QString("%1 ").arg(p[i], 2, 16, QChar('0'));
         msg += " bytes=" + byte.trimmed();
     }
+    if (isWindowsGraphicsCrashModule(moduleName))
+        writeWindowsRuntimeGraphicsCrashFlag(moduleName, rec->ExceptionCode);
     DecodiumLogging::diag(DiagCategory::ERR, msg);
     return EXCEPTION_EXECUTE_HANDLER;
 }
