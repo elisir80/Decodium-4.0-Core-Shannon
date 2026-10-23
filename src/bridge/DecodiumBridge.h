@@ -4698,6 +4698,8 @@ public:
     void    setMamCqSlots(bool on);
     // Pianifica le frequenze audio dei CQ paralleli: parte dalla frequenza TX e
     // sale a passi di 60 Hz, poi scende, saltando quelle gia' occupate.
+    int mamMinStreamGapHz() const;
+    int mamStreamStepHz() const;
     QVector<int> mamPlanCqFrequencies(int count, const QVector<int>& used) const;
     bool    mamModeSupported() const { return isMamMultiStreamMode(); }
     // FT2: il multi-stream non e' mai stato validato on-air (primo pileup reale

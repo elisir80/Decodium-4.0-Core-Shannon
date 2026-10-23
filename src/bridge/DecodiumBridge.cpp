@@ -25896,6 +25896,28 @@ void DecodiumBridge::setMamCqSlots(bool on)
     bridgeLog(QStringLiteral("MAM parallel CQ slots toggled: %1").arg(on ? 1 : 0));
 }
 
+// Distanza minima fra due stream MAM nello stesso periodo, per modo. Due
+// portanti piu' vicine della larghezza del segnale si disturbano a vicenda in
+// ricezione. Misurato il 23/10/2026 (banco tools/autoimprove/multistream_scan.py,
+// 2 e 3 stream a pari ampiezza, rumore bianco, SNR per stream vicino alla
+// soglia): FT2 (segnale largo ~167 Hz) si decodifica al 98-100% a 170 Hz, al
+// 48-92% a 125 Hz, al 15-65% a 85 Hz, <10% a 40 Hz. FT4 (~83 Hz): a 3 dB sopra la
+// soglia 100% da 85 Hz in su, 90-93% a 60 Hz, 17-67% a 40 Hz. FT8 resta a 50/60 Hz.
+int DecodiumBridge::mamMinStreamGapHz() const
+{
+    if (m_mode == QStringLiteral("FT2")) return 170;
+    if (m_mode == QStringLiteral("FT4")) return 85;
+    return 50;
+}
+
+// Passo con cui si cercano frequenze libere: un po' sopra la distanza minima.
+int DecodiumBridge::mamStreamStepHz() const
+{
+    if (m_mode == QStringLiteral("FT2")) return 180;
+    if (m_mode == QStringLiteral("FT4")) return 90;
+    return 60;
+}
+
 // 1.0.569+ - sceglie fino a `count` frequenze audio per i CQ paralleli. Parte
 // dalla frequenza TX dell'operatore e sale a passi di 60 Hz (la spaziatura gia'
 // usata dal de-dup degli slot: un segnale FT8 occupa 50 Hz), poi ripiega verso
@@ -25907,8 +25929,8 @@ QVector<int> DecodiumBridge::mamPlanCqFrequencies(int count, const QVector<int>&
     if (count <= 0) {
         return out;
     }
-    constexpr int spacingHz = 60;
-    constexpr int minGapHz = 50;
+    int const spacingHz = mamStreamStepHz();
+    int const minGapHz = mamMinStreamGapHz();
     constexpr int maxSteps = 64;
     int const base = qBound(200, m_txFrequency > 0 ? m_txFrequency : m_rxFrequency, 4000);
     QVector<int> taken = used;
@@ -26126,10 +26148,10 @@ void DecodiumBridge::mamEnqueueClickedStation(const QString& callFull, int audio
     for (int guard = 0; guard < m_mamSlots.size() + 2; ++guard) {
         bool collision = false;
         for (MamQsoSlot const& other : m_mamSlots) {
-            if (qAbs(other.audioFreqHz - fHz) < 50) { collision = true; break; }
+            if (qAbs(other.audioFreqHz - fHz) < mamMinStreamGapHz()) { collision = true; break; }
         }
         if (!collision) break;
-        fHz = qBound(200, fHz + 60, 4000);
+        fHz = qBound(200, fHz + mamStreamStepHz(), 4000);
     }
     s.audioFreqHz = fHz;
     s.progress = 1;     // CQ-stage: IO inizio la chiamata
@@ -26402,7 +26424,7 @@ void DecodiumBridge::mamIngestDecode(const QStringList& f)
         }
         bool frequencyBusy = false;
         for (MamQsoSlot const& other : m_mamSlots) {
-            if (qAbs(other.audioFreqHz - s.audioFreqHz) < 50) {
+            if (qAbs(other.audioFreqHz - s.audioFreqHz) < mamMinStreamGapHz()) {
                 frequencyBusy = true;
                 break;
             }
@@ -26577,7 +26599,7 @@ void DecodiumBridge::mamPromoteLateReportRecoveries()
         MamQsoSlot restored = it->slot;
         bool frequencyBusy = false;
         for (MamQsoSlot const& other : m_mamSlots) {
-            if (qAbs(other.audioFreqHz - restored.audioFreqHz) < 50) {
+            if (qAbs(other.audioFreqHz - restored.audioFreqHz) < mamMinStreamGapHz()) {
                 frequencyBusy = true;
                 break;
             }
@@ -26644,7 +26666,7 @@ void DecodiumBridge::mamPromoteFromQueue()
         int const fHz = qBound(200, qFreq > 0 ? qFreq : m_rxFrequency, 4000);
         bool frequencyBusy = false;
         for (MamQsoSlot const& other : m_mamSlots) {
-            if (qAbs(other.audioFreqHz - fHz) < 50) {
+            if (qAbs(other.audioFreqHz - fHz) < mamMinStreamGapHz()) {
                 frequencyBusy = true;
                 break;
             }

@@ -107,3 +107,7 @@ The CPU rule (+10 %) is exceeded on purpose: the gain is real-band only. Slow co
   would give the alias gain without the CPU cost; needs a savg/sbase dump to test offline.
 * `ALIAS=3`, and alias only after the parent failed twice (async path).
 * Memory-based knobs (ACCUMULO, STORICO) need repeated-station scenes (`mescola_ft2.py --sequenze`).
+
+## 23/10/2026 - spaziatura degli stream MAM per modo
+
+`multistream_scan.py`: N stream a pari ampiezza, rumore bianco. FT2 si decodifica al 98-100% a 170 Hz, 48-92% a 125 Hz, 15-65% a 85 Hz, <10% a 40 Hz; FT4 100% da 85 Hz in su a 3 dB sopra soglia. Il MAM usava 50/60 Hz (taratura FT8) per tutti i modi: ora FT2 170/180, FT4 85/90, FT8 invariato.
