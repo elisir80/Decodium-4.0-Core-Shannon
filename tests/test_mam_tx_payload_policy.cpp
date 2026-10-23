@@ -267,7 +267,7 @@ void TestMamTxPayloadPolicy::waterfallUsesTheComposedMamPayloadDuringTx()
 
     const QString dispatch = functionBody(
         cpp,
-        QStringLiteral("void DecodiumBridge::mamDispatchPeriod()"),
+        QStringLiteral("void DecodiumBridge::mamDispatchPeriod(bool elastic)"),
         QStringLiteral("bool DecodiumBridge::ensureTxAudioPrepared("));
     QVERIFY(dispatch.contains(QStringLiteral("emit mamTxStreamsChanged();")));
     QVERIFY(dispatch.indexOf(QStringLiteral("emit mamTxStreamsChanged();"))

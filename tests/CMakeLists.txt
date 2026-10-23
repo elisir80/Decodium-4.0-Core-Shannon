@@ -326,6 +326,11 @@ target_compile_definitions (test_mam_tx_payload_policy
 target_link_libraries (test_mam_tx_payload_policy Qt6::Test Qt6::Core)
 add_test (NAME test_mam_tx_payload_policy COMMAND $<TARGET_FILE:test_mam_tx_payload_policy>)
 
+add_executable (test_fox_elastic_cycle test_fox_elastic_cycle.cpp)
+target_include_directories (test_fox_elastic_cycle PRIVATE ${CMAKE_SOURCE_DIR})
+target_link_libraries (test_fox_elastic_cycle Qt6::Test Qt6::Core)
+add_test (NAME test_fox_elastic_cycle COMMAND $<TARGET_FILE:test_fox_elastic_cycle>)
+
 add_executable (test_audio_sink_tx_gate
   test_audio_sink_tx_gate.cpp
   ../Audio/AudioDevice.cpp
@@ -779,6 +784,7 @@ set (_decodium_regression_test_targets
   test_tx_pipeline
   test_ptt_transition_policy
   test_mam_tx_payload_policy
+  test_fox_elastic_cycle
   test_audio_sink_tx_gate
   test_rtty_rx_recovery
   test_rtty_rig_mode_state

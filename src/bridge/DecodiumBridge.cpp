@@ -26255,6 +26255,9 @@ void DecodiumBridge::mamIngestDecode(const QStringList& f)
     if (partnerBase.isEmpty() || partnerBase == myBaseUpper) {
         return;
     }
+    if (m_ft2ElasticFox) {
+        m_foxElastic.decodeHeard(partnerBase.toStdString(), QDateTime::currentMSecsSinceEpoch());
+    }
 
     // Anti-riapertura: stazioni gia' lavorate di recente o in cooldown non
     // devono riaprire uno slot (eviterebbe loop su 73 ripetuti).
@@ -26734,12 +26737,74 @@ void DecodiumBridge::mamLogSlot(MamQsoSlot& s)
                   .arg(logCall, s.reportSent, s.reportReceived));
 }
 
+// ---------------------------------------------------------------------------
+// Ciclo elastico della Fox FT2 (opt-in: Ft2ElasticFox / DECODIUM_FT2_ELASTIC_FOX).
+// Invece di trasmettere ogni secondo slot (7,5 s), la Fox riparte appena tutte
+// le stazioni a cui ha scritto hanno risposto, o appena e' chiaro che non
+// risponderanno (tempi appresi per stazione, come il timeout di TCP). La logica
+// di decisione e' in FoxElasticCycle.h (testata); qui c'e' solo il collegamento.
+// Il confine di periodo resta come ripiego: se l'elastico non scatta, dopo 6,5 s
+// dalla fine del TX la griglia riprende il controllo.
+// ---------------------------------------------------------------------------
+bool DecodiumBridge::foxElasticActive() const
+{
+    return m_ft2ElasticFox
+        && m_mode == QStringLiteral("FT2")
+        && m_asyncTxEnabled
+        && mamMultiStreamSequencerActive();
+}
+
+void DecodiumBridge::foxElasticOnTxFinished()
+{
+    if (!foxElasticActive()) {
+        return;
+    }
+    m_foxElastic.txEnded(QDateTime::currentMSecsSinceEpoch());
+    if (!m_foxElasticTimer) {
+        m_foxElasticTimer = new QTimer(this);
+        m_foxElasticTimer->setInterval(40);
+        connect(m_foxElasticTimer, &QTimer::timeout, this, &DecodiumBridge::foxElasticPoll);
+    }
+    m_foxElasticTimer->start();
+    bridgeLog(QStringLiteral("FoxElastic: window open, waiting for %1 station(s), newcomer delay %2 ms")
+                  .arg(m_foxElastic.pendingCount())
+                  .arg(static_cast<int>(m_foxElastic.newcomerDelayMs())));
+}
+
+void DecodiumBridge::foxElasticPoll()
+{
+    auto closeWindow = [this]() {
+        if (m_foxElasticTimer) {
+            m_foxElasticTimer->stop();
+        }
+        m_foxElastic.dispatched();
+    };
+    if (!foxElasticActive() || !m_foxElastic.windowOpen() || m_transmitting || m_tuning || m_manualTxHold) {
+        closeWindow();
+        return;
+    }
+    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+    if (!m_foxElastic.shouldGo(nowMs)) {
+        return;
+    }
+    if (m_periodicTxInFlight) {
+        return;     // un altro avvio e' in corso: riprovo al prossimo giro
+    }
+    bridgeLog(QStringLiteral("FoxElastic: go after %1 ms, still waiting for %2 station(s)")
+                  .arg(nowMs - m_foxElastic.windowStartMs())
+                  .arg(m_foxElastic.pendingCount()));
+    closeWindow();
+    m_foxElasticGo = true;
+    checkAndStartPeriodicTx();
+    m_foxElasticGo = false;
+}
+
 // Dispatch di un periodo TX MAM. Sostituisce checkAndStartPeriodicTx quando il
 // sequencer multi-stream e' attivo. Calcola la parita' slot (come
 // checkAndStartPeriodicTx), prune/promote, costruisce m_mamMessages/m_mamF0sHz
 // per gli slot attivi e avvia startTx() (la seam FASE 1 produce il wave
 // multi-stream). Il caso 1-slot e' gestito da multiStreamActive()>=1.
-void DecodiumBridge::mamDispatchPeriod()
+void DecodiumBridge::mamDispatchPeriod(bool elastic)
 {
     if (!m_txEnabled) {
         const bool hadTxStreams = !m_mamMessages.isEmpty() || !m_mamF0sHz.isEmpty();
@@ -26749,6 +26814,16 @@ void DecodiumBridge::mamDispatchPeriod()
             emit mamTxStreamsChanged();
         }
         bridgeLog(QStringLiteral("MAM dispatch blocked: TX disabled"));
+        return;
+    }
+
+    // Ciclo elastico (FT2, opt-in): finche' la finestra di ascolto e' aperta e'
+    // foxElasticPoll() a decidere quando parte il frame successivo; il confine
+    // di periodo non deve trasmettere nel mezzo delle risposte. Se l'elastico
+    // si bloccasse, passati 6,5 s dalla fine del TX il confine riprende il
+    // controllo (ritorno alla griglia).
+    if (!elastic && foxElasticActive() && m_foxElastic.windowOpen()
+        && QDateTime::currentMSecsSinceEpoch() - m_foxElastic.windowStartMs() < 6500) {
         return;
     }
 
@@ -26762,12 +26837,12 @@ void DecodiumBridge::mamDispatchPeriod()
     int const pidx = static_cast<int>(msNow / static_cast<qint64>(pMs));
     bool const isEven = (pidx % 2 == 0);
     bool const isOurPeriod = bridgeTxPeriodIsEven(m_txPeriod) ? isEven : !isEven;
-    if (!isOurPeriod) {
+    if (!isOurPeriod && !elastic) {
         return;
     }
     int const elapsedMs = static_cast<int>(msNow % static_cast<qint64>(pMs));
     int const latestStartMs = latestD3CompatibleSyncTxStartMs(m_mode, pMs, effectiveRelaxLatestCap());
-    if (latestStartMs > 0 && elapsedMs >= latestStartMs) {
+    if (!elastic && latestStartMs > 0 && elapsedMs >= latestStartMs) {
         // Troppo tardi nello slot: rinvio al prossimo (no troncamento payload).
         scheduleSyncTxAtNextValidSlot(QStringLiteral("mamDispatchPeriod"), elapsedMs, latestStartMs);
         return;
@@ -26891,6 +26966,21 @@ void DecodiumBridge::mamDispatchPeriod()
     // when transmitting becomes true.
     emit mamTxStreamsChanged();
     emit mamActiveSlotsChanged();
+    // Ciclo elastico: le stazioni a cui e' indirizzato un messaggio che attende
+    // risposta (TX1..TX3); i CQ e gli RR73/73 non aspettano nessuno.
+    {
+        std::vector<std::string> expected;
+        for (int idx : std::as_const(txSlotIdx)) {
+            if (idx < 0 || idx >= m_mamSlots.size()) {
+                continue;
+            }
+            MamQsoSlot const& es = m_mamSlots.at(idx);
+            if (es.currentTx >= 1 && es.currentTx <= 3) {
+                expected.push_back(es.call.toStdString());
+            }
+        }
+        m_foxElastic.setExpected(std::move(expected));
+    }
     startTx();
 }
 
@@ -28080,6 +28170,9 @@ void DecodiumBridge::completeTxPlayback(const QString& reason, bool error)
     restoreTxAudioSchedulingBoost(reason);
     resumeRxAudioAfterTx(reason);
     resumeNonAudioTxWork(reason);
+    if (wasTransmitting && !error) {
+        foxElasticOnTxFinished();
+    }
 
     if (txPlaybackFinalizedQso) {
         if (wasTransmitting && !error) {
@@ -40790,7 +40883,12 @@ void DecodiumBridge::checkAndStartPeriodicTx()
     // e' attivo gestisce TUTTO il dispatch del periodo e ritorna. Gated da
     // mamMultiStreamSequencerActive() -> con MAM OFF questo if non scatta mai
     // e il path single-QSO sottostante resta byte-identico.
-    if (mamMultiStreamSequencerActive()) { mamDispatchPeriod(); return; }
+    if (mamMultiStreamSequencerActive()) {
+        bool const elasticGo = m_foxElasticGo;
+        m_foxElasticGo = false;
+        mamDispatchPeriod(elasticGo);
+        return;
+    }
     // 1.0.446 - P1-4 (audit hardening, DIAGNOSTICO solo-logging, nessun blocco): rileva stati
     // (progress,currentTx) incoerenti al chokepoint TX. Logga solo l'anomalia (rara se la
     // macchina a stati e' sana). Eccezione QuickQSO (currentTx=3,progress=5) whitelistata.
@@ -43194,6 +43292,9 @@ void DecodiumBridge::loadSettings()
     m_ft2AsyncSkipRedundantSyncDecode = s.value(QStringLiteral("Ft2AsyncSkipRedundantSyncDecode"), false).toBool();
     // 1.0.364+ - MAM multi-stream (MSHV) FASE 3 (default OFF; cap 2..5, default 3)
     m_mamMultiStream = decodium::profiledSettingsValue(QString(), QStringLiteral("MamMultiStream"), false).toBool();
+    // 1.0.711 - ciclo elastico della Fox FT2 (opt-in, default OFF; nessuna interfaccia ancora).
+    m_ft2ElasticFox = truthyEnvironmentFlag("DECODIUM_FT2_ELASTIC_FOX")
+        || decodium::profiledSettingsValue(QString(), QStringLiteral("Ft2ElasticFox"), false).toBool();
     m_mamMaxStreams  = qBound(1, decodium::profiledSettingsValue(QString(), QStringLiteral("MamMaxStreams"), 3).toInt(), 10);
     m_mamCqSlots     = decodium::profiledSettingsValue(QString(), QStringLiteral("MamCqSlots"), true).toBool();
     // 1.0.299 — Deep decode anche in TX (decode-list-only), opt-in default OFF

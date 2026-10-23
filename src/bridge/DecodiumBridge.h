@@ -35,6 +35,7 @@ namespace decodium::audio { class RttyRxRecovery; }
 
 #include "DecodiumThemeManager.h"
 #include "Detector/Ft2AsyncRegistry.hpp"
+#include "FoxElasticCycle.h"
 #include "DecodiumSubManagers.h"
 #include "DecodiumCat4OmManager.h"
 #include "DecodiumOmniRigManager.h"
@@ -3844,6 +3845,11 @@ private:
         enum class State { Active, Signoff, Done } state {State::Active};
     };
     QVector<MamQsoSlot> m_mamSlots;
+    // Ciclo elastico della Fox FT2 (opt-in, default OFF).
+    bool m_ft2ElasticFox {false};
+    bool m_foxElasticGo {false};
+    decodium::foxelastic::Cycle m_foxElastic;
+    QTimer* m_foxElasticTimer {nullptr};
     // A station can decode our report only after its slot has reached the
     // retry/silence limit.  Keep that incomplete exchange briefly so an
     // unambiguously directed late R+report can finish it at TX4/RR73 instead
@@ -4672,7 +4678,10 @@ public:
     QVariantList mamTxStreams() const;
     int     mamActiveSlotCount() const { return m_mamSlots.size(); }
     bool    mamMultiStreamSequencerActive() const;
-    void    mamDispatchPeriod();
+    void    mamDispatchPeriod(bool elastic = false);
+    bool    foxElasticActive() const;
+    void    foxElasticOnTxFinished();
+    void    foxElasticPoll();
     void    mamIngestDecode(const QStringList& f);
     QString mamBuildSlotMessage(MamQsoSlot& s);
     void    mamPruneSlots();
