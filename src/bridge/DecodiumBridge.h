@@ -36,6 +36,7 @@ namespace decodium::audio { class RttyRxRecovery; }
 #include "DecodiumThemeManager.h"
 #include "Detector/Ft2AsyncRegistry.hpp"
 #include "FoxElasticCycle.h"
+#include "FoxPowerBudget.h"
 #include "DecodiumSubManagers.h"
 #include "DecodiumCat4OmManager.h"
 #include "DecodiumOmniRigManager.h"
@@ -3817,6 +3818,8 @@ private:
     bool               m_mamMultiStream {false};
     QStringList        m_mamMessages;
     QVector<int>       m_mamF0sHz;
+    QVector<float>     m_mamGains;     // amplitude per stream, parallel to m_mamMessages (power budget)
+    bool               m_mamPowerBudget {false};
     // 1.0.364+ — MAM multi-stream nativo (FASE 2). Sequencer multi-QSO
     // paralleli, modello MSHV "rispondi sulla freq del chiamante". Default OFF
     // (m_mamMultiStream==false): nessuno slot viene mai creato, mamDispatchPeriod
@@ -3842,6 +3845,9 @@ private:
         qint64  lastHeardMs {0};    // epoch ms ultimo decode diretto a me
         bool    logged {false};     // QSO loggato
         QString lastTransmittedMessage;
+        float   lastTxGain {1.0f};  // amplitude our last frame gave this station (power budget)
+        int     linkSnrDb {127};    // its SNR on a full-scale stream, from its own report (127 = unknown)
+        int     waitFrames {0};     // frames the power budget left it out of
         enum class State { Active, Signoff, Done } state {State::Active};
     };
     QVector<MamQsoSlot> m_mamSlots;

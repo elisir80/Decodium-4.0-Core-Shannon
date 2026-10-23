@@ -5902,7 +5902,8 @@ static QVector<float> buildTxWaveformForMessage(QString const& mode,
 static QVector<float> generateMultiStreamFtxWave(QString const& mode,
                                                  QStringList const& messages,
                                                  QVector<int> const& f0sHz,
-                                                 QString* errorOut = nullptr)
+                                                 QString* errorOut = nullptr,
+                                                 QVector<float> const& gains = {})
 {
     if (messages.isEmpty() || messages.size() != f0sHz.size()) {
         if (errorOut) *errorOut = QStringLiteral("MAM multi-stream: input non valido");
@@ -5956,8 +5957,10 @@ static QVector<float> generateMultiStreamFtxWave(QString const& mode,
         }
         int const samples = std::min(static_cast<int>(acc.size()),
                                      static_cast<int>(slot.size()));
+        // Power budget: each stream carries the amplitude its own link needs.
+        float const streamGain = (gains.size() == messages.size()) ? gains.at(i) : 1.0f;
         for (int k = 0; k < samples; ++k) {
-            acc[k] += slot.at(k);
+            acc[k] += streamGain * slot.at(k);
         }
     }
 
@@ -19070,6 +19073,7 @@ void DecodiumBridge::setMode(const QString& v) {
         m_mamLateReportRecoveries.clear();
         m_mamMessages.clear();
         m_mamF0sHz.clear();
+        m_mamGains.clear();
         emit mamTxStreamsChanged();
         // A mode switch invalidates short-lived CAT/audio-frequency guards
         // from the previous mode. Leaving them active can make a later CAT
@@ -24840,6 +24844,7 @@ void DecodiumBridge::clearTxMessages()
     m_mamLateReportRecoveries.clear();
     m_mamMessages.clear();
     m_mamF0sHz.clear();
+    m_mamGains.clear();
     emit mamTxStreamsChanged();
     clearDeferredManualSyncTx(QStringLiteral("clear-tx-messages"));
 
@@ -25563,6 +25568,7 @@ void DecodiumBridge::clearMamPendingTxPayload(const QString& reason)
     // A MAM composite can have the same representative message, frequency and
     // period as mono TX. Always invalidate it, even if the vectors were
     // already empty, so the next manual transmission is regenerated safely.
+    m_mamGains.clear();
     invalidateTxAudioCache();
     if (hadPayload) {
         emit mamTxStreamsChanged();
@@ -26465,6 +26471,11 @@ void DecodiumBridge::mamIngestDecode(const QStringList& f)
     }
     if (receivedReportValid) {
         s.reportReceived = formatSignalReport(receivedReportDb);
+        // The R+report is how well the station copied our last frame; undo the
+        // amplitude that frame carried to get its SNR on a full-scale stream.
+        if (hasRogerReport && s.lastTxGain > 0.0f) {
+            s.linkSnrDb = qRound(receivedReportDb - 20.0 * std::log10(static_cast<double>(s.lastTxGain)));
+        }
     }
 
     if (isFinal73) {
@@ -26810,6 +26821,7 @@ void DecodiumBridge::mamDispatchPeriod(bool elastic)
         const bool hadTxStreams = !m_mamMessages.isEmpty() || !m_mamF0sHz.isEmpty();
         m_mamMessages.clear();
         m_mamF0sHz.clear();
+        m_mamGains.clear();
         if (hadTxStreams) {
             emit mamTxStreamsChanged();
         }
@@ -26856,13 +26868,60 @@ void DecodiumBridge::mamDispatchPeriod(bool elastic)
     const bool hadPreviousTxStreams = !m_mamMessages.isEmpty() || !m_mamF0sHz.isEmpty();
     m_mamMessages.clear();
     m_mamF0sHz.clear();
+    m_mamGains.clear();
     // A listening interval suppresses only new CQ streams. Existing MAM QSO
     // slots remain free to send their directed reply/signoff traffic.
     bool const autoCqBurstListeningNow = autoCqBurstListening();
     qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
     QVector<int> txSlotIdx;
+    // Budget di potenza (opt-in): al posto di "i primi N slot con ampiezza
+    // uguale" si ammettono tanti QSO quanti ne stanno nel budget, ciascuno con
+    // l'ampiezza che il suo collegamento richiede (FoxPowerBudget.h).
+    bool const budgetOn = m_mamPowerBudget;
+    QHash<int, float> budgetGain;
+    if (budgetOn) {
+        decodium::foxbudget::Config bcfg;
+        bcfg.thresholdDb = (m_mode == QStringLiteral("FT2")) ? -13.5
+                         : (m_mode == QStringLiteral("FT4")) ? -17.0 : -20.0;
+        bcfg.maxStreams = m_mamMaxStreams;
+        std::vector<decodium::foxbudget::Candidate> cands;
+        // chi chiude un QSO (RR73/73) prima, poi R+report, report, chiamata
+        for (int pass = 0; pass < 4; ++pass) {
+            for (int i = 0; i < m_mamSlots.size(); ++i) {
+                MamQsoSlot const& s = m_mamSlots.at(i);
+                if (s.state == MamQsoSlot::State::Done || s.logged || s.currentTx < 1 || s.currentTx > 6) {
+                    continue;
+                }
+                int const rank = (s.currentTx >= 4) ? 0 : (s.currentTx == 3) ? 1 : (s.currentTx == 2) ? 2 : 3;
+                if (rank != pass) {
+                    continue;
+                }
+                bool const measured = s.linkSnrDb != 127;
+                double const link = measured ? s.linkSnrDb : (s.partnerSnrDb != 127 ? s.partnerSnrDb : -8);
+                cands.emplace_back(i, link, measured, s.waitFrames);
+            }
+        }
+        decodium::foxbudget::Allocation const alloc = decodium::foxbudget::allocate(cands, bcfg);
+        QStringList chosenLog, deferredLog;
+        for (size_t k = 0; k < alloc.ids.size(); ++k) {
+            budgetGain.insert(alloc.ids[k], static_cast<float>(alloc.gains[k]));
+            m_mamSlots[alloc.ids[k]].waitFrames = 0;
+            chosenLog << QStringLiteral("%1:%2").arg(m_mamSlots.at(alloc.ids[k]).call).arg(alloc.gains[k], 0, 'f', 2);
+        }
+        for (int id : alloc.deferred) {
+            ++m_mamSlots[id].waitFrames;
+            deferredLog << m_mamSlots.at(id).call;
+        }
+        if (!cands.empty()) {
+            bridgeLog(QStringLiteral("MAM budget: streams=[%1] deferred=[%2]")
+                          .arg(chosenLog.join(QLatin1Char(' ')), deferredLog.join(QLatin1Char(' '))));
+        }
+    }
     for (int i = 0; i < m_mamSlots.size() && m_mamMessages.size() < m_mamMaxStreams; ++i) {
         MamQsoSlot& s = m_mamSlots[i];
+        if (budgetOn && !budgetGain.contains(i)) {
+            continue;
+        }
         if (s.state == MamQsoSlot::State::Done || s.logged) {
             continue;
         }
@@ -26875,6 +26934,10 @@ void DecodiumBridge::mamDispatchPeriod(bool elastic)
         }
         m_mamMessages.append(msg);
         m_mamF0sHz.append(s.audioFreqHz);
+        if (budgetOn) {
+            m_mamGains.append(budgetGain.value(i, 1.0f));
+            s.lastTxGain = budgetGain.value(i, 1.0f);
+        }
         s.lastTransmittedMessage = msg;
         txSlotIdx.append(i);
         s.lastTxSlotMs = nowMs;
@@ -26916,8 +26979,9 @@ void DecodiumBridge::mamDispatchPeriod(bool elastic)
         && m_autoCqRepeat
         && !autoCqBurstListeningNow
         && !cqMessage.isEmpty()
+        && !(budgetOn && !m_mamMessages.isEmpty())
         && m_mamMessages.size() < m_mamMaxStreams) {
-        int const want = m_mamMaxStreams - m_mamMessages.size();
+        int const want = budgetOn ? 1 : m_mamMaxStreams - m_mamMessages.size();
         QVector<int> const cqFreqs = mamPlanCqFrequencies(want, m_mamF0sHz);
         for (int f : cqFreqs) {
             m_mamMessages.append(cqMessage);
@@ -26966,6 +27030,13 @@ void DecodiumBridge::mamDispatchPeriod(bool elastic)
     // when transmitting becomes true.
     emit mamTxStreamsChanged();
     emit mamActiveSlotsChanged();
+    if (budgetOn) {
+        while (m_mamGains.size() < m_mamMessages.size()) {
+            m_mamGains.append(1.0f);     // CQ: a single stream at full scale
+        }
+    } else {
+        m_mamGains.clear();
+    }
     // Ciclo elastico: le stazioni a cui e' indirizzato un messaggio che attende
     // risposta (TX1..TX3); i CQ e gli RR73/73 non aspettano nessuno.
     {
@@ -27126,7 +27197,8 @@ bool DecodiumBridge::ensureTxAudioPrepared(const QString& msg, int txAudioFreque
         bridgeLog(QStringLiteral("MAM composite audio build: streams=%1 %2")
                       .arg(m_mamMessages.size())
                       .arg(streamDescription.join(QStringLiteral(" | "))));
-        wave = generateMultiStreamFtxWave(mode, m_mamMessages, m_mamF0sHz, &buildError);
+        wave = generateMultiStreamFtxWave(mode, m_mamMessages, m_mamF0sHz, &buildError,
+                                          m_mamPowerBudget ? m_mamGains : QVector<float> {});
     } else {
         wave = buildTxWaveformForMessage(mode, message, txAudioFrequency,
                                          effectivePeriodMsForMode(mode) / 1000.0,
@@ -43292,6 +43364,9 @@ void DecodiumBridge::loadSettings()
     m_ft2AsyncSkipRedundantSyncDecode = s.value(QStringLiteral("Ft2AsyncSkipRedundantSyncDecode"), false).toBool();
     // 1.0.364+ - MAM multi-stream (MSHV) FASE 3 (default OFF; cap 2..5, default 3)
     m_mamMultiStream = decodium::profiledSettingsValue(QString(), QStringLiteral("MamMultiStream"), false).toBool();
+    // 1.0.711 - budget di potenza del MAM (opt-in, default OFF; nessuna interfaccia ancora).
+    m_mamPowerBudget = truthyEnvironmentFlag("DECODIUM_MAM_POWER_BUDGET")
+        || decodium::profiledSettingsValue(QString(), QStringLiteral("MamPowerBudget"), false).toBool();
     // 1.0.711 - ciclo elastico della Fox FT2 (opt-in, default OFF; nessuna interfaccia ancora).
     m_ft2ElasticFox = truthyEnvironmentFlag("DECODIUM_FT2_ELASTIC_FOX")
         || decodium::profiledSettingsValue(QString(), QStringLiteral("Ft2ElasticFox"), false).toBool();
