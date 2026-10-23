@@ -28191,12 +28191,8 @@ KÍSÉRLETI. Alapértelmezett: KI.</translation>
 
 Range 1-10. Default: 3. With 1 you answer one caller at a time, but still on THEIR frequency (MSHV style).
 
-Higher values split the TX power across the streams (about 1/sqrt(N) each) and need more CPU to generate the overlapping audio. Enabled only when MAM multi-stream is active.</source>
-        <translation>Hány párhuzamos QSO-t vihet egyszerre a MAM multi-stream, mindegyiket a saját frekvenciáján.
-
-Tartomány 1-10. Alapértelmezés: 3. 1-nél egyszerre egy hívóra válaszol, de AZ Ő frekvenciáján (MSHV-stílus).
-
-A magasabb értékek a streamek között osztják el a TX teljesítményt (kb. 1/gyök(N) mindegyik) és több CPU-t igényelnek az átfedő hang előállításához. Csak akkor aktív, ha a MAM multi-stream aktív.</translation>
+Higher values split the TX peak power across the streams: with N equal streams each one loses about 20·log10(N) dB (6 dB for 2, 9.5 dB for 3, 12 dB for 4), and they need more CPU to generate the overlapping audio. The DigiPileup power budget limits this loss. Enabled only when MAM multi-stream is active.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsTab3.qml" line="1171"/>

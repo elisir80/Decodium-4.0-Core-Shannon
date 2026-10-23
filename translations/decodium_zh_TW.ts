@@ -28317,12 +28317,8 @@ EXPERIMENTAL。預設：OFF。</translation>
 
 Range 1-10. Default: 3. With 1 you answer one caller at a time, but still on THEIR frequency (MSHV style).
 
-Higher values split the TX power across the streams (about 1/sqrt(N) each) and need more CPU to generate the overlapping audio. Enabled only when MAM multi-stream is active.</source>
-        <translation>MAM 多串流可同時進行多少個並行 QSO，每個使用各自的頻率。
-
-範圍 1-10。預設：3。設為 1 時每次只回應一個呼叫者，但使用對方的頻率（MSHV 方式）。
-
-較高的值會在各串流之間分配 TX 功率（每個約 1/√N），並需要更多 CPU 來產生重疊的音訊。僅在 MAM 多串流啟用時有效。</translation>
+Higher values split the TX peak power across the streams: with N equal streams each one loses about 20·log10(N) dB (6 dB for 2, 9.5 dB for 3, 12 dB for 4), and they need more CPU to generate the overlapping audio. The DigiPileup power budget limits this loss. Enabled only when MAM multi-stream is active.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsTab3.qml" line="1171"/>

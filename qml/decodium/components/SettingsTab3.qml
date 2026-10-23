@@ -1124,7 +1124,7 @@ Default: OFF.")
                     hoverEnabled: true
                     ToolTip.visible: hovered
                     ToolTip.delay: 400
-                    ToolTip.text: qsTr("How many parallel QSOs MAM multi-stream can run at the same time, each on its own frequency.\n\nRange 1-10. Default: 3. With 1 you answer one caller at a time, but still on THEIR frequency (MSHV style).\n\nHigher values split the TX power across the streams (about 1/sqrt(N) each) and need more CPU to generate the overlapping audio. Enabled only when MAM multi-stream is active.")
+                    ToolTip.text: qsTr("How many parallel QSOs MAM multi-stream can run at the same time, each on its own frequency.\n\nRange 1-10. Default: 3. With 1 you answer one caller at a time, but still on THEIR frequency (MSHV style).\n\nHigher values split the TX peak power across the streams: with N equal streams each one loses about 20·log10(N) dB (6 dB for 2, 9.5 dB for 3, 12 dB for 4), and they need more CPU to generate the overlapping audio. The DigiPileup power budget limits this loss. Enabled only when MAM multi-stream is active.")
                 }
 
                 // 1.0.187 — FT2 Weak-Signal Pack F v2: partner-memory cache (30s)
