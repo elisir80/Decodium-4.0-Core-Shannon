@@ -30,18 +30,20 @@ struct Config
     double marginDb {3.0};            // margin on a measured link
     double marginUnmeasuredDb {6.0};  // margin when the link is only an estimate
     double minGain {0.06};            // never below -24 dB
+    double unknownGain {0.5};         // nothing known about the link: half the budget, so two such stations fit in one frame
     int maxStreams {10};
     int agedAfterFrames {2};          // a station deferred this long goes first
 };
 
 struct Candidate
 {
-    Candidate(int id_ = 0, double linkDb_ = 0.0, bool measured_ = false, int waitFrames_ = 0)
-        : id(id_), linkDb(linkDb_), measured(measured_), waitFrames(waitFrames_) {}
+    Candidate(int id_ = 0, double linkDb_ = 0.0, bool measured_ = false, int waitFrames_ = 0, bool unknown_ = false)
+        : id(id_), linkDb(linkDb_), measured(measured_), waitFrames(waitFrames_), unknown(unknown_) {}
     int id;
     double linkDb;                    // SNR on a single full-scale stream
     bool measured;                    // from the station's own report
     int waitFrames;                   // frames it has been left out of
+    bool unknown;                     // no figure at all for its link (e.g. picked by a click)
 };
 
 struct Allocation
@@ -53,6 +55,9 @@ struct Allocation
 
 inline double neededGain(Candidate const& c, Config const& cfg)
 {
+    if (c.unknown) {
+        return cfg.unknownGain;
+    }
     double const margin = c.measured ? cfg.marginDb : cfg.marginUnmeasuredDb;
     double const g = std::pow(10.0, (cfg.thresholdDb + margin - c.linkDb) / 20.0);
     return std::max(g, cfg.minGain);

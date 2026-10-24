@@ -24,6 +24,7 @@ private slots:
     void everyChosenStationKeepsItsMargin();
     void unmeasuredLinksCostMore();
     void nothingToSendGivesAnEmptyAllocation();
+    void twoStationsWithoutAnyDataShareAFrame();
 };
 
 void TestFoxPowerBudget::strongStationsAllFitAndShareTheBudget()
@@ -114,6 +115,19 @@ void TestFoxPowerBudget::nothingToSendGivesAnEmptyAllocation()
     Allocation a = allocate({}, Config {});
     QVERIFY(a.ids.empty());
     QVERIFY(a.gains.empty());
+}
+
+void TestFoxPowerBudget::twoStationsWithoutAnyDataShareAFrame()
+{
+    // Stations picked by a click have no figure for their link: on the air
+    // (24/10) the default made each of them need more than the whole budget,
+    // so they were served one per frame and ran out of retries.
+    Config cfg;
+    std::vector<Candidate> c {Candidate(1, 0.0, false, 0, true), Candidate(2, 0.0, false, 0, true), Candidate(3, 0.0, false, 0, true)};
+    Allocation a = allocate(c, cfg);
+    QCOMPARE(int(a.ids.size()), 2);
+    QCOMPARE(int(a.deferred.size()), 1);
+    QVERIFY(std::abs(a.gains[0] - 0.5) < 1e-9);
 }
 
 QTEST_APPLESS_MAIN(TestFoxPowerBudget)

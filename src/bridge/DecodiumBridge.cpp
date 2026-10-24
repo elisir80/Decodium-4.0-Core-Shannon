@@ -26971,7 +26971,7 @@ void DecodiumBridge::mamDispatchPeriod(bool elastic)
                 }
                 bool const measured = s.linkSnrDb != 127;
                 double const link = measured ? s.linkSnrDb : (s.partnerSnrDb != 127 ? s.partnerSnrDb : -8);
-                cands.emplace_back(i, link, measured, s.waitFrames);
+                cands.emplace_back(i, link, measured, s.waitFrames, !measured && s.partnerSnrDb == 127);
             }
         }
         decodium::foxbudget::Allocation const alloc = decodium::foxbudget::allocate(cands, bcfg);
