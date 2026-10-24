@@ -23,7 +23,7 @@ namespace foxelastic {
 struct Config
 {
     int minWindowMs {2700};      // never start sooner than this after our TX ended
-    int maxWindowMs {6000};      // listening never lasts longer: the grid takes over
+    int maxWindowMs {4700};      // never longer than the grid cycle: 2472 ms of TX + this + ~400 ms of PTT/audio latency ~ 7.5 s
     int initialReplyMs {3400};   // TX end -> decode of a reply, before any measurement
     int guardMs {100};           // margin added to the learned "everybody is done" delay
     int graceMs {300};           // margin added to a station's own timeout
@@ -70,7 +70,9 @@ public:
         auto it = m_expected.find(call);
         if (it != m_expected.end() && !it->second) {
             it->second = true;
-            learn(call, d);
+            if (d <= m_cfg.maxWindowMs) {
+                learn(call, d);
+            }
         }
     }
 
@@ -111,6 +113,16 @@ public:
 
     void dispatched()
     {
+        // A station that did not answer is worth less waiting next time.
+        for (auto const& kv : m_expected) {
+            auto it = m_rtt.find(kv.first);
+            if (it != m_rtt.end()) {
+                it->second.misses = kv.second ? 0 : it->second.misses + 1;
+            } else if (!kv.second) {
+                m_rtt[kv.first] = Rtt();
+                m_rtt[kv.first].misses = 1;
+            }
+        }
         m_open = false;
         m_expected.clear();
     }
@@ -130,18 +142,26 @@ public:
 private:
     struct Rtt
     {
-        double srtt {0.0};
-        double var {0.0};
+        Rtt() : srtt(0.0), var(0.0), misses(0) {}
+        double srtt;
+        double var;
+        int misses;      // consecutive windows in which it did not answer
     };
 
     void learn(std::string const& call, double d)
     {
         auto it = m_rtt.find(call);
-        if (it == m_rtt.end()) {
-            m_rtt[call] = {d, d / 2.0};
+        if (it == m_rtt.end() || it->second.srtt <= 0.0) {
+            // first sample: a quarter of it as variation (TCP uses half, which
+            // makes the first timeout three times the round trip)
+            Rtt r;
+            r.srtt = d;
+            r.var = d / 4.0;
+            m_rtt[call] = r;
             return;
         }
         Rtt& r = it->second;
+        r.misses = 0;
         r.var = 0.75 * r.var + 0.25 * std::fabs(r.srtt - d);
         r.srtt = 0.875 * r.srtt + 0.125 * d;
     }
@@ -151,8 +171,12 @@ private:
     {
         auto it = m_rtt.find(call);
         double d = m_cfg.initialReplyMs + m_cfg.graceMs;
-        if (it != m_rtt.end()) {
+        if (it != m_rtt.end() && it->second.srtt > 0.0) {
             d = it->second.srtt + 4.0 * it->second.var + m_cfg.graceMs;
+            // silent last time: do not hold the whole cycle for it again
+            if (it->second.misses > 0) {
+                d = std::min<double>(d, m_cfg.initialReplyMs + m_cfg.graceMs);
+            }
         }
         return std::min<double>(d, m_cfg.maxWindowMs);
     }

@@ -18,6 +18,9 @@ private slots:
     void silentStationIsGivenUpAtItsTimeout();
     void slowStationRaisesItsOwnTimeout();
     void learnedFloorShortensTheCycle();
+    void aFirstReplyDoesNotInflateTheTimeoutBeyondTheGridCycle();
+    void aSilentStationIsWaitedLessNextTime();
+    void theWindowIsNeverLongerThanTheGridCycle();
     void windowNeverExceedsTheCap();
     void dispatchClosesTheWindow();
     void elasticCycleBeatsTheGridAndNeverCutsAnAnswer();
@@ -67,18 +70,18 @@ void TestFoxElasticCycle::silentStationIsGivenUpAtItsTimeout()
 void TestFoxElasticCycle::slowStationRaisesItsOwnTimeout()
 {
     Cycle c;
-    // a station that answers late every time (e.g. locked to the slot grid)
+    // a station that answers late every time (e.g. slower software)
     for (int i = 0; i < 6; ++i) {
-        c.setExpected({"GRID1"});
+        c.setExpected({"SLOW1"});
         c.txEnded(i * 20000LL);
-        c.decodeHeard("GRID1", i * 20000LL + 5200);
+        c.decodeHeard("SLOW1", i * 20000LL + 4000);
         c.dispatched();
     }
-    c.setExpected({"GRID1"});
+    c.setExpected({"SLOW1"});
     c.txEnded(200000);
-    QVERIFY2(c.timeoutMs("GRID1") > 5200, "timeout must exceed the learned delay");
-    QVERIFY(c.goAtMs() >= 200000LL + 5200);
-    QVERIFY(c.goAtMs() <= 200000LL + 6000);
+    QVERIFY2(c.timeoutMs("SLOW1") > 4000, "timeout must exceed the learned delay");
+    QVERIFY(c.goAtMs() >= 200000LL + 4000);
+    QVERIFY(c.goAtMs() <= 200000LL + 4700);
 }
 
 void TestFoxElasticCycle::learnedFloorShortensTheCycle()
@@ -97,6 +100,55 @@ void TestFoxElasticCycle::learnedFloorShortensTheCycle()
     long long const at = c.goAtMs() - 500000;
     QVERIFY2(at >= 2900, "never before the answer");
     QVERIFY2(at <= 3100, "learned floor must be shorter than the 3500 default");
+}
+
+void TestFoxElasticCycle::aFirstReplyDoesNotInflateTheTimeoutBeyondTheGridCycle()
+{
+    // On the air (24/10) the first reply made the next timeout three times the
+    // round trip, capped at 6 s: the cycle became 8.9 s, slower than the grid.
+    Cycle c;
+    c.setExpected({"AA1AA"});
+    c.txEnded(0);
+    c.decodeHeard("AA1AA", 2500);
+    c.dispatched();
+    c.setExpected({"AA1AA"});
+    c.txEnded(100000);
+    QVERIFY2(c.timeoutMs("AA1AA") <= 2 * 2500 + 300 + 1, "first sample must not triple the timeout");
+    QVERIFY(c.goAtMs() - 100000 <= 4700);
+}
+
+void TestFoxElasticCycle::aSilentStationIsWaitedLessNextTime()
+{
+    Cycle c;
+    for (int i = 0; i < 4; ++i) {          // it used to answer slowly
+        c.setExpected({"AA1AA"});
+        c.txEnded(i * 20000LL);
+        c.decodeHeard("AA1AA", i * 20000LL + 4400);
+        c.dispatched();
+    }
+    c.setExpected({"AA1AA"});
+    c.txEnded(100000);
+    double const before = c.timeoutMs("AA1AA");
+    c.dispatched();                         // ... and then it stayed silent
+    c.setExpected({"AA1AA"});
+    c.txEnded(200000);
+    QVERIFY2(c.timeoutMs("AA1AA") < before, "a silent station must be waited for less");
+    QVERIFY(c.timeoutMs("AA1AA") <= 3400 + 300 + 1);
+}
+
+void TestFoxElasticCycle::theWindowIsNeverLongerThanTheGridCycle()
+{
+    Cycle c;
+    c.setExpected({"A", "B", "C", "D"});
+    c.txEnded(0);
+    // nobody answers at all
+    QVERIFY(c.goAtMs() <= 4700);
+    // and a decode arriving after the cap is not learned
+    c.decodeHeard("A", 9000);
+    c.dispatched();
+    c.setExpected({"A"});
+    c.txEnded(50000);
+    QVERIFY(c.goAtMs() - 50000 <= 4700);
 }
 
 void TestFoxElasticCycle::windowNeverExceedsTheCap()
