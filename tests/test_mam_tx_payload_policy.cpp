@@ -38,6 +38,7 @@ private slots:
     void cacheNeverCrossesMonoAndMultiStream();
     void bridgeWiresCleanupAtEveryExit();
     void lateSignoffFromASlowPartnerStillLogsTheQso();
+    void lowConfidenceDecodeDoesNotRewriteTheReportSnr();
     void legacyMirrorRoutesMultiStreamDecodesToSlotState();
     void legacyMirrorCompletesExistingMamQsoAfterMamIsDisabled();
     void lateRogerReportResumesRetryExpiredMamSlot();
@@ -118,6 +119,22 @@ void TestMamTxPayloadPolicy::lateSignoffFromASlowPartnerStillLogsTheQso()
     QVERIFY(ingest.contains(QStringLiteral("|| isFinal73 || hasSignoff)")));
     QVERIFY(ingest.contains(QStringLiteral("MAM late RR73")));
     QVERIFY(ingest.contains(QStringLiteral("recovery.slot.progress >= 3")));
+}
+
+void TestMamTxPayloadPolicy::lowConfidenceDecodeDoesNotRewriteTheReportSnr()
+{
+    // 24/10/2026, on the air: a-priori decodes marked '?' rebuilt SP9UXV's
+    // previous message from the tail of our own signal, with SNR +9; the report
+    // sent to a -22 dB station became +09.
+    const QString cpp = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
+    QVERIFY(!cpp.isEmpty());
+    const QString ingest = functionBody(
+        cpp,
+        QStringLiteral("void DecodiumBridge::mamIngestDecode"),
+        QStringLiteral("void DecodiumBridge::mamPruneSlots"));
+    QVERIFY(ingest.contains(QStringLiteral("lowConfidenceDecode = message.trimmed().endsWith")));
+    QVERIFY(ingest.contains(
+        QStringLiteral("decodedSnr != 127 && (!lowConfidenceDecode || s.partnerSnrDb == 127)")));
 }
 
 void TestMamTxPayloadPolicy::bridgeWiresCleanupAtEveryExit()

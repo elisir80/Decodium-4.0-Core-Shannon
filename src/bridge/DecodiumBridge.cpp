@@ -26535,7 +26535,14 @@ void DecodiumBridge::mamIngestDecode(const QStringList& f)
     // Slot esistente: aggiorna avanzamento.
     MamQsoSlot& s = m_mamSlots[idx];
     s.lastHeardMs = nowMs;
-    if (decodedSnr != 127) {
+    // A low-confidence decode ('?') made by the a-priori memory right after our
+    // own transmission is often the station's previous message rebuilt from the
+    // tail of OUR signal on its frequency (the Fox answers on the caller's
+    // frequency), with a made-up SNR: on the air a station at -22 dB was sent a
+    // +09 report. Such a decode may keep the slot alive but must not rewrite the
+    // SNR the report is built from, unless nothing else is known yet.
+    bool const lowConfidenceDecode = message.trimmed().endsWith(QLatin1Char('?'));
+    if (decodedSnr != 127 && (!lowConfidenceDecode || s.partnerSnrDb == 127)) {
         s.partnerSnrDb = decodedSnr;
         if (s.currentTx >= 1 && s.currentTx <= 3) {
             s.reportSent = formatSignalReport(decodedSnr);
