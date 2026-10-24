@@ -27115,6 +27115,10 @@ void DecodiumBridge::mamDispatchPeriod(bool elastic)
         m_digiLastTxStartMs = txStartMs;
         m_digiLastStreams = m_mamMessages.size();
         m_digiLastDeferred = budgetDeferred;
+        // An elastic start lands anywhere in the slot by design: the late-start
+        // guard of startTx() would push it to the next slot and give back the
+        // 7.5 s grid cycle (seen on the air, 24/10).
+        m_foxElasticTxNow = elastic;
     }
     startTx();
 }
@@ -27556,6 +27560,10 @@ bool DecodiumBridge::shouldAlignTxAudioToCurrentSyncSlot() const
     // scheduleSyncTxBoundaryStop e i guard "late slot", che chiamano questa).
     if (m_cwTxActive) return false;
     if (m_ft2LinkTxActive) return false;
+    // Elastic Fox cycle: the frame starts wherever the cycle says, not on the
+    // slot grid, so nothing may align it to the slot (lead-in, PCM offset, late
+    // start guard, boundary stop). Cleared when the transmission ends.
+    if (m_foxElasticTxNow && foxElasticActive()) return false;
     QString const normalized = m_mode.trimmed().toUpper();
     // JT4 is a 60-second synchronous waveform.  Whenever this bridge owns
     // PCM playback, align the payload regardless of platform.  With CAT
@@ -28306,6 +28314,7 @@ void DecodiumBridge::completeTxPlayback(const QString& reason, bool error)
     restoreTxAudioSchedulingBoost(reason);
     resumeRxAudioAfterTx(reason);
     resumeNonAudioTxWork(reason);
+    m_foxElasticTxNow = false;
     if (wasTransmitting && !error) {
         foxElasticOnTxFinished();
     }
@@ -29122,7 +29131,7 @@ void DecodiumBridge::startTx()
         int elapsedMs = -1;
         int latestStartMs = 0;
         int ft2AsyncDelayMs = 0;
-        if (isFt2AsyncTxStartTooLate(&elapsedMs, &latestStartMs, &ft2AsyncDelayMs)) {
+        if (!m_foxElasticTxNow && isFt2AsyncTxStartTooLate(&elapsedMs, &latestStartMs, &ft2AsyncDelayMs)) {
             bridgeLog(QStringLiteral("startTx: skipped late FT2 async TX%1 elapsed=%2ms latest=%3ms msg=[%4]")
                           .arg(m_currentTx)
                           .arg(elapsedMs)

@@ -3859,6 +3859,7 @@ private:
     // Ciclo elastico della Fox FT2 (opt-in, default OFF).
     bool m_ft2ElasticFox {false};
     bool m_foxElasticGo {false};
+    bool m_foxElasticTxNow {false};   // the elastic cycle starts off the slot grid: skip the late-start guard
     decodium::foxelastic::Cycle m_foxElastic;
     QTimer* m_foxElasticTimer {nullptr};
     qint64 m_digiLastTxStartMs {0};
