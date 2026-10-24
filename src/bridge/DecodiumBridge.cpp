@@ -26377,7 +26377,7 @@ void DecodiumBridge::mamIngestDecode(const QStringList& f)
         // exact station belongs to an MAM exchange that just expired. A
         // recovery snapshot is the evidence; without it we must never invent
         // a QSO from orphan traffic.
-        if ((hasRogerReport && receivedReportValid) || isFinal73) {
+        if ((hasRogerReport && receivedReportValid) || isFinal73 || hasSignoff) {
             for (auto it = m_mamLateReportRecoveries.begin();
                  it != m_mamLateReportRecoveries.end();) {
                 if (it->expiresMs <= nowMs) {
@@ -26399,6 +26399,25 @@ void DecodiumBridge::mamIngestDecode(const QStringList& f)
                     bridgeLog(QStringLiteral("MAM late final 73: %1 -> logged")
                                   .arg(completed.callFull));
                     emit callerQueueChanged();
+                    return;
+                }
+                if (hasSignoff) {
+                    // The partner's RR73/RRR after our R+report closes the exchange from
+                    // its side, even though our slot ran out of retries while it was
+                    // slow to answer (a person at the key can take 20-40 s). That is as
+                    // good as a final 73: log it. Without a report of ours on record
+                    // (progress < 3) the signoff cannot be tied to this exchange.
+                    if (recovery.slot.progress >= 3) {
+                        MamQsoSlot completed = recovery.slot;
+                        completed.lastHeardMs = nowMs;
+                        completed.partnerSnrDb = (decodedSnr != 127)
+                            ? decodedSnr : completed.partnerSnrDb;
+                        m_mamLateReportRecoveries.erase(recoveryIt);
+                        mamLogSlot(completed);
+                        bridgeLog(QStringLiteral("MAM late RR73: %1 -> logged")
+                                      .arg(completed.callFull));
+                        emit callerQueueChanged();
+                    }
                     return;
                 }
                 recovery.slot.lastHeardMs = nowMs;

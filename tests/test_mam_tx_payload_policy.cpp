@@ -37,6 +37,7 @@ private slots:
     void clearingPayloadClearsBothVectors();
     void cacheNeverCrossesMonoAndMultiStream();
     void bridgeWiresCleanupAtEveryExit();
+    void lateSignoffFromASlowPartnerStillLogsTheQso();
     void legacyMirrorRoutesMultiStreamDecodesToSlotState();
     void legacyMirrorCompletesExistingMamQsoAfterMamIsDisabled();
     void lateRogerReportResumesRetryExpiredMamSlot();
@@ -100,6 +101,23 @@ void TestMamTxPayloadPolicy::cacheNeverCrossesMonoAndMultiStream()
     QVERIFY(decodium::mamtx::cacheMatchesPayloadKind(true, true));
     QVERIFY(!decodium::mamtx::cacheMatchesPayloadKind(true, false));
     QVERIFY(!decodium::mamtx::cacheMatchesPayloadKind(false, true));
+}
+
+void TestMamTxPayloadPolicy::lateSignoffFromASlowPartnerStillLogsTheQso()
+{
+    // 24/10/2026, on the air: SP9TNK answered 40 s late, the slot ran out of
+    // retries, and his RR73 was thrown away. The recovered exchange must also
+    // accept a signoff (RR73/RRR) and log the QSO, but only if we had already
+    // sent our report (progress >= 3).
+    const QString cpp = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
+    QVERIFY(!cpp.isEmpty());
+    const QString ingest = functionBody(
+        cpp,
+        QStringLiteral("void DecodiumBridge::mamIngestDecode"),
+        QStringLiteral("void DecodiumBridge::mamPruneSlots"));
+    QVERIFY(ingest.contains(QStringLiteral("|| isFinal73 || hasSignoff)")));
+    QVERIFY(ingest.contains(QStringLiteral("MAM late RR73")));
+    QVERIFY(ingest.contains(QStringLiteral("recovery.slot.progress >= 3")));
 }
 
 void TestMamTxPayloadPolicy::bridgeWiresCleanupAtEveryExit()
