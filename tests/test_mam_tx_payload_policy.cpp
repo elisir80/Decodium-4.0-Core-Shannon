@@ -40,6 +40,7 @@ private slots:
     void lateSignoffFromASlowPartnerStillLogsTheQso();
     void lowConfidenceDecodeDoesNotRewriteTheReportSnr();
     void rr73SentToAStationThatLeftIsLoggedAndNotRepeatedForever();
+    void aStationNeverCalledIsNotDroppedAsSilent();
     void legacyMirrorRoutesMultiStreamDecodesToSlotState();
     void legacyMirrorCompletesExistingMamQsoAfterMamIsDisabled();
     void lateRogerReportResumesRetryExpiredMamSlot();
@@ -156,6 +157,22 @@ void TestMamTxPayloadPolicy::rr73SentToAStationThatLeftIsLoggedAndNotRepeatedFor
         QStringLiteral("void DecodiumBridge::mamIngestDecode"),
         QStringLiteral("void DecodiumBridge::mamPruneSlots"));
     QVERIFY(ingest.contains(QStringLiteral("recovery.slot.lateResumes >= 2")));
+}
+
+void TestMamTxPayloadPolicy::aStationNeverCalledIsNotDroppedAsSilent()
+{
+    // 25/10/2026, on the air (FT8): stations promoted from the queue were kept
+    // waiting by the power budget and dropped as "silent > 6 periods" 90 s later
+    // without ever being called.
+    const QString cpp = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
+    QVERIFY(!cpp.isEmpty());
+    const QString prune = functionBody(
+        cpp,
+        QStringLiteral("void DecodiumBridge::mamPruneSlots"),
+        QStringLiteral("void DecodiumBridge::mamPromoteLateReportRecoveries"));
+    QVERIFY(prune.contains(QStringLiteral("s.lastTxSlotMs == 0")));
+    QVERIFY(prune.contains(QStringLiteral("never called, waited > 12 periods")));
+    QVERIFY(prune.contains(QStringLiteral("qMax(s.lastHeardMs, s.lastTxSlotMs)")));
 }
 
 void TestMamTxPayloadPolicy::bridgeWiresCleanupAtEveryExit()

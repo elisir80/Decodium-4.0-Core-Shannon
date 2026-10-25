@@ -26642,7 +26642,16 @@ void DecodiumBridge::mamPruneSlots()
         } else if (s.retryCount > maxRetry) {
             drop = true;
             dropReason = QStringLiteral("retry limit %1").arg(maxRetry);
-        } else if (s.lastHeardMs > 0 && (nowMs - s.lastHeardMs) > 6 * periodMs) {
+        } else if (s.lastHeardMs > 0 && s.lastTxSlotMs == 0 && (nowMs - s.lastHeardMs) > 12 * periodMs) {
+            // Never called: the power budget kept it waiting. It gets longer than a
+            // station we are already working before it is given up.
+            drop = true;
+            dropReason = QStringLiteral("never called, waited > 12 periods");
+        } else if (s.lastHeardMs > 0 && s.lastTxSlotMs > 0
+                   && (nowMs - qMax(s.lastHeardMs, s.lastTxSlotMs)) > 6 * periodMs) {
+            // The silence is counted from the last time we heard it OR called it:
+            // a station promoted from the queue and called late (24/10, 25/10 on the
+            // air) used to be dropped as silent right after its first call.
             drop = true;
             dropReason = QStringLiteral("silent > 6 periods");
         }
