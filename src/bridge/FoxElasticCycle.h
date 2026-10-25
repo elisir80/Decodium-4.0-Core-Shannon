@@ -4,6 +4,7 @@
 #include <cmath>
 #include <deque>
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -22,7 +23,7 @@ namespace foxelastic {
 // timestamps from the same clock for every call. All times are in ms.
 struct Config
 {
-    int minWindowMs {2700};      // never start sooner than this after our TX ended
+    int minWindowMs {3000};      // never start sooner than this: a real answer is on the air until ~2.9-3.1 s after our TX ended
     int maxWindowMs {4700};      // never longer than the grid cycle: 2472 ms of TX + this + ~400 ms of PTT/audio latency ~ 7.5 s
     int initialReplyMs {3400};   // TX end -> decode of a reply, before any measurement
     int guardMs {100};           // margin added to the learned "everybody is done" delay
@@ -51,15 +52,23 @@ public:
     {
         m_endMs = endMs;
         m_open = true;
+        m_seen.clear();
     }
 
     bool windowOpen() const { return m_open; }
     long long windowStartMs() const { return m_endMs; }
 
-    // A decode arrived. `call` is the sender's base callsign.
-    void decodeHeard(const std::string& call, long long nowMs)
+    // A decode arrived. `call` is the sender's base callsign. Only a reliable
+    // decode counts, and each station counts once per window: the same frame is
+    // decoded many times, and low-confidence a-priori decodes of an old message
+    // show up early and would pull the learned delay down (seen on the air: it
+    // fell to 2.0 s and the Fox keyed over the answers).
+    void decodeHeard(const std::string& call, long long nowMs, bool reliable = true)
     {
-        if (!m_open || nowMs < m_endMs) {
+        if (!reliable || !m_open || nowMs < m_endMs) {
+            return;
+        }
+        if (!m_seen.insert(call).second) {
             return;
         }
         double const d = static_cast<double>(nowMs - m_endMs);
@@ -187,6 +196,7 @@ private:
     std::map<std::string, bool> m_expected;     // call -> already answered
     std::map<std::string, Rtt> m_rtt;
     std::deque<double> m_samples;
+    std::set<std::string> m_seen;               // stations already counted in this window
 };
 
 } // namespace foxelastic

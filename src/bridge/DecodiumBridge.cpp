@@ -26315,7 +26315,8 @@ void DecodiumBridge::mamIngestDecode(const QStringList& f)
         return;
     }
     if (m_ft2ElasticFox) {
-        m_foxElastic.decodeHeard(partnerBase.toStdString(), QDateTime::currentMSecsSinceEpoch());
+        m_foxElastic.decodeHeard(partnerBase.toStdString(), QDateTime::currentMSecsSinceEpoch(),
+                                 !message.trimmed().endsWith(QLatin1Char('?')));
     }
 
     // Anti-riapertura: stazioni gia' lavorate di recente o in cooldown non

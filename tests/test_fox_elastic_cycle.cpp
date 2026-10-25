@@ -21,6 +21,9 @@ private slots:
     void aFirstReplyDoesNotInflateTheTimeoutBeyondTheGridCycle();
     void aSilentStationIsWaitedLessNextTime();
     void theWindowIsNeverLongerThanTheGridCycle();
+    void unreliableDecodesDoNotShortenTheWindow();
+    void eachStationCountsOnceInAWindow();
+    void theWindowIsNeverShorterThanARealAnswer();
     void windowNeverExceedsTheCap();
     void dispatchClosesTheWindow();
     void elasticCycleBeatsTheGridAndNeverCutsAnAnswer();
@@ -149,6 +152,59 @@ void TestFoxElasticCycle::theWindowIsNeverLongerThanTheGridCycle()
     c.setExpected({"A"});
     c.txEnded(50000);
     QVERIFY(c.goAtMs() - 50000 <= 4700);
+}
+
+void TestFoxElasticCycle::unreliableDecodesDoNotShortenTheWindow()
+{
+    // 25/10/2026, on the air: '?' a-priori decodes arrived 0.5-2 s after our TX
+    // and the learned delay fell to 2.0 s; the Fox keyed over the real answers.
+    Cycle c;
+    for (int i = 0; i < 10; ++i) {
+        c.setExpected({"AA1AA"});
+        c.txEnded(i * 20000LL);
+        c.decodeHeard("AA1AA", i * 20000LL + 800, false);   // phantom, early
+        c.decodeHeard("AA1AA", i * 20000LL + 3100, true);   // the real answer
+        c.dispatched();
+    }
+    c.setExpected({"AA1AA"});
+    c.txEnded(500000);
+    QVERIFY2(c.newcomerDelayMs() >= 3000.0, "phantom decodes must not pull the delay down");
+    QVERIFY(c.pendingCount() == 1);
+    c.decodeHeard("AA1AA", 500000 + 700, false);
+    QVERIFY2(c.pendingCount() == 1, "an unreliable decode must not count as the answer");
+}
+
+void TestFoxElasticCycle::eachStationCountsOnceInAWindow()
+{
+    Cycle c;
+    for (int i = 0; i < 6; ++i) {
+        c.setExpected({"AA1AA"});
+        c.txEnded(i * 20000LL);
+        // the same frame decoded over and over while it is on the air
+        for (int k = 0; k < 8; ++k) {
+            c.decodeHeard("AA1AA", i * 20000LL + 2400 + k * 250, true);
+        }
+        c.dispatched();
+    }
+    c.setExpected({"AA1AA"});
+    c.txEnded(300000);
+    // one sample per station and window, the first one: 2400 ms
+    QVERIFY2(c.newcomerDelayMs() >= 2400.0 && c.newcomerDelayMs() <= 2401.0, "one sample per station and window");
+}
+
+void TestFoxElasticCycle::theWindowIsNeverShorterThanARealAnswer()
+{
+    Cycle c;
+    for (int i = 0; i < 10; ++i) {
+        c.setExpected({"AA1AA"});
+        c.txEnded(i * 20000LL);
+        c.decodeHeard("AA1AA", i * 20000LL + 1500, true);   // implausibly early
+        c.dispatched();
+    }
+    c.setExpected({"AA1AA"});
+    c.txEnded(500000);
+    c.decodeHeard("AA1AA", 500000 + 1500, true);
+    QVERIFY2(c.goAtMs() - 500000 >= 3000, "never start before 3000 ms");
 }
 
 void TestFoxElasticCycle::windowNeverExceedsTheCap()
