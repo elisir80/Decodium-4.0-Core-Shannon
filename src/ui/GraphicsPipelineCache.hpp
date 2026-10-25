@@ -12,6 +12,7 @@
 #include <QStringList>
 
 #include <utility>
+#include <functional>
 
 namespace decodium {
 namespace graphics_cache {
@@ -54,6 +55,16 @@ inline QString graphicsBackendToken()
     if (backend == QByteArrayLiteral("d3d11")
         && qEnvironmentVariableIntValue("QSG_RHI_PREFER_SOFTWARE_RENDERER") != 0) {
         backend += QByteArrayLiteral("_warp");
+    }
+    // Linux hybrid-GPU recovery can select Intel instead of NVIDIA while
+    // keeping Vulkan. Never seed the new adapter with the old adapter's cache.
+    // The key includes vendor/device/driver and Vulkan pipeline-cache UUID,
+    // not the enumeration index (which may change after a driver update).
+    if (backend == QByteArrayLiteral("vulkan") && QCoreApplication::instance()) {
+        const QByteArray deviceKey = QCoreApplication::instance()
+            ->property("decodiumVulkanCacheDeviceKey").toByteArray();
+        if (!deviceKey.isEmpty())
+            backend += '_' + QCryptographicHash::hash(deviceKey, QCryptographicHash::Sha256).toHex().left(16);
     }
     return sanitisedToken(QString::fromLocal8Bit(backend), QStringLiteral("auto"));
 }
@@ -149,12 +160,14 @@ class PipelineCacheSession final
 {
 public:
     explicit PipelineCacheSession(QString directory = cacheDirectory(),
-                                  bool forceFresh = false)
+                                  bool forceFresh = false,
+                                  std::function<bool()> healthyAtTeardown = {})
         : m_directory(std::move(directory))
         , m_markerFile(QDir(m_directory).absoluteFilePath(
               cachePrefix() + QStringLiteral("session.pending")))
         , m_stageSuffix(QStringLiteral(".stage.%1")
                             .arg(QCoreApplication::applicationPid()))
+        , m_healthyAtTeardown(std::move(healthyAtTeardown))
     {
         QDir().mkpath(m_directory);
         bool const interruptedSession = QFileInfo::exists(m_markerFile);
@@ -199,7 +212,7 @@ public:
 
     ~PipelineCacheSession()
     {
-        if (!m_cleanShutdown)
+        if (!m_cleanShutdown || (m_healthyAtTeardown && !m_healthyAtTeardown()))
             return;
 
         bool promotionSucceeded = true;
@@ -234,6 +247,7 @@ private:
     QString m_directory;
     QString m_markerFile;
     QString m_stageSuffix;
+    std::function<bool()> m_healthyAtTeardown;
     bool m_recovered {false};
     bool m_markerArmed {false};
     bool m_cleanShutdown {false};

@@ -6,6 +6,17 @@ using namespace decodium::cw;
 class TestCwCatText : public QObject {
     Q_OBJECT
 private slots:
+    void limitsOnlyChangeTheIcomPath()
+    {
+        QCOMPARE(catMorseTextLimit("Icom", false), 30);
+        QCOMPARE(catMorseTextLimit(" icom ", false), 30);
+        QCOMPARE(catMorseTextLimit("Yaesu", true), 49);
+        QCOMPARE(catMorseTextLimit("Yaesu", false), 0);
+        QCOMPARE(catMorseTextLimit("Kenwood", false), 0);
+        QCOMPARE(catMorseTextLimit("Hamlib", false), 0); // NET rigctl
+        QCOMPARE(catMorseTextLimit({}, false), 0);
+    }
+
     void singleLettersAndDigitsAreLiteralMessages()
     {
         QCOMPARE(ft991MorsePayload("v"), QStringLiteral("V}"));

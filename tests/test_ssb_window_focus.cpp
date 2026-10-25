@@ -22,6 +22,10 @@ private slots:
     void openMenuBlocksPttEvenIfFocusReturnsToKeyCatcher();
     void textEntryDoesNotTriggerPtt();
     void spaceStillStartsAndStopsPtt();
+    void heldMousePttKeepsFocusUntilRelease_data();
+    void heldMousePttKeepsFocusUntilRelease();
+    void heldMousePttStillStopsSafely_data();
+    void heldMousePttStillStopsSafely();
     void heldMousePttSurvivesTransientMicrophoneEnumeration();
     void closeRequestsLoaderReleaseAndStopsActivity();
 
@@ -226,10 +230,104 @@ void TestSsbWindowFocus::spaceStillStartsAndStopsPtt()
     QVERIFY(!m_voice->property("transmitting").toBool());
 }
 
+void TestSsbWindowFocus::heldMousePttKeepsFocusUntilRelease_data()
+{
+    QTest::addColumn<int>("focusPolicy");
+    QTest::addColumn<QSize>("windowSize");
+    // Qt's native default is TabFocus on macOS, StrongFocus on Linux/Windows.
+    // Exercise both explicitly so a passing Mac test also covers the reporter.
+    QTest::newRow("mac-tab-focus") << int(Qt::TabFocus) << QSize(1200, 820);
+    QTest::newRow("linux-windows-click-focus") << int(Qt::StrongFocus) << QSize(1200, 820);
+    QTest::newRow("linux-windows-small-window") << int(Qt::StrongFocus) << QSize(760, 560);
+}
+
+void TestSsbWindowFocus::heldMousePttKeepsFocusUntilRelease()
+{
+    QFETCH(int, focusPolicy);
+    QFETCH(QSize, windowSize);
+    m_window->resize(windowSize);
+    auto *button = item("ssbHoldPttButton");
+    auto *keyCatcher = item("ssbPttKeyCatcher");
+    QVERIFY(button && keyCatcher);
+    QVERIFY(button->setProperty("focusPolicy", focusPolicy));
+    keyCatcher->forceActiveFocus();
+    QTest::qWait(50);
+    QSignalSpy cancelled(button, SIGNAL(canceled()));
+    QVERIFY(cancelled.isValid());
+    const QPoint point = button->mapToScene(
+        QPointF(button->width() / 2, button->height() / 2)).toPoint();
+    const int stopCalls = m_voice->property("stopCalls").toInt();
+    QTest::mousePress(m_window, Qt::LeftButton, Qt::NoModifier, point);
+    QCOMPARE(m_voice->property("startCalls").toInt(), 1);
+    QVERIFY(m_voice->property("transmitting").toBool());
+    // Crucially, process the deferred focus callback before releasing the mouse.
+    QTest::qWait(250);
+    QCOMPARE(cancelled.count(), 0);
+    QVERIFY(button->property("pressed").toBool());
+    QVERIFY(m_voice->property("transmitting").toBool());
+    QCOMPARE(m_voice->property("stopCalls").toInt(), stopCalls);
+    QTest::mouseRelease(m_window, Qt::LeftButton, Qt::NoModifier, point);
+    QTRY_VERIFY(!m_voice->property("transmitting").toBool());
+    QCOMPARE(m_voice->property("stopCalls").toInt(), stopCalls + 1);
+    QTRY_VERIFY(keyCatcher->hasActiveFocus());
+    QTest::keyPress(m_window, Qt::Key_Space);
+    QCOMPARE(m_voice->property("startCalls").toInt(), 2);
+    QVERIFY(m_voice->property("transmitting").toBool());
+    QTest::keyRelease(m_window, Qt::Key_Space);
+    QVERIFY(!m_voice->property("transmitting").toBool());
+}
+
+void TestSsbWindowFocus::heldMousePttStillStopsSafely_data()
+{
+    QTest::addColumn<QString>("reason");
+    for (const auto *reason : {"release-outside", "escape", "focus-loss",
+                              "deactivation", "cat-disconnected", "mode-change", "close"})
+        QTest::newRow(reason) << QString::fromLatin1(reason);
+}
+
+void TestSsbWindowFocus::heldMousePttStillStopsSafely()
+{
+    QFETCH(QString, reason);
+    auto *button = item("ssbHoldPttButton");
+    QVERIFY(button);
+    QVERIFY(button->setProperty("focusPolicy", int(Qt::StrongFocus)));
+    item("ssbPttKeyCatcher")->forceActiveFocus();
+    QTest::qWait(50);
+    const QPoint point = button->mapToScene(
+        QPointF(button->width() / 2, button->height() / 2)).toPoint();
+    QTest::mousePress(m_window, Qt::LeftButton, Qt::NoModifier, point);
+    QTest::qWait(100);
+    QVERIFY(m_voice->property("transmitting").toBool());
+    QWindow other;
+    if (reason == "release-outside")
+        QTest::mouseRelease(m_window, Qt::LeftButton, Qt::NoModifier, QPoint(1, 1));
+    else if (reason == "escape")
+        QTest::keyClick(m_window, Qt::Key_Escape);
+    else if (reason == "focus-loss")
+        item("ssbFrequency")->forceActiveFocus();
+    else if (reason == "deactivation") {
+        other.show();
+        other.requestActivate();
+        QTRY_VERIFY(!m_window->isActive());
+    } else if (reason == "cat-disconnected")
+        QVERIFY(m_bridge->setProperty("catConnected", false));
+    else if (reason == "mode-change")
+        QVERIFY(m_bridge->setProperty("mode", QStringLiteral("FT8")));
+    else if (reason == "close")
+        m_window->close();
+    QTRY_VERIFY(!m_voice->property("transmitting").toBool());
+    if (reason != "release-outside")
+        QTest::mouseRelease(m_window, Qt::LeftButton, Qt::NoModifier, point);
+    QTest::qWait(100);
+    QVERIFY(!m_voice->property("transmitting").toBool());
+    QCOMPARE(m_voice->property("startCalls").toInt(), 1);
+}
+
 void TestSsbWindowFocus::heldMousePttSurvivesTransientMicrophoneEnumeration()
 {
     auto *button = item("ssbHoldPttButton");
     QVERIFY(button);
+    QVERIFY(button->setProperty("focusPolicy", int(Qt::StrongFocus)));
     QTRY_VERIFY(button->isEnabled());
     const QPoint point = button->mapToScene(
         QPointF(button->width() / 2, button->height() / 2)).toPoint();

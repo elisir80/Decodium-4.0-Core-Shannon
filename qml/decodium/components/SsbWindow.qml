@@ -62,8 +62,13 @@ GlassApplicationWindow {
         syncingRadioMode = false
     }
     function updateRadioMode() { bridge.ssbSetRadioMode(dataInput.checked ? (side.currentIndex ? "DIGL" : "DIGU") : (side.currentIndex ? "LSB" : "USB")) }
-    function stopWindowActivity() {
+    function stopVoice(reason) {
+        if (voice.transmitting)
+            console.info("[SSB] UI stop reason=" + reason)
         voice.stop()
+    }
+    function stopWindowActivity() {
+        stopVoice("window closed/destroyed")
         voiceKeyer.stop()
         if (speech.working) speech.stopListening()
         if (assistant.busy) assistant.cancel()
@@ -72,7 +77,7 @@ GlassApplicationWindow {
         stopWindowActivity()
         releaseRequested()
     }
-    onActiveChanged: if (!active) voice.stop()
+    onActiveChanged: if (!active) stopVoice("window deactivated")
     Component.onDestruction: stopWindowActivity()
     onVisibleChanged: if (visible) {
         syncRadioModeFromCat()
@@ -83,7 +88,7 @@ GlassApplicationWindow {
         syncRadioModeFromCat()
         if (bridge.hamlibCat) bridge.hamlibCat.requestAtuState()
     }
-    Shortcut { sequence: "Escape"; onActivated: { voice.stop(); voiceKeyer.stop() } }
+    Shortcut { sequence: "Escape"; onActivated: { stopVoice("Escape"); voiceKeyer.stop() } }
 
     // Barra spaziatrice = PTT: si trasmette finche' e' premuta. Con il cursore in
     // un campo di testo (frequenza) la barra scrive uno spazio e basta; con un
@@ -103,9 +108,21 @@ GlassApplicationWindow {
     function restorePttFocus() {
         var f = win.activeFocusItem
         if (!win.active || f === keyCatcher || win.isTextEntry(f)
-                || win.comboBoxForItem(f) || win.popupOpen)
+                || win.comboBoxForItem(f) || win.popupOpen
+                || (f instanceof T.AbstractButton && f.pressed))
             return
         keyCatcher.forceActiveFocus()
+    }
+    // Linux/Windows buttons take focus on mouse press (macOS defaults to
+    // TabFocus). Stealing it before release makes Qt cancel the held button,
+    // dropping PTT immediately. Restore Space handling only AFTER release;
+    // real focus loss, cancellation, Escape and window deactivation still stop TX.
+    Connections {
+        target: win.activeFocusItem instanceof T.AbstractButton ? win.activeFocusItem : null
+        function onPressedChanged() {
+            if (!target.pressed)
+                Qt.callLater(win.restorePttFocus)
+        }
     }
     onActiveFocusItemChanged: {
         // Capture the menu synchronously: its popup can take focus before the
@@ -130,7 +147,7 @@ GlassApplicationWindow {
         Keys.onReleased: function (event) {
             if (event.key === Qt.Key_Space && !event.isAutoRepeat) {
                 event.accepted = true
-                voice.stop()
+                win.stopVoice("space released")
             }
         }
     }
@@ -173,15 +190,15 @@ GlassApplicationWindow {
     Connections {
         target: bridge
         function onCatConnectedChanged() {
-            if (!bridge.catConnected) voice.stop()
+            if (!bridge.catConnected) win.stopVoice("CAT disconnected")
             if (win.visible) {
                 syncRadioModeFromCat(); bridge.ssbRefreshControls()
                 if (bridge.catConnected && bridge.hamlibCat) bridge.hamlibCat.requestAtuState()
             }
         }
         function onCatModeChanged() { syncRadioModeFromCat() }
-        function onModeChanged() { if (bridge.mode !== "SSB") voice.stop() }
-        function onDecoPortUseRemoteChanged() { voice.stop(); bridge.ssbRefreshControls() }
+        function onModeChanged() { if (bridge.mode !== "SSB") win.stopVoice("application mode changed") }
+        function onDecoPortUseRemoteChanged() { win.stopVoice("radio routing changed"); bridge.ssbRefreshControls() }
     }
     Connections {
         target: bridge.hamlibCat
@@ -222,8 +239,8 @@ GlassApplicationWindow {
             enabled: voice.transmitting
                      || (ready && controls.busy !== true && mic.currentIndex >= 0)
             onPressed: voice.start()
-            onReleased: voice.stop()
-            onCanceled: voice.stop()
+            onReleased: win.stopVoice("mouse released")
+            onCanceled: win.stopVoice("mouse press cancelled")
             background: Rectangle { radius: 8; color: voice.transmitting ? "#b53238" : "#087f92"; opacity: parent.enabled ? 1 : .45 }
         }
         Label { text: voice.status; Layout.fillWidth: true; wrapMode: Text.WordWrap; color: "#a9bac9" }

@@ -33,7 +33,10 @@ void SsbController::setGainDb(double v){if(!std::isfinite(v))return;dsp.gainDb=s
 void SsbController::setAutomatic(bool v){dsp.automatic=v;save();}
 void SsbController::setLowCut(int v){dsp.lowHz=std::clamp(v,80,500);save();}
 void SsbController::setHighCut(int v){dsp.highHz=std::clamp(v,1800,3500);save();}
-void SsbController::fail(QString const& text){stop();message=text;emit changed();}
+void SsbController::fail(QString const& text){
+    qWarning().noquote() << "[SSB] failure:" << text;
+    stop();message=text;emit changed();
+}
 QAudioDevice SsbController::selectedMicrophoneDevice() const
 {
     for(const auto& device:QMediaDevices::audioInputs())
@@ -68,9 +71,18 @@ bool SsbController::openMicrophone()
     source->setBufferSize(format.bytesForDuration(40000));
     input=source->start();
     if(!input || source->error()!=QAudio::NoError){
+        qWarning().noquote() << "[SSB] microphone open failed"
+                             << "device=" << device.description()
+                             << "state=" << int(source->state())
+                             << "error=" << int(source->error());
         source->stop();source->deleteLater();source=nullptr;input=nullptr;
         return false;
     }
+    qInfo().noquote() << "[SSB] microphone opened"
+                      << "device=" << device.description()
+                      << "rate=" << format.sampleRate()
+                      << "channels=" << format.channelCount()
+                      << "format=" << int(format.sampleFormat());
     connect(input,&QIODevice::readyRead,this,&SsbController::capture);
     connect(source,&QAudioSource::stateChanged,this,[this](QAudio::State state){
         if(active && state==QAudio::StoppedState)
@@ -130,6 +142,7 @@ bool SsbController::start(){
     active=true;message=tr("SSB transmitting");peak=0;phase=0;dsp.reset();pending.clear();packet.clear();
     lead=hooks.leadMs ? std::clamp(hooks.leadMs(),0,1500) : 150;
     clock.start();lastAudio.start();guard.start();
+    qInfo().noquote() << "[SSB] PTT session started lead_ms=" << lead;
     const quint64 generation=microphoneGeneration;
     // A backend can emit Stopped synchronously inside QAudioSource::start(),
     // before active becomes true. Verify once after activation so that early
@@ -142,6 +155,11 @@ bool SsbController::start(){
     emit changed();return true;
 }
 void SsbController::stop(){
+    if(active)qInfo().noquote() << "[SSB] PTT session stopped"
+        << "elapsed_ms=" << clock.elapsed()
+        << "last_audio_age_ms=" << lastAudio.elapsed()
+        << "input_state=" << (source ? int(source->state()) : -1)
+        << "input_error=" << (source ? int(source->error()) : -1);
     bool was=active;active=false;microphoneRecoveryPending=false;++microphoneGeneration;guard.stop();
     if(source){source->disconnect(this);source->stop();source->deleteLater();source=nullptr;}
     input=nullptr;pending.clear();packet.clear();peak=0;
@@ -152,9 +170,25 @@ void SsbController::stop(){
 void SsbController::capture(){
     if(!active || !input)return;
     if(!hooks.valid || !hooks.valid()){fail(tr("Radio unavailable; PTT released"));return;}
-    pending+=input->readAll();lastAudio.restart();
+    const QByteArray captured=input->readAll();
+    // A readyRead notification with no PCM is not a healthy microphone
+    // heartbeat: keep the existing no-audio watchdog effective.
+    if(captured.isEmpty())return;
+    pending+=captured;lastAudio.restart();
     const int frame=format.bytesPerFrame();
-    if(pending.size()>format.bytesForDuration(250000)){fail(tr("Microphone backlog; PTT released"));return;}
+    if(pending.size()>format.bytesForDuration(250000)){
+        // Capture notifications can be batched while CAT/audio startup or
+        // the GUI event loop is busy. A backlog of valid PCM is not a device
+        // failure. Discard old *whole frames*, keeping the newest 40 ms plus
+        // any partial frame for the next read. Never replay the stale burst
+        // or mix a pre-gap TX packet/filter history into the fresh audio.
+        const qsizetype discard=(pending.size()/frame)*frame-format.bytesForDuration(40000);
+        pending.remove(0,discard);
+        packet.clear();phase=0;dsp.reset();peak=0;
+        qWarning().noquote() << "[SSB] microphone backlog resynchronised; PTT retained"
+                             << "discarded_ms=" << format.durationForBytes(discard)/1000
+                             << "retained_bytes=" << pending.size();
+    }
     const int count=pending.size()/frame;double blockPeak=0;
     for(int i=0;i<count;++i){
         float sample=0;

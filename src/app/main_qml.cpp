@@ -157,6 +157,7 @@ __declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance = 0x00000001;
 #include "DecodiumStorageMigration.hpp"
 #include "DecodiumUpdater.hpp"
 #include "GraphicsPipelineCache.hpp"
+#include "LinuxGraphicsSafety.hpp"
 #include "DecodiumCommunityReport.hpp"
 #include "MapIntelligenceService.h"
 #include "controllers/FT2LinkQmlAdapter.hpp"
@@ -325,6 +326,9 @@ private:
 #endif
 
 static std::atomic_bool g_shuttingDown {false};
+#ifdef Q_OS_LINUX
+static std::unique_ptr<decodium::linux_graphics::DeviceLossRecovery> g_linuxGraphicsRecovery;
+#endif
 
 // The render-thread QSG timings can tell us that the scene graph is waiting
 // for the GUI thread, but not which GUI event occupied that thread.  Time the
@@ -485,11 +489,15 @@ struct LinuxVulkanGpuCandidate
 {
     uint32_t index = 0;
     QByteArray name;
+    quint32 vendorId = 0;
+    QByteArray cacheDeviceKey;
     VkPhysicalDeviceType type = VK_PHYSICAL_DEVICE_TYPE_OTHER;
     quint64 localMemoryBytes = 0;
     uint32_t apiVersion = 0;
     bool hasGraphicsComputePresentQueue = false;
     bool hasSwapchain = false;
+
+    bool integrated() const { return type == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU; }
 
     bool eligible() const
     {
@@ -594,7 +602,8 @@ static void configureLinuxVulkanGpuSelection()
            + qgetenv("QT_VK_PHYSICAL_DEVICE_INDEX")).constData());
         return;
     }
-    if (!quickBackend.isEmpty() || (!backend.isEmpty() && !explicitVulkan)) {
+    if (!quickBackend.isEmpty() || !qgetenv("QMLSCENE_DEVICE").trimmed().isEmpty()
+        || (!backend.isEmpty() && !explicitVulkan)) {
         L("[GPUSEL] Linux Vulkan GPU auto-selection skipped: another graphics backend was requested");
         return;
     }
@@ -641,6 +650,11 @@ static void configureLinuxVulkanGpuSelection()
         LinuxVulkanGpuCandidate candidate;
         candidate.index = i;
         candidate.name = QByteArray(properties.deviceName);
+        candidate.vendorId = properties.vendorID;
+        candidate.cacheDeviceKey = QByteArray::number(properties.vendorID, 16) + '_'
+            + QByteArray::number(properties.deviceID, 16) + '_'
+            + QByteArray::number(properties.driverVersion) + '_'
+            + QByteArray(reinterpret_cast<const char*>(properties.pipelineCacheUUID), VK_UUID_SIZE).toHex();
         candidate.type = properties.deviceType;
         candidate.apiVersion = properties.apiVersion;
         candidate.localMemoryBytes = linuxVulkanLocalMemoryBytes(functions, physicalDevices[i]);
@@ -683,26 +697,39 @@ static void configureLinuxVulkanGpuSelection()
         return;
     }
 
+    auto const* selectedDevice = decodium::linux_graphics::automaticAlternativeForNvk(
+        candidates, &*best, explicitVulkan);
+    if (!selectedDevice) {
+        decodium::linux_graphics::useSoftwareRendering();
+        L("[GPUSEL] Automatic NVK selection avoided: no eligible Intel alternative; using Qt software rendering");
+        return;
+    }
+    bool const avoidedNvk = selectedDevice != &*best;
+    if (avoidedNvk)
+        L("[GPUSEL] Automatic NVK selection avoided: using eligible Intel integrated GPU (issue #101)");
+
     // Do not force Vulkan on ordinary single/iGPU Linux systems. Hybrid systems
     // switch to Vulkan so Qt can address the dedicated adapter explicitly. If a
     // dedicated adapter was enumerated but did not qualify, the sorted choice is
     // the integrated hardware fallback. An explicit Vulkan request always gets
     // the best eligible hardware device.
-    bool const bestIsDedicated = best->type == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU;
+    bool const bestIsDedicated = selectedDevice->type == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU;
     if (!explicitVulkan && !bestIsDedicated && !sawDedicatedDevice) {
         L("[GPUSEL] No dedicated Vulkan GPU found; preserving Qt automatic integrated-GPU path");
         return;
     }
 
-    qputenv("QT_VK_PHYSICAL_DEVICE_INDEX", QByteArray::number(best->index));
+    qputenv("QT_VK_PHYSICAL_DEVICE_INDEX", QByteArray::number(selectedDevice->index));
     if (backend.isEmpty())
         qputenv("QSG_RHI_BACKEND", "vulkan");
+    QCoreApplication::instance()->setProperty("decodiumVulkanCacheDeviceKey", selectedDevice->cacheDeviceKey);
 
     QByteArray selected("[GPUSEL] Selected Linux GPU");
-    selected += " index=" + QByteArray::number(best->index);
-    selected += " name=" + best->name;
-    selected += " type=" + QByteArray(linuxVulkanDeviceTypeName(best->type));
-    selected += bestIsDedicated ? " policy=prefer_dedicated" : " policy=integrated_fallback";
+    selected += " index=" + QByteArray::number(selectedDevice->index);
+    selected += " name=" + selectedDevice->name;
+    selected += " type=" + QByteArray(linuxVulkanDeviceTypeName(selectedDevice->type));
+    selected += avoidedNvk ? " policy=nvk_intel_fallback"
+        : (bestIsDedicated ? " policy=prefer_dedicated" : " policy=integrated_fallback");
     selected += " backend=vulkan";
     L(selected.constData());
 }
@@ -1433,6 +1460,21 @@ static void qtMsgHandler(QtMsgType, const QMessageLogContext&, const QString& ms
     if (msg.contains("Main window closing - shutting down application")) {
         g_shuttingDown.store(true, std::memory_order_relaxed);
     }
+#ifdef Q_OS_LINUX
+    if (g_linuxGraphicsRecovery && g_linuxGraphicsRecovery->record(msg)) {
+        L(g_linuxGraphicsRecovery->persisted()
+              ? "[GPU-RECOVERY] Vulkan device loss recorded; next automatic launch will use software rendering"
+              : "[GPU-RECOVERY] WARNING: could not persist Vulkan device-loss recovery marker");
+        if (auto* application = QCoreApplication::instance()) {
+            // Never switch graphics APIs, stop CAT or destroy QML windows
+            // inside a render-thread message callback. Exit on the GUI thread.
+            QMetaObject::invokeMethod(application, [] {
+                L("[GPU-RECOVERY] Requesting orderly shutdown after Vulkan device loss; no automatic restart");
+                QCoreApplication::exit(1);
+            }, Qt::QueuedConnection);
+        }
+    }
+#endif
 #ifdef Q_OS_WIN
     if (msg.startsWith(QStringLiteral("DirectWrite: CreateFontFaceFromHDC() failed"))
         && msg.contains(QStringLiteral("MS Sans Serif"), Qt::CaseInsensitive)) {
@@ -1619,8 +1661,16 @@ int main(int argc, char* argv[])
     bool const startupResetFromCommandLine =
         hasCommandLineSwitchAny(argc, argv, "--reset-safe-graphics");
     bool const startupResetFromSettings = portableResetSafeGraphicsRequestedInSettings();
+#ifdef Q_OS_LINUX
+    g_linuxGraphicsRecovery = std::make_unique<decodium::linux_graphics::DeviceLossRecovery>(
+        decodium::linux_graphics::recoveryMarkerPath());
+#endif
     if (startupResetFromCommandLine || startupResetFromSettings) {
         clearPortableGraphicsFallbackSettings();
+#ifdef Q_OS_LINUX
+        if (!g_linuxGraphicsRecovery->reset())
+            L("WARNING: could not clear Linux graphics recovery marker");
+#endif
         if (startupResetFromSettings)
             clearPortableResetSafeGraphicsRequest();
         L("Graphics reset requested: cleared persistent fallback settings");
@@ -1667,6 +1717,16 @@ int main(int argc, char* argv[])
     }
 
 #if !defined(Q_OS_WIN)
+#ifdef Q_OS_LINUX
+    if (g_linuxGraphicsRecovery->active()) {
+        if (!decodium::linux_graphics::hasExplicitGraphicsChoice()) {
+            decodium::linux_graphics::useSoftwareRendering();
+            L("[GPU-RECOVERY] Previous Vulkan device loss: using persistent software rendering; --reset-safe-graphics clears recovery");
+        } else {
+            L("[GPU-RECOVERY] Explicit graphics override respected; Linux recovery marker retained");
+        }
+    }
+#endif
     bool const commandLineSoftwareGraphics =
         hasCommandLineSwitchAny(argc, argv, "--disable-gpu")
         || hasCommandLineSwitchAny(argc, argv, "--software-renderer");
@@ -2089,7 +2149,7 @@ int main(int argc, char* argv[])
         QStringLiteral("Use the GPU-independent Qt Quick software renderer."));
     QCommandLineOption const resetSafeGraphicsOption(
         QStringList {} << "reset-safe-graphics",
-        QStringLiteral("Clear automatic Windows safe graphics and persistent D3D11 fallback markers."));
+        QStringLiteral("Clear automatic graphics recovery markers and cached pipelines (Windows/Linux)."));
     QCommandLineOption const graphicsWorkerOption(
         QStringList {} << "decodium-graphics-worker",
         QStringLiteral("Internal Windows graphics startup worker."));
@@ -2936,7 +2996,16 @@ int main(int argc, char* argv[])
     // an interrupted run makes this launch start cache-free automatically.
     decodium::graphics_cache::PipelineCacheSession pipelineCacheSession {
         decodium::graphics_cache::cacheDirectory(),
-        startupResetFromCommandLine || startupResetFromSettings
+        startupResetFromCommandLine || startupResetFromSettings,
+        [] {
+#ifdef Q_OS_LINUX
+            // A driver error can arrive while QML windows are being destroyed,
+            // after app.exec() returned. Do not promote those staged caches.
+            return !g_linuxGraphicsRecovery->observed();
+#else
+            return true;
+#endif
+        }
     };
     QString const pipelineCacheFile =
         decodium::graphics_cache::stableCacheFile(QStringLiteral("bootstrap"));
@@ -2976,6 +3045,19 @@ int main(int argc, char* argv[])
     // CW: decodificatore, manipolatori e macro (vengono da DecoDXLog).
     decodium::cw::CwController cwModule;
     decodium::ssb::SsbController ssbModule;
+#ifdef Q_OS_LINUX
+    QObject::connect(&app, &QCoreApplication::aboutToQuit, &bridge,
+                     [&bridge, &cwModule, &ssbModule, &jtty] {
+        if (g_linuxGraphicsRecovery && g_linuxGraphicsRecovery->observed()) {
+            // Device-loss shutdown bypasses the normal Main.qml close event.
+            // Stop native keyers/voice and release PTT before disconnecting CAT.
+            cwModule.suspend();
+            ssbModule.stop();
+            jtty.abort();
+            bridge.shutdown();
+        }
+    });
+#endif
     // Rotore d'antenna PRO.SIS.TEL (viene da DecoRotor): spento finche' l'operatore non lo accende.
     decodium::rotor::RotorModule rotorModule;
     auto labDialOverrideActive = std::make_shared<bool>(labDialHz > 0);
@@ -5242,11 +5324,15 @@ int main(int argc, char* argv[])
 
     int r = app.exec();
     g_shuttingDown.store(true, std::memory_order_relaxed);
-    if (*mainThreadWatchdogInstalled) {
+    bool graphicsSessionHealthy = *mainThreadWatchdogInstalled;
+#ifdef Q_OS_LINUX
+    graphicsSessionHealthy = graphicsSessionHealthy && !g_linuxGraphicsRecovery->observed();
+#endif
+    if (graphicsSessionHealthy) {
         pipelineCacheSession.markCleanShutdown();
         L("Graphics cache session marked clean; staged caches will be promoted after window teardown");
     } else {
-        L("Graphics cache session left pending because Main.qml never reached ready state");
+        L("Graphics cache session left pending: startup incomplete or graphics device lost");
     }
     L("app.exec() exited");
     return r;

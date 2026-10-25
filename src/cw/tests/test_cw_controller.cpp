@@ -1,4 +1,5 @@
 #include "CwController.h"
+#include "CwCatText.h"
 
 #include <QFile>
 #include <QSettings>
@@ -683,6 +684,94 @@ private slots:
         QCOMPARE(sent.size(), 3);
         QCOMPARE(sent.join(QString()), text);
         QCOMPARE(ptt, (QVector<bool>{true, false}));
+    }
+
+    void icomChunkBoundariesPreserveTheLastCharacter_data()
+    {
+        QTest::addColumn<int>("length");
+        for (int length : {1, 29, 30, 31, 59, 60, 61, 67})
+            QTest::newRow(qPrintable(QString::number(length))) << length;
+    }
+
+    void icomChunkBoundariesPreserveTheLastCharacter()
+    {
+        QFETCH(int, length);
+        QSettings s(iniPath(), QSettings::IniFormat);
+        CwController c;
+        QStringList sent;
+        QVector<bool> ptt;
+        int stops = 0;
+        CwController::Hooks h;
+        h.rigKeyerAvailable = [] { return true; };
+        h.rigMorseTextLimit = [] { return catMorseTextLimit("Icom", false); };
+        h.rigCwRequiresExplicitPtt = [] { return false; };
+        h.rigPtt = [&](bool on) { ptt.append(on); };
+        h.stopRigMorse = [&] { ++stops; };
+        h.sendRigMorse = [&](const QString& text, int) { sent.append(text); return true; };
+        c.setHooks(h);
+        c.start(&s);
+        c.setWpm(60);
+        const QString text = QString(length - 1, QLatin1Char('E')) + QLatin1Char('9');
+        c.sendText(text, {});
+        QCOMPARE(sent.size(), 1);
+        QTRY_VERIFY_WITH_TIMEOUT(!c.sending(), 8000);
+        QCOMPARE(sent.size(), (length + icomTextLimit - 1) / icomTextLimit);
+        QCOMPARE(sent.join(QString()), text);
+        for (const auto& chunk : sent) {
+            QVERIFY(!chunk.isEmpty());
+            QVERIFY(chunk.size() <= icomTextLimit);
+        }
+        QVERIFY(ptt.isEmpty()); // Native break-in, no continuous PTT or cycling.
+        QCOMPARE(stops, 0);     // Never flush the final characters on completion.
+    }
+
+    void stoppingIcomCancelsTheUnsentTail_data()
+    {
+        QTest::addColumn<bool>("acknowledgeBeforeStop");
+        QTest::newRow("waiting-for-CAT") << false;
+        QTest::newRow("keying-first-chunk") << true;
+    }
+
+    void stoppingIcomCancelsTheUnsentTail()
+    {
+        QFETCH(bool, acknowledgeBeforeStop);
+        QSettings s(iniPath(), QSettings::IniFormat);
+        CwController c;
+        QStringList sent;
+        QVector<bool> ptt;
+        int stops = 0;
+        CwController::Hooks::MorseCompletion done;
+        CwController::Hooks h;
+        h.rigKeyerAvailable = [] { return true; };
+        h.rigMorseTextLimit = [] { return catMorseTextLimit("Icom", false); };
+        h.rigCwRequiresExplicitPtt = [] { return false; };
+        h.rigPtt = [&](bool on) { ptt.append(on); };
+        h.stopRigMorse = [&] { ++stops; };
+        h.sendRigMorseAsync = [&](const QString& text, int, auto completion) {
+            sent.append(text);
+            done = completion;
+            return true;
+        };
+        c.setHooks(h);
+        c.start(&s);
+        c.setWpm(60);
+        c.sendText(QString(60, QLatin1Char('E')) + QStringLiteral("589 589"), {});
+        QCOMPARE(sent.size(), 1);
+        QCOMPARE(sent.first().size(), icomTextLimit);
+        QVERIFY(bool(done));
+        if (acknowledgeBeforeStop)
+            done({});
+        c.stop();
+        QVERIFY(!c.sending());
+        QCOMPARE(stops, 1);
+        QCOMPARE(ptt, (QVector<bool>{false}));
+        if (!acknowledgeBeforeStop)
+            done({}); // A late successful ACK must not restart the queue.
+        QTest::qWait(CwKeyer::millisFor(sent.first(), 60) + 350);
+        QCOMPARE(sent.size(), 1);
+        QVERIFY(!c.sending());
+        QCOMPARE(stops, 1);
+        QCOMPARE(ptt, (QVector<bool>{false}));
     }
 
     void stoppingCatAfterBackendChangeIgnoresLateAcknowledgements()

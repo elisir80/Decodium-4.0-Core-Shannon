@@ -30,11 +30,18 @@ bool DecodiumBridge::ssbBegin()
     }
     m_ssbRestoreMonitor=m_decoPortMonitor;
     if(m_ssbRestoreMonitor)setDecoPortMonitor(false);
-    m_ssbTxActive=true;emit ssbStateChanged();return true;
+    m_ssbTxActive=true;
+    qInfo().noquote() << "[SSB] radio session started backend=" << m_catBackend
+                      << "remote=" << m_ssbRemoteTx << "cat_mode=" << m_catMode;
+    emit ssbStateChanged();return true;
 }
 void DecodiumBridge::ssbStop()
 {
     if(!m_ssbTxActive)return;
+    qInfo().noquote() << "[SSB] radio session stopped backend=" << m_catBackend
+                      << "connected=" << m_catConnected << "app_mode=" << m_mode
+                      << "cat_mode=" << m_catMode << "requested_mode=" << m_ssbRadioMode
+                      << "keyed=" << m_decoPortRemoteKeyed;
     m_ssbTxActive=false;
     if(m_ssbRemoteTx){if(auto* link=remoteLinkIfAny())link->setPtt(false,0);}
     else keySharedAudioTransmitter(false,false);

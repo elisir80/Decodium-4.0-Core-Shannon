@@ -2638,8 +2638,11 @@ bool HamlibTransceiver::supports_power_control () const noexcept
 
 int HamlibTransceiver::morse_text_limit () const noexcept
 {
-  return m_->rig_ && m_->rig_->caps->rig_model == RIG_MODEL_FT991
-    ? decodium::cw::ft991TextLimit : 0;
+  if (!m_->rig_ || !m_->rig_->caps)
+    return 0;
+  auto const * caps = m_->rig_->caps;
+  return decodium::cw::catMorseTextLimit (QString::fromLatin1 (caps->mfg_name),
+                                        caps->rig_model == RIG_MODEL_FT991);
 }
 
 QString HamlibTransceiver::send_morse_checked (QString const& text, int wpm)
@@ -2718,7 +2721,8 @@ QString HamlibTransceiver::send_morse_checked (QString const& text, int wpm)
   int const rc = rig_send_morse (m_->rig_.data (), RIG_VFO_CURR, bytes.constData ());
   qInfo ().noquote () << "[CW-CAT] send result=" << rc << "model=" << m_->rig_->caps->rig_model
                      << "text_chars=" << text.size () << "payload_chars=" << payload.size ()
-                     << "literal_single_char=" << literal_single_char << "wpm=" << wpm;
+                     << "literal_single_char=" << literal_single_char << "wpm=" << wpm
+                     << "chunk_limit=" << morse_text_limit ();
   return rc == RIG_OK ? QString {} : tr ("Sending CW failed: %1 (%2)")
     .arg (QString::fromLatin1 (rigerror (rc))).arg (rc);
 }

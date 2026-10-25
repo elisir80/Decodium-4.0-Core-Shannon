@@ -51,6 +51,7 @@ signals:
     void changed();
     void devicesChanged();
 private:
+    friend struct SsbControllerTestAccess;
     QAudioDevice selectedMicrophoneDevice() const;
     void handleAudioInputsChanged();
     bool openMicrophone();

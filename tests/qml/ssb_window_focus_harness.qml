@@ -64,8 +64,8 @@ QtObject {
         property int highCut: 2800
         property real micPeak: 0
         property string status: "Receiving (test)"
-        function start() { startCalls++; transmitting = true }
-        function stop() { stopCalls++; transmitting = false }
+        function start() { startCalls++; transmitting = true; status = "SSB transmitting" }
+        function stop() { stopCalls++; transmitting = false; status = "Receiving" }
     }
     property QtObject voiceKeyer: QtObject {
         property var messages: []

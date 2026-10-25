@@ -38,6 +38,13 @@ target_compile_definitions (test_graphics_pipeline_cache PRIVATE DECODIUM_SOURCE
 target_link_libraries (test_graphics_pipeline_cache Qt6::Test Qt6::Core)
 add_test (NAME test_graphics_pipeline_cache COMMAND $<TARGET_FILE:test_graphics_pipeline_cache>)
 
+add_executable (test_linux_graphics_safety test_linux_graphics_safety.cpp)
+target_include_directories (test_linux_graphics_safety PRIVATE ${CMAKE_SOURCE_DIR}/src/ui)
+target_compile_definitions (test_linux_graphics_safety PRIVATE DECODIUM_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+target_link_libraries (test_linux_graphics_safety PRIVATE Qt6::Test Qt6::Core)
+set_target_properties (test_linux_graphics_safety PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+add_test (NAME test_linux_graphics_safety COMMAND $<TARGET_FILE:test_linux_graphics_safety>)
+
 add_executable (test_audio_mode_change_capture_policy test_audio_mode_change_capture_policy.cpp)
 target_include_directories (test_audio_mode_change_capture_policy PRIVATE ${CMAKE_SOURCE_DIR})
 target_compile_definitions (test_audio_mode_change_capture_policy PRIVATE DECODIUM_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
@@ -131,6 +138,14 @@ add_test (NAME test_transceiver_base_split COMMAND $<TARGET_FILE:test_transceive
 add_executable (test_hamlib_release_contract test_hamlib_release_contract.cpp)
 target_link_libraries (test_hamlib_release_contract Qt6::Test Qt6::Core Hamlib::Hamlib)
 add_test (NAME test_hamlib_release_contract COMMAND $<TARGET_FILE:test_hamlib_release_contract>)
+
+# Issue #109: the real Hamlib FIFO feeds a simulated finite CW keyer only.
+# No serial port, network radio, audio device or RF transmission is used.
+add_executable (test_cw_icom_buffer test_cw_icom_buffer.cpp)
+target_link_libraries (test_cw_icom_buffer PRIVATE decodium_cw Qt6::Test Hamlib::Hamlib)
+set_target_properties (test_cw_icom_buffer PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+add_test (NAME test_cw_icom_buffer COMMAND $<TARGET_FILE:test_cw_icom_buffer>)
+set_tests_properties (test_cw_icom_buffer PROPERTIES TIMEOUT 120)
 
 add_executable (test_cat_configuration_snapshot test_cat_configuration_snapshot.cpp)
 target_link_libraries (test_cat_configuration_snapshot Qt6::Test Qt6::Core)
