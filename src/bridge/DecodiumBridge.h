@@ -48,6 +48,7 @@ namespace decodium::audio { class RttyRxRecovery; }
 #include "Network/DecoSyncTime.hpp"
 #include "FtRuntimeAdaptivePolicy.hpp"
 #include "PttTransitionPolicy.h"
+#include "Ft8AutoTxDecodeGate.h"
 
 class ActiveStationsModel;
 class DecodiumAlertManager;
@@ -3143,6 +3144,10 @@ private:
     bool m_syncTxRetryScheduled {false};
     quint64 m_syncTxRetrySerial {0};
     quint64 m_txRequestGeneration {0};
+    decodium::Ft8AutoTxDecodeGate m_ft8AutoTxDecodeGate;
+    quint64 m_ft8AutoTxFinalDecodeSerial {0};
+    bool m_activeFt8AutoTxFullFrame {false};
+    decodium::Ft8AutoTxDecodeGate::Context m_activeFt8AutoTxContext;
     int m_explicitManualTxRequest {0};
     // A roster CALL prepares the QSO immediately but synchronized waveforms
     // must not be dispatched in the middle of an already-running slot.
@@ -5155,6 +5160,11 @@ private:
     void checkAndStartPeriodicTx();
     bool shouldDeferAutoTxUntilTimeSyncDecode(const QString& modeSnapshot) const;
     bool hasPendingTimeSyncDecodeForMode(const QString& modeSnapshot) const;
+    bool usesFt8AutoTxDecodeGate() const;
+    bool deferFt8AutoTxForDecode();
+    decodium::Ft8AutoTxDecodeGate::Context ft8AutoTxDecodeContext() const;
+    int syncTxCommitDeadlineMs(bool relaxed) const;
+    bool validateFt8AutoTxAudioStart(qint64 payloadMs);
     // Grace di attesa decode al boundary, CLAMPATO per CPU pressure. Usato sia dal
     // fallback timer (scheduleDeferredAutoTxAfterTimeSyncDecode) sia dal gate
     // "defer al prossimo slot" (onFt8DecodeReady), per evitare l'asimmetria P1-A.

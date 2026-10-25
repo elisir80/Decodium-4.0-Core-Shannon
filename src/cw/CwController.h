@@ -73,7 +73,8 @@ class CwController : public QObject {
     Q_PROPERTY(bool remoteRadio READ remoteRadio NOTIFY txChanged)
     // Con una radio Decolink: mandare gli istanti del tasto (vero, predefinito) o il tono audio.
     Q_PROPERTY(bool remoteKey READ remoteKey WRITE setRemoteKey NOTIFY txChanged)
-    // La nota del CW a tasto, in hertz.
+    // Local Center CW receive target, also used for Decolink key-event tone.
+    // Not a readback or a CAT setter for the physical radio's CW pitch/sidetone.
     Q_PROPERTY(int toneHz READ toneHz WRITE setToneHz NOTIFY txChanged)
     Q_PROPERTY(QString keyerPort READ keyerPort WRITE setKeyerPort NOTIFY txChanged)
     Q_PROPERTY(QString keyerLine READ keyerLine WRITE setKeyerLine NOTIFY txChanged)

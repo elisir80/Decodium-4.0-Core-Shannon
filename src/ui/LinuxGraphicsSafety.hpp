@@ -69,6 +69,20 @@ inline QString recoveryMarkerPath()
         QStringLiteral("Decodium/linux-vulkan-device-loss.json"));
 }
 
+inline bool isDeviceLossMessage(const QString& message)
+{
+    // Driver debug output is optional. Qt's QRhi Vulkan backend reports the
+    // same failure without spelling VK_ERROR_DEVICE_LOST; both Qt Quick
+    // render loops also report it before tearing down/recreating the RHI.
+    // See qtbase/src/gui/rhi/qrhivulkan.cpp and qtdeclarative's
+    // qsgthreadedrenderloop.cpp / qsgrenderloop.cpp handleDeviceLoss paths (#101).
+    if (message.contains(QLatin1String("VK_ERROR_DEVICE_LOST"))) return true;
+    if (message.startsWith(QLatin1String("Device loss detected in vk"))
+        && message.endsWith(QLatin1String("()"))) return true;
+    return message == QLatin1String("Graphics device lost, cleaning up scenegraph and releasing RHI")
+        || message == QLatin1String("Graphics device lost, cleaning up scenegraph and releasing RHIs");
+}
+
 class DeviceLossRecovery final
 {
 public:
@@ -84,7 +98,7 @@ public:
     // No qDebug/qWarning here: this is called from the Qt message handler.
     bool record(const QString& message)
     {
-        if (!message.contains(QStringLiteral("VK_ERROR_DEVICE_LOST"))
+        if (!isDeviceLossMessage(message)
             || m_observed.exchange(true, std::memory_order_relaxed))
             return false;
         if (!m_path.isEmpty() && QDir().mkpath(QFileInfo(m_path).absolutePath())) {

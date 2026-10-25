@@ -1,0 +1,148 @@
+#include <QtTest>
+#include <QFile>
+
+#include "src/bridge/Ft8AutoTxDecodeGate.h"
+
+using Gate = decodium::Ft8AutoTxDecodeGate;
+using Decision = Gate::Decision;
+
+class TestFt8AutoTxDecodeGate : public QObject
+{
+    Q_OBJECT
+private slots:
+    void diagnosticReplay_data()
+    {
+        QTest::addColumn<int>("oldCommitMs");
+        QTest::addColumn<int>("responseMs");
+        QTest::addColumn<QString>("oldPayload");
+        QTest::addColumn<QString>("newPayload");
+        // EA5IL's diagnostic (21): actual auto-sequence processing offsets.
+        QTest::newRow("SQ7KMT-RR73") << 384 << 637
+            << QString("SQ7KMT EA5IL R-04") << QString("SQ7KMT EA5IL 73");
+        QTest::newRow("YO2LOG-report") << 393 << 674
+            << QString("YO2LOG EA5IL IM99") << QString("YO2LOG EA5IL R-01");
+        QTest::newRow("YO2LOG-RR73") << 384 << 560
+            << QString("YO2LOG EA5IL R+01") << QString("YO2LOG EA5IL 73");
+    }
+
+    void diagnosticReplay()
+    {
+        QFETCH(int, oldCommitMs);
+        QFETCH(int, responseMs);
+        QFETCH(QString, oldPayload);
+        QFETCH(QString, newPayload);
+        Gate gate;
+        Gate::Context const context {12345, 2, 7};
+        QString selected = oldPayload;
+        QStringList transmitted;
+        auto dispatch = [&](int elapsed) {
+            if (gate.decision(context, elapsed) == Decision::Ready) {
+                transmitted.append(selected);
+                gate.committed(context);
+            }
+        };
+        QVERIFY(gate.armTimer(context));
+        QCOMPARE(gate.decision(context, oldCommitMs), Decision::Wait);
+        dispatch(oldCommitMs); // Old unconditional fallback MUST NOT key PTT.
+        QVERIFY(transmitted.isEmpty());
+        selected = newPayload; // Auto-seq applies the received report/signoff first.
+        gate.decoded(context, responseMs);
+        dispatch(responseMs);
+        QCOMPARE(transmitted, QStringList {newPayload});
+        dispatch(1200); // Stale fallback cannot send a second time.
+        gate.decoded(context, responseMs + 100);
+        dispatch(responseMs + 100); // Late decode cannot replace an active frame.
+        QCOMPARE(transmitted.size(), 1);
+    }
+
+    void noResultSkipsSlotButCompletedEmptyDecodeAllowsRetry()
+    {
+        Gate gate;
+        Gate::Context const context {12345, 2, 7};
+        QVERIFY(gate.armTimer(context));
+        QVERIFY(!gate.armTimer(context));
+        QCOMPARE(gate.decision(context, 1199), Decision::Wait);
+        QCOMPARE(gate.decision(context, 1200), Decision::SkipSlot);
+        gate.decoded(context, 1201);
+        QCOMPARE(gate.decision(context, 1201), Decision::SkipSlot);
+        // A stalled decoder must not hold all future slots.
+        Gate::Context const next {12347, 2, 7};
+        QVERIFY(gate.armTimer(next));
+        gate.decoded(next, 520); // The final pass completed with zero rows.
+        QCOMPARE(gate.decision(next, 520), Decision::Ready);
+    }
+
+    void deadlinesAreAbsoluteAndBounded()
+    {
+        Gate gate;
+        Gate::Context const context {12345, 2, 7};
+        gate.decoded(context, 1199);
+        QCOMPARE(gate.decision(context, 1399), Decision::Ready);
+        QCOMPARE(gate.decision(context, 1400), Decision::SkipSlot);
+        QCOMPARE(gate.decision(context, 5000), Decision::SkipSlot);
+        QCOMPARE(gate.decision(context, -1), Decision::SkipSlot);
+        QVERIFY(gate.armTimer(context)); // Scheduling cannot clear a ready result.
+        QCOMPARE(gate.decision(context, 1200), Decision::Ready);
+    }
+
+    void slotSessionAndHaltGenerationCannotReuseReadyState()
+    {
+        Gate::Context const context {12345, 2, 7};
+        for (auto const other : {Gate::Context {12346, 2, 7},
+                                Gate::Context {12344, 2, 7}, // clock moved backwards
+                                Gate::Context {12345, 3, 7}, // monitoring/mode restart
+                                Gate::Context {12345, 2, 8}}) { // HALT/reset QSO
+            Gate gate;
+            gate.decoded(context, 600);
+            QVERIFY(!gate.matches(other));
+            QCOMPARE(gate.decision(other, 610), Decision::Wait);
+            QVERIFY(gate.armTimer(other));
+            QVERIFY(!gate.matches(context)); // old timer must be discarded
+            gate.reset();
+            QCOMPARE(gate.decision(other, 610), Decision::Wait);
+        }
+    }
+
+    void completeWaveformStaysInsideSlot()
+    {
+        constexpr int payloadMs = 79 * 160; // Complete FT8 frame, including Costas.
+        for (int elapsed : {500, 674, 900, 1200, 1400, 1800})
+            QVERIFY(Gate::fullFrameFits(elapsed, payloadMs));
+        QVERIFY(!Gate::fullFrameFits(1801, payloadMs));
+        QVERIFY(!Gate::fullFrameFits(15000, payloadMs));
+        QVERIFY(!Gate::fullFrameFits(1800, 13000));
+        QVERIFY(!Gate::fullFrameFits(500, 0));
+    }
+
+    void bridgeWiring()
+    {
+        QFile file(QStringLiteral(DECODIUM_SOURCE_DIR "/src/bridge/DecodiumBridge.cpp"));
+        QVERIFY(file.open(QIODevice::ReadOnly | QIODevice::Text));
+        QString const cpp = QString::fromUtf8(file.readAll());
+        auto body = [&](const char* begin, const char* end) {
+            int const from = cpp.indexOf(QLatin1String(begin));
+            int const to = cpp.indexOf(QLatin1String(end), from + 1);
+            return from >= 0 && to > from ? cpp.mid(from, to - from) : QString();
+        };
+        for (auto const& entry : {
+                 body("void DecodiumBridge::startTx()", "void DecodiumBridge::sendTx(int n)"),
+                 body("void DecodiumBridge::checkAndStartPeriodicTx()", "void DecodiumBridge::autoSequenceStep(")})
+            QVERIFY(entry.contains(QStringLiteral("deferFt8AutoTxForDecode()")));
+        QString const ready = body("void DecodiumBridge::onFt8DecodeReady(", "void DecodiumBridge::onFt2DecodeReady(");
+        QVERIFY(ready.contains(QStringLiteral("serial == m_ft8AutoTxFinalDecodeSerial")));
+        QVERIFY(ready.contains(QStringLiteral("context.slot - 1")));
+        QVERIFY(ready.indexOf(QStringLiteral("autoSequenceStep(fields)"))
+                < ready.indexOf(QStringLiteral("m_ft8AutoTxDecodeGate.decoded")));
+        QVERIFY(ready.contains(QStringLiteral("autoSeqGotResponse || ft8AutoTxDecodeSettled")));
+        QCOMPARE(cpp.count(QStringLiteral("syncTxCommitDeadlineMs(")), 3); // helper and both guards
+        QCOMPARE(cpp.count(QStringLiteral("validateFt8AutoTxAudioStart(txPlaybackMs)")), 3); // macOS, Windows, Linux
+        QVERIFY(cpp.contains(QStringLiteral("m_activeFt8AutoTxFullFrame) return 0")));
+        QString const deferred = body("bool DecodiumBridge::tryStartDeferredManualSyncTx()",
+                                      "void DecodiumBridge::clearDeferredManualSyncTx(");
+        QVERIFY(deferred.contains(QStringLiteral("auto-ft8-rx-rendezvous")));
+        QVERIFY(deferred.contains(QStringLiteral("checkAndStartPeriodicTx()")));
+    }
+};
+
+QTEST_GUILESS_MAIN(TestFt8AutoTxDecodeGate)
+#include "test_ft8_auto_tx_decode_gate.moc"

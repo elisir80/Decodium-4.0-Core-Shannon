@@ -111,8 +111,19 @@ private Q_SLOTS:
     QCOMPARE (ftx_ft8_ap_mycall_enabled_c (), expected ? 0 : 1);
   }
 
+  void realDirectedMessageStillDecodesWhileIdle_data ()
+  {
+    QTest::addColumn<int> ("startMs");
+    QTest::newRow ("nominal") << 500;
+    QTest::newRow ("after-EA5IL-report") << 800;
+    QTest::newRow ("decode-deadline") << 1200;
+    QTest::newRow ("commit-deadline") << 1400;
+    QTest::newRow ("audio-deadline") << 1800;
+  }
+
   void realDirectedMessageStillDecodesWhileIdle ()
   {
+    QFETCH (int, startMs);
     std::array<int, 79> tones {};
     std::array<signed char, 174> bits {};
     std::array<char, 37> sent {};
@@ -127,8 +138,10 @@ private Q_SLOTS:
     std::mt19937 random (618);
     std::normal_distribution<float> noise (0.f, 200.f);
     for (auto& sample : request.audio) sample = short (noise (random));
-    for (int i = 0; i < wave.size () && i + 6000 < request.audio.size (); ++i)
-      request.audio[i + 6000] += short (2000.f * wave[i]);
+    int const startSample = startMs * 12;
+    QVERIFY (wave.size () + startSample <= request.audio.size ());
+    for (int i = 0; i < wave.size (); ++i)
+      request.audio[i + startSample] += short (2000.f * wave[i]);
     request.availableSamples = request.audio.size ();
     request.nfa = 1300; request.nfb = 1700;
     request.nfqso = request.nftx = 1500;

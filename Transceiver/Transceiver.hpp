@@ -292,6 +292,8 @@ public:
   // hide controls that the wrapped backend supports.
   virtual bool supports_morse () const noexcept {return false;}
   virtual int morse_text_limit () const noexcept {return 0;}
+  virtual int morse_speed (bool /*write*/, int& /*wpm*/) {return -11;}
+  virtual int stop_morse_checked () noexcept {return -11;}
   virtual QString send_morse_checked (QString const&, int)
   {
     return QStringLiteral ("The radio CAT CW keyer is unavailable");

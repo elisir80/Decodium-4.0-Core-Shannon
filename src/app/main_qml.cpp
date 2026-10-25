@@ -1463,13 +1463,13 @@ static void qtMsgHandler(QtMsgType, const QMessageLogContext&, const QString& ms
 #ifdef Q_OS_LINUX
     if (g_linuxGraphicsRecovery && g_linuxGraphicsRecovery->record(msg)) {
         L(g_linuxGraphicsRecovery->persisted()
-              ? "[GPU-RECOVERY] Vulkan device loss recorded; next automatic launch will use software rendering"
-              : "[GPU-RECOVERY] WARNING: could not persist Vulkan device-loss recovery marker");
+              ? "[GPU-RECOVERY] Graphics device loss recorded; next automatic launch will use software rendering"
+              : "[GPU-RECOVERY] WARNING: could not persist graphics device-loss recovery marker");
         if (auto* application = QCoreApplication::instance()) {
             // Never switch graphics APIs, stop CAT or destroy QML windows
             // inside a render-thread message callback. Exit on the GUI thread.
             QMetaObject::invokeMethod(application, [] {
-                L("[GPU-RECOVERY] Requesting orderly shutdown after Vulkan device loss; no automatic restart");
+                L("[GPU-RECOVERY] Requesting orderly shutdown after graphics device loss; no automatic restart");
                 QCoreApplication::exit(1);
             }, Qt::QueuedConnection);
         }
@@ -1721,7 +1721,7 @@ int main(int argc, char* argv[])
     if (g_linuxGraphicsRecovery->active()) {
         if (!decodium::linux_graphics::hasExplicitGraphicsChoice()) {
             decodium::linux_graphics::useSoftwareRendering();
-            L("[GPU-RECOVERY] Previous Vulkan device loss: using persistent software rendering; --reset-safe-graphics clears recovery");
+            L("[GPU-RECOVERY] Previous graphics device loss: using persistent software rendering; --reset-safe-graphics clears recovery");
         } else {
             L("[GPU-RECOVERY] Explicit graphics override respected; Linux recovery marker retained");
         }

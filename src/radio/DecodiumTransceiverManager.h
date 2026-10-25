@@ -231,7 +231,9 @@ public:
     int rigMorseTextLimit() const;
     bool sendRigMorse(const QString& text, int wpm,
                       std::function<void(const QString&)> completion = {});
-    void stopRigMorse();
+    void stopRigMorse(std::function<void(int)> completion = {});
+    void requestRigMorseSpeed(bool write, int wpm, std::function<void(int, int)> completion);
+    Q_SIGNAL void morseStopRequested();
     void requestVoiceControl(const QString& key = {}, double value = 0, bool write = false);
     Q_SIGNAL void voiceControlsReady(QVariantMap controls);
     Q_INVOKABLE void setRigAudio(bool on, double periodSeconds = 15.0, int blockSize = 6912 / 2);

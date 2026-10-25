@@ -20716,6 +20716,7 @@ void DecodiumBridge::invalidateDeferredTxRequests(const QString& reason)
         || m_explicitManualTxRequest > 0;
 
     ++m_txRequestGeneration;
+    m_ft8AutoTxDecodeGate.reset();
     m_periodicTxCheckScheduled = false;
     m_syncTxRetryScheduled = false;
     ++m_syncTxRetrySerial;
@@ -27658,7 +27659,7 @@ bool DecodiumBridge::isSyncTxStartTooLate(int* elapsedMsOut, int* latestStartMsO
         return false;
     }
 
-    int const latestStartMs = latestD3CompatibleSyncTxStartMs(m_mode, periodMs, m_ftxImmediateClickTx);
+    int const latestStartMs = syncTxCommitDeadlineMs(m_ftxImmediateClickTx);
     if (latestStartMsOut) {
         *latestStartMsOut = latestStartMs;
     }
@@ -28069,6 +28070,9 @@ qint64 DecodiumBridge::syncTxPcmStartOffsetBytes(const QAudioFormat& format,
     if (payloadElapsedMs <= 0) {
         return 0;
     }
+    // The bounded automatic reply sends the WHOLE frame. The final audio
+    // start guard cancels an overrun instead of clipping the first Costas.
+    if (m_mode == QStringLiteral("FT8") && m_activeFt8AutoTxFullFrame) return 0;
 
     // Fix QSO-completion: partenza tardiva (es. TX di risposta committato dopo il
     // decode dello slot precedente, ~+0.9-1.2s). Se l'INTERA forma d'onda entra ancora
@@ -29119,6 +29123,9 @@ void DecodiumBridge::startTx()
     if (!txDispatchGuardAllows(QStringLiteral("startTx"))) {
         return;
     }
+    if (!customAudioTxActive && deferFt8AutoTxForDecode()) return;
+    m_activeFt8AutoTxFullFrame = !customAudioTxActive && usesFt8AutoTxDecodeGate();
+    m_activeFt8AutoTxContext = ft8AutoTxDecodeContext();
     QString const txMode = m_ft2LinkTxActive ? QStringLiteral("FT2LINK") : m_mode;
     // Audio custom: salta le guardie FT (validazione payload, fallback CQ,
     // Fox/Hound). CW e FT2-Link hanno testo/waveform arbitrari.
@@ -29512,6 +29519,7 @@ void DecodiumBridge::startTx()
                       .arg(macSlotElapsedMs)
                       .arg(m_txPcmData.size())
                       .arg(m_txPcmBuffer->size()));
+        if (!validateFt8AutoTxAudioStart(txPlaybackMs)) return;
         m_soundOutput->restart(m_txPcmBuffer);
         QTimer::singleShot(txPlaybackMs + macTxTailGuardMs + 50, this,
                            [this, bufferGuard, txPlaybackMs, macTxTailGuardMs]() {
@@ -29543,6 +29551,10 @@ void DecodiumBridge::startTx()
                   " samples=" + QString::number(wave.size()) +
                   " pcm=" + QString::number(m_txPcmData.size()));
 
+        // The one-shot click is consumed on this early-return path too;
+        // subsequent automatic FT8 repeats must rendezvous with RX results.
+        if (txMode == QStringLiteral("FT8") && m_explicitManualTxRequest == m_currentTx)
+            m_explicitManualTxRequest = 0;
         emit statusMessage("TX: " + msg.trimmed());
         return;
     }
@@ -29995,6 +30007,7 @@ void DecodiumBridge::startTx()
                                   syncElapsedMs, leadInMs, payloadDelayMs,
                                   pcmBytes, static_cast<qsizetype>(txBufferBytes),
                                   wavePeak, effectiveGain);
+            if (!validateFt8AutoTxAudioStart(txPlaybackMs)) return;
             soundOutputGuard->restart(m_txPcmBuffer);
             m_txAudioRestartPending = false;
             scheduleSyncTxBoundaryStop(QStringLiteral("sound-output"), txSerial);
@@ -30189,6 +30202,7 @@ void DecodiumBridge::startTx()
                                   syncElapsedMs, leadInMs, payloadDelayMs,
                                   pcmBytes, m_txAudioSink->bufferSize(),
                                   wavePeak, effectiveGain);
+            if (!validateFt8AutoTxAudioStart(txPlaybackMs)) return;
             m_txAudioSink->start(m_txPcmBuffer);
             scheduleTxAudioTelemetryProbe(txSerial);
             scheduleSyncTxBoundaryStop(QStringLiteral("pcm"), txSerial);
@@ -39413,6 +39427,14 @@ bool DecodiumBridge::tryStartDeferredManualSyncTx()
         return false;
     }
 
+    // setTxEnabled also queues automatic requests through this path. Only
+    // an actual user click may bypass the RX rendezvous with manual timing.
+    if (usesFt8AutoTxDecodeGate()) {
+        clearDeferredManualSyncTx(QStringLiteral("auto-ft8-rx-rendezvous"));
+        checkAndStartPeriodicTx();
+        return m_transmitting;
+    }
+
     int const periodMs = effectivePeriodMsForMode(m_mode);
     if (periodMs <= 0) {
         clearDeferredManualSyncTx(QStringLiteral("invalid-period"));
@@ -40359,6 +40381,84 @@ bool DecodiumBridge::advanceQsoState(int txNum)
     return true;
 }
 
+bool DecodiumBridge::usesFt8AutoTxDecodeGate() const
+{
+    return m_mode == QStringLiteral("FT8")
+        && !usingLegacyBackendForTx() && !usingTciAudioInput() && !m_decoPortUseRemote
+        && !mamMultiStreamSequencerActive()
+        && !m_cwTxActive && !m_telemetryTxActive
+        && m_explicitManualTxRequest == 0
+        && !m_callsign.trimmed().isEmpty()
+        && ((m_autoSeq && m_txEnabled) || m_autoCqRepeat);
+}
+
+decodium::Ft8AutoTxDecodeGate::Context DecodiumBridge::ft8AutoTxDecodeContext() const
+{
+    return {correctedUtcEpochMs() / decodium::Ft8AutoTxDecodeGate::periodMs,
+            m_periodTimerSessionId, m_txRequestGeneration};
+}
+
+int DecodiumBridge::syncTxCommitDeadlineMs(bool relaxed) const
+{
+    if (usesFt8AutoTxDecodeGate()) return decodium::Ft8AutoTxDecodeGate::commitDeadlineMs;
+    return latestD3CompatibleSyncTxStartMs(m_mode, effectivePeriodMsForMode(m_mode), relaxed);
+}
+
+bool DecodiumBridge::validateFt8AutoTxAudioStart(qint64 payloadMs)
+{
+    if (!m_activeFt8AutoTxFullFrame) return true;
+    using Gate = decodium::Ft8AutoTxDecodeGate;
+    auto const context = ft8AutoTxDecodeContext();
+    int const elapsedMs = int(correctedUtcEpochMs() % Gate::periodMs);
+    if (!(context == m_activeFt8AutoTxContext) || !Gate::fullFrameFits(elapsedMs, payloadMs)) {
+        bridgeLog(QStringLiteral("FT8 auto TX: audio deadline missed, cancelling full frame elapsed=%1ms payload=%2ms")
+                      .arg(elapsedMs).arg(payloadMs));
+        completeTxPlayback(QStringLiteral("ft8-auto-audio-deadline"), true);
+        return false;
+    }
+    m_ft8AutoTxDecodeGate.committed(context);
+    return true;
+}
+
+bool DecodiumBridge::deferFt8AutoTxForDecode()
+{
+    if (!usesFt8AutoTxDecodeGate()) return false;
+    using Gate = decodium::Ft8AutoTxDecodeGate;
+    auto const context = ft8AutoTxDecodeContext();
+    bool const isEven = context.slot % 2 == 0;
+    if (bridgeTxPeriodIsEven(m_txPeriod) != isEven) return true;
+    int const elapsedMs = int(correctedUtcEpochMs() % Gate::periodMs);
+    auto const decision = m_ft8AutoTxDecodeGate.decision(context, elapsedMs);
+    if (decision == Gate::Decision::Ready) return false;
+
+    // One timer per slot/lifecycle, shared by ALL automatic TX entry points.
+    // A result callback releases this gate only after auto-seq has run. At
+    // the deadline a missing result skips the slot, never sends stale TX1/3.
+    if (m_ft8AutoTxDecodeGate.armTimer(context)) {
+        if (decision == Gate::Decision::SkipSlot) {
+            bridgeLog(QStringLiteral("FT8 auto TX: skip slot, RX result not ready in time elapsed=%1ms").arg(elapsedMs));
+        } else {
+            int const delayMs = qMax(1, Gate::decodeDeadlineMs - elapsedMs);
+            bridgeLog(QStringLiteral("FT8 auto TX: waiting for previous RX slot, deadline=%1ms remaining=%2ms")
+                          .arg(Gate::decodeDeadlineMs).arg(delayMs));
+            QTimer::singleShot(delayMs, Qt::PreciseTimer, this, [this, context]() {
+                if (!(context == ft8AutoTxDecodeContext())
+                    || !m_ft8AutoTxDecodeGate.matches(context)
+                    || !usesFt8AutoTxDecodeGate() || m_manualTxHold
+                    || !m_monitoring || m_transmitting || m_tuning) return;
+                int const elapsed = int(correctedUtcEpochMs() % Gate::periodMs);
+                if (m_ft8AutoTxDecodeGate.decision(context, elapsed) != Gate::Decision::Ready) {
+                    bridgeLog(QStringLiteral("FT8 auto TX: decode deadline expired, skip stale TX%1 in this slot")
+                                  .arg(m_currentTx));
+                    return;
+                }
+                checkAndStartPeriodicTx();
+            });
+        }
+    }
+    return true;
+}
+
 bool DecodiumBridge::shouldDeferAutoTxUntilTimeSyncDecode(const QString& modeSnapshot) const
 {
     QString const normalizedMode = modeSnapshot.trimmed().toUpper();
@@ -40424,6 +40524,11 @@ int DecodiumBridge::effectiveAutoTxDecodeGraceMs(const QString& modeSnapshot) co
 void DecodiumBridge::scheduleDeferredAutoTxAfterTimeSyncDecode(const QString& modeSnapshot,
                                                               quint64 sessionId)
 {
+    if (sessionId == m_periodTimerSessionId && modeSnapshot == m_mode
+        && usesFt8AutoTxDecodeGate()) {
+        if (!deferFt8AutoTxForDecode()) checkAndStartPeriodicTx();
+        return;
+    }
     QString const normalizedMode = modeSnapshot.trimmed().toUpper();
     int const periodMs = periodMsForMode(normalizedMode);
     // 1.0.326 B4: use effectiveRelaxLatestCap() (includes ft8FastSequence) — was using only m_ftxImmediateClickTx
@@ -41077,6 +41182,7 @@ void DecodiumBridge::checkAndStartPeriodicTx()
     if (!txDispatchGuardAllows(QStringLiteral("checkAndStartPeriodicTx"))) {
         return;
     }
+    if (deferFt8AutoTxForDecode()) return;
     // 1.0.364+ MAM multi-stream nativo (FASE 2): se il sequencer multi-QSO
     // e' attivo gestisce TUTTO il dispatch del periodo e ritorna. Gated da
     // mamMultiStreamSequencerActive() -> con MAM OFF questo if non scatta mai
@@ -41519,7 +41625,7 @@ void DecodiumBridge::checkAndStartPeriodicTx()
 
         int const elapsedMs = static_cast<int>(msNow % static_cast<qint64>(pMs));
         // 1.0.318 — P2 fix: questo call site usa effectiveRelaxLatestCap() (helper 1.0.326 B4)
-        int const latestStartMs = latestD3CompatibleSyncTxStartMs(m_mode, pMs, effectiveRelaxLatestCap());
+        int const latestStartMs = syncTxCommitDeadlineMs(effectiveRelaxLatestCap());
         if (latestStartMs > 0 && elapsedMs >= latestStartMs) {
             bridgeLog(QStringLiteral("checkAndStartPeriodicTx: too late in %1 slot, defer TX%2 elapsed=%3ms latest=%4ms")
                           .arg(m_mode)
@@ -51081,11 +51187,27 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
     finalizeTimeSyncDecodeCycle(serial, decodeMode, dtSamples);
     m_decoding = false;
     emit decodingChanged();
-    if (autoSeqGotResponse && !m_transmitting && !m_tuning) {
+    bool ft8AutoTxDecodeSettled = false;
+    if (decodeMode == QStringLiteral("FT8") && !ft8DeepInTxListOnly
+        && serial == m_ft8AutoTxFinalDecodeSerial && usesFt8AutoTxDecodeGate()) {
+        using Gate = decodium::Ft8AutoTxDecodeGate;
+        auto const context = ft8AutoTxDecodeContext();
+        // Only the final pass for the immediately preceding RX slot releases
+        // TX, including an empty result (a legitimate retry). An early or
+        // list-only deep result must not pre-empt the final partner response.
+        if (forcedUtcToken == utcDisplayTokenForSlotStart(context.slot - 1, Gate::periodMs)) {
+            int const elapsed = int(correctedUtcEpochMs() % Gate::periodMs);
+            m_ft8AutoTxDecodeGate.decoded(context, elapsed);
+            ft8AutoTxDecodeSettled = true;
+            bridgeLog(QStringLiteral("FT8 auto TX: previous RX result processed serial=%1 elapsed=%2ms response=%3")
+                          .arg(serial).arg(elapsed).arg(autoSeqGotResponse ? 1 : 0));
+        }
+    }
+    if ((autoSeqGotResponse || ft8AutoTxDecodeSettled) && !m_transmitting && !m_tuning) {
         QString const autoTxMode = decodeMode.isEmpty() ? m_mode : decodeMode;
         QString const normalizedAutoTxMode = autoTxMode.trimmed().toUpper();
         bool canStartInThisSlot = true;
-        if (isTimeSyncDecodeMode(normalizedAutoTxMode)
+        if (!usesFt8AutoTxDecodeGate() && isTimeSyncDecodeMode(normalizedAutoTxMode)
             && !(normalizedAutoTxMode == QStringLiteral("FT2") && m_asyncTxEnabled)) {
             int const periodMs = periodMsForMode(normalizedAutoTxMode);
             if (periodMs > 0) {
@@ -56462,6 +56584,7 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
     }
 
     if (modeSnapshot == "FT8") {
+        m_ft8AutoTxFinalDecodeSerial = serial;
         if (m_ft8Worker) {
             m_ft8Worker->markLatestDecodeSerial(serial);
             m_ft8Worker->cancelCurrentDecode();

@@ -164,6 +164,75 @@ private slots:
         QVERIFY(nextLaunch.reset());
     }
 
+    void deviceLossNotifications_data()
+    {
+        QTest::addColumn<QString>("message");
+        QTest::addColumn<bool>("deviceLost");
+        QTest::newRow("NVK-debug") << lostDevice << true;
+        // Qt 6.11 emits these independently of the Vulkan driver's optional
+        // debug output. The fence/submit/scenegraph messages also occur in
+        // issue #101 comment 6402574508 (v1.0.712, 19:05 and 19:09 sessions).
+        for (const char* call : {"vkWaitForFences", "vkQueueSubmit", "vkQueuePresentKHR",
+                                 "vkAcquireNextImageKHR", "vkAllocateCommandBuffers",
+                                 "vkBeginCommandBuffer", "vkEndCommandBuffer"}) {
+            QTest::newRow(call) << QStringLiteral("Device loss detected in %1()")
+                                      .arg(QLatin1String(call)) << true;
+        }
+        QTest::newRow("Qt-threaded-renderloop")
+            << QStringLiteral("Graphics device lost, cleaning up scenegraph and releasing RHI") << true;
+        QTest::newRow("Qt-basic-renderloop")
+            << QStringLiteral("Graphics device lost, cleaning up scenegraph and releasing RHIs") << true;
+        QTest::newRow("swapchain-resize") << QStringLiteral("VK_ERROR_OUT_OF_DATE_KHR") << false;
+        QTest::newRow("memory") << QStringLiteral("VK_ERROR_OUT_OF_DEVICE_MEMORY") << false;
+        QTest::newRow("normal-teardown") << QStringLiteral("sceneGraphInvalidated") << false;
+        QTest::newRow("sound-device") << QStringLiteral("Audio device lost") << false;
+        QTest::newRow("generic-warning") << QStringLiteral("Device loss detected") << false;
+        QTest::newRow("counter-error") << QStringLiteral("drm-process-stale") << false;
+    }
+
+    void deviceLossNotifications()
+    {
+        QFETCH(QString, message);
+        QFETCH(bool, deviceLost);
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        const QString path = dir.filePath("loss.json");
+        DeviceLossRecovery recovery(path);
+        QCOMPARE(recovery.record(message), deviceLost);
+        QCOMPARE(recovery.observed(), deviceLost);
+        QCOMPARE(recovery.persisted(), deviceLost);
+        QCOMPARE(DeviceLossRecovery(path).active(), deviceLost);
+        if (deviceLost) {
+            QCOMPARE(QJsonDocument::fromJson(readFile(path)).object().value("reason").toString(), message);
+            QVERIFY(!recovery.record(message)); // No repeated shutdown requests.
+        }
+    }
+
+    void qtOnlyLossSequenceRequestsRecoveryOnce()
+    {
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        const QString path = dir.filePath("loss.json");
+        DeviceLossRecovery recovery(path);
+        int requests = 0;
+        // Replay the repeated device-loss portion without vkDebug messages.
+        // A build/driver that omits debug output must still arm safe startup.
+        for (int attempt = 0; attempt < 4; ++attempt) {
+            for (const QString& message : {
+                     QStringLiteral("Device loss detected in vkQueueSubmit()"),
+                     QStringLiteral("Graphics device lost, cleaning up scenegraph and releasing RHI")}) {
+                if (recovery.record(message)) ++requests;
+            }
+        }
+        QCOMPARE(requests, 1);
+        DeviceLossRecovery nextLaunch(path);
+        QVERIFY(nextLaunch.active());
+        QVERIFY(!hasExplicitGraphicsChoice());
+        useSoftwareRendering();
+        QCOMPARE(qgetenv("QT_QUICK_BACKEND"), QByteArray("software"));
+        QVERIFY(!qEnvironmentVariableIsSet("QSG_RHI_BACKEND"));
+    }
+
     void renderThreadFailureIsRecordedOnlyOnce()
     {
         QTemporaryDir dir;
@@ -211,8 +280,17 @@ private slots:
         QVERIFY(decodium::graphics_cache::graphicsBackendToken().startsWith("d3d11"));
     }
 
+    void deviceLossDuringTeardownDoesNotPromoteCache_data()
+    {
+        QTest::addColumn<QString>("notification");
+        QTest::newRow("driver") << lostDevice;
+        QTest::newRow("Qt-only")
+            << QStringLiteral("Graphics device lost, cleaning up scenegraph and releasing RHI");
+    }
+
     void deviceLossDuringTeardownDoesNotPromoteCache()
     {
+        QFETCH(QString, notification);
         QTemporaryDir dir;
         QVERIFY(dir.isValid());
         DeviceLossRecovery recovery(dir.filePath("loss.json"));
@@ -228,7 +306,7 @@ private slots:
             QVERIFY(file.write("failed-driver-cache") > 0);
             file.close();
             session.markCleanShutdown(); // app.exec() returned before teardown.
-            QVERIFY(recovery.record(lostDevice));
+            QVERIFY(recovery.record(notification));
         }
         QVERIFY(QFileInfo::exists(marker));
         QVERIFY(!QFileInfo::exists(stable));

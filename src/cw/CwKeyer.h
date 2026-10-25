@@ -1,9 +1,8 @@
 // Decodium — il manipolatore CW su una porta seriale.
 //
-// Il CW via CAT va bene finche' il CAT e' nostro. Ma chi opera con Decodium
-// aperto la porta della radio ce l'ha gia' occupata: il CAT passa dal ponte di
-// Decodium, e quel ponte il manipolatore non lo sa fare. Allora il CW lo
-// facciamo qui, come si e' sempre fatto: si alza e si abbassa un piedino
+// Il CW via CAT funziona anche attraverso un ponte che inoltra send_morse.
+// Per le radio senza keyer CAT resta disponibile la manipolazione diretta:
+// si alza e si abbassa un piedino
 // (DTR o RTS) di un'altra porta seriale, quella attaccata al circuitino di
 // manipolazione, e la radio va in CW senza che nessuno debba mollare il CAT.
 //

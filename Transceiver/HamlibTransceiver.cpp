@@ -2645,6 +2645,18 @@ int HamlibTransceiver::morse_text_limit () const noexcept
                                         caps->rig_model == RIG_MODEL_FT991);
 }
 
+int HamlibTransceiver::morse_speed (bool write, int& wpm)
+{
+  if (!m_->rig_) return -RIG_EIO;
+  value_t value {};
+  value.i = wpm;
+  int const rc = write
+    ? rig_set_level (m_->rig_.data (), RIG_VFO_CURR, RIG_LEVEL_KEYSPD, value)
+    : rig_get_level (m_->rig_.data (), RIG_VFO_CURR, RIG_LEVEL_KEYSPD, &value);
+  if (rc == RIG_OK) wpm = value.i;
+  return rc;
+}
+
 QString HamlibTransceiver::send_morse_checked (QString const& text, int wpm)
 {
   if (!supports_morse ())
@@ -2746,11 +2758,16 @@ void HamlibTransceiver::send_morse (QString const& text, int wpm) noexcept
 
 void HamlibTransceiver::stop_morse () noexcept
 {
+  stop_morse_checked ();
+}
+
+int HamlibTransceiver::stop_morse_checked () noexcept
+{
   try
     {
       auto * rig = m_->rig_.data ();
       if (!rig || !rig->caps)
-        return;
+        return -RIG_EIO;
 
       // This is the CW frame's emergency stop.  Do not rely on the cached
       // TransceiverState::ptt(): native radio keyers own their break-in timing,
@@ -2831,6 +2848,7 @@ void HamlibTransceiver::stop_morse () noexcept
         << "yaesu_cat_off_rc=" << cat_ptt_rc
         << "stop_morse_rc=" << stop_rc
         << "has_stop_morse=" << (rig->caps->stop_morse != nullptr);
+      return rig->caps->stop_morse ? stop_rc : effective_ptt_rc;
     }
   catch (std::exception const& error)
     {
@@ -2840,6 +2858,7 @@ void HamlibTransceiver::stop_morse () noexcept
     {
       qWarning () << "[CW-CAT] unknown emergency stop exception";
     }
+  return -RIG_EIO;
 }
 
 void HamlibTransceiver::do_tune (bool on)

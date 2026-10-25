@@ -3159,13 +3159,17 @@ Reverted Hamlib will be used after restart</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/CwWindow.qml" line="767"/>
-        <source>Center tone</source>
-        <translation>Center tone</translation>
+        <source>Center target (RX)</source>
+        <translation>Centre target (RX)</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/CwWindow.qml" line="776"/>
-        <source>Match the radio&apos;s CW pitch / sidetone.</source>
-        <translation>Match the radio&apos;s CW pitch / sidetone.</translation>
+        <source>Target received audio frequency for Center CW. That button retunes the VFO; this setting does not control the radio&apos;s CW pitch/sidetone.</source>
+        <translation>Target received audio frequency for Centre CW. That button retunes the VFO; this setting does not control the radio&apos;s CW pitch/sidetone.</translation>
+    </message>
+    <message>
+        <source>Center target does not read or change the radio&apos;s CW pitch/sidetone. Set it to match the radio (e.g. 600 Hz).</source>
+        <translation>Centre target does not read or change the radio&apos;s CW pitch/sidetone. Set it to match the radio (e.g. 600 Hz).</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/CwWindow.qml" line="785"/>

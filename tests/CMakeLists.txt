@@ -17,6 +17,46 @@ endif ()
 # Tell CMake to run moc when necessary
 set (CMAKE_AUTOMOC ON)
 
+add_executable (test_cat_share_cw test_cat_share_cw.cpp
+  ../src/radio/DecodiumCatShare.cpp ../src/radio/DecodiumCatShare.h)
+target_include_directories (test_cat_share_cw PRIVATE ${CMAKE_SOURCE_DIR})
+target_link_libraries (test_cat_share_cw PRIVATE decodium_cw Qt6::Test Qt6::Network)
+set_target_properties (test_cat_share_cw PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+add_test (NAME test_cat_share_cw COMMAND $<TARGET_FILE:test_cat_share_cw>)
+set_tests_properties (test_cat_share_cw PROPERTIES TIMEOUT 60)
+
+add_executable (cat_share_hamlib_client cat_share_hamlib_client.cpp)
+target_link_libraries (cat_share_hamlib_client PRIVATE Hamlib::Hamlib)
+set_target_properties (cat_share_hamlib_client PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+add_dependencies (test_cat_share_cw cat_share_hamlib_client)
+target_compile_definitions (test_cat_share_cw PRIVATE
+  HAMLIB_TEST_CLIENT="$<TARGET_FILE:cat_share_hamlib_client>")
+
+# Optional two-repository interoperability test; no external checkout is
+# downloaded and no physical radio/serial/audio device is accessed.
+set (DECODIUM_DECOLOG_SOURCE_DIR "" CACHE PATH "DecoDXLog checkout for CAT CW interoperability tests")
+if (EXISTS "${DECODIUM_DECOLOG_SOURCE_DIR}/src/core/RigControl.cpp")
+  add_executable (test_cat_share_interop test_cat_share_interop.cpp
+    ../src/radio/DecodiumCatShare.cpp ../src/radio/DecodiumCatShare.h
+    ${DECODIUM_DECOLOG_SOURCE_DIR}/src/core/RigControl.cpp
+    ${DECODIUM_DECOLOG_SOURCE_DIR}/src/core/RigControl.h
+    ${DECODIUM_DECOLOG_SOURCE_DIR}/src/core/RigLink.h
+    ${DECODIUM_DECOLOG_SOURCE_DIR}/src/core/CatShare.cpp
+    ${DECODIUM_DECOLOG_SOURCE_DIR}/src/core/CatShare.h
+    ${DECODIUM_DECOLOG_SOURCE_DIR}/src/core/CwKeyer.cpp
+    ${DECODIUM_DECOLOG_SOURCE_DIR}/src/core/CwKeyer.h
+    ${DECODIUM_DECOLOG_SOURCE_DIR}/src/core/SerialPorts.cpp)
+  target_include_directories (test_cat_share_interop PRIVATE ${CMAKE_SOURCE_DIR}
+    ${DECODIUM_DECOLOG_SOURCE_DIR}/src)
+  target_link_libraries (test_cat_share_interop PRIVATE decodium_cw Qt6::Test Qt6::Network)
+  target_compile_definitions (test_cat_share_interop PRIVATE
+    HAMLIB_TEST_CLIENT="$<TARGET_FILE:cat_share_hamlib_client>")
+  set_target_properties (test_cat_share_interop PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+  add_dependencies (test_cat_share_interop cat_share_hamlib_client)
+  add_test (NAME test_cat_share_interop COMMAND $<TARGET_FILE:test_cat_share_interop>)
+  set_tests_properties (test_cat_share_interop PROPERTIES TIMEOUT 60)
+endif ()
+
 add_executable (test_qso_waterfall_recovery test_qso_waterfall_recovery.cpp)
 target_compile_definitions (test_qso_waterfall_recovery PRIVATE DECODIUM_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
 target_link_libraries (test_qso_waterfall_recovery Qt6::Test Qt6::Core)
@@ -101,6 +141,12 @@ add_executable (test_tx_dispatch_guard test_tx_dispatch_guard.cpp)
 target_compile_definitions (test_tx_dispatch_guard PRIVATE DECODIUM_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
 target_link_libraries (test_tx_dispatch_guard Qt6::Test Qt6::Core)
 add_test (NAME test_tx_dispatch_guard COMMAND $<TARGET_FILE:test_tx_dispatch_guard>)
+
+add_executable (test_ft8_auto_tx_decode_gate test_ft8_auto_tx_decode_gate.cpp)
+target_include_directories (test_ft8_auto_tx_decode_gate PRIVATE ${CMAKE_SOURCE_DIR})
+target_compile_definitions (test_ft8_auto_tx_decode_gate PRIVATE DECODIUM_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+target_link_libraries (test_ft8_auto_tx_decode_gate Qt6::Test Qt6::Core)
+add_test (NAME test_ft8_auto_tx_decode_gate COMMAND $<TARGET_FILE:test_ft8_auto_tx_decode_gate>)
 
 add_executable (test_rigctl_dashboard_controls test_rigctl_dashboard_controls.cpp)
 target_compile_definitions (test_rigctl_dashboard_controls PRIVATE DECODIUM_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
@@ -797,6 +843,8 @@ add_custom_target (decodium_regression_test_binaries)
 set (_decodium_regression_test_targets
   test_qt_helpers
   test_panadapter_gpu_recovery
+  test_graphics_pipeline_cache
+  test_linux_graphics_safety
   test_audio_mode_change_capture_policy
   test_ssb_window_focus
   test_hamlib_release_contract
@@ -804,6 +852,7 @@ set (_decodium_regression_test_targets
   test_cat_serial_open_safety
   test_transceiver_base_split
   test_qso_sequencer_rules
+  test_ft8_auto_tx_decode_gate
   test_tx_pipeline
   test_ptt_transition_policy
   test_mam_tx_payload_policy

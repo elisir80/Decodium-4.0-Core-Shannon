@@ -26,6 +26,7 @@ private slots:
     void nativeStopForcesPttOffBeforeOptionalStopMorse();
     void yaesuStopAlsoForcesCatOffWhenPttUsesAnExternalLine();
     void managerClearsDesiredPttBeforeDispatchingEmergencyStop();
+    void stopInvalidatesMorseWaitingOnCatWorker();
 };
 
 void TestCwCatSpeedFallback::unavailableSpeedControlDoesNotBlockMorseSend()
@@ -197,10 +198,24 @@ void TestCwCatSpeedFallback::managerClearsDesiredPttBeforeDispatchingEmergencySt
     const QString implementation = source.mid(functionStart, functionEnd - functionStart);
     const int desiredRx = implementation.indexOf(QStringLiteral("d->desired.ptt(false)"));
     const int dispatch = implementation.indexOf(QStringLiteral("QMetaObject::invokeMethod"));
-    const int stop = implementation.indexOf(QStringLiteral("xcv->stop_morse()"));
+    const int stop = implementation.indexOf(QStringLiteral("xcv->stop_morse_checked()"));
     QVERIFY(desiredRx >= 0);
     QVERIFY(dispatch > desiredRx);
     QVERIFY(stop > dispatch);
+}
+
+void TestCwCatSpeedFallback::stopInvalidatesMorseWaitingOnCatWorker()
+{
+    const QString source = readSource(QStringLiteral("src/radio/DecodiumTransceiverManager.cpp"));
+    const int send = source.indexOf(QStringLiteral("bool DecodiumTransceiverManager::sendRigMorse"));
+    const int guard = source.indexOf(QStringLiteral("cancellation->load() != generation"), send);
+    const int dispatch = source.indexOf(QStringLiteral("xcv->send_morse_checked"), send);
+    QVERIFY(send >= 0);
+    QVERIFY(guard > send && guard < dispatch);
+    const int stop = source.indexOf(QStringLiteral("void DecodiumTransceiverManager::stopRigMorse"));
+    const int invalidate = source.indexOf(QStringLiteral("++*d->morseGeneration"), stop);
+    const int notify = source.indexOf(QStringLiteral("emit morseStopRequested()"), stop);
+    QVERIFY(invalidate > stop && invalidate < notify);
 }
 
 QTEST_APPLESS_MAIN(TestCwCatSpeedFallback)

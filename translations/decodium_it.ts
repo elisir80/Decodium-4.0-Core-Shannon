@@ -2826,8 +2826,8 @@ Hamlib ripristinato verrà utilizzato dopo il riavvio</translation>
     </message>
     <message>
         <location line="+10"/>
-        <source>Center tone</source>
-        <translation>Tono centro</translation>
+        <source>Center target (RX)</source>
+        <translation>Tono centratura (RX)</translation>
     </message>
     <message>
         <location line="-26"/>
@@ -2841,8 +2841,12 @@ Hamlib ripristinato verrà utilizzato dopo il riavvio</translation>
     </message>
     <message>
         <location line="+23"/>
-        <source>Match the radio&apos;s CW pitch / sidetone.</source>
-        <translation>Imposta lo stesso tono CW della radio.</translation>
+        <source>Target received audio frequency for Center CW. That button retunes the VFO; this setting does not control the radio&apos;s CW pitch/sidetone.</source>
+        <translation>Frequenza audio ricevuta di riferimento per Centra CW. Il pulsante risintonizza il VFO; questa impostazione non controlla il pitch/sidetone CW della radio.</translation>
+    </message>
+    <message>
+        <source>Center target does not read or change the radio&apos;s CW pitch/sidetone. Set it to match the radio (e.g. 600 Hz).</source>
+        <translation>Il tono di centratura non legge né modifica il pitch/sidetone CW della radio. Impostalo allo stesso valore della radio (es. 600 Hz).</translation>
     </message>
     <message>
         <location line="+9"/>

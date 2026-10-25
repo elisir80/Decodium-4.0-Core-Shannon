@@ -51,8 +51,8 @@ non si collega nessuno.
 0                                                    attenuatori
 0x0                                                  has_get_func
 0x0                                                  has_set_func
-0x0                                                  has_get_level
-0x0                                                  has_set_level
+0x8170004000                                         has_get_level (meters + KEYSPD)
+0x4000                                               has_set_level (KEYSPD)
 0x0                                                  has_get_parm
 0x0                                                  has_set_parm
 vfo_ops=0x0
@@ -95,6 +95,10 @@ in uso, e senza quel dettaglio si cerca il guasto altrove.
 | `S <0\|1> <vfo>` | imposta split | `RPRT 0` |
 | `i` | frequenza di trasmissione | `14074000` |
 | `I <hz>` | imposta frequenza TX | `RPRT 0` |
+| `l KEYSPD` / `\get_level KEYSPD` | velocità del keyer radio, WPM | valore reale o errore Hamlib |
+| `L KEYSPD <5..60>` / `\set_level KEYSPD <wpm>` | imposta velocità CW | esito del comando CAT |
+| `b <testo>` / `\send_morse <testo>` | invia testo al keyer CW della radio | esito del primo invio / accodamento |
+| `\stop_morse` / byte `0xBB` | cancella testo pendente e arresta il keyer | esito dello stop CAT |
 | `\get_lock_mode` | blocco del VFO | `0` poi `RPRT 0` |
 | `q` | chiude | `RPRT 0`, poi la connessione si chiude |
 
@@ -118,12 +122,60 @@ durava **20,03 s**; con le due righe 0,00 s. Anche a `q` rigctld risponde
 - **Solo questo computer.** Ascolto su `127.0.0.1`. L'apertura alla rete
   locale richiede una lista di indirizzi ammessi, e quella a Internet
   autenticazione e cifratura: nessuna delle due è un primo passo.
-- **Nessun traffico aggiuntivo sulla seriale.** Le letture rispondono dallo
+- **Telemetria in cache.** Frequenza, modo e misuratori rispondono dallo
   stato che Decodium tiene già in memoria. Interrogare la radio a ogni domanda
   di ogni client saturerebbe il bus — su CI-V è già successo, con il PTT
-  rimasto incollato.
+  rimasto incollato. `KEYSPD` viene invece letto sul worker CAT per restituire
+  la velocità effettiva e scandire correttamente il buffer del manipolatore;
+  non blocca il thread dell'interfaccia.
 - **Retrocompatibilità.** A interruttore spento non si apre alcuna porta e il
   comportamento è identico a oggi.
+
+## CW fra Decodium e DecoDXLog, nei due versi
+
+Il programma che apre la porta fisica è il **master**. L'altro si collega al
+suo endpoint rigctld; non occorre una seconda seriale. Sul master abilitare
+sia **Allow control** sia **Allow transmit**. La lettura di `KEYSPD` resta
+disponibile senza autorizzazione alla trasmissione; la scrittura richiede il
+controllo e `send_morse`/`stop_morse` richiedono il permesso TX.
+
+La radio e il suo backend Hamlib devono esporre un keyer CW CAT. La
+condivisione non aggiunge questa capacità a una radio che non la possiede.
+Con il keyer nativo non viene inviato `PTT ON`: il break-in della radio
+gestisce la commutazione. Gli errori non diventano falsi successi.
+
+Il server Decodium limita i blocchi alla capacità del keyer (30 caratteri
+Icom, 49 FT-991; 30 conservativi se sconosciuta) e ne scandisce l'invio alla
+velocità letta dalla radio. Se `KEYSPD` non è disponibile, il testo può
+comunque essere inviato ma la coda viene scandita prudentemente a 5 WPM.
+Il limite complessivo della coda è 4096 caratteri. Un secondo client non
+può intercalare il proprio testo mentre il primo sta trasmettendo.
+
+`T 0` interrompe anche la coda CW, oltre a forzare il percorso fisico di
+PTT OFF/stop del driver. Ferma locale, disconnessione del client, perdita
+del CAT o disattivazione del permesso TX invalidano il testo pendente:
+una conferma tardiva non deve riavviarlo. Non si deve usare contemporaneamente
+il keyer locale e quello remoto sulla stessa radio.
+
+In DecoDXLog la lettura WPM accetta sia numeri semplici sia
+`Level Value: 24.000000`; il suo server risponde anche correttamente a
+`\get_lock_mode` e `q` per il client Hamlib 4.7.
+
+### Test senza radio
+
+`test_cat_share_cw` esercita il server TCP di produzione con un backend
+simulato, incluso un client **Hamlib NET rigctl reale**, permessi, errori,
+velocità, buffer finito, stop, disconnessioni e conferme tardive.
+`test_cat_share_interop` usa inoltre i sorgenti di produzione di DecoDXLog:
+
+```sh
+cmake -S . -B build -DDECODIUM_DECOLOG_SOURCE_DIR=/percorso/decolog
+cmake --build build --target test_cat_share_cw test_cat_share_interop
+ctest --test-dir build -R '^test_cat_share_(cw|interop)$' --output-on-failure
+```
+
+I test ascoltano solo su loopback, su porte assegnate dal sistema; non aprono
+la seriale né producono audio/RF. Non sostituiscono la verifica sulla radio.
 
 ## Due istanze di Decodium sulla stessa radio
 
@@ -155,4 +207,3 @@ Due avvertenze che vale la pena dire prima che le scopra l'utente:
 - **Chi comanda la radio.** Con la scrittura abilitata entrambe le istanze
   possono cambiare frequenza. Non c'è arbitraggio: l'ultima che scrive vince.
   Per il secondo posto di ascolto conviene lasciare la scrittura spenta.
-

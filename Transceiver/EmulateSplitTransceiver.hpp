@@ -43,6 +43,8 @@ public:
   void stop () noexcept override {wrapped_->stop ();}
   bool supports_morse () const noexcept override {return wrapped_->supports_morse ();}
   int morse_text_limit () const noexcept override {return wrapped_->morse_text_limit ();}
+  int morse_speed (bool write, int& wpm) override {return wrapped_->morse_speed (write, wpm);}
+  int stop_morse_checked () noexcept override {return wrapped_->stop_morse_checked ();}
   QString send_morse_checked (QString const& text, int wpm) override
   {
     return wrapped_->send_morse_checked (text, wpm);

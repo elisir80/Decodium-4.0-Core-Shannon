@@ -111,27 +111,35 @@ private slots:
     void centerMeasuredTone_data()
     {
         QTest::addColumn<bool>("lower"); QTest::addColumn<int>("pitch");
-        QTest::newRow("upper-high") << false << 800;
-        QTest::newRow("lower-high") << true << 800;
-        QTest::newRow("upper-low") << false << 600;
-        QTest::newRow("lower-low") << true << 600;
+        QTest::addColumn<int>("target");
+        QTest::newRow("upper-high") << false << 800 << 700;
+        QTest::newRow("lower-high") << true << 800 << 700;
+        QTest::newRow("upper-low") << false << 600 << 700;
+        QTest::newRow("lower-low") << true << 600 << 700;
+        QTest::newRow("radio-600-upper") << false << 800 << 600;
+        QTest::newRow("radio-600-lower") << true << 800 << 600;
+        QTest::newRow("radio-650-upper") << false << 600 << 650;
     }
     void centerMeasuredTone()
     {
-        QFETCH(bool, lower); QFETCH(int, pitch);
+        QFETCH(bool, lower); QFETCH(int, pitch); QFETCH(int, target);
         CwController c; c.setTuningLowerSideband(lower);
         double dial = 14025000;
+        int tunes = 0;
         CwController::Hooks h;
         h.frequency = [&] { return dial; };
-        h.tuneFrequency = [&](double hz) { dial = hz; return true; };
+        h.tuneFrequency = [&](double hz) { ++tunes; dial = hz; return true; };
         c.setHooks(h);
+        c.setToneHz(target);
+        QCOMPARE(tunes, 0); // Setting the target does not retune the radio.
         QVERIFY(!c.centerSignal());
         auto audio = morseAudio("CQ CQ CQ DE IU8LMC TEST TEST", 20, pitch, 12000);
         audio.resize(audio.size() - 12000);
         c.feedRxAudio(audio, 12000);
         QVERIFY(c.decoderScope().value("reading").toBool());
         QVERIFY(c.centerSignal());
-        const double expected = 14025000 + (lower ? -1 : 1) * (pitch - 700);
+        const double expected = 14025000 + (lower ? -1 : 1) * (pitch - target);
+        QCOMPARE(tunes, 1);
         QVERIFY2(std::abs(dial - expected) < 12, qPrintable(QString::number(dial)));
         const double once = dial;
         QVERIFY(!c.centerSignal()); QCOMPARE(dial, once);
@@ -944,6 +952,7 @@ private slots:
             c.setKeyerLine("RTS");
             c.setMacro(0, "F1 CQ", "CQ DX DE {MYCALL}");
             c.setDecoderToneLock(650);
+            c.setToneHz(600);
             c.setDecoderSpeedLock(22);
             c.setDecoderOn(false);
             s.sync();
@@ -955,6 +964,7 @@ private slots:
         QCOMPARE(c.keyerLine(), QString("RTS"));
         QCOMPARE(c.macros().first().toMap().value("text").toString(), QString("CQ DX DE {MYCALL}"));
         QCOMPARE(c.decoderToneLock(), 650);
+        QCOMPARE(c.toneHz(), 600);
         QCOMPARE(c.decoderSpeedLock(), 22);
         QVERIFY(!c.decoderOn());
     }

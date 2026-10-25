@@ -882,8 +882,12 @@ GlassWindow {
             columns: win.width < 820 ? 4 : 7
             columnSpacing: 8
             rowSpacing: 4
-            Lbl { text: qsTr("Center tone") }
+            Lbl {
+                objectName: "cwCenterTargetLabel"
+                text: qsTr("Center target (RX)")
+            }
             ComboBox {
+                objectName: "cwCenterTarget"
                 implicitHeight: 36
                 implicitWidth: 120
                 readonly property var tones: [400, 500, 550, 600, 650, 700, 750, 800, 900, 1000]
@@ -891,7 +895,7 @@ GlassWindow {
                 currentIndex: win.cw ? tones.indexOf(win.cw.toneHz) : 5
                 onActivated: (i) => win.cw.toneHz = tones[i]
                 ToolTip.visible: hovered
-                ToolTip.text: qsTr("Match the radio's CW pitch / sidetone.")
+                ToolTip.text: qsTr("Target received audio frequency for Center CW. That button retunes the VFO; this setting does not control the radio's CW pitch/sidetone.")
             }
             ColumnLayout {
                 spacing: 1
@@ -953,6 +957,14 @@ GlassWindow {
                 font.pixelSize: 11
             }
             Btn { label: qsTr("Clear"); onClicked: win.cw.clearDecoder() }
+        }
+        Text {
+            objectName: "cwCenterTargetHelp"
+            Layout.fillWidth: true
+            wrapMode: Text.Wrap
+            color: win.cDim
+            font.pixelSize: 11
+            text: qsTr("Center target does not read or change the radio's CW pitch/sidetone. Set it to match the radio (e.g. 600 Hz).")
         }
 
         // Il grafico come quello di ggmorse: sopra i segni come li sta

@@ -929,6 +929,10 @@ struct DecodiumTransceiverManagerPrivate
     QPointer<Transceiver> transceiver;            // owned via deleteLater
     QPointer<QThread>     xcvThread;               // owned via deleteLater / manager shutdown
     std::atomic<unsigned> seqNum    {0};
+    // Shared with queued worker closures; survives manager teardown until
+    // those closures are discarded. Stop invalidates not-yet-executed sends.
+    std::shared_ptr<std::atomic<quint64>> morseGeneration
+        {std::make_shared<std::atomic<quint64>>(0)};
     Transceiver::TransceiverState desired;
 };
 
@@ -938,6 +942,9 @@ DecodiumTransceiverManager::DecodiumTransceiverManager(QObject* parent)
     , d(std::make_unique<DecodiumTransceiverManagerPrivate>())
 {
     qRegisterMetaType<QVector<short>>("QVector<short>");
+    connect(this, &DecodiumTransceiverManager::connectedChanged, this, [this]() {
+        if (!m_connected) ++*d->morseGeneration;
+    });
     loadSettings();
 
     // Auto-save debounced: ogni cambio di parametro CAT salva entro 500ms.
@@ -2476,6 +2483,8 @@ void DecodiumTransceiverManager::disconnectRig()
 
 void DecodiumTransceiverManager::disconnectRigInternal(bool reconnectAfterDisconnect)
 {
+    ++*d->morseGeneration;
+    emit morseStopRequested();
     // La sessione si chiude: lo stato "spenta via CAT" non vale per la prossima.
     m_radioPoweredOffByUser = false;
     ++m_transientCatReconnectSerial;
@@ -2970,11 +2979,17 @@ bool DecodiumTransceiverManager::sendRigMorse(const QString& text, int wpm,
     d->desired.ptt(false);
     QPointer<Transceiver> xcv = d->transceiver;
     QPointer<DecodiumTransceiverManager> manager(this);
-    return QMetaObject::invokeMethod(xcv, [xcv, manager, text, wpm, completion = std::move(completion)]() {
+    const auto cancellation = d->morseGeneration;
+    const quint64 generation = cancellation->load();
+    return QMetaObject::invokeMethod(xcv, [xcv, manager, text, wpm, cancellation, generation,
+                                          completion = std::move(completion)]() {
         QString error;
         try {
-            error = xcv ? xcv->send_morse_checked(text, wpm)
-                        : QStringLiteral("CAT CW keyer disconnected before sending");
+            if (cancellation->load() != generation)
+                error = QStringLiteral("CAT CW send cancelled before dispatch");
+            else
+                error = xcv ? xcv->send_morse_checked(text, wpm)
+                            : QStringLiteral("CAT CW keyer disconnected before sending");
         } catch (std::exception const& e) {
             error = QString::fromUtf8(e.what());
         } catch (...) {
@@ -2989,16 +3004,41 @@ bool DecodiumTransceiverManager::sendRigMorse(const QString& text, int wpm,
     }, Qt::QueuedConnection);
 }
 
-void DecodiumTransceiverManager::stopRigMorse()
+void DecodiumTransceiverManager::requestRigMorseSpeed(bool write, int wpm,
+                                                     std::function<void(int, int)> completion)
 {
-    if (!m_connected || !d->transceiver) return;
+    if (!m_connected || !d->transceiver) { completion(-RIG_EIO, 0); return; }
+    QPointer<Transceiver> xcv = d->transceiver;
+    QPointer<DecodiumTransceiverManager> manager(this);
+    QMetaObject::invokeMethod(xcv, [xcv, manager, write, wpm, completion]() mutable {
+        int rc = -RIG_EIO;
+        try { if (xcv) rc = xcv->morse_speed(write, wpm); } catch (...) {}
+        if (manager) QMetaObject::invokeMethod(manager, [manager, xcv, rc, wpm, completion]() {
+            if (!manager) return;
+            completion(manager->m_connected && manager->d->transceiver == xcv ? rc : -RIG_EIO, wpm);
+        }, Qt::QueuedConnection);
+    }, Qt::QueuedConnection);
+}
+
+void DecodiumTransceiverManager::stopRigMorse(std::function<void(int)> completion)
+{
+    ++*d->morseGeneration;
+    emit morseStopRequested();
+    if (!m_connected || !d->transceiver) {
+        if (completion) completion(-RIG_EIO);
+        return;
+    }
     // Prevent a stale desired-state transaction from reasserting TX after the
     // emergency operation below.  HamlibTransceiver::stop_morse() bypasses
     // the cached state and always performs a physical PTT OFF as well.
     d->desired.ptt(false);
     QPointer<Transceiver> xcv = d->transceiver;
-    QMetaObject::invokeMethod(xcv, [xcv]() {
-        if (xcv) xcv->stop_morse();
+    QPointer<DecodiumTransceiverManager> manager(this);
+    QMetaObject::invokeMethod(xcv, [xcv, manager, completion]() {
+        const int rc = xcv ? xcv->stop_morse_checked() : -RIG_EIO;
+        if (manager && completion) QMetaObject::invokeMethod(manager, [manager, completion, rc]() {
+            if (manager) completion(rc);
+        }, Qt::QueuedConnection);
     }, Qt::QueuedConnection);
 }
 

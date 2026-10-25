@@ -687,6 +687,7 @@ set (wsjtx_CXXSRCS
   src/radio/DecodiumTransceiverManager.cpp
   src/radio/DecodiumTransceiverManager.h
   src/radio/DecodiumCatShare.cpp
+  src/radio/DecodiumCatShareRig.cpp
   src/radio/DecodiumNativeCatShare.cpp
   src/radio/DecodiumNativeCatShare.h
   src/radio/DecodiumCatShare.h
@@ -2172,6 +2173,7 @@ add_executable (decodium_qml
   src/radio/DecodiumTransceiverManager.cpp
   src/radio/DecodiumTransceiverManager.h
   src/radio/DecodiumCatShare.cpp
+  src/radio/DecodiumCatShareRig.cpp
   src/radio/DecodiumNativeCatShare.cpp
   src/radio/DecodiumNativeCatShare.h
   src/radio/DecodiumCatShare.h

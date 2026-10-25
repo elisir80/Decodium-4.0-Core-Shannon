@@ -1,6 +1,6 @@
 #include "DecodiumCatShare.h"
 
-#include "DecodiumTransceiverManager.h"
+#include "../cw/CwKeyer.h"
 
 #include <QHostAddress>
 #include <QTcpServer>
@@ -19,10 +19,22 @@ const char* const kNotImpl   = "RPRT -11\n";
 } // namespace
 
 
-DecodiumCatShare::DecodiumCatShare(DecodiumTransceiverManager* rig, QObject* parent)
+DecodiumCatShare::DecodiumCatShare(Hooks hooks, QObject* parent)
     : QObject(parent)
-    , m_rig(rig)
+    , m_hooks(std::move(hooks))
 {
+    m_morseTimer.setSingleShot(true);
+    connect(&m_morseTimer, &QTimer::timeout, this, [this]() {
+        if (m_morseWaiting) {
+            qWarning() << "[CATSHARE] CW command timed out; stopping shared keyer";
+            stopMorse();
+        } else if (!m_morseText.isEmpty()) {
+            sendNextMorseChunk();
+        } else {
+            m_morseOwner.clear();
+            m_morseChunk.clear();
+        }
+    });
 }
 
 DecodiumCatShare::~DecodiumCatShare()
@@ -58,11 +70,17 @@ bool DecodiumCatShare::configure(bool enabled, int port, bool allowControl, bool
     m_port = port;
     m_enabled = enabled;
 
+    if (m_morseOwner && (restart || !m_allowPtt))
+        stopMorse();
+
     if (restart) {
         if (m_server) {
-            for (auto it = m_buffers.begin(); it != m_buffers.end(); ++it)
-                it.key()->disconnectFromHost();
+            // disconnectFromHost can synchronously remove an entry.
+            const auto clients = m_buffers.keys();
+            for (auto* client : clients)
+                client->disconnectFromHost();
             m_buffers.clear();
+            m_replies.clear();
             m_server->close();
             m_server->deleteLater();
             m_server = nullptr;
@@ -120,7 +138,9 @@ void DecodiumCatShare::onDisconnected()
 {
     auto* s = qobject_cast<QTcpSocket*>(sender());
     if (!s) return;
+    if (m_morseOwner == s) stopMorse();
     m_buffers.remove(s);
+    m_replies.remove(s);
     s->deleteLater();
     qInfo().noquote() << "[CATSHARE] client scollegato, restano" << m_buffers.size();
     emit clientsChanged();
@@ -141,23 +161,188 @@ void DecodiumCatShare::onReadyRead()
         return;
     }
 
-    int nl;
-    while ((nl = it.value().indexOf('\n')) >= 0) {
-        QByteArray const raw = it.value().left(nl);
-        it.value().remove(0, nl + 1);
+    while (m_buffers.contains(s)) {
+        auto& buffer = m_buffers[s];
+        const int nl = buffer.indexOf('\n');
+        if (nl < 0) break;
+        QByteArray const raw = buffer.left(nl);
+        buffer.remove(0, nl + 1);
         QString const line = QString::fromLatin1(raw).trimmed();
         if (line.isEmpty())
             continue;
+        if (m_replies[s].size() >= 64) {
+            s->disconnectFromHost();
+            return;
+        }
+        const quint64 id = ++m_replyId;
+        m_replies[s].enqueue({id, {}, false});
+        QPointer<DecodiumCatShare> self(this);
+        QPointer<QTcpSocket> socket(s);
+        auto completed = [self, socket, id](const QString& reply) {
+            if (self && socket) self->finishReply(socket, id, reply);
+        };
+        if (handleMorse(s, line, completed)) continue;
         QString const reply = handleLine(line);
         if (reply.isNull()) {          // comando di chiusura
             // rigctld risponde RPRT 0 anche a "q", e il client di Hamlib lo
             // aspetta: senza, registra un errore di chiusura che non c'e'.
-            s->write(kOk);
+            completed(QString::fromLatin1(kOk));
             s->disconnectFromHost();
             return;
         }
-        s->write(reply.toLatin1());
+        completed(reply);
     }
+}
+
+void DecodiumCatShare::finishReply(QTcpSocket* socket, quint64 id, const QString& text)
+{
+    auto it = m_replies.find(socket);
+    if (it == m_replies.end()) return;
+    for (auto& reply : it.value()) {
+        if (reply.id == id) { reply.text = text; reply.ready = true; break; }
+    }
+    // CAT completions are asynchronous, but replies must stay in wire order.
+    while (!it.value().isEmpty() && it.value().head().ready)
+        socket->write(it.value().dequeue().text.toLatin1());
+}
+
+bool DecodiumCatShare::handleMorse(QTcpSocket* socket, const QString& line,
+                                  std::function<void(QString)> reply)
+{
+    QString cleaned = line;
+    const bool extended = cleaned.startsWith(QLatin1Char('+'));
+    while (cleaned.startsWith(QLatin1Char('+')) || cleaned.startsWith(QLatin1Char(';')))
+        cleaned.remove(0, 1);
+    const auto parts = cleaned.split(QLatin1Char(' '), Qt::SkipEmptyParts);
+    if (parts.isEmpty()) return false;
+    const auto cmd = parts.first();
+    const bool send = cmd == QLatin1String("b") || cmd == QLatin1String("\\send_morse");
+    const bool stop = cmd == QLatin1String("\\stop_morse") || cmd == QString(QChar(0xbb))
+        || ((cmd == QLatin1String("T") || cmd == QLatin1String("\\set_ptt"))
+            && parts.size() == 2 && parts.last() == QLatin1String("0"));
+    const bool readSpeed = (cmd == QLatin1String("l") || cmd == QLatin1String("\\get_level"))
+        && parts.size() >= 2 && parts.at(1).compare(QLatin1String("KEYSPD"), Qt::CaseInsensitive) == 0;
+    const bool writeSpeed = (cmd == QLatin1String("L") || cmd == QLatin1String("\\set_level"))
+        && parts.size() >= 2 && parts.at(1).compare(QLatin1String("KEYSPD"), Qt::CaseInsensitive) == 0;
+    if (!send && !stop && !readSpeed && !writeSpeed) return false;
+
+    auto result = [reply](int rc) { reply(QStringLiteral("RPRT %1\n").arg(rc)); };
+    if (!readSpeed && refuseWrite(cmd, send || stop)) { result(-1); return true; }
+    const State state = m_hooks.state ? m_hooks.state() : State{};
+    if (!state.connected) { result(-6); return true; }
+    if (stop) { stopMorse(result); return true; }
+    if (readSpeed || writeSpeed) {
+        bool valid = false;
+        const int wpm = parts.last().toInt(&valid);
+        if (writeSpeed && (parts.size() != 3 || !valid || wpm < 5 || wpm > 60)) {
+            result(-1); return true;
+        }
+        if (!m_hooks.morseSpeed) { result(-11); return true; }
+        QPointer<DecodiumCatShare> self(this);
+        m_hooks.morseSpeed(writeSpeed, wpm, [self, reply, writeSpeed, readSpeed, extended](int rc, int speed) {
+            if (!self) return;
+            if (writeSpeed && rc == 0 && self->m_morseOwner && !self->m_morseWaiting
+                && !self->m_morseChunk.isEmpty()) {
+                // A slower speed mid-chunk must not let the next chunk
+                // overwrite a still-playing finite radio buffer.
+                self->m_morseTimer.start(qMax(self->m_morseTimer.remainingTime(),
+                    decodium::cw::CwKeyer::millisFor(self->m_morseChunk, qBound(5, speed, 60)) + 720));
+            }
+            if (readSpeed && rc == 0) {
+                reply(extended ? QStringLiteral("get_level: KEYSPD\nLevel Value: %1\nRPRT 0\n").arg(speed)
+                               : QStringLiteral("%1\n").arg(speed));
+            } else {
+                reply(QStringLiteral("RPRT %1\n").arg(rc));
+            }
+        });
+        return true;
+    }
+    if (!m_hooks.morseAvailable || !m_hooks.morseAvailable() || !m_hooks.sendMorse) {
+        result(-11); return true;
+    }
+    const QString text = cleaned.mid(cmd.size()).simplified().toUpper();
+    if (text.isEmpty() || text.size() + m_morseText.size() > 4096) { result(-1); return true; }
+    for (const QChar c : text) {
+        if (c != QLatin1Char(' ') && decodium::cw::CwKeyer::morseOf(c).isEmpty()) {
+            result(-1); return true;
+        }
+    }
+    // Never interleave messages from two clients into one physical keyer.
+    if (m_morseOwner && m_morseOwner != socket) { result(-9); return true; }
+    if (m_morseOwner) {
+        m_morseText += QLatin1Char(' ') + text;
+        result(0); // accepted into this client's bounded keyer queue
+    } else {
+        m_morseOwner = socket;
+        m_morseText = text;
+        m_morseAccepted = std::move(reply);
+        sendNextMorseChunk();
+    }
+    return true;
+}
+
+void DecodiumCatShare::sendNextMorseChunk()
+{
+    if (!m_morseOwner || m_morseText.isEmpty()) return;
+    const State state = m_hooks.state ? m_hooks.state() : State{};
+    if (!m_allowPtt || !state.connected || !m_hooks.morseAvailable || !m_hooks.morseAvailable()) {
+        stopMorse(); return;
+    }
+    const int limit = m_hooks.morseTextLimit ? m_hooks.morseTextLimit() : 0;
+    // An unknown downstream NET rigctl keyer may also have a finite FIFO.
+    const int count = qMin(limit > 0 ? limit : 30, int(m_morseText.size()));
+    m_morseChunk = m_morseText.left(count);
+    m_morseText.remove(0, count);
+    const QString chunk = m_morseChunk;
+    const quint64 generation = ++m_morseGeneration;
+    m_morseWaiting = true;
+    m_morseTimer.start(30000);
+    QPointer<DecodiumCatShare> self(this);
+    auto ready = [self, generation, chunk](int rc, int speed) {
+        if (!self || generation != self->m_morseGeneration || !self->m_morseOwner) return;
+        // Missing speed telemetry must not disable send_morse. Pace at the
+        // slowest supported speed in that case; never invent a radio readback.
+        const int pacingWpm = rc == 0 && speed >= 5 && speed <= 60 ? speed : 5;
+        self->m_hooks.sendMorse(chunk, [self, generation, chunk, pacingWpm](int sent) {
+            if (!self || generation != self->m_morseGeneration || !self->m_morseOwner) return;
+            self->m_morseWaiting = false;
+            auto accepted = std::move(self->m_morseAccepted);
+            self->m_morseAccepted = {};
+            if (accepted) accepted(QStringLiteral("RPRT %1\n").arg(sent));
+            if (sent != 0) {
+                qWarning() << "[CATSHARE] CW keyer rejected text, rc=" << sent;
+                self->stopMorse();
+                return;
+            }
+            self->m_morseTimer.start(decodium::cw::CwKeyer::millisFor(chunk, pacingWpm)
+                                    + qMax(100, 3600 / pacingWpm));
+        });
+    };
+    if (m_hooks.morseSpeed) m_hooks.morseSpeed(false, 0, ready);
+    else ready(-11, 0);
+}
+
+void DecodiumCatShare::cancelMorse()
+{
+    ++m_morseGeneration;
+    m_morseTimer.stop();
+    m_morseWaiting = false;
+    m_morseText.clear();
+    m_morseChunk.clear();
+    m_morseOwner.clear();
+    auto accepted = std::move(m_morseAccepted);
+    m_morseAccepted = {};
+    if (accepted) accepted(QStringLiteral("RPRT -9\n"));
+}
+
+void DecodiumCatShare::stopMorse(Completion completion)
+{
+    cancelMorse();
+    if (!completion) completion = [](int rc) {
+        if (rc != 0) qWarning() << "[CATSHARE] CW stop failed, rc=" << rc;
+    };
+    if (m_hooks.stopMorse) m_hooks.stopMorse(std::move(completion));
+    else completion(-11);
 }
 
 // -------------------------------------------------------------------- protocollo
@@ -191,9 +376,9 @@ QString DecodiumCatShare::dumpState() const
         // potenza, ROS e ALC restavano vuote per sempre.
         //
         // 0x8170000000 = SWR | ALC | STRENGTH | RFPOWER_METER | RFPOWER_METER_WATTS.
-        // Sono in sola lettura: la scrittura resta 0x0, perche' impostare la
-        // potenza di una radio altrui non e' compito di questo canale.
-        "0x0\n0x0\n0x8170000000\n0x0\n0x0\n0x0\n"
+        // KEYSPD (0x4000) is read/write; meters remain read-only. An actual
+        // unsupported radio operation still returns its Hamlib error.
+        "0x0\n0x0\n0x8170004000\n0x4000\n0x0\n0x0\n"
         "vfo_ops=0x0\n"
         "ptt_type=0x1\n"
         "targetable_vfo=0x0\n"
@@ -280,24 +465,25 @@ QString DecodiumCatShare::handleLine(const QString& line)
     if (cmd == QLatin1String("\\get_lock_mode"))
         return QStringLiteral("0\nRPRT 0\n");
 
-    bool const up = m_rig && m_rig->connected();
+    const State state = m_hooks.state ? m_hooks.state() : State{};
+    bool const up = state.connected;
 
     // ---- letture: rispondono dallo stato gia' in memoria, senza generare
     // traffico sulla seriale. Interrogare la radio a ogni domanda di ogni
     // client saturerebbe il bus.
     if (cmd == QLatin1String("f") || cmd == QLatin1String("\\get_freq"))
-        return QStringLiteral("%1\n").arg(qint64(up ? m_rig->frequency() : 0));
+        return QStringLiteral("%1\n").arg(qint64(up ? state.frequency : 0));
     if (cmd == QLatin1String("m") || cmd == QLatin1String("\\get_mode"))
         return QStringLiteral("%1\n3000\n")
-            .arg(toHamlibMode(up ? m_rig->mode() : QString()));
+            .arg(toHamlibMode(up ? state.mode : QString()));
     if (cmd == QLatin1String("t") || cmd == QLatin1String("\\get_ptt"))
-        return QStringLiteral("%1\n").arg(up && m_rig->pttActive() ? 1 : 0);
+        return QStringLiteral("%1\n").arg(up && state.ptt ? 1 : 0);
     if (cmd == QLatin1String("v") || cmd == QLatin1String("\\get_vfo"))
         return QStringLiteral("VFOA\n");
     if (cmd == QLatin1String("s") || cmd == QLatin1String("\\get_split_vfo"))
-        return QStringLiteral("%1\nVFOB\n").arg(up && m_rig->split() ? 1 : 0);
+        return QStringLiteral("%1\nVFOB\n").arg(up && state.split ? 1 : 0);
     if (cmd == QLatin1String("i") || cmd == QLatin1String("\\get_split_freq"))
-        return QStringLiteral("%1\n").arg(qint64(up ? m_rig->txFrequency() : 0));
+        return QStringLiteral("%1\n").arg(qint64(up ? state.txFrequency : 0));
 
     // ---- misuratori: potenza, ROS, ALC
     //
@@ -335,7 +521,7 @@ QString DecodiumCatShare::handleLine(const QString& line)
         bool const diTx = quale == QLatin1String("SWR")
                           || quale == QLatin1String("ALC")
                           || quale.startsWith(QLatin1String("RFPOWER_METER"));
-        if (diTx && !m_rig->pttActive()) return fail();
+        if (diTx && !state.ptt) return fail();
 
         // S-meter: e' l'unico livello di RICEZIONE, quindi non passa dal
         // filtro "diTx" qui sopra — anzi vale solo mentre NON si trasmette.
@@ -343,23 +529,23 @@ QString DecodiumCatShare::handleLine(const QString& line)
         // c'e', si risponde che non c'e' invece di mandare uno zero, che su
         // questa scala vorrebbe dire S9.
         if (quale == QLatin1String("STRENGTH")) {
-            if (!m_rig->strengthValid()) return fail();
-            return ok(m_rig->strengthDb());
+            if (!state.strengthValid) return fail();
+            return ok(state.strengthDb);
         }
 
         if (quale == QLatin1String("SWR")) {
-            double const v = m_rig->swr();
+            double const v = state.swr;
             if (v < 1.0) return fail();
             return ok(v);
         }
         if (quale == QLatin1String("ALC")) {
             // Se la radio non sa dare l'ALC, Decodium lo segna non valido: quel
             // «non lo so» va riportato tale e quale, non tradotto in zero.
-            if (!m_rig->alcValid()) return fail();
-            return ok(m_rig->alc() / 100.0);
+            if (!state.alcValid) return fail();
+            return ok(state.alc / 100.0);
         }
         if (quale == QLatin1String("RFPOWER_METER_WATTS")) {
-            double const w = m_rig->powerWatts();
+            double const w = state.powerWatts;
             if (w <= 0.0) return fail();
             return ok(w);
         }
@@ -371,25 +557,25 @@ QString DecodiumCatShare::handleLine(const QString& line)
     if (cmd == QLatin1String("F") || cmd == QLatin1String("\\set_freq")) {
         if (refuseWrite(cmd, false)) return QString::fromLatin1(kRefused);
         if (parts.size() < 2 || !up) return QString::fromLatin1(kRefused);
-        m_rig->setRigFrequency(parts.last().toDouble());
+        if (m_hooks.frequency) m_hooks.frequency(parts.last().toDouble(), false);
         return QString::fromLatin1(kOk);
     }
     if (cmd == QLatin1String("I") || cmd == QLatin1String("\\set_split_freq")) {
         if (refuseWrite(cmd, false)) return QString::fromLatin1(kRefused);
         if (parts.size() < 2 || !up) return QString::fromLatin1(kRefused);
-        m_rig->setRigTxFrequency(parts.last().toDouble());
+        if (m_hooks.frequency) m_hooks.frequency(parts.last().toDouble(), true);
         return QString::fromLatin1(kOk);
     }
     if (cmd == QLatin1String("M") || cmd == QLatin1String("\\set_mode")) {
         if (refuseWrite(cmd, false)) return QString::fromLatin1(kRefused);
         if (parts.size() < 2 || !up) return QString::fromLatin1(kRefused);
-        m_rig->setRigMode(fromHamlibMode(parts.at(1)));
+        if (m_hooks.mode) m_hooks.mode(fromHamlibMode(parts.at(1)));
         return QString::fromLatin1(kOk);
     }
     if (cmd == QLatin1String("T") || cmd == QLatin1String("\\set_ptt")) {
         if (refuseWrite(cmd, true)) return QString::fromLatin1(kRefused);
         if (parts.size() < 2 || !up) return QString::fromLatin1(kRefused);
-        m_rig->setRigPtt(parts.last().toInt() != 0);
+        if (m_hooks.ptt) m_hooks.ptt(parts.last().toInt() != 0);
         return QString::fromLatin1(kOk);
     }
     // VFO e split si accettano senza agire: i client li impostano di routine

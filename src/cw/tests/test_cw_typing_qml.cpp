@@ -4,6 +4,10 @@
 #include <QQmlComponent>
 #include <QQmlContext>
 #include <QQmlEngine>
+#include <QQuickItem>
+#include <QQuickWindow>
+#include <QSettings>
+#include <QTemporaryDir>
 #include <QTest>
 #include <memory>
 
@@ -12,6 +16,70 @@ using namespace decodium::cw;
 class TestCwTypingQml : public QObject {
     Q_OBJECT
 private slots:
+    void centerTargetIsLocalAndExplained_data()
+    {
+        QTest::addColumn<int>("width");
+        QTest::newRow("compact") << 640;
+        QTest::newRow("normal") << 920;
+    }
+
+    void centerTargetIsLocalAndExplained()
+    {
+        QFETCH(int, width);
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        QSettings settings(dir.filePath("cw.ini"), QSettings::IniFormat);
+        settings.setValue("CW/toneHz", 600);
+        CwController cw;
+        int tunes = 0, sends = 0, pttChanges = 0;
+        CwController::Hooks hooks;
+        hooks.rigKeyerAvailable = [] { return true; };
+        hooks.tuneFrequency = [&](double) { ++tunes; return true; };
+        hooks.sendRigMorse = [&](const QString&, int) { ++sends; return true; };
+        hooks.rigPtt = [&](bool) { ++pttChanges; };
+        cw.setHooks(hooks);
+        cw.deferStart(&settings);
+        QQmlEngine engine;
+        engine.rootContext()->setContextProperty("cwModule", &cw);
+        QQmlComponent component(&engine, QUrl::fromLocalFile(QStringLiteral(CW_WINDOW_QML)));
+        std::unique_ptr<QObject> window(component.create());
+        QVERIFY2(window, qPrintable(component.errorString()));
+        window->setProperty("width", width);
+        auto* label = window->findChild<QObject*>(QStringLiteral("cwCenterTargetLabel"));
+        auto* target = window->findChild<QObject*>(QStringLiteral("cwCenterTarget"));
+        auto* explanation = window->findChild<QObject*>(QStringLiteral("cwCenterTargetHelp"));
+        QVERIFY(label);
+        QVERIFY(target);
+        QVERIFY(explanation);
+        QCOMPARE(label->property("text").toString(), QStringLiteral("Center target (RX)"));
+        QVERIFY(explanation->property("text").toString().contains("does not read or change"));
+        auto* quickWindow = qobject_cast<QQuickWindow*>(window.get());
+        QVERIFY(quickWindow);
+        quickWindow->show();
+        // The explanation must remain visible (and wrapped) in both layouts.
+        for (QObject* control : {label, target, explanation}) {
+            auto* item = qobject_cast<QQuickItem*>(control);
+            QVERIFY(item);
+            QTRY_VERIFY(item->isVisible() && item->width() > 0 && item->height() > 0);
+            const QPointF origin = item->mapToScene(QPointF(0, 0));
+            QVERIFY(origin.x() >= 0 && origin.y() >= 0);
+            QVERIFY(origin.x() + item->width() <= quickWindow->width());
+            QVERIFY(origin.y() + item->height() <= quickWindow->height());
+        }
+        QCOMPARE(cw.toneHz(), 600);
+        QCOMPARE(target->property("currentText").toString(), QStringLiteral("600 Hz"));
+        // Selecting 700 is a local target change, not a CAT operation. The
+        // VFO must only move when the operator explicitly presses Center CW.
+        target->setProperty("currentIndex", 5);
+        QVERIFY(QMetaObject::invokeMethod(target, "activated", Q_ARG(int, 5)));
+        QCOMPARE(cw.toneHz(), 700);
+        QCOMPARE(settings.value("CW/toneHz").toInt(), 700);
+        QCOMPARE(cw.decoderToneLock(), 0); // Does not replace the decoder filter.
+        QCOMPARE(tunes, 0);
+        QCOMPARE(sends, 0);
+        QCOMPARE(pttChanges, 0);
+    }
+
     void stopButtonAlwaysRequestsEmergencyRelease()
     {
         CwController cw;

@@ -15,6 +15,10 @@
 #include <QObject>
 #include <QHash>
 #include <QString>
+#include <QPointer>
+#include <QQueue>
+#include <QTimer>
+#include <functional>
 
 class QTcpServer;
 class QTcpSocket;
@@ -32,7 +36,30 @@ class DecodiumCatShare : public QObject
     Q_PROPERTY(QString status       READ status       NOTIFY listeningChanged)
 
 public:
+    // Only cached telemetry is exposed here. CW operations complete on the
+    // server thread after the serialised CAT worker has executed them.
+    struct State {
+        bool connected{false}, ptt{false}, split{false};
+        bool strengthValid{false}, alcValid{false};
+        double frequency{0}, txFrequency{0}, strengthDb{0};
+        double swr{0}, alc{0}, powerWatts{0};
+        QString mode;
+    };
+    using Completion = std::function<void(int)>;
+    using SpeedCompletion = std::function<void(int, int)>;
+    struct Hooks {
+        std::function<State()> state;
+        std::function<void(double, bool)> frequency;
+        std::function<void(const QString&)> mode;
+        std::function<void(bool)> ptt;
+        std::function<bool()> morseAvailable;
+        std::function<int()> morseTextLimit;
+        std::function<void(const QString&, Completion)> sendMorse;
+        std::function<void(bool, int, SpeedCompletion)> morseSpeed;
+        std::function<void(Completion)> stopMorse;
+    };
     explicit DecodiumCatShare(DecodiumTransceiverManager* rig, QObject* parent = nullptr);
+    explicit DecodiumCatShare(Hooks hooks, QObject* parent = nullptr);
     ~DecodiumCatShare() override;
 
     bool    enabled()      const { return m_enabled; }
@@ -51,6 +78,9 @@ public:
     static QString toHamlibMode(const QString& decodiumMode);
     static QString fromHamlibMode(const QString& hamlibMode);
 
+    // A local Stop or a lost CAT connection must also invalidate remote text.
+    void cancelMorse();
+
 signals:
     void configChanged();
     void listeningChanged();
@@ -68,10 +98,24 @@ private:
     QString handleLine(const QString& line);
     QString dumpState() const;
     bool    refuseWrite(const QString& command, bool pttCommand);
+    bool handleMorse(QTcpSocket*, const QString&, std::function<void(QString)>);
+    void sendNextMorseChunk();
+    void stopMorse(Completion completion = {});
+    void finishReply(QTcpSocket*, quint64 id, const QString& reply);
 
-    DecodiumTransceiverManager* m_rig {nullptr};
+    Hooks m_hooks;
     QTcpServer* m_server {nullptr};
     QHash<QTcpSocket*, QByteArray> m_buffers;
+    struct Reply { quint64 id; QString text; bool ready{false}; };
+    QHash<QTcpSocket*, QQueue<Reply>> m_replies;
+    quint64 m_replyId{0};
+    QPointer<QTcpSocket> m_morseOwner;
+    QString m_morseText;
+    QString m_morseChunk;
+    QTimer m_morseTimer;
+    quint64 m_morseGeneration{0};
+    bool m_morseWaiting{false};
+    std::function<void(QString)> m_morseAccepted;
 
     bool m_enabled {false};
     bool m_allowControl {false};
