@@ -26800,7 +26800,9 @@ void DecodiumBridge::mamPromoteFromQueue()
         s.audioFreqHz = fHz;
         s.progress = 2;
         s.currentTx = 2;
-        s.partnerSnrDb = qSnr;
+        // -10 is only the placeholder given to a station picked by a click: no
+        // real figure for its link, so the power budget must treat it as unknown.
+        s.partnerSnrDb = (qSnr == -10) ? 127 : qSnr;
         s.reportSent = formatSignalReport(qSnr);
         s.reportReceived = QStringLiteral("-10");
         s.startedOnMs = nowMs;

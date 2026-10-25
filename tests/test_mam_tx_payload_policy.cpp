@@ -41,6 +41,7 @@ private slots:
     void lowConfidenceDecodeDoesNotRewriteTheReportSnr();
     void rr73SentToAStationThatLeftIsLoggedAndNotRepeatedForever();
     void aStationNeverCalledIsNotDroppedAsSilent();
+    void aQueuePlaceholderSnrIsTreatedAsUnknownByThePowerBudget();
     void legacyMirrorRoutesMultiStreamDecodesToSlotState();
     void legacyMirrorCompletesExistingMamQsoAfterMamIsDisabled();
     void lateRogerReportResumesRetryExpiredMamSlot();
@@ -173,6 +174,17 @@ void TestMamTxPayloadPolicy::aStationNeverCalledIsNotDroppedAsSilent()
     QVERIFY(prune.contains(QStringLiteral("s.lastTxSlotMs == 0")));
     QVERIFY(prune.contains(QStringLiteral("never called, waited > 12 periods")));
     QVERIFY(prune.contains(QStringLiteral("qMax(s.lastHeardMs, s.lastTxSlotMs)")));
+}
+
+void TestMamTxPayloadPolicy::aQueuePlaceholderSnrIsTreatedAsUnknownByThePowerBudget()
+{
+    // 25/10/2026, on the air (FT8): stations promoted from the queue carried the
+    // click placeholder of -10 dB as if it were a measurement; the budget asked
+    // 0.63 of the frame for each, so only one fitted and 13 frames in a row
+    // served a single station.
+    const QString cpp = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
+    QVERIFY(!cpp.isEmpty());
+    QVERIFY(cpp.contains(QStringLiteral("s.partnerSnrDb = (qSnr == -10) ? 127 : qSnr;")));
 }
 
 void TestMamTxPayloadPolicy::bridgeWiresCleanupAtEveryExit()

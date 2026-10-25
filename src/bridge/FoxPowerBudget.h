@@ -28,7 +28,7 @@ struct Config
 {
     double thresholdDb {-13.5};       // 50% decode point of the mode
     double marginDb {3.0};            // margin on a measured link
-    double marginUnmeasuredDb {6.0};  // margin when the link is only an estimate
+    double marginUnmeasuredDb {4.0};  // margin when the link is only an estimate
     double minGain {0.06};            // never below -24 dB
     double unknownGain {0.5};         // nothing known about the link: half the budget, so two such stations fit in one frame
     int maxStreams {10};
@@ -77,7 +77,9 @@ inline Allocation allocate(std::vector<Candidate> candidates, Config const& cfg 
     double total = 0.0;
     for (Candidate const& c : candidates) {
         double const g = neededGain(c, cfg);
-        bool const fits = total + g <= 1.0 + 1e-9;
+        // A 5% overcommit costs each stream 0.4 dB at most (the gains are scaled to
+        // sum to 1 below) and lets two stations that each need 0.501 share a frame.
+        bool const fits = total + g <= 1.05;
         bool const room = static_cast<int>(out.ids.size()) < cfg.maxStreams;
         if (out.ids.empty() && g >= 1.0) {
             // A station that needs more than the whole budget gets the frame to itself.

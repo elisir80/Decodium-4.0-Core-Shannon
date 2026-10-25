@@ -25,6 +25,7 @@ private slots:
     void unmeasuredLinksCostMore();
     void nothingToSendGivesAnEmptyAllocation();
     void twoStationsWithoutAnyDataShareAFrame();
+    void twoHeardButUnmeasuredStationsFitInAnFt8Frame();
 };
 
 void TestFoxPowerBudget::strongStationsAllFitAndShareTheBudget()
@@ -128,6 +129,18 @@ void TestFoxPowerBudget::twoStationsWithoutAnyDataShareAFrame()
     QCOMPARE(int(a.ids.size()), 2);
     QCOMPARE(int(a.deferred.size()), 1);
     QVERIFY(std::abs(a.gains[0] - 0.5) < 1e-9);
+}
+
+void TestFoxPowerBudget::twoHeardButUnmeasuredStationsFitInAnFt8Frame()
+{
+    // 25/10/2026, on the air: with a 6 dB margin a station heard at -10 dB asked
+    // 0.63 of an FT8 frame and nobody else fitted. With 4 dB it asks 0.501, and a 5% tolerance lets two share the frame.
+    Config cfg;
+    cfg.thresholdDb = -20.0;
+    std::vector<Candidate> c {Candidate(1, -10.0, false, 0, false), Candidate(2, -10.0, false, 0, false)};
+    Allocation a = allocate(c, cfg);
+    QCOMPARE(int(a.ids.size()), 2);
+    QVERIFY(neededGain(c[0], cfg) <= 0.52);
 }
 
 QTEST_APPLESS_MAIN(TestFoxPowerBudget)
