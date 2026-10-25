@@ -39,6 +39,7 @@ private slots:
     void bridgeWiresCleanupAtEveryExit();
     void lateSignoffFromASlowPartnerStillLogsTheQso();
     void lowConfidenceDecodeDoesNotRewriteTheReportSnr();
+    void rr73SentToAStationThatLeftIsLoggedAndNotRepeatedForever();
     void legacyMirrorRoutesMultiStreamDecodesToSlotState();
     void legacyMirrorCompletesExistingMamQsoAfterMamIsDisabled();
     void lateRogerReportResumesRetryExpiredMamSlot();
@@ -135,6 +136,26 @@ void TestMamTxPayloadPolicy::lowConfidenceDecodeDoesNotRewriteTheReportSnr()
     QVERIFY(ingest.contains(QStringLiteral("lowConfidenceDecode = message.trimmed().endsWith")));
     QVERIFY(ingest.contains(
         QStringLiteral("decodedSnr != 127 && (!lowConfidenceDecode || s.partnerSnrDb == 127)")));
+}
+
+void TestMamTxPayloadPolicy::rr73SentToAStationThatLeftIsLoggedAndNotRepeatedForever()
+{
+    // 25/10/2026, on the air: two stations acknowledged our report, got our RR73
+    // (12 times for one of them, resumed again and again by its repeated
+    // R+report) and neither contact was logged.
+    const QString cpp = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
+    QVERIFY(!cpp.isEmpty());
+    const QString prune = functionBody(
+        cpp,
+        QStringLiteral("void DecodiumBridge::mamPruneSlots"),
+        QStringLiteral("void DecodiumBridge::mamPromoteLateReportRecoveries"));
+    QVERIFY(prune.contains(QStringLiteral("m_ft2LogRr73OnPartnerLeft && s.currentTx == 4")));
+    QVERIFY(prune.contains(QStringLiteral("logged on RR73 (partner left)")));
+    const QString ingest = functionBody(
+        cpp,
+        QStringLiteral("void DecodiumBridge::mamIngestDecode"),
+        QStringLiteral("void DecodiumBridge::mamPruneSlots"));
+    QVERIFY(ingest.contains(QStringLiteral("recovery.slot.lateResumes >= 2")));
 }
 
 void TestMamTxPayloadPolicy::bridgeWiresCleanupAtEveryExit()

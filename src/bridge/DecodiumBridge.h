@@ -3853,6 +3853,7 @@ private:
         float   lastTxGain {1.0f};  // amplitude our last frame gave this station (power budget)
         int     linkSnrDb {127};    // its SNR on a full-scale stream, from its own report (127 = unknown)
         int     waitFrames {0};     // frames the power budget left it out of
+        int     lateResumes {0};    // times a dropped exchange was resumed by the partner's late R+report
         enum class State { Active, Signoff, Done } state {State::Active};
     };
     QVector<MamQsoSlot> m_mamSlots;

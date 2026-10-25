@@ -26421,6 +26421,12 @@ void DecodiumBridge::mamIngestDecode(const QStringList& f)
                     }
                     return;
                 }
+                // A station that keeps repeating its R+report without ever copying
+                // our RR73 must not be answered forever (12 RR73 on the air).
+                if (recovery.slot.lateResumes >= 2) {
+                    return;
+                }
+                recovery.slot.lateResumes += 1;
                 recovery.slot.lastHeardMs = nowMs;
                 recovery.slot.partnerSnrDb = (decodedSnr != 127) ? decodedSnr : recovery.slot.partnerSnrDb;
                 recovery.slot.reportReceived = formatSignalReport(receivedReportDb);
@@ -26645,6 +26651,15 @@ void DecodiumBridge::mamPruneSlots()
             // not log on retry/silence: retain the exchange briefly so only a
             // subsequent decoded final 73 from this same station can close
             // and log it.
+            // The partner acknowledged our report (progress >= 4), we sent RR73 and
+            // then it went silent or kept repeating: with "log RR73 when the
+            // partner leaves" on, that is a complete QSO from the Fox's side.
+            // On the air a station got 12 RR73 and the contact was never logged.
+            if (!s.logged && m_ft2LogRr73OnPartnerLeft && s.currentTx == 4
+                && s.progress >= 4 && s.lastNtx == 4) {
+                mamLogSlot(s);
+                bridgeLog(QStringLiteral("MAM slot %1 logged on RR73 (partner left)").arg(s.callFull));
+            }
             if (!s.logged && s.progress >= 2 && s.progress <= 4) {
                 MamLateReportRecovery recovery;
                 recovery.slot = s;
