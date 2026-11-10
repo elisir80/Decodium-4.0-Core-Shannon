@@ -6,6 +6,7 @@ import ctypes.util
 import os
 from pathlib import Path
 import secrets
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -19,7 +20,7 @@ allowed.add('avt-24')
 allowed.add('robot-c12')
 if mode not in allowed: raise SystemExit('expected robot-c12, avt-24 or an AVT 24/90/94 narrow, QRM or narrow-QRM mode')
 root=Path(tempfile.mkdtemp(prefix='decodium-avt-two-app-'+mode+'-'))
-binary=Path('build/decodium').resolve(strict=True)
+binary=Path(os.environ.get('DECODIUM_LAB_AVT_BINARY', 'build/decodium')).resolve(strict=True)
 if len(sys.argv) > 4: raise SystemExit('expected mode, optional variant, and optional image path')
 variant=sys.argv[2] if len(sys.argv)>2 else 'a'
 if variant not in ('a','b'): raise SystemExit('image variant must be a or b')
@@ -47,11 +48,19 @@ if not 1000 <= tx_delay_ms <= 30000:
     raise SystemExit('DECODIUM_LAB_AVT_TX_MS must be between 1000 and 30000')
 duration_ms=(35000 if mode == 'robot-c12' else (60000 if mode.startswith('avt-24') else 130000))
 duration_ms += max(0, tx_delay_ms - 14000)
+try:
+    extra_ms = int(os.environ.get('DECODIUM_LAB_AVT_EXTRA_MS', '0'))
+except ValueError:
+    raise SystemExit('DECODIUM_LAB_AVT_EXTRA_MS must be an integer')
+if not 0 <= extra_ms <= 60000:
+    raise SystemExit('DECODIUM_LAB_AVT_EXTRA_MS must be between 0 and 60000')
+duration_ms += extra_ms
 common=['--test-mode','--lab-no-cat','--lab-audio-input','BlackHole 2ch',
         '--lab-reapply-ms','500']
 tx_output=os.environ.get('DECODIUM_LAB_AVT_TX_OUTPUT','BlackHole 2ch')
 if tx_output not in ('BlackHole 2ch','BlackHole 16ch'): raise SystemExit('unsupported lab output')
 processes=[]
+rigs=[]
 class Info(c.Structure):
     _fields_=[('version',c.c_int),('name',c.c_char_p),('host',c.c_int),('inputs',c.c_int),
               ('outputs',c.c_int),('lowin',c.c_double),('lowout',c.c_double),
@@ -93,10 +102,12 @@ if capture_enabled:
 try:
     for role in ('rx','tx'):
         env=os.environ.copy()
-        env.update(QT_QPA_PLATFORM='offscreen',QT_QUICK_BACKEND='software',
+        env.update(QT_QPA_PLATFORM=os.environ.get('DECODIUM_LAB_AVT_PLATFORM', 'offscreen'),QT_QUICK_BACKEND='software',
                    DECODIUM_LAB_SETTINGS_DIR=str(root/(role+'-settings')))
+        rig = 'AVT'+role+secrets.token_hex(4)
+        rigs.append(rig)
         args=[str(binary),*common,'--lab-audio-output',tx_output if role=='tx' else 'BlackHole 2ch',
-              '--rig-name','AVT'+role+secrets.token_hex(4)]
+              '--rig-name',rig]
         if role=='rx':
             args+=['--lab-monitor-ms','1800','--lab-sstv-rx-ms','3500',
                    '--lab-sstv-rx-ready-file',str(root/'ready'),
@@ -137,7 +148,9 @@ try:
             except json.JSONDecodeError: continue
         rx_done=(diagnostics and diagnostics[-1].get('imageComplete')
                  and diagnostics[-1].get('imageMode')==mode and (root/'received.png').is_file())
-        if tx_done and rx_done:
+        autosave_done = (os.environ.get('DECODIUM_LAB_VERIFY_SSTV_AUTOSAVE') != '1'
+                         or '[SSTV-AUTOSAVE-LAB] saved' in rx_text)
+        if tx_done and rx_done and autosave_done:
             break
         if all(p.poll() is not None for p in processes):
             raise RuntimeError('applications exited before TX and RX completed; artifacts '+str(root))
@@ -175,7 +188,8 @@ try:
     if not (root/'received.png').exists(): raise RuntimeError('RX did not save image; artifacts '+str(root))
     compare=[sys.executable,'tests/sstv/tools/compare_sstv_lab_images.py',
              str(root/'reference.png'),str(root/'received.png'),
-             '--max-mae','5','--max-p95','15']
+             '--max-mae',os.environ.get('DECODIUM_LAB_AVT_MAX_MAE','5'),
+             '--max-p95',os.environ.get('DECODIUM_LAB_AVT_MAX_P95','15')]
     last_blue_limit=env.get('DECODIUM_LAB_AVT_MAX_LAST_BLUE_ERROR')
     if last_blue_limit is not None:
         compare += ['--max-last-blue-error',last_blue_limit]
@@ -195,6 +209,14 @@ finally:
     if thread: thread.join(timeout=5)
     if pa:
         pa.Pa_StopStream(stream);pa.Pa_CloseStream(stream);pa.Pa_Terminate()
+    # Remove only the uniquely named Qt test profiles created by this run.
+    # The caller retains the run artifacts and compact evidence separately.
+    for rig in rigs:
+        for parent in (Path.home()/'.qttest/Library/Application Support/IU8LMC',
+                       Path.home()/'.qttest/Library/Caches/IU8LMC'):
+            profile = parent/('Decodium - '+rig+' - test')
+            if profile.is_dir():
+                shutil.rmtree(profile)
 
 if capture_enabled:
     print('Capture integrity (internal exact-zero runs; may be intentional):', flush=True)

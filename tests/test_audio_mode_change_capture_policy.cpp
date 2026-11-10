@@ -127,7 +127,7 @@ void TestAudioModeChangeCapturePolicy::requiresBridgeHandoffWhenLeavingLegacyFor
 
 void TestAudioModeChangeCapturePolicy::legacyMigrationStartsStateRefreshEvenWhenStartedInCw()
 {
-    const QString source = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
+    const QString source = readSource(QStringLiteral("src/bridge/DecodiumBridgeLegacyRxHandoff.cpp"));
     const qsizetype begin = source.indexOf(QStringLiteral("void DecodiumBridge::migrateActiveMonitoringToLegacyBackend()"));
     const qsizetype end = source.indexOf(QStringLiteral("void DecodiumBridge::recoverGpuPanadapterAfterSourceHandoff"), begin);
     QVERIFY(begin >= 0 && end > begin);
@@ -141,7 +141,7 @@ void TestAudioModeChangeCapturePolicy::legacyMigrationStartsStateRefreshEvenWhen
 
 void TestAudioModeChangeCapturePolicy::stoppedNativeCaptureDoesNotOwnLegacyMeters()
 {
-    const QString source = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
+    const QString source = readSource(QStringLiteral("src/bridge/DecodiumBridgeLegacyState.cpp"));
     const qsizetype begin = source.indexOf(QStringLiteral("void DecodiumBridge::syncLegacyBackendState()"));
     const qsizetype end = source.indexOf(QStringLiteral("QString const legacyModeRaw"), begin);
     QVERIFY(begin >= 0 && end > begin);
@@ -168,11 +168,14 @@ void TestAudioModeChangeCapturePolicy::meterFollowsRxOwnershipAcrossRepeatedMode
 
 void TestAudioModeChangeCapturePolicy::bridgeUsesTheSharedOwnershipPolicy()
 {
-    const QString source = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
+    const QString source = readSource(QStringLiteral("src/bridge/DecodiumBridgeMode.cpp"))
+        + readSource(QStringLiteral("src/bridge/DecodiumBridgeFeedDecoder.cpp"));
+    const QString recoverySource = readSource(QStringLiteral("src/bridge/DecodiumBridgeAudioRecovery.cpp"));
     QVERIFY(!source.isEmpty());
-    QVERIFY(source.contains(QStringLiteral("AudioModeChangeCapturePolicy.h")));
-    QVERIFY(source.contains(QStringLiteral("ModeChangeCaptureState captureState")));
-    QVERIFY(source.contains(QStringLiteral("preserveExistingCaptureForModeChange(captureState)")));
+    QVERIFY(!recoverySource.isEmpty());
+    QVERIFY(recoverySource.contains(QStringLiteral("AudioModeChangeCapturePolicy.h")));
+    QVERIFY(recoverySource.contains(QStringLiteral("ModeChangeCaptureState captureState")));
+    QVERIFY(recoverySource.contains(QStringLiteral("preserveExistingCaptureForModeChange(captureState)")));
     QVERIFY(source.contains(QStringLiteral("LegacyRxHandoffState legacyHandoffState")));
     QVERIFY(source.contains(QStringLiteral("requiresLegacyRxHandoff(legacyHandoffState)")));
     QVERIFY(source.contains(QStringLiteral("completeNativePcmToLegacyRxHandoff(previousMode)")));
@@ -181,7 +184,8 @@ void TestAudioModeChangeCapturePolicy::bridgeUsesTheSharedOwnershipPolicy()
     QVERIFY(source.contains(QStringLiteral("bridgeOwnedExplicitQ65")));
     QVERIFY(source.contains(QStringLiteral("normalizedMode == QStringLiteral(\"Q65\")")));
     QVERIFY(source.contains(QStringLiteral("normalizedMode = QStringLiteral(\"Q65-60A\")")));
-    QVERIFY(source.contains(QStringLiteral("legacy dialog sync: Q65 variant remains bridge-owned")));
+    QVERIFY(readSource(QStringLiteral("src/bridge/DecodiumBridgeLegacyDialogSync.cpp"))
+                .contains(QStringLiteral("legacy dialog sync: Q65 variant remains bridge-owned")));
     QVERIFY(source.contains(QStringLiteral("qBound(1, decodeDepth, 3)")));
     QVERIFY(source.contains(QStringLiteral("req.nclearave = q65CoherentAverage ? 0 : 1")));
     QVERIFY(source.contains(QStringLiteral("[Q65DISPATCH]")));

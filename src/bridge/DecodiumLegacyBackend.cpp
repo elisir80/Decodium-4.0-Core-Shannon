@@ -12,6 +12,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QDateTime>
+#include <QElapsedTimer>
 #include <exception>
 
 #include "MultiSettings.hpp"
@@ -556,6 +557,8 @@ QPalette embeddedLegacyWidgetPalette(QPalette base)
 DecodiumLegacyBackend::DecodiumLegacyBackend(QObject* parent, QStringList const& udpClientIds)
     : QObject(parent)
 {
+    QElapsedTimer startupTimer;
+    startupTimer.start();
     m_backendStartupMs = QDateTime::currentMSecsSinceEpoch();
     m_app = qobject_cast<QApplication*>(QCoreApplication::instance());
     if (!m_app) {
@@ -595,9 +598,13 @@ DecodiumLegacyBackend::DecodiumLegacyBackend(QObject* parent, QStringList const&
     m_app->setProperty("decodiumEmbeddedLegacyRigControlEnabled", m_rigControlEnabled);
     bootstrapEmbeddedLegacyDataDir(embeddedLegacyDataDir);
     bootstrapEmbeddedLegacyConfig();
+    const qint64 bootstrapMs = startupTimer.elapsed();
+    qint64 settingsMs = -1;
+    qint64 windowMs = -1;
 
     try {
         m_multiSettings = std::make_unique<MultiSettings>();
+        settingsMs = startupTimer.elapsed() - bootstrapMs;
         // Seed the effective QML identity before MainWindow sends its first
         // heartbeat; updating it afterwards leaves a stale connection event.
         QStringList const idKeys {QStringLiteral("UDPClientId"),
@@ -615,9 +622,11 @@ DecodiumLegacyBackend::DecodiumLegacyBackend(QObject* parent, QStringList const&
         QDir tempDir {QStandardPaths::writableLocation(QStandardPaths::TempLocation)};
         QDir::setCurrent(qApp->applicationDirPath());
 
+        const qint64 windowStartMs = startupTimer.elapsed();
         m_mainWindow = new MainWindow(tempDir, false, m_multiSettings.get(),
                                       downSampleFactor, nullptr,
                                       QProcessEnvironment::systemEnvironment());
+        windowMs = startupTimer.elapsed() - windowStartMs;
         m_mainWindow->setAttribute(Qt::WA_DontShowOnScreen, true);
         m_mainWindow->legacySetEmbeddedMode(true);
         m_mainWindow->legacySetRigControlEnabled(m_rigControlEnabled);
@@ -692,6 +701,9 @@ DecodiumLegacyBackend::DecodiumLegacyBackend(QObject* parent, QStringList const&
     }
 
     restoreApplicationIdentity();
+    qInfo() << "[STARTUP-TIMING] legacy_backend_ms=" << startupTimer.elapsed()
+            << "bootstrap_ms=" << bootstrapMs << "settings_ms=" << settingsMs
+            << "window_ms=" << windowMs << "available=" << m_available;
 }
 
 DecodiumLegacyBackend::~DecodiumLegacyBackend()

@@ -4,6 +4,7 @@
 #include <QCoreApplication>
 #include <QHash>
 #include <QSettings>
+#include <QSet>
 #include <QString>
 #include <QVariant>
 
@@ -56,10 +57,27 @@ inline void ensureSettingsProfileInitialized(const QString& profileName)
     settings.endGroup();
     if (legacyProfileExists) return;
 
+    // Other profiles are siblings of the global settings, not global
+    // settings themselves. Copying them recursively makes each new profile
+    // contain all earlier profiles and can grow the INI exponentially.
+    QSet<QString> existingProfiles;
+    settings.beginGroup(QStringLiteral("MultiSettings"));
+    for (const QString& name : settings.childGroups()) existingProfiles.insert(name);
+    settings.endGroup();
+    for (const QString& name : settings.childGroups()) {
+        if (name == QStringLiteral("MultiSettings")) continue;
+        settings.beginGroup(name);
+        if (settings.value(QStringLiteral("_ProfileSettingsInitialized"), false).toBool())
+            existingProfiles.insert(name);
+        settings.endGroup();
+    }
+
     QHash<QString, QVariant> rootValues;
     for (QString const& key : settings.allKeys()) {
+        const int separator = key.indexOf(QLatin1Char('/'));
         if (key.startsWith(QStringLiteral("MultiSettings/"))
             || key.startsWith(profileName + QLatin1Char('/'))
+            || (separator > 0 && existingProfiles.contains(key.left(separator)))
             || key == QStringLiteral("CurrentMultiSettingsConfiguration")) {
             continue;
         }

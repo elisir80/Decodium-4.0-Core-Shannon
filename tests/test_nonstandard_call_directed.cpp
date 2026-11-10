@@ -286,7 +286,7 @@ int main (int argc, char* argv[])
 
     // c) quindi il bridge non deve piu' dedurre il destinatario dal QSO in corso:
     //    nel ramo dell'hash non risolto si ferma e basta.
-    QFile sorgente {QStringLiteral (DECODIUM_SOURCE_DIR "/src/bridge/DecodiumBridge.cpp")};
+    QFile sorgente {QStringLiteral (DECODIUM_SOURCE_DIR "/src/bridge/DecodiumBridgeFt2PartnerGuards.cpp")};
     QString testo;
     if (sorgente.open (QIODevice::ReadOnly | QIODevice::Text))
       testo = QString::fromUtf8 (sorgente.readAll ());

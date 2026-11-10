@@ -11,7 +11,63 @@ QString readSource(const QString& relativePath)
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         return {};
     }
-    return QString::fromUtf8(file.readAll());
+    QString source = QString::fromUtf8(file.readAll());
+    if (relativePath == QStringLiteral("src/bridge/DecodiumBridge.cpp")) {
+        const QString autoSequence = readSource(QStringLiteral("src/bridge/DecodiumBridgeAutoSequence.cpp"));
+        const int sequencePoint = source.indexOf(QStringLiteral("// BRIDGE_LAB_INSERTION_POINT"));
+        if (autoSequence.isEmpty() || sequencePoint < 0) return {};
+        source.insert(sequencePoint, autoSequence);
+
+        const QString logQso = readSource(QStringLiteral("src/bridge/DecodiumBridgeLogQso.cpp"));
+        const int logPoint = source.indexOf(QStringLiteral("// BRIDGE_LOG_QSO_INSERTION_POINT"));
+        if (logQso.isEmpty() || logPoint < 0) return {};
+        source.insert(logPoint, logQso);
+        // Reconstruct the original MAM function order for these source-level
+        // regression checks after the functions moved to separate files.
+        QString moved;
+        for (const QString& path : {QStringLiteral("src/bridge/DecodiumBridgeAutoCqRepeat.cpp"),
+                                    QStringLiteral("src/bridge/DecodiumBridgeMamIngest.cpp"),
+                                    QStringLiteral("src/bridge/DecodiumBridgeMamPrune.cpp"),
+                                    QStringLiteral("src/bridge/DecodiumBridgeMamRecovery.cpp"),
+                                    QStringLiteral("src/bridge/DecodiumBridgeMamPromote.cpp"),
+                                    QStringLiteral("src/bridge/DecodiumBridgeMamLog.cpp"),
+                                    QStringLiteral("src/bridge/DecodiumBridgeMamDispatch.cpp"),
+                                    QStringLiteral("src/bridge/DecodiumBridgeTxPrepare.cpp")}) {
+            const QString part = readSource(path);
+            if (part.isEmpty()) return {};
+            moved += part;
+        }
+        const QString legacySync = readSource(QStringLiteral("src/bridge/DecodiumBridgeLegacySync.cpp"));
+        const int station = source.indexOf(QStringLiteral("// === STATION ==="));
+        if (legacySync.isEmpty() || station < 0) return {};
+        source.insert(station, legacySync);
+        const QString mamStateSource = readSource(QStringLiteral("src/bridge/DecodiumBridgeMamState.cpp"));
+        const int mamMethod = mamStateSource.indexOf(QStringLiteral("void DecodiumBridge::setMultiAnswerMode(bool v)"));
+        const QString services = readSource(QStringLiteral("src/bridge/DecodiumBridgeServices.cpp"));
+        if (services.isEmpty()) return {};
+        source.append(services);
+        const QString autologHelpers = readSource(QStringLiteral("src/bridge/DecodiumBridgeAutologHelpers.cpp"));
+        if (autologHelpers.isEmpty()) return {};
+        source.append(autologHelpers);
+        const int catShare = source.indexOf(QStringLiteral("QObject* DecodiumBridge::catShareObject() const"));
+        if (mamMethod < 0 || catShare < 0) return {};
+        source.insert(catShare, mamStateSource.mid(mamMethod));
+        const QString txEnable = readSource(QStringLiteral("src/bridge/DecodiumBridgeTxEnable.cpp"));
+        const int multiAnswer = source.indexOf(QStringLiteral("void DecodiumBridge::setMultiAnswerMode(bool v)"));
+        if (txEnable.isEmpty() || multiAnswer < 0) return {};
+        source.insert(multiAnswer, txEnable);
+        const QString periodic = readSource(QStringLiteral("src/bridge/DecodiumBridgePeriodicTx.cpp"));
+        const int periodicPosition = source.indexOf(QStringLiteral("void DecodiumBridge::autoSequenceStep("));
+        if (periodic.isEmpty() || periodicPosition < 0) return {};
+        source.insert(periodicPosition, periodic);
+        const QString recording = readSource(QStringLiteral("src/bridge/DecodiumBridgeTxRecording.cpp"));
+        if (recording.isEmpty()) return {};
+        moved += recording;
+        const int position = source.indexOf(QStringLiteral("// BRIDGE_COMPLETE_TX_INSERTION_POINT"));
+        if (position < 0) return {};
+        source.insert(position, moved);
+    }
+    return source;
 }
 
 QString functionBody(const QString& source, const QString& signature,
@@ -222,16 +278,22 @@ void TestMamTxPayloadPolicy::adifFieldsAreWhatActuallyHappened()
     // received and an empty grid; KV4T with RST_SENT -01 while +05 and -02 had
     // been transmitted.
     const QString cpp = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
+    const QString snapshots = readSource(QStringLiteral("src/bridge/DecodiumBridgeAutoLogSnapshot.cpp"));
     QVERIFY(!cpp.isEmpty());
+    QVERIFY(!snapshots.isEmpty());
     const QString snap = functionBody(
-        cpp,
+        snapshots,
         QStringLiteral("void DecodiumBridge::capturePendingAutoLogSnapshot"),
         QStringLiteral("QDateTime DecodiumBridge::effectiveQsoLogTimeOnUtc"));
     QVERIFY(snap.contains(QStringLiteral("m_pendingAutoLogGrid = lookupWorldMapGrid(snapshotCall)")));
     QVERIFY(snap.contains(QStringLiteral("m_lastReportTxMessage")));
     QVERIFY(snap.contains(QStringLiteral("m_reportReceivedReal ? m_reportReceived.trimmed() : QString()")));
     QVERIFY(!cpp.contains(QStringLiteral("rstRcvd.isEmpty() ? QStringLiteral(\"-10\") : rstRcvd")));
-    QVERIFY(cpp.count(QStringLiteral("setReportReceivedPlaceholder(QStringLiteral(\"-10\"))")) == 3);
+    const QString queueCpp = readSource(QStringLiteral("src/bridge/DecodiumBridgeCallerQueue.cpp"));
+    QVERIFY(!queueCpp.isEmpty());
+    const auto placeholder = QStringLiteral("setReportReceivedPlaceholder(QStringLiteral(\"-10\"))");
+    QCOMPARE(cpp.count(placeholder), 2);
+    QCOMPARE(queueCpp.count(placeholder), 1);
 }
 
 void TestMamTxPayloadPolicy::logAnywayNeedsAReportFromThePartner()
@@ -276,8 +338,10 @@ void TestMamTxPayloadPolicy::aWorkedPartnerStaysOutForFiveMinutes()
     QVERIFY(!cpp.isEmpty());
     QVERIFY(cpp.contains(QStringLiteral("constexpr int kRecentAutoCqPartnerWindowSeconds {600};")));
     QVERIFY(cpp.contains(QStringLiteral("constexpr int kRecentDuplicateLogWindowSeconds {90};")));
+    const QString dedup = readSource(QStringLiteral("src/bridge/DecodiumBridgeAutoCqDedupe.cpp"));
+    QVERIFY(!dedup.isEmpty());
     const QString dup = functionBody(
-        cpp,
+        dedup,
         QStringLiteral("bool DecodiumBridge::isRecentAutoCqDuplicate"),
         QStringLiteral("bool DecodiumBridge::isRecentAutoCqWorkedOrLoggedDuplicate"));
     QVERIFY(dup.contains(QStringLiteral("isWithinRecentAutoCqPartnerWindow(workedIt.value()")));
@@ -285,7 +349,7 @@ void TestMamTxPayloadPolicy::aWorkedPartnerStaysOutForFiveMinutes()
     // an abandoned partner (no answer) is still skipped for 90 s only
     QVERIFY(dup.contains(QStringLiteral("isWithinRecentDuplicateWindow(abandonedIt.value()")));
     const QString wl = functionBody(
-        cpp,
+        dedup,
         QStringLiteral("bool DecodiumBridge::isRecentAutoCqWorkedOrLoggedDuplicate"),
         QStringLiteral("void DecodiumBridge::touchRecentAutoCqWorked"));
     QVERIFY(wl.contains(QStringLiteral("isWithinRecentAutoCqPartnerWindow(workedIt.value()")));
@@ -303,15 +367,16 @@ void TestMamTxPayloadPolicy::courtesySignoffNeverLogsTwice()
     const QString cpp = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
     QVERIFY(!cpp.isEmpty());
     const QString fromSignoff = functionBody(
-        cpp,
+        readSource(QStringLiteral("src/bridge/DecodiumBridgeQsoFinish.cpp")),
         QStringLiteral("bool DecodiumBridge::finishAutoSequenceQsoFromCompletedSignoff"),
         QStringLiteral("void DecodiumBridge::checkAndStartPeriodicTx"));
     QVERIFY(fromSignoff.left(300).contains(QStringLiteral("releaseCourtesySignoffIfActive(reason)")));
     // the two finishAutoSequenceQso lambdas
     QCOMPARE(cpp.count(QStringLiteral("if (releaseCourtesySignoffIfActive(reason)) {\n            return;")), 2);
     // release never logs and restores the worked entry that finishing without a log removes
+    const QString courtesy = readSource(QStringLiteral("src/bridge/DecodiumBridgeCourtesySignoff.cpp"));
     const QString release = functionBody(
-        cpp,
+        courtesy,
         QStringLiteral("bool DecodiumBridge::releaseCourtesySignoffIfActive"),
         QStringLiteral("void DecodiumBridge::clearRecentAutoCqAbandoned"));
     QVERIFY(release.contains(QStringLiteral("complete, QSO was already logged\").arg(base), false)")));
@@ -319,7 +384,7 @@ void TestMamTxPayloadPolicy::courtesySignoffNeverLogsTwice()
     QVERIFY(release.contains(QStringLiteral("rememberRecentAutoCqWorked(base")));
     // only when idle in CQ, for a worked/logged partner, at most twice
     const QString start = functionBody(
-        cpp,
+        courtesy,
         QStringLiteral("bool DecodiumBridge::maybeStartCourtesySignoff"),
         QStringLiteral("bool DecodiumBridge::releaseCourtesySignoffIfActive"));
     QVERIFY(start.contains(QStringLiteral("m_currentTx != 6")));
@@ -330,7 +395,7 @@ void TestMamTxPayloadPolicy::courtesySignoffNeverLogsTwice()
     QCOMPARE(cpp.count(QStringLiteral("maybeStartCourtesySignoff(messagePartner, messagePartnerBase, msg);")), 2);
     // the flag never outlives the QSO state
     const QString reset = functionBody(
-        cpp,
+        readSource(QStringLiteral("src/bridge/DecodiumBridgeQsoReset.cpp")),
         QStringLiteral("void DecodiumBridge::resetQsoStateForNextSequence"),
         QStringLiteral("bool DecodiumBridge::finishAutoSequenceQsoFromCompletedSignoff"));
     QVERIFY(reset.contains(QStringLiteral("m_courtesySignoffBase.clear();")));
@@ -362,7 +427,8 @@ void TestMamTxPayloadPolicy::mamPileUpClosesSlotsHonestly()
     // the refusal applies to low-confidence decodes only: a clean 73/RR73 must reach the slot
     QVERIFY(ingest.contains(QStringLiteral("message.trimmed().endsWith(QLatin1Char('?'))")));
     // the stale-TX6 guard line is rate limited
-    QVERIFY(cpp.contains(QStringLiteral("static qint64 lastStaleTx6LogMs = 0;")));
+    QVERIFY(readSource(QStringLiteral("src/bridge/DecodiumBridgeTxDispatchGuard.cpp"))
+                .contains(QStringLiteral("static qint64 lastStaleTx6LogMs = 0;")));
 }
 
 void TestMamTxPayloadPolicy::mamReopenAndResumeFixes()
@@ -399,7 +465,7 @@ void TestMamTxPayloadPolicy::mamReopenAndResumeFixes()
 void TestMamTxPayloadPolicy::clickedReportIsRecordedAsReceived()
 {
     // 28/10/2026 (paul log, FT4): a double-clicked R-report of the partner must be recorded.
-    const QString cpp = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
+    const QString cpp = readSource(QStringLiteral("src/bridge/DecodiumBridgeDecodeClick.cpp"));
     QVERIFY(!cpp.isEmpty());
     QVERIFY(cpp.contains(QStringLiteral("setReportReceived(last.startsWith(QLatin1Char('R')) ? last.mid(1) : last);")));
     QVERIFY(cpp.contains(QStringLiteral("setReportReceived(last); // 1.0.726")));
@@ -419,12 +485,14 @@ void TestMamTxPayloadPolicy::perCallLimitAndAlignedFixes()
     // wait of two periods; AutoCQ 10-minute window; stale TX6 retries stop.
     const QString cpp = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
     QVERIFY(!cpp.isEmpty());
-    QVERIFY(cpp.contains(QStringLiteral("m_maxQsoPerCall = qBound(0, s.value(QStringLiteral(\"MaxQsoPerCall\"), 0).toInt(), 3);")));
-    QVERIFY(cpp.contains(QStringLiteral("loadQsoCountFromLog();  // 1.0.731")));
+    const QString settings = readSource(QStringLiteral("src/bridge/DecodiumBridgeLoadSettings.cpp"));
+    QVERIFY(settings.contains(QStringLiteral("m_maxQsoPerCall = qBound(0, s.value(QStringLiteral(\"MaxQsoPerCall\"), 0).toInt(), 3);")));
+    QVERIFY(settings.contains(QStringLiteral("loadQsoCountFromLog();  // 1.0.731")));
     QVERIFY(cpp.contains(QStringLiteral("m_qsoCountByKey[dedupeKey] += 1;")));
     QVERIFY(cpp.contains(QStringLiteral("if (qsoLimitReached(partnerBase, m_frequency, m_mode)) {")));
     QVERIFY(cpp.contains(QStringLiteral("static_cast<qint64>(qMax(2, remainingPeriods)) * periodMs")));
-    QVERIFY(cpp.contains(QStringLiteral("constexpr int kMamRecentWorkedWindowSeconds {600};")));
+    const QString limits = readSource(QStringLiteral("src/bridge/DecodiumBridgeQsoLimit.cpp"));
+    QVERIFY(limits.contains(QStringLiteral("constexpr int kMamRecentWorkedWindowSeconds {600};")));
     QVERIFY(cpp.contains(QStringLiteral("1.0.732: a CQ left in TX6 after AutoCQ was stopped")));
     const QString qml = readSource(QStringLiteral("qml/decodium/components/DigiPileupDialog.qml"));
     QVERIFY(qml.contains(QStringLiteral("bridge.maxQsoPerCall = value")));
@@ -433,10 +501,12 @@ void TestMamTxPayloadPolicy::perCallLimitAndAlignedFixes()
 void TestMamTxPayloadPolicy::bridgeWiresCleanupAtEveryExit()
 {
     const QString cpp = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
+    const QString audioBuffers = readSource(QStringLiteral("src/bridge/DecodiumBridgeAudioBuffers.cpp"));
     QVERIFY(!cpp.isEmpty());
+    QVERIFY(!audioBuffers.isEmpty());
 
     const QString helper = functionBody(
-        cpp,
+        audioBuffers,
         QStringLiteral("void DecodiumBridge::clearMamPendingTxPayload"),
         QStringLiteral("void DecodiumBridge::scheduleIdleAudioBufferRelease"));
     QVERIFY(helper.contains(QStringLiteral("decodium::mamtx::clearPendingPayload")));
@@ -465,15 +535,16 @@ void TestMamTxPayloadPolicy::bridgeWiresCleanupAtEveryExit()
     QVERIFY(multiAnswer.contains(
         QStringLiteral("clearMamPendingTxPayload(QStringLiteral(\"mam-disabled\"))")));
 
+    const QString mamState = readSource(QStringLiteral("src/bridge/DecodiumBridgeMamState.cpp"));
     const QString multiStream = functionBody(
-        cpp,
+        mamState,
         QStringLiteral("void DecodiumBridge::setMamMultiStream(bool on)"),
         QStringLiteral("void DecodiumBridge::setMamMaxStreams"));
     QVERIFY(multiStream.contains(
         QStringLiteral("clearMamPendingTxPayload(QStringLiteral(\"multi-stream-disabled\"))")));
 
     const QString halt = functionBody(
-        cpp,
+        readSource(QStringLiteral("src/bridge/DecodiumBridgeHalt.cpp")),
         QStringLiteral("void DecodiumBridge::haltWithReason(const QString& reason)"),
         QStringLiteral("void DecodiumBridge::refreshAudioDevices"));
     QVERIFY(halt.contains(QStringLiteral("clearMamPendingTxPayload(")));
@@ -481,7 +552,7 @@ void TestMamTxPayloadPolicy::bridgeWiresCleanupAtEveryExit()
     QVERIFY(halt.contains(QStringLiteral("abortLegacyBridgeTxRequest(QStringLiteral(\"halt:%1\")")));
 
     const QString gate = functionBody(
-        cpp,
+        mamState,
         QStringLiteral("bool DecodiumBridge::multiStreamActive() const"),
         QStringLiteral("bool DecodiumBridge::isMamMultiStreamMode() const"));
     QVERIFY(gate.contains(QStringLiteral("mamMultiStreamSequencerActive()")));
@@ -558,7 +629,7 @@ void TestMamTxPayloadPolicy::lateRogerReportResumesRetryExpiredMamSlot()
     // Native MAM bypasses the legacy auto-sequencer cleanup.  Its signoff
     // cooldown must therefore expire here instead of blocking the station for
     // the rest of a long-running session.
-    QVERIFY(prune.contains(QStringLiteral("kQsoCooldownWindowMs")));
+    QVERIFY(prune.contains(QStringLiteral("decodiumBridgeQsoCooldownWindowMs()")));
     QVERIFY(prune.contains(QStringLiteral("m_qsoCooldown.erase(it)")));
 
     const QString promote = functionBody(
@@ -577,16 +648,18 @@ void TestMamTxPayloadPolicy::waterfallUsesTheComposedMamPayloadDuringTx()
 {
     const QString header = readSource(QStringLiteral("src/bridge/DecodiumBridge.h"));
     const QString cpp = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
+    const QString controls = readSource(QStringLiteral("src/bridge/DecodiumBridgeMamControls.cpp"));
     const QString waterfall = readSource(QStringLiteral("qml/decodium/components/Waterfall.qml"));
     QVERIFY(!header.isEmpty());
     QVERIFY(!cpp.isEmpty());
+    QVERIFY(!controls.isEmpty());
     QVERIFY(!waterfall.isEmpty());
 
     // Active QSO slots do not contain idle parallel CQ streams, so the
     // bridge must expose the exact m_mamMessages/m_mamF0sHz payload separately.
     QVERIFY(header.contains(QStringLiteral("Q_PROPERTY(QVariantList mamTxStreams READ mamTxStreams NOTIFY mamTxStreamsChanged)")));
     const QString streams = functionBody(
-        cpp,
+        controls,
         QStringLiteral("QVariantList DecodiumBridge::mamTxStreams() const"),
         QStringLiteral("bool DecodiumBridge::mamModeExperimental() const"));
     QVERIFY(streams.contains(QStringLiteral("m_mamMessages")));

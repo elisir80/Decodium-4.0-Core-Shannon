@@ -102,7 +102,8 @@ void TestPanadapterGpuRecovery::sourceHandoffRebuildsGpuResourcesBeforeAnyCpuFal
     QVERIFY(handoff.contains(QStringLiteral("fallback=deferred_until_gpu_retries_exhausted")));
     QVERIFY(!handoff.contains(QStringLiteral("failGpuFft(")));
 
-    const QString bridge = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
+    const QString bridge = readSource(QStringLiteral("src/bridge/DecodiumBridgeLegacyRxHandoff.cpp"))
+        + readSource(QStringLiteral("src/bridge/DecodiumBridgeLegacyPcmRecovery.cpp"));
     QVERIFY(!bridge.isEmpty());
     const QString bridgeHandoff = functionBody(bridge,
         QStringLiteral("void DecodiumBridge::completeNativePcmToLegacyRxHandoff(const QString& previousMode)"),

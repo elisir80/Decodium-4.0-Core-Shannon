@@ -2638,7 +2638,10 @@ void SstvRxRuntime::resetWorkerPipeline(WorkerPipeline& pipeline,
                                         std::uint64_t generation,
                                         qint64 epochNs)
 {
-    if (pipeline.stateMachine) {
+    // A lifecycle transition has already invalidated the old generation's
+    // published image. Finalising that old pipeline here would publish its
+    // partial image again after resetStream() or switchSource() returned.
+    if (pipeline.stateMachine && pipeline.generation == generation) {
         const std::uint64_t eventMs =
             pipeline.stateMachine->metrics().lastEventAtMs;
         terminateMartinM1ForDiscontinuity(pipeline, eventMs);

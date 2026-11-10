@@ -8,7 +8,46 @@ QString readSource(const QString& relativePath)
     QFile file(QStringLiteral(DECODIUM_SOURCE_DIR "/") + relativePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         return {};
-    return QString::fromUtf8(file.readAll());
+    QString source = QString::fromUtf8(file.readAll());
+    if (relativePath == QStringLiteral("src/bridge/DecodiumBridge.cpp")) {
+        const QString startTxSource = readSource(QStringLiteral("src/bridge/DecodiumBridgeStartTx.cpp"));
+        const int startPoint = source.indexOf(QStringLiteral("// BRIDGE_START_TX_INSERTION_POINT"));
+        if (startTxSource.isEmpty() || startPoint < 0) return {};
+        source.insert(startPoint, startTxSource);
+        const QString autoSequence = readSource(QStringLiteral("src/bridge/DecodiumBridgeAutoSequence.cpp"));
+        const int sequencePoint = source.indexOf(QStringLiteral("// BRIDGE_LAB_INSERTION_POINT"));
+        if (autoSequence.isEmpty() || sequencePoint < 0) return {};
+        source.insert(sequencePoint, autoSequence);
+
+        const QString completeTxSource = readSource(QStringLiteral("src/bridge/DecodiumBridgeCompleteTxPlayback.cpp"));
+        const int completePoint = source.indexOf(QStringLiteral("// BRIDGE_COMPLETE_TX_INSERTION_POINT"));
+        if (completeTxSource.isEmpty() || completePoint < 0) return {};
+        source.insert(completePoint, completeTxSource);
+        const QString tuneSource = readSource(QStringLiteral("src/bridge/DecodiumBridgeTune.cpp"));
+        const int tunePoint = source.indexOf(QStringLiteral("// BRIDGE_TUNE_INSERTION_POINT"));
+        if (tuneSource.isEmpty() || tunePoint < 0) return {};
+        source.insert(tunePoint, tuneSource);
+        const QString stopTxSource = readSource(QStringLiteral("src/bridge/DecodiumBridgeStopTx.cpp"));
+        const int stopPoint = source.indexOf(QStringLiteral("// BRIDGE_STOP_TX_INSERTION_POINT"));
+        if (stopTxSource.isEmpty() || stopPoint < 0) return {};
+        source.insert(stopPoint, stopTxSource);
+        const QString periodic = readSource(QStringLiteral("src/bridge/DecodiumBridgePeriodicTx.cpp"));
+        const int periodicPosition = source.indexOf(QStringLiteral("void DecodiumBridge::autoSequenceStep("));
+        if (periodic.isEmpty() || periodicPosition < 0) return {};
+        source.insert(periodicPosition, periodic);
+        const QString sendTx = readSource(QStringLiteral("src/bridge/DecodiumBridgeSendTx.cpp"));
+        const int txPosition = source.indexOf(QStringLiteral("void DecodiumBridge::stopTx()"));
+        if (sendTx.isEmpty() || txPosition < 0) return {};
+        source.insert(txPosition, sendTx);
+        const QString monitoring = readSource(QStringLiteral("src/bridge/DecodiumBridgeRxMonitoring.cpp"));
+        if (monitoring.isEmpty()) return {};
+        source.append(monitoring);
+        const QString mode = readSource(QStringLiteral("src/bridge/DecodiumBridgeMode.cpp"));
+        const int at = source.indexOf(QStringLiteral("void DecodiumBridge::setMonitoring(bool v)"));
+        if (mode.isEmpty() || at < 0) return {};
+        source.insert(at, mode);
+    }
+    return source;
 }
 
 QString functionBody(const QString& source, const QString& signature,
@@ -49,8 +88,9 @@ void TestTxDispatchGuard::commonGuardIsWiredIntoTxEntryPoints()
     QVERIFY(header.contains(QStringLiteral("quint64 m_txRequestGeneration {0};")));
     QVERIFY(header.contains(QStringLiteral("int m_explicitManualTxRequest {0};")));
 
+    const QString txEnableSource = readSource(QStringLiteral("src/bridge/DecodiumBridgeTxEnable.cpp"));
     const QString setTxEnabled = functionBody(
-        cpp,
+        txEnableSource,
         QStringLiteral("void DecodiumBridge::setTxEnabled(bool v)"),
         QStringLiteral("bool DecodiumBridge::txEnabled() const"));
     const QString startTx = functionBody(
@@ -66,12 +106,13 @@ void TestTxDispatchGuard::commonGuardIsWiredIntoTxEntryPoints()
     QVERIFY(startTx.contains(QStringLiteral("txDispatchGuardAllows")));
     QVERIFY(periodicTx.contains(QStringLiteral("txDispatchGuardAllows")));
     QVERIFY(cpp.contains(QStringLiteral("armExplicitManualTxRequest(n, QStringLiteral(\"TX panel\"))")));
-    QVERIFY(cpp.contains(QStringLiteral("armExplicitManualTxRequest(newCurrentTx")));
+    const QString decodeClick = readSource(QStringLiteral("src/bridge/DecodiumBridgeDecodeClick.cpp"));
+    QVERIFY(decodeClick.contains(QStringLiteral("armExplicitManualTxRequest(newCurrentTx")));
 }
 
 void TestTxDispatchGuard::staleTx6RequiresAutoOrExplicitManualAuthority()
 {
-    const QString cpp = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
+    const QString cpp = readSource(QStringLiteral("src/bridge/DecodiumBridgeTxDispatchGuard.cpp"));
     QVERIFY(!cpp.isEmpty());
 
     const QString guard = functionBody(
@@ -93,19 +134,19 @@ void TestTxDispatchGuard::lifecycleTransitionsInvalidateDeferredRequests()
     QVERIFY(!cpp.isEmpty());
 
     const QString autoCq = functionBody(
-        cpp,
+        readSource(QStringLiteral("src/bridge/DecodiumBridgeAutoCqRepeat.cpp")),
         QStringLiteral("void DecodiumBridge::setAutoCqRepeat(bool v)"),
         QStringLiteral("bool DecodiumBridge::autoCallModeSupported() const"));
     const QString halt = functionBody(
-        cpp,
+        readSource(QStringLiteral("src/bridge/DecodiumBridgeHalt.cpp")),
         QStringLiteral("void DecodiumBridge::haltWithReason(const QString& reason)"),
         QStringLiteral("void DecodiumBridge::setTune(bool v)"));
     const QString resetQso = functionBody(
-        cpp,
+        readSource(QStringLiteral("src/bridge/DecodiumBridgeQsoReset.cpp")),
         QStringLiteral("void DecodiumBridge::resetQsoStateForNextSequence(bool preserveAutoTx)"),
         QStringLiteral("bool DecodiumBridge::finishAutoSequenceQsoFromCompletedSignoff"));
     const QString completedQso = functionBody(
-        cpp,
+        readSource(QStringLiteral("src/bridge/DecodiumBridgeQsoCompletion.cpp")),
         QStringLiteral("void DecodiumBridge::clearTxArmedAfterCompletedQso"),
         QStringLiteral("void DecodiumBridge::logQsoNow()"));
 
@@ -113,9 +154,10 @@ void TestTxDispatchGuard::lifecycleTransitionsInvalidateDeferredRequests()
     QVERIFY(halt.contains(QStringLiteral("invalidateDeferredTxRequests")));
     QVERIFY(resetQso.contains(QStringLiteral("invalidateDeferredTxRequests")));
     QVERIFY(completedQso.contains(QStringLiteral("invalidateDeferredTxRequests")));
-    QVERIFY(cpp.contains(QStringLiteral("++m_txRequestGeneration")));
-    QVERIFY(cpp.contains(QStringLiteral("m_periodicTxCheckScheduled = false")));
-    QVERIFY(cpp.contains(QStringLiteral("m_syncTxRetryScheduled = false")));
+    const QString guardSource = readSource(QStringLiteral("src/bridge/DecodiumBridgeTxDispatchGuard.cpp"));
+    QVERIFY(guardSource.contains(QStringLiteral("++m_txRequestGeneration")));
+    QVERIFY(guardSource.contains(QStringLiteral("m_periodicTxCheckScheduled = false")));
+    QVERIFY(guardSource.contains(QStringLiteral("m_syncTxRetryScheduled = false")));
 }
 
 void TestTxDispatchGuard::deferredCallbacksCheckRequestGeneration()
@@ -125,12 +167,21 @@ void TestTxDispatchGuard::deferredCallbacksCheckRequestGeneration()
 
     // Every timer-backed TX scheduler must capture the lifecycle generation
     // and drop its callback after HALT/QSO completion invalidates it.
-    const int generationChecks = cpp.count(
+    const QString rendezvous = readSource(QStringLiteral("src/bridge/DecodiumBridgeDecodeTxRendezvous.cpp"));
+    QVERIFY(!rendezvous.isEmpty());
+    const QString smartFt2 = readSource(QStringLiteral("src/bridge/DecodiumBridgeSmartFt2Scheduler.cpp"));
+    QVERIFY(!smartFt2.isEmpty());
+    QVERIFY(smartFt2.contains(QStringLiteral("requestGeneration != m_txRequestGeneration")));
+    const QString syncSchedule = readSource(QStringLiteral("src/bridge/DecodiumBridgeSyncSchedule.cpp"));
+    const QString txEnable = readSource(QStringLiteral("src/bridge/DecodiumBridgeTxEnable.cpp"));
+    QVERIFY(!syncSchedule.isEmpty());
+    QVERIFY(!txEnable.isEmpty());
+    const int generationChecks = (cpp + rendezvous + smartFt2 + syncSchedule + txEnable).count(
         QStringLiteral("requestGeneration != m_txRequestGeneration"));
     QVERIFY2(generationChecks >= 8,
              qPrintable(QStringLiteral("only %1 deferred TX generation checks found")
                             .arg(generationChecks)));
-    QVERIFY(cpp.contains(QStringLiteral("tryStartDeferredManualSyncTx")));
+    QVERIFY((cpp + syncSchedule + txEnable).contains(QStringLiteral("tryStartDeferredManualSyncTx")));
     QVERIFY(cpp.contains(QStringLiteral("TX guard")));
 }
 
@@ -158,13 +209,15 @@ void TestTxDispatchGuard::jttyUsesNativeManualDispatchAndBlocksGenericStart()
     const QString stopTx = functionBody(
         bridge,
         QStringLiteral("void DecodiumBridge::stopTx()"),
-        QStringLiteral("void DecodiumBridge::armTuneWatchdog"));
+        QStringLiteral("void DecodiumBridge::startTune()"));
     const QString setMode = functionBody(
         bridge,
         QStringLiteral("void DecodiumBridge::setMode(const QString& v)"),
         QStringLiteral("void DecodiumBridge::setMonitoring(bool v)"));
 
-    QVERIFY(startTx.contains(QStringLiteral("blocked generic JTTY TX path")));
+    const QString preflight = readSource(QStringLiteral("src/bridge/DecodiumBridgeStartTxPreflight.cpp"));
+    QVERIFY(startTx.contains(QStringLiteral("if (!startTxPreflight()) return;")));
+    QVERIFY(preflight.contains(QStringLiteral("blocked generic JTTY TX path")));
     QVERIFY(sendTx.contains(QStringLiteral("forwarding explicit TX%1 to native controller")));
     QVERIFY(sendTx.contains(QStringLiteral("emit jttyPanelTransmitRequested(message);")));
     QVERIFY(sendTx.indexOf(QStringLiteral("emit jttyPanelTransmitRequested(message);"))

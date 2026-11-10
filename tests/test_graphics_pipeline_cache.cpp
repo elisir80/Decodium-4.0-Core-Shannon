@@ -187,7 +187,7 @@ void TestGraphicsPipelineCache::windowsRuntimeDriverCrashRecoveryIsPersistent()
 
 void TestGraphicsPipelineCache::windowsD3d11StallFallbackDoesNotRetryGpu()
 {
-    QString const bridge = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
+    QString const bridge = readSource(QStringLiteral("src/bridge/DecodiumBridgeCpuPressure.cpp"));
     QVERIFY(!bridge.isEmpty());
 
     int const functionStart = bridge.indexOf(QStringLiteral(

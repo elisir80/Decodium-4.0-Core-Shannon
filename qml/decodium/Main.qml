@@ -185,6 +185,10 @@ GlassApplicationWindow {
             return true
         if (bridge.transmitting || bridge.tuning)
             return false
+        // Without active monitoring there is no incoming decode slot to
+        // protect; show the dashboard as soon as its staging timer fires.
+        if (!bridge.monitoring && !bridge.decoding)
+            return true
         // Do not let a long first decode keep the normal dashboard hidden.
         // Prefer a quiet FT slot, but guarantee that both visuals appear.
         var deadlineMs = stage === "waterfall" ? 5000 : 7500

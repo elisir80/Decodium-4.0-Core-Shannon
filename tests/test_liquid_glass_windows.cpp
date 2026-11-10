@@ -457,7 +457,8 @@ void TestLiquidGlassWindows::closedCwAndSsbPopoutsReleaseTheirSceneGraphs()
     QVERIFY(main.contains(QStringLiteral("cwModule.ensureStarted()")));
 
     // Closing CW must also stop its invisible decoder/scope workload.
-    QVERIFY(bridge.contains(QStringLiteral(
+    const QString audioSink = readSource(QStringLiteral("src/bridge/DecodiumBridgeAudioSink.cpp"));
+    QVERIFY(audioSink.contains(QStringLiteral(
         "const bool cwTap = m_cwInAscolto && !m_transmitting && !m_tuning;")));
 }
 

@@ -59,7 +59,9 @@ void TestRigctlDashboardControls::liveRigctlPowerOnDoesNotReopenCat()
 
 void TestRigctlDashboardControls::networkRigctlConnectIsReadOnly()
 {
-    const QString bridge = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
+    const QString bridge = readSource(QStringLiteral("src/bridge/DecodiumBridgeCatConnections.cpp"))
+        + readSource(QStringLiteral("src/bridge/DecodiumBridgeCatSplitSync.cpp"))
+        + readSource(QStringLiteral("src/bridge/DecodiumBridgeCatRigMode.cpp"));
     const QString header = readSource(QStringLiteral("src/bridge/DecodiumBridge.h"));
     QVERIFY(!bridge.isEmpty());
     QVERIFY(!header.isEmpty());

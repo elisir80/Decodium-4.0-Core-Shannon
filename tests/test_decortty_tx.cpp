@@ -491,17 +491,20 @@ void TestDecoRttyTx::audioOnlyBridgeWiring()
 {
     // This complements the real engine/link tests: the application must use
     // local audio ownership, without relaxing the network gateway CAT guard.
-    QFile source(QStringLiteral(DECODIUM_SOURCE_DIR "/src/bridge/DecodiumBridge.cpp"));
+    QFile source(QStringLiteral(DECODIUM_SOURCE_DIR "/src/bridge/DecodiumBridgeDecoPortPtt.cpp"));
     QVERIFY(source.open(QIODevice::ReadOnly));
     const QString text = QString::fromUtf8(source.readAll());
     const auto remoteStart = text.indexOf("void DecodiumBridge::decoPortKeyLocalRig(");
     const auto remoteEnd = text.indexOf("void DecodiumBridge::keySharedAudioTransmitter(", remoteStart);
     QVERIFY(remoteStart >= 0 && remoteEnd > remoteStart);
     QVERIFY(text.mid(remoteStart, remoteEnd - remoteStart).contains("keySharedAudioTransmitter(on, false)"));
-    const auto localStart = text.indexOf("void DecodiumBridge::rttyAlzaPtt(");
-    const auto localEnd = text.indexOf("void DecodiumBridge::rttyMandaAudioTx(", localStart);
+    QFile keyboardSource(QStringLiteral(DECODIUM_SOURCE_DIR "/src/bridge/DecodiumBridgeKeyboardAudio.cpp"));
+    QVERIFY(keyboardSource.open(QIODevice::ReadOnly));
+    const QString keyboardText = QString::fromUtf8(keyboardSource.readAll());
+    const auto localStart = keyboardText.indexOf("void DecodiumBridge::rttyAlzaPtt(");
+    const auto localEnd = keyboardText.indexOf("void DecodiumBridge::rttyMandaAudioTx(", localStart);
     QVERIFY(localStart >= 0 && localEnd > localStart);
-    QVERIFY(text.mid(localStart, localEnd - localStart).contains("keySharedAudioTransmitter(true, true)"));
+    QVERIFY(keyboardText.mid(localStart, localEnd - localStart).contains("keySharedAudioTransmitter(true, true)"));
 }
 
 void TestDecoRttyTx::modeExitStopsAutoCqAndAudio()

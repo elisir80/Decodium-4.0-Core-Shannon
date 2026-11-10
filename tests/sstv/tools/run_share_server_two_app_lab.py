@@ -23,6 +23,7 @@ from run_share_app_transfer_lab import image_bytes
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--unsigned', action='store_true')
+    parser.add_argument('--accept-target', choices=('a', 'b'), help='Import the selected received image into the isolated Gallery')
     parser.add_argument('--binary', type=Path, default=repo / 'build/decodium')
     args = parser.parse_args()
     binary = args.binary.resolve(strict=True)
@@ -49,6 +50,8 @@ def main():
         sessions = {'receiver': dict(common, role='receiver', outputDir=str(root / 'out'), result=str(root / 'receiver-ok')),
                     'sender': dict(common, role='sender', recipient='labrx', imageA=str(root / 'image-a.jpg'),
                                    imageB=str(root / 'image-b.jpg'), result=str(root / 'sender-ok'))}
+        if args.accept_target:
+            sessions['receiver']['acceptTarget'] = args.accept_target
         suffix = secrets.token_hex(4)
         for role in ('receiver', 'sender'):
             config = root / (role + '.json')

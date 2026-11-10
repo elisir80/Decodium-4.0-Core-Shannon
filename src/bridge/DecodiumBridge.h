@@ -1730,6 +1730,8 @@ public slots:
     Q_INVOKABLE bool advanceQsoState(int txNum); // GitHub TxController clone
 
 private:
+    bool startTxPreflight();
+    bool prepareStartTxSelection(bool customAudioTxActive);
     void saveSettingsInternal(bool asynchronous);
     void fetchPskReporterSnapshot(int spanMinutes, bool mapRequest, bool force);
     void syncPskMapSpotWindowToMap();
@@ -4867,6 +4869,32 @@ private:
     QStringList parseWsprRow(const QString& row) const;
     QStringList parseJt65Row(const QString& row) const;
     void ensureAudioSink();
+    void initialisePanadapterGpuPolicy();
+    void initialiseUiStartupSettings();
+    void initialiseDecodeModels();
+    void initialiseRtlSdr();
+    void initialiseAudioDeviceNotifications();
+    void initialiseSatelliteTracking();
+    void initialiseMapIntelligence();
+    void initialiseWavManager();
+    void initialiseTxAudioOutput();
+    void initialiseLegacyCqFilterConnections();
+    void initialiseLegacyMyCallFilterConnection();
+    void initialiseReadyProfileConnections();
+    void initialiseDxClusterNotifications();
+    void initialiseTimeSync();
+    void initialisePskAndCloudlog();
+    void initialiseDecoLogLink();
+    void initialiseQrzAndWspr();
+    void initialiseRemoteWebConsole();
+    void initialiseCallsignIntelligence();
+    void initialiseUsStateAndWsprNotifications();
+    void initialiseMacLegacyStartup();
+    void initialiseCatConnections();
+    void initialiseDecodeClusterConnections();
+    void initialiseDiagnosticConnections();
+    void initialiseCatTelemetry();
+    void initialiseCoreTimers();
     void initialiseSstvRuntime();
     void initialiseSstvStorage();
     void initialiseSstvTx();

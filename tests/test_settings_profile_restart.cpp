@@ -66,6 +66,28 @@ class SettingsRestartTest : public QObject
 {
     Q_OBJECT
 private slots:
+    void newProfileDoesNotCopyOtherProfiles()
+    {
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, dir.path());
+        QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+        settings.setValue("GlobalValue", 17);
+        settings.setValue("CW/monitorVolume", 35);
+        settings.setValue("Alpha/_ProfileSettingsInitialized", true);
+        settings.setValue("Alpha/PrivateValue", 99);
+        settings.setValue("MultiSettings/Beta/PrivateValue", 77);
+        settings.sync();
+        QCoreApplication::instance()->setProperty("decodiumConfigName", "Gamma");
+        QVERIFY(decodium::beginActiveSettingsProfile(settings));
+        QCOMPARE(settings.value("GlobalValue").toInt(), 17);
+        QCOMPARE(settings.value("CW/monitorVolume").toInt(), 35);
+        QVERIFY(!settings.contains("Alpha/PrivateValue"));
+        QVERIFY(!settings.contains("Beta/PrivateValue"));
+        settings.endGroup();
+        QCoreApplication::instance()->setProperty("decodiumConfigName", QString {});
+    }
+
     void persistedMultiSettingsSelectionIsAnActiveProfile()
     {
         QTemporaryDir dir;

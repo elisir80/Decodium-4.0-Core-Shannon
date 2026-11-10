@@ -377,6 +377,38 @@ add_executable (test_tx_pipeline test_tx_pipeline.cpp)
 target_link_libraries (test_tx_pipeline wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
 add_test (NAME test_tx_pipeline COMMAND $<TARGET_FILE:test_tx_pipeline>)
 
+add_executable (test_bridge_txwave_real_ab test_bridge_txwave_real_ab.cpp
+  ${PROJECT_SOURCE_DIR}/src/bridge/DecodiumBridgeTxWave.cpp
+  ${PROJECT_SOURCE_DIR}/src/bridge/DecodiumBridgeTxTimingMath.cpp)
+target_compile_definitions (test_bridge_txwave_real_ab PRIVATE DECODIUM_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
+target_link_libraries (test_bridge_txwave_real_ab wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
+add_test (NAME test_bridge_txwave_real_ab COMMAND $<TARGET_FILE:test_bridge_txwave_real_ab>)
+
+add_executable (test_jt65_native_decode test_jt65_native_decode.cpp
+  ${PROJECT_SOURCE_DIR}/src/bridge/DecodiumBridgeTxWave.cpp
+  ${PROJECT_SOURCE_DIR}/src/bridge/DecodiumBridgeTxTimingMath.cpp)
+target_link_libraries (test_jt65_native_decode wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
+add_test (NAME test_jt65_native_decode COMMAND $<TARGET_FILE:test_jt65_native_decode>)
+
+add_executable (test_bridge_txpolicy_ab test_bridge_txpolicy_ab.cpp
+  ${PROJECT_SOURCE_DIR}/src/bridge/DecodiumBridgeTxPolicy.cpp
+  ${PROJECT_SOURCE_DIR}/src/bridge/DecodiumBridgeTxTimingMath.cpp)
+target_link_libraries (test_bridge_txpolicy_ab Qt6::Core)
+add_test (NAME test_bridge_txpolicy_ab COMMAND $<TARGET_FILE:test_bridge_txpolicy_ab>)
+
+add_executable (test_bridge_txpcm_ab test_bridge_txpcm_ab.cpp
+  ${PROJECT_SOURCE_DIR}/src/bridge/DecodiumBridgeTxPcm.cpp)
+target_link_libraries (test_bridge_txpcm_ab Qt6::Core Qt6::Multimedia)
+add_test (NAME test_bridge_txpcm_ab COMMAND $<TARGET_FILE:test_bridge_txpcm_ab>)
+
+add_executable (test_bridge_txformat_ab test_bridge_txformat_ab.cpp
+  ${PROJECT_SOURCE_DIR}/src/bridge/DecodiumBridgeTxFormat.cpp)
+target_link_libraries (test_bridge_txformat_ab Qt6::Core Qt6::Multimedia)
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+  target_compile_options (test_bridge_txformat_ab PRIVATE -Wno-deprecated-declarations)
+endif ()
+add_test (NAME test_bridge_txformat_ab COMMAND $<TARGET_FILE:test_bridge_txformat_ab>)
+
 add_executable (test_ptt_transition_policy test_ptt_transition_policy.cpp)
 target_link_libraries (test_ptt_transition_policy Qt6::Test Qt6::Core)
 add_test (NAME test_ptt_transition_policy COMMAND $<TARGET_FILE:test_ptt_transition_policy>)

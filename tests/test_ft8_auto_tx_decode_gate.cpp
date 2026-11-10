@@ -215,7 +215,52 @@ private slots:
     {
         QFile file(QStringLiteral(DECODIUM_SOURCE_DIR "/src/bridge/DecodiumBridge.cpp"));
         QVERIFY(file.open(QIODevice::ReadOnly | QIODevice::Text));
-        QString const cpp = QString::fromUtf8(file.readAll());
+        QString cpp = QString::fromUtf8(file.readAll());
+        QFile startTxSource(QStringLiteral(DECODIUM_SOURCE_DIR "/src/bridge/DecodiumBridgeStartTx.cpp"));
+        QVERIFY(startTxSource.open(QIODevice::ReadOnly));
+        int const startPoint = cpp.indexOf(QStringLiteral("// BRIDGE_START_TX_INSERTION_POINT"));
+        QVERIFY(startPoint >= 0);
+        cpp.insert(startPoint, QString::fromUtf8(startTxSource.readAll()));
+        QFile autoSequence(QStringLiteral(DECODIUM_SOURCE_DIR "/src/bridge/DecodiumBridgeAutoSequence.cpp"));
+        QVERIFY(autoSequence.open(QIODevice::ReadOnly));
+        int const sequencePoint = cpp.indexOf(QStringLiteral("// BRIDGE_LAB_INSERTION_POINT"));
+        QVERIFY(sequencePoint >= 0);
+        cpp.insert(sequencePoint, QString::fromUtf8(autoSequence.readAll()));
+
+        QFile extracted(QStringLiteral(DECODIUM_SOURCE_DIR "/src/bridge/DecodiumBridgeFt8AutoGate.cpp"));
+        QVERIFY(extracted.open(QIODevice::ReadOnly));
+        int const insertAt = cpp.indexOf(QStringLiteral("void DecodiumBridge::autoSequenceStep("));
+        QVERIFY(insertAt >= 0);
+        QFile syncSchedule(QStringLiteral(DECODIUM_SOURCE_DIR "/src/bridge/DecodiumBridgeSyncSchedule.cpp"));
+        QVERIFY(syncSchedule.open(QIODevice::ReadOnly));
+        QFile rendezvous(QStringLiteral(DECODIUM_SOURCE_DIR "/src/bridge/DecodiumBridgeDecodeTxRendezvous.cpp"));
+        QVERIFY(rendezvous.open(QIODevice::ReadOnly));
+        QFile dispatchGuard(QStringLiteral(DECODIUM_SOURCE_DIR "/src/bridge/DecodiumBridgeTxDispatchGuard.cpp"));
+        QVERIFY(dispatchGuard.open(QIODevice::ReadOnly));
+        cpp.insert(insertAt, QString::fromUtf8(syncSchedule.readAll()) + QString::fromUtf8(extracted.readAll()) + QString::fromUtf8(rendezvous.readAll()) + QString::fromUtf8(dispatchGuard.readAll()));
+        QFile readySource(QStringLiteral(DECODIUM_SOURCE_DIR "/src/bridge/DecodiumBridgeFt8Ready.cpp"));
+        QVERIFY(readySource.open(QIODevice::ReadOnly));
+        QFile periodicSource(QStringLiteral(DECODIUM_SOURCE_DIR "/src/bridge/DecodiumBridgePeriodicTx.cpp"));
+        QVERIFY(periodicSource.open(QIODevice::ReadOnly | QIODevice::Text));
+        const int periodicPosition = cpp.indexOf(QStringLiteral("void DecodiumBridge::autoSequenceStep("));
+        QVERIFY(periodicPosition >= 0);
+        cpp.insert(periodicPosition, QString::fromUtf8(periodicSource.readAll()));
+        QFile stopTxSource(QStringLiteral(DECODIUM_SOURCE_DIR "/src/bridge/DecodiumBridgeStopTx.cpp"));
+        QVERIFY(stopTxSource.open(QIODevice::ReadOnly));
+        int const stopPoint = cpp.indexOf(QStringLiteral("// BRIDGE_STOP_TX_INSERTION_POINT"));
+        QVERIFY(stopPoint >= 0);
+        cpp.insert(stopPoint, QString::fromUtf8(stopTxSource.readAll()));
+        QFile manualSource(QStringLiteral(DECODIUM_SOURCE_DIR "/src/bridge/DecodiumBridgeSendTx.cpp"));
+        QVERIFY(manualSource.open(QIODevice::ReadOnly | QIODevice::Text));
+        const int manualPosition = cpp.indexOf(QStringLiteral("void DecodiumBridge::stopTx()"));
+        QVERIFY(manualPosition >= 0);
+        cpp.insert(manualPosition, QString::fromUtf8(manualSource.readAll()));
+        QFile stateSource(QStringLiteral(DECODIUM_SOURCE_DIR "/src/bridge/DecodiumBridgeState.cpp"));
+        QVERIFY(stateSource.open(QIODevice::ReadOnly));
+        cpp.append(QString::fromUtf8(stateSource.readAll()));
+        const int readyPosition = cpp.indexOf(QStringLiteral("void DecodiumBridge::onUtcTimer()"));
+        QVERIFY(readyPosition >= 0);
+        cpp.insert(readyPosition, QString::fromUtf8(readySource.readAll()));
         auto body = [&](const char* begin, const char* end) {
             int const from = cpp.indexOf(QLatin1String(begin));
             int const to = cpp.indexOf(QLatin1String(end), from + 1);
@@ -225,7 +270,7 @@ private slots:
                  body("void DecodiumBridge::startTx()", "void DecodiumBridge::sendTx(int n)"),
                  body("void DecodiumBridge::checkAndStartPeriodicTx()", "void DecodiumBridge::autoSequenceStep(")})
             QVERIFY(entry.contains(QStringLiteral("deferFt8AutoTxForDecode()")));
-        QString const ready = body("void DecodiumBridge::onFt8DecodeReady(", "void DecodiumBridge::onFt2DecodeReady(");
+        QString const ready = body("void DecodiumBridge::onFt8DecodeReady(", "void DecodiumBridge::onUtcTimer()");
         QVERIFY(ready.contains(QStringLiteral("serial == m_ft8AutoTxFinalDecodeSerial")));
         QVERIFY(ready.contains(QStringLiteral("context.slot - 1")));
         QVERIFY(ready.indexOf(QStringLiteral("autoSequenceStep(fields)"))
@@ -240,12 +285,16 @@ private slots:
         // the learned decoder speed survives the reset done at every new QSO, HALT or click
         QVERIFY(cpp.contains(QStringLiteral("m_ft8AutoTxDecodeGate.resetKeepingSpeed();")));
         QVERIFY(!cpp.contains(QStringLiteral("m_ft8AutoTxDecodeGate.reset();")));
-        QCOMPARE(cpp.count(QStringLiteral("syncTxCommitDeadlineMs(")), 3); // helper and both guards
+        QFile timingFile(QStringLiteral(DECODIUM_SOURCE_DIR "/src/bridge/DecodiumBridgeTxTiming.cpp"));
+        QVERIFY(timingFile.open(QIODevice::ReadOnly | QIODevice::Text));
+        QString const timingCpp = QString::fromUtf8(timingFile.readAll());
+        QCOMPARE(cpp.count(QStringLiteral("syncTxCommitDeadlineMs("))
+                     + timingCpp.count(QStringLiteral("syncTxCommitDeadlineMs(")), 3); // helper and both guards
         QCOMPARE(cpp.count(QStringLiteral("validateFt8AutoTxAudioStart(txPlaybackMs)")), 3); // macOS, Windows, Linux
-        QVERIFY(cpp.contains(QStringLiteral("m_activeFt8AutoTxFullFrame) return 0")));
+        QVERIFY(timingCpp.contains(QStringLiteral("m_activeFt8AutoTxFullFrame) return 0")));
         // the gate stays on by default; DECODIUM_FT8_TX_GATE_OFF switches it off
         QString const uses = body("bool DecodiumBridge::usesFt8AutoTxDecodeGate() const", "decodium::Ft8AutoTxDecodeGate::Context DecodiumBridge::ft8AutoTxDecodeContext()");
-        QVERIFY(uses.contains(QStringLiteral("truthyEnvironmentFlag(\"DECODIUM_FT8_TX_GATE_OFF\")")));
+        QVERIFY(uses.contains(QStringLiteral("decodiumBridgeTruthyEnvironmentFlag(\"DECODIUM_FT8_TX_GATE_OFF\")")));
         QVERIFY(uses.indexOf(QStringLiteral("if (gateDisabled)")) < uses.indexOf(QStringLiteral("m_mode == QStringLiteral(\"FT8\")")));
         QString const deferred = body("bool DecodiumBridge::tryStartDeferredManualSyncTx()",
                                       "void DecodiumBridge::clearDeferredManualSyncTx(");

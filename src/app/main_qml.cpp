@@ -3133,16 +3133,6 @@ int main(int argc, char* argv[])
         return -1;
     }
     QStandardPaths::setTestModeEnabled(parser.isSet(testOption));
-    // Explicit test-only root keeps bridge settings (including named INI
-    // stores) separate from the operator's normal radio configuration.
-    if (parser.isSet(testOption)) {
-        const QString labSettingsRoot=qEnvironmentVariable("DECODIUM_LAB_SETTINGS_DIR");
-        if (!labSettingsRoot.isEmpty() && QDir::isAbsolutePath(labSettingsRoot)) {
-            QDir().mkpath(labSettingsRoot);
-            QSettings::setPath(QSettings::IniFormat,QSettings::UserScope,labSettingsRoot);
-        }
-    }
-
     QString const rigName = parser.value(rigOption).trimmed();
     if (!rigName.isEmpty()) {
         if (rigName.contains(QRegularExpression(QStringLiteral(R"([\\/,])")))) {
@@ -3153,6 +3143,17 @@ int main(int argc, char* argv[])
     }
     if (parser.isSet(testOption)) {
         app.setApplicationName(app.applicationName() + QStringLiteral(" - test"));
+    }
+    // Test mode must never write the operator's named INI stores, even when
+    // no explicit laboratory settings directory was provided.
+    if (parser.isSet(testOption)) {
+        QString labSettingsRoot = qEnvironmentVariable("DECODIUM_LAB_SETTINGS_DIR");
+        if (labSettingsRoot.isEmpty() || !QDir::isAbsolutePath(labSettingsRoot)) {
+            labSettingsRoot = QDir(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation))
+                                  .absoluteFilePath(QStringLiteral("lab-settings"));
+        }
+        QDir().mkpath(labSettingsRoot);
+        QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, labSettingsRoot);
     }
     DecodiumLogging::reopenDiagnosticLog();
     L(("Application identity: " + app.applicationName().toLocal8Bit()).constData());
@@ -3228,7 +3229,7 @@ int main(int argc, char* argv[])
     // Standard FTx lab triggers intentionally bypass slot timing so short
     // tests can start immediately. Legacy minute modes search sync inside a
     // UTC-aligned 60-second window, so an arbitrary start would create a false
-    // decoder failure. Let the bridge schedule those modes on a valid slot.
+    // decoder failure. Test mode can also opt into normal FTx slot scheduling.
     QString const normalizedLabMode = labMode.trimmed().toUpper();
     bool const labMinuteSlotTest = normalizedLabMode == QStringLiteral("JT4")
         || normalizedLabMode == QStringLiteral("JT9")
@@ -3237,10 +3238,14 @@ int main(int argc, char* argv[])
         || normalizedLabMode == QStringLiteral("FST4W")
         || normalizedLabMode.startsWith(QStringLiteral("FST4-"))
         || normalizedLabMode.startsWith(QStringLiteral("FST4W-"));
-    if ((parser.isSet(labSendTxMsOption) || parser.isSet(labSendTxPlanOption)) && !labMinuteSlotTest) {
+    const bool labPreserveFtxSlots = QStandardPaths::isTestModeEnabled()
+        && qEnvironmentVariableIntValue("DECODIUM_LAB_FTX_SLOT_TIMING") == 1;
+    if ((parser.isSet(labSendTxMsOption) || parser.isSet(labSendTxPlanOption))
+        && !labMinuteSlotTest && !labPreserveFtxSlots) {
         qputenv("DECODIUM_LAB_FORCE_TX_IMMEDIATE", QByteArrayLiteral("1"));
         qInfo() << "[LAB] immediate TX timing bypass enabled by lab standard TX trigger";
-    } else if (labMinuteSlotTest && (parser.isSet(labSendTxMsOption) || parser.isSet(labSendTxPlanOption))) {
+    } else if ((labMinuteSlotTest || labPreserveFtxSlots)
+               && (parser.isSet(labSendTxMsOption) || parser.isSet(labSendTxPlanOption))) {
         qInfo() << "[LAB]" << normalizedLabMode
                 << "TX slot timing preserved for decoder validation";
     }
@@ -3504,7 +3509,10 @@ int main(int argc, char* argv[])
     });
 
     L("bridge constructing");
+    QElapsedTimer bridgeConstructionTimer;
+    bridgeConstructionTimer.start();
     DecodiumBridge bridge;
+    qInfo() << "[STARTUP-TIMING] bridge_constructor_ms=" << bridgeConstructionTimer.elapsed();
     if (parser.isSet(testOption)
         && qEnvironmentVariableIntValue("DECODIUM_LAB_SDR_LIFECYCLE") > 0) {
         for (const auto& step : {std::pair<int, bool>{8000, true}, {15000, false},

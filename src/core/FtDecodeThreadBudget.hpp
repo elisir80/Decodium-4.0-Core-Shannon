@@ -5,6 +5,8 @@
 namespace decodium {
 namespace decode {
 
+inline constexpr int kMaxFtDecodeThreads {24};
+
 inline int adaptiveInteractiveThreadCount(int logicalCores,
                                           int normalLimit,
                                           int maximumThreads)

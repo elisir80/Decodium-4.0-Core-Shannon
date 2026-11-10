@@ -23,7 +23,7 @@ private slots:
 
 void TestFileDialogFocus::openDialogFollowsQmlWindowAndActivates()
 {
-    const QString source = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
+    const QString source = readSource(QStringLiteral("src/bridge/DecodiumBridgeReceivedFiles.cpp"));
     QVERIFY(!source.isEmpty());
 
     const int openStart = source.indexOf(

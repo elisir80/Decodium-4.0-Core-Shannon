@@ -20,7 +20,7 @@ bool DecodiumBridge::ssbBegin()
        || m_cwRemoteKeying || m_decoPortRemoteKeyed || activeCatReportsPttActive())return false;
     if(!m_decoPortUseRemote) {
         bool found=false;auto device=resolveTxOutputDevice(&found);
-        if(!found || device.isNull() || !activeCatCanPtt(this,m_hamlibCat,m_catBackend,m_omniRigCat,m_legacyBackend,m_cat4OmCat))return false;
+        if(!found || device.isNull() || !decodiumBridgeSharedCatCanPttExplicit(this,m_hamlibCat,m_catBackend,m_omniRigCat,m_legacyBackend,m_cat4OmCat))return false;
     }
     m_ssbRemoteTx=m_decoPortUseRemote;
     if(m_ssbRemoteTx)remoteLinkIfAny()->setPtt(true,0);

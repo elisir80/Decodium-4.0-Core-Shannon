@@ -36,7 +36,7 @@ private slots:
 void TestQsoWaterfallRecovery::bridgeExposesDedicatedVisualRearm()
 {
     const QString header = readSource(QStringLiteral("src/bridge/DecodiumBridge.h"));
-    const QString cpp = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
+    const QString cpp = readSource(QStringLiteral("src/bridge/DecodiumBridgeSpectrumVisibility.cpp"));
     QVERIFY(!header.isEmpty());
     QVERIFY(!cpp.isEmpty());
     QVERIFY(header.contains(QStringLiteral("Q_INVOKABLE void rearmSpectrumAfterQsoLog();")));
@@ -45,7 +45,7 @@ void TestQsoWaterfallRecovery::bridgeExposesDedicatedVisualRearm()
     const QString helper = functionBody(
         cpp,
         QStringLiteral("void DecodiumBridge::rearmSpectrumAfterQsoLog()"),
-        QStringLiteral("bool DecodiumBridge::cpuPressureActive() const"));
+        QStringLiteral("QVariantList DecodiumBridge::augmentLegacyMirrorWithAllTxt("));
     QVERIFY(!helper.isEmpty());
     QVERIFY(helper.contains(QStringLiteral("!m_monitoring")));
     QVERIFY(helper.contains(QStringLiteral("m_lastPanadapterFrameMs = nowMs - 1000")));
@@ -56,7 +56,7 @@ void TestQsoWaterfallRecovery::bridgeExposesDedicatedVisualRearm()
 
 void TestQsoWaterfallRecovery::successfulLogPathsNotifyWaterfall()
 {
-    const QString cpp = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
+    const QString cpp = readSource(QStringLiteral("src/bridge/DecodiumBridgeLogQso.cpp"));
     QVERIFY(!cpp.isEmpty());
     const QString body = functionBody(
         cpp,

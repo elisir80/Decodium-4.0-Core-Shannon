@@ -70,7 +70,7 @@ void TestB4WorkedBefore::settingPersistsOnlyOnUserToggle()
     QVERIFY(!block.contains(QStringLiteral("onCheckedChanged:")));
     QVERIFY(!block.contains(QStringLiteral("bridge.setSetting(\"b4Strikethrough\"")));
 
-    const QString cpp = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
+    const QString cpp = readSource(QStringLiteral("src/bridge/DecodiumBridgeDecodeColors.cpp"));
     const QString setter = functionBody(
         cpp,
         QStringLiteral("void DecodiumBridge::setB4Strikethrough(bool enabled)"),
@@ -84,7 +84,7 @@ void TestB4WorkedBefore::settingPersistsOnlyOnUserToggle()
 
 void TestB4WorkedBefore::successfulLogPathsRefreshWorkedBeforeRows()
 {
-    const QString cpp = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
+    const QString cpp = readSource(QStringLiteral("src/bridge/DecodiumBridgeLogQso.cpp"));
     QVERIFY(!cpp.isEmpty());
 
     const QString legacyPath = functionBody(
@@ -103,9 +103,9 @@ void TestB4WorkedBefore::successfulLogPathsRefreshWorkedBeforeRows()
     QVERIFY(snapshotClear > legacyRefresh);
 
     const QString nativePath = functionBody(
-        cpp,
+        readSource(QStringLiteral("src/bridge/DecodiumBridgeAdifAppend.cpp")),
         QStringLiteral("bool DecodiumBridge::appendAdifRecord("),
-        QStringLiteral("QVariantList DecodiumBridge::logbookProfiles() const"));
+        QStringLiteral("bool DecodiumBridge::openActiveLogbookFolder() const"));
     QVERIFY(!nativePath.isEmpty());
     const int nativeAppend = nativePath.indexOf(
         QStringLiteral("appendWorkedQso(dxCall"));
@@ -144,7 +144,7 @@ void TestB4WorkedBefore::cqOnlyPreservesWorkedCqRows()
 // reads must come from a base-call comparison, not the raw callsign.
 void TestB4WorkedBefore::workedFiltersMatchOnBaseCall()
 {
-    const QString cpp = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
+    const QString cpp = readSource(QStringLiteral("src/bridge/DecodiumBridgeDecodeEnrichment.cpp"));
     QVERIFY(!cpp.isEmpty());
     QVERIFY(cpp.contains(QStringLiteral(
         "m_worked.callToday.contains(dxStatusBaseCall)")));
@@ -152,11 +152,13 @@ void TestB4WorkedBefore::workedFiltersMatchOnBaseCall()
         "m_worked.callYesterday.contains(dxStatusBaseCall)")));
     QVERIFY(cpp.contains(QStringLiteral(
         "m_worked.callEver.contains(dxStatusBaseCall)")));
+    const QString worked = readSource(QStringLiteral("src/bridge/DecodiumBridgeWorkedHistory.cpp"));
+    QVERIFY(!worked.isEmpty());
     // Both population paths must key the sets the same way.
-    QVERIFY(cpp.contains(QStringLiteral("m_worked.callToday.insert(baseCall)")));
-    QVERIFY(cpp.contains(QStringLiteral("m_worked.callEver.insert(baseCall)")));
-    QVERIFY(!cpp.contains(QStringLiteral("m_worked.callToday.insert(upCall)")));
-    QVERIFY(!cpp.contains(QStringLiteral("m_worked.callToday.insert(call)")));
+    QVERIFY(worked.contains(QStringLiteral("m_worked.callToday.insert(baseCall)")));
+    QVERIFY(worked.contains(QStringLiteral("m_worked.callEver.insert(baseCall)")));
+    QVERIFY(!worked.contains(QStringLiteral("m_worked.callToday.insert(upCall)")));
+    QVERIFY(!worked.contains(QStringLiteral("m_worked.callToday.insert(call)")));
 }
 
 void TestB4WorkedBefore::workedTodayCanIncludeYesterday()
@@ -200,8 +202,11 @@ void TestB4WorkedBefore::workedEverHidesAnyLoggedStation()
 
 void TestB4WorkedBefore::cqOnlyPolicyIsWiredIntoDisplayPipelines()
 {
-    const QString cpp = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
-    QVERIFY(!cpp.isEmpty());
+    const QString snapshot = readSource(QStringLiteral("src/bridge/DecodiumBridgeDecodeUiSnapshot.cpp"));
+    const QString visibility = readSource(QStringLiteral("src/bridge/DecodiumBridgeDecodeVisibility.cpp"));
+    QVERIFY(!snapshot.isEmpty());
+    QVERIFY(!visibility.isEmpty());
+    const QString cpp = snapshot + visibility;
     QVERIFY(cpp.contains(QStringLiteral(
         "job.preserveWorkedCq = !m_filtersBypassed && m_filterCqOnly")));
     QCOMPARE(cpp.count(QStringLiteral(

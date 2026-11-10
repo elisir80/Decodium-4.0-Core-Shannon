@@ -21,6 +21,7 @@
 #include <QElapsedTimer>
 #include <QFile>
 #include <QSignalSpy>
+#include <QStandardPaths>
 
 #include <algorithm>
 #include <array>
@@ -1795,6 +1796,80 @@ private slots:
         QVERIFY(image != nullptr);
         QVERIFY(!image->isComplete());
         QVERIFY(image->completedPixels > 0U);
+        QVERIFY(runtime.stop());
+    }
+
+    void robotColour12FullPcmCompletesAndMeasuresEdges()
+    {
+        // Enable the existing band-pass diagnostic only for an explicit
+        // one-test invocation; restore global Qt state even on assertion.
+        struct TestModeRestore {
+            bool previous = QStandardPaths::isTestModeEnabled();
+            ~TestModeRestore() { QStandardPaths::setTestModeEnabled(previous); }
+        } restore;
+        if (qEnvironmentVariable("DECODIUM_LAB_AVT_BANDPASS") == QStringLiteral("off")) {
+            QStandardPaths::setTestModeEnabled(true);
+        }
+        SstvRxRuntime::Config config = smallConfig();
+        config.ingress.maximumChunks = 4U;
+        config.ingress.maximumQueuedSamples = 131'072U;
+        config.ingress.maximumSamplesPerCall = 65'536U;
+        std::vector<std::int16_t> pcm = robotPrefix(SstvRobotMode::Colour12, 120U);
+        QVERIFY(!pcm.empty());
+        pcm.insert(pcm.end(), 1'024U, std::int16_t {0});
+        SstvRxRuntime runtime(config);
+        QVERIFY(runtime.start(SstvAudioSourceKind::Replay, 902U));
+        const SstvRxRouteToken token = runtime.routeToken();
+        constexpr std::size_t chunkSize = 60'001U;
+        std::size_t offset = 0U;
+        std::uint64_t chunks = 0U;
+        while (offset < pcm.size()) {
+            const std::size_t count = std::min(chunkSize, pcm.size() - offset);
+            QVERIFY(runtime.enqueuePcm16At(pcmChunk(pcm, offset, count),
+                                            kRate, token, 9'750'000'000));
+            ++chunks;
+            QTRY_COMPARE_WITH_TIMEOUT(runtime.snapshot().chunksProcessed,
+                                      chunks, 10'000);
+            offset += count;
+        }
+        QTRY_VERIFY_WITH_TIMEOUT(runtime.snapshot().image.complete, 10'000);
+        const auto image = runtime.latestImageSnapshot();
+        QVERIFY(image != nullptr);
+        QCOMPARE(image->width, std::uint32_t {160U});
+        QCOMPARE(image->height, std::uint32_t {120U});
+        QVERIFY(image->isComplete());
+        std::uint64_t edgeError = 0U;
+        std::uint64_t interiorError = 0U;
+        for (std::uint32_t y = 0; y < image->height; ++y) {
+            const auto edge = image->pixel(image->width - 1U, y);
+            const auto middle = image->pixel(image->width / 2U, y);
+            const auto error = [](const SstvRgbPixel& p) {
+                return std::abs(int(p.red) - 210) + std::abs(int(p.green) - 70)
+                    + std::abs(int(p.blue) - 145);
+            };
+            edgeError += error(edge);
+            interiorError += error(middle);
+        }
+        qInfo() << "Robot12 PCM mean edge/interior RGB error:"
+                << double(edgeError) / (3.0 * image->height)
+                << double(interiorError) / (3.0 * image->height);
+        for (const std::uint32_t y : {0U, 1U, 60U, 118U, 119U}) {
+            const auto edge = image->pixel(image->width - 1U, y);
+            const auto previous = image->pixel(image->width - 2U, y);
+            qInfo() << "Robot12 PCM row/last/previous:" << y
+                    << int(edge.red) << int(edge.green) << int(edge.blue)
+                    << int(previous.red) << int(previous.green) << int(previous.blue);
+        }
+        for (const std::uint32_t x : {150U, 154U, 156U, 157U, 158U, 159U}) {
+            std::uint64_t sum = 0U;
+            for (std::uint32_t y = 0; y < image->height; ++y) {
+                const auto p = image->pixel(x, y);
+                sum += std::abs(int(p.red) - 210) + std::abs(int(p.green) - 70)
+                    + std::abs(int(p.blue) - 145);
+            }
+            qInfo() << "Robot12 PCM column/mean RGB error:" << x
+                    << double(sum) / (3.0 * image->height);
+        }
         QVERIFY(runtime.stop());
     }
 
