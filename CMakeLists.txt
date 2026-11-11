@@ -3132,6 +3132,12 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   # for the affected translation unit.
   set_source_files_properties (src/services/MapIntelligenceService.cpp PROPERTIES
     COMPILE_FLAGS "-Wno-error=stringop-overflow")
+
+  # GCC 16 diagnoses the guarded QPointer dereference in SSTV QSO association
+  # as stringop-overflow after inlining the worker's atomic state check.
+  # Keep the warning visible while avoiding a build failure for this file only.
+  set_source_files_properties (src/bridge/DecodiumBridgeSstvQsoAssociation.cpp PROPERTIES
+    COMPILE_FLAGS "-Wno-error=stringop-overflow")
 endif ()
 # C17 — FoxVerifier senza Boost.Log (usa qDebug come shim)
 target_compile_definitions (decodium_qml PRIVATE DECODIUM_NO_BOOST_LOG FFTW3_SINGLE_FOUND DECODIUM_QML_PANADAPTER_DIRECT=1)
