@@ -3139,6 +3139,12 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   set_source_files_properties (src/bridge/DecodiumBridgeSstvQsoAssociation.cpp PROPERTIES
     COMPILE_FLAGS "-Wno-error=stringop-overflow")
 endif ()
+# With OpenMP unavailable, the scheduler's OpenMP-only thread-limit constant
+# is unused. Keep the diagnostic visible without failing this macOS unit.
+if (APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  set_source_files_properties (src/bridge/DecodiumBridgeFtScheduler.cpp PROPERTIES
+    COMPILE_FLAGS "-Wno-error=unused-const-variable")
+endif ()
 # C17 — FoxVerifier senza Boost.Log (usa qDebug come shim)
 target_compile_definitions (decodium_qml PRIVATE DECODIUM_NO_BOOST_LOG FFTW3_SINGLE_FOUND DECODIUM_QML_PANADAPTER_DIRECT=1)
 if (DECODIUM_HAS_RTLSDR)
