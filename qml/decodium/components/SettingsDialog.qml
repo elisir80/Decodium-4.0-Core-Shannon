@@ -61,7 +61,6 @@ Dialog {
         return isFinite(savedTab) ? Math.max(0, Math.min(13, Math.floor(savedTab))) : 0
     }
     property bool closeAlreadyPersisted: false
-
     function increaseSetupFont() {
         settingsFontScale = Math.min(1.3,
                                      Math.round((settingsFontScale + 0.1) * 10) / 10)
@@ -1889,41 +1888,10 @@ Dialog {
                     Layout.fillHeight: true
                     color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.5)
 
-                Flickable {
-                    id: settingsTabScroll
+                SettingsSearchSidebar {
                     anchors.fill: parent
-                    clip: true
-                    boundsBehavior: Flickable.StopAtBounds
-                    flickableDirection: Flickable.VerticalFlick
-                    contentWidth: width
-                    contentHeight: Math.max(height, settingsTabColumn.implicitHeight + 16)
-                    ScrollBar.horizontal: ScrollBar {
-                        policy: ScrollBar.AlwaysOff
-                    }
-                    ScrollBar.vertical: ScrollBar {
-                        policy: ScrollBar.AsNeeded
-                        interactive: true
-                        active: hovered || pressed
-                    }
-
-                    Column {
-                        id: settingsTabColumn
-                        x: 6
-                        y: 8
-                        width: Math.max(0, parent.width - 12)
-                        spacing: 2
-
-                        Repeater {
-                            model: [qsTr("Station"), qsTr("Radio"), qsTr("Audio"), qsTr("TX"), qsTr("Display"), qsTr("Decode"), qsTr("Reporting"), qsTr("Frequencies"), qsTr("Colors"), qsTr("Advanced"), qsTr("Alerts"), qsTr("Filters"), qsTr("UI Buttons"), qsTr("Callsign")]
-                            delegate: Rectangle {
-                                width: settingsTabColumn.width; height: 36; radius: 6
-                                color: tabStack.currentIndex === index ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.25) : (tabMA.containsMouse ? Qt.rgba(1,1,1,0.05) : "transparent")
-                                border.color: tabStack.currentIndex === index ? primaryBlue : "transparent"
-                                Text { anchors.centerIn: parent; text: modelData; color: tabStack.currentIndex === index ? primaryBlue : textSecondary; font.pixelSize: 12 }
-                                MouseArea { id: tabMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: settingsDialog.currentTab = index }
-                            }
-                        }
-                    }
+                    dialog: settingsDialog
+                    tabHost: tabStack
                 }
             }
 

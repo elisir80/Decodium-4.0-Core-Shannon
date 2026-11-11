@@ -1,6 +1,8 @@
 // main_qml.cpp - QML entry point for Decodium3
 
 #include <QApplication>
+#include "src/services/DxCalendarCache.h"
+#include "src/app/QmlRootCleanup.h"
 #include <QCommandLineOption>
 #include <QCommandLineParser>
 #include <QCryptographicHash>
@@ -5716,6 +5718,7 @@ int main(int argc, char* argv[])
         return result;
     }
 #endif
+    DxCalendarCache dxCalendarCache;
     QQmlApplicationEngine engine;
     L("engine OK");
 #if DECODIUM_HAS_SSTV
@@ -5778,6 +5781,7 @@ int main(int argc, char* argv[])
     }
 
     engine.rootContext()->setContextProperty("bridge", &bridge);
+    engine.rootContext()->setContextProperty("dxCalendarCache", &dxCalendarCache);
     engine.rootContext()->setContextProperty("appEngine", &bridge);
     engine.rootContext()->setContextProperty("ft2Link", &ft2Link);
 #if DECODIUM_HAS_RTTY
@@ -6649,5 +6653,6 @@ int main(int argc, char* argv[])
         L("Graphics cache session left pending: startup incomplete or graphics device lost");
     }
     L("app.exec() exited");
+    destroyQmlRoots(engine);
     return r;
 }

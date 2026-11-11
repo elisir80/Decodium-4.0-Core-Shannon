@@ -2985,6 +2985,8 @@ add_executable (decodium_qml
   Web/DecodiumWebServer.cpp
   Web/DecodiumWebServer.hpp
   src/bridge/DecodiumDiagnostics.cpp
+  src/services/DxCalendarCache.cpp
+  src/services/DxCalendarCache.h
   src/services/DecodiumPropagationManager.cpp
   src/services/DecodiumPropagationManager.h
   src/services/RotatorService.cpp

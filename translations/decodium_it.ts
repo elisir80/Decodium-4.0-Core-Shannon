@@ -7039,6 +7039,7 @@ Errore: %2 - %3</translation>
         <source>Clear</source>
         <translation>Cancella</translation>
     </message>
+    <message><source>DX calendar</source><translation>Calendario DX</translation></message>
 </context>
 <context>
     <name>DxPedFloatWindow</name>
@@ -25617,6 +25618,14 @@ Nel dubbio, usa Alta.</translation>
         <source>✕</source>
         <translation>✕</translation>
     </message>
+    <message>
+        <source>Search settings…</source>
+        <translation>Cerca nelle impostazioni…</translation>
+    </message>
+    <message>
+        <source>No matching settings</source>
+        <translation>Nessuna impostazione trovata</translation>
+    </message>
 </context>
 <context>
     <name>SettingsPage</name>
@@ -26527,6 +26536,50 @@ Nel dubbio, usa Alta.</translation>
         <location line="+1"/>
         <source>A second Decodium with its own settings profile. It does not take the serial port - this one keeps it and shares it.</source>
         <translation>Un secondo Decodium con un profilo di impostazioni suo. Non prende la porta seriale: la tiene questa, e gliela condivide.</translation>
+    </message>
+    <message>
+        <source>Radio and audio troubleshooting</source>
+        <translation>Diagnostica guidata radio e audio</translation>
+    </message>
+    <message>
+        <source>Diagnostics are not available.</source>
+        <translation>Diagnostica non disponibile.</translation>
+    </message>
+    <message>
+        <source>1. Radio connection: connected. This does not prove audio is arriving.</source>
+        <translation>1. Collegamento radio: connesso. Questo non conferma che arrivi audio.</translation>
+    </message>
+    <message>
+        <source>1. Radio connection: not connected. Check the backend, address or port, then connect.</source>
+        <translation>1. Collegamento radio: non connesso. Controlla backend, indirizzo o porta, quindi connetti.</translation>
+    </message>
+    <message>
+        <source>2. TCI audio: enabled. Check that the TCI server and selected RX1/RX2 match the receiver in use.</source>
+        <translation>2. Audio TCI: abilitato. Controlla che il server TCI e RX1/RX2 corrispondano al ricevitore utilizzato.</translation>
+    </message>
+    <message>
+        <source>2. TCI audio: disabled. Enable RX/TX via TCI if the radio should supply audio over TCI.</source>
+        <translation>2. Audio TCI: disabilitato. Abilita RX/TX via TCI se la radio deve fornire audio tramite TCI.</translation>
+    </message>
+    <message>
+        <source>3. Check TCI Host:Port and TCI RX gain below. Match the address and port to the server configuration.</source>
+        <translation>3. Controlla TCI Host:Port e il guadagno RX TCI qui sotto. Indirizzo e porta devono corrispondere al server.</translation>
+    </message>
+    <message>
+        <source>2. Audio source: check the input device and operating-system audio permissions in Audio settings.</source>
+        <translation>2. Sorgente audio: controlla il dispositivo di ingresso e i permessi del sistema nella scheda Audio.</translation>
+    </message>
+    <message>
+        <source>4. MON is on. Check whether the RX level and waterfall respond to a signal; a quiet band alone does not indicate a fault.</source>
+        <translation>4. MON è attivo. Verifica che livello RX e waterfall rispondano a un segnale; una banda silenziosa da sola non indica un guasto.</translation>
+    </message>
+    <message>
+        <source>4. MON is off. Turn on MON to receive and check the RX level and waterfall.</source>
+        <translation>4. MON è spento. Attiva MON per ricevere e controllare il livello RX e il waterfall.</translation>
+    </message>
+    <message>
+        <source>These checks read the current state; they do not change radio or audio settings.</source>
+        <translation>Questi controlli leggono lo stato attuale e non modificano le impostazioni radio o audio.</translation>
     </message>
 </context>
 <context>
@@ -41033,5 +41086,37 @@ Fare clic con il tasto destro per inserire ed eliminare le opzioni.</translation
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Double click a color to edit it.&lt;/p&gt;&lt;p&gt;Right click to insert or delete colors.&lt;/p&gt;&lt;p&gt;Colors at the top represent weak signals&lt;/p&gt;&lt;p&gt;and colors at the bottom represent strong&lt;/p&gt;&lt;p&gt;signals. You can have up to 256 colors.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Doppio click su un colore per editarlo.&lt;/p&gt;&lt;p&gt;Click destro per inserire o cancellare colori.&lt;/p&gt;&lt;p&gt;I colori in alto rappresentano segnali deboli&lt;/p&gt;&lt;p&gt;e i colori in basso rappresentano segnali &lt;/p&gt;&lt;p&gt;forti. Puoi avere fino a 256 colori.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
+</context>
+<context>
+    <name>RadioAudioDiagnostics</name>
+    <message><source>MON is on. Check whether the RX level and waterfall respond to a signal; a quiet band alone does not indicate a fault.</source><translation>MON è attivo. Verifica che livello RX e waterfall rispondano a un segnale; una banda silenziosa da sola non indica un guasto.</translation></message>
+    <message><source>MON is off. Turn on MON to receive and check the RX level and waterfall.</source><translation>MON è spento. Attiva MON per ricevere e controllare il livello RX e il waterfall.</translation></message>
+    <message><source>Configured TCI: %1 · receiver: %2</source><translation>TCI configurato: %1 · ricevitore: %2</translation></message>
+</context>
+<context>
+    <name>DxCalendar</name>
+    <message><source>Update timed out. Showing the last saved calendar.</source><translation>Aggiornamento scaduto. Mostro l’ultimo calendario salvato.</translation></message>
+    <message><source>Saved calendar: %1</source><translation>Calendario salvato: %1</translation></message>
+    <message><source>No saved calendar. Select Update to download it.</source><translation>Nessun calendario salvato. Seleziona Aggiorna per scaricarlo.</translation></message>
+    <message><source>Online services are paused. The saved calendar remains available.</source><translation>I servizi online sono sospesi. Il calendario salvato resta disponibile.</translation></message>
+    <message><source>Updating calendar…</source><translation>Aggiornamento calendario…</translation></message>
+    <message><source>Update failed. Showing the last saved calendar.</source><translation>Aggiornamento non riuscito. Mostro l’ultimo calendario salvato.</translation></message>
+    <message><source>The source returned no valid entries. The saved calendar was kept.</source><translation>La fonte non ha restituito voci valide. Il calendario salvato è stato conservato.</translation></message>
+    <message><source>Updated: %1</source><translation>Aggiornato: %1</translation></message>
+    <message><source>DXpedition calendar</source><translation>Calendario DXpedition</translation></message>
+    <message><source>Updating…</source><translation>Aggiornamento…</translation></message>
+    <message><source>Update</source><translation>Aggiorna</translation></message>
+    <message><source>Close</source><translation>Chiudi</translation></message>
+    <message><source>Callsign, entity or details</source><translation>Nominativo, entità o dettagli</translation></message>
+    <message><source>Active and upcoming</source><translation>Attive e prossime</translation></message>
+    <message><source>Active</source><translation>Attive</translation></message>
+    <message><source>Upcoming</source><translation>Prossime</translation></message>
+    <message><source>All</source><translation>Tutte</translation></message>
+    <message><source>No details provided</source><translation>Nessun dettaglio disponibile</translation></message>
+    <message><source>No matching operations</source><translation>Nessuna operazione corrispondente</translation></message>
+    <message><source>Announcements: NG3K ADXO · calendar feed: DXCAL / KK7DS. Dates may change; verify with the operation.</source><translation>Annunci: NG3K ADXO · calendario: DXCAL / KK7DS. Le date possono cambiare; verifica con la spedizione.</translation></message>
+    <message><source>Open NG3K source</source><translation>Apri la fonte NG3K</translation></message>
+    <message><source>Open DXCAL feed</source><translation>Apri il feed DXCAL</translation></message>
+    <message><source>Calendar updated, but the offline copy could not be saved.</source><translation>Calendario aggiornato, ma non è stato possibile salvare la copia offline.</translation></message>
 </context>
 </TS>

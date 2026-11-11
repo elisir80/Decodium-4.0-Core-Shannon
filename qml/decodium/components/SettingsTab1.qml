@@ -7,6 +7,7 @@ import QtQuick.Layouts
 SettingsPageScroll {
     property var dialog
     readonly property var bridge: dialog ? dialog.appBridge : null
+    readonly property var parentBridge: bridge
 
     // Applica in un colpo solo lo stato dei quattro comandi della CAT
     // condivisa: il server apre o chiude la porta di conseguenza.
@@ -167,6 +168,14 @@ SettingsPageScroll {
         anchors.leftMargin: dialog.scrollLeftMargin
         anchors.rightMargin: dialog.scrollRightMargin
         anchors.topMargin: dialog.scrollTopMargin
+
+        RadioAudioDiagnostics {
+            Layout.fillWidth: true
+            Layout.columnSpan: pageColumns
+            bridge: parentBridge
+            textColor: textPrimary
+            accentColor: secondaryCyan
+        }
 
         // ── Backend CAT ──
         Text { text: qsTr("BACKEND CAT"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 4 }

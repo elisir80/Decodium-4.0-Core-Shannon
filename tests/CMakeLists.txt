@@ -1,5 +1,36 @@
 find_package (Qt6Test 5 REQUIRED)
 
+if (TARGET Qt6::qmltestrunner)
+  foreach (settings_qml_test IN ITEMS settings_search settings_sidebar radio_audio_diagnostics dxcalendar dxcluster_calendar)
+    add_test (NAME test_qml_${settings_qml_test}
+      COMMAND $<TARGET_FILE:Qt6::qmltestrunner>
+        -input "${CMAKE_CURRENT_SOURCE_DIR}/qml/tst_${settings_qml_test}.qml")
+    set_tests_properties (test_qml_${settings_qml_test} PROPERTIES
+      ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software"
+      TIMEOUT 30)
+  endforeach ()
+endif ()
+
+add_executable (test_dxcalendar_cache test_dxcalendar_cache.cpp
+  ../src/services/DxCalendarCache.cpp ../src/services/DxCalendarCache.h)
+target_include_directories (test_dxcalendar_cache PRIVATE ${CMAKE_SOURCE_DIR})
+target_compile_definitions (test_dxcalendar_cache PRIVATE DECODIUM_TEST_DIR="${CMAKE_BINARY_DIR}")
+target_link_libraries (test_dxcalendar_cache PRIVATE Qt6::Core Qt6::Concurrent Qt6::Test)
+set_target_properties (test_dxcalendar_cache PROPERTIES AUTOMOC ON CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+add_test (NAME test_dxcalendar_cache COMMAND $<TARGET_FILE:test_dxcalendar_cache>)
+set_tests_properties (test_dxcalendar_cache PROPERTIES TIMEOUT 30)
+
+add_executable (test_dxcalendar_integration test_dxcalendar_integration.cpp
+  ../src/services/DxCalendarCache.cpp ../src/services/DxCalendarCache.h)
+target_include_directories (test_dxcalendar_integration PRIVATE ${CMAKE_SOURCE_DIR})
+target_compile_definitions (test_dxcalendar_integration PRIVATE
+  DECODIUM_TEST_DIR="${CMAKE_BINARY_DIR}" DECODIUM_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+target_link_libraries (test_dxcalendar_integration PRIVATE Qt6::Core Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Concurrent Qt6::Test)
+set_target_properties (test_dxcalendar_integration PROPERTIES AUTOMOC ON CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+add_test (NAME test_dxcalendar_integration COMMAND $<TARGET_FILE:test_dxcalendar_integration>)
+set_tests_properties (test_dxcalendar_integration PROPERTIES
+  ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software" TIMEOUT 30)
+
 #
 # Compiler options
 #

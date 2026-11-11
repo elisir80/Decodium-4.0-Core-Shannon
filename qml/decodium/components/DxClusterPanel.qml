@@ -21,6 +21,16 @@ Rectangle {
     // campioni audio persi durante i pile-up.
     readonly property var spotModel: bridge.dxCluster ? bridge.dxCluster.spotModel : null
     readonly property bool onlineServicesPaused: !!(bridge && bridge.offlineMode)
+    readonly property var calendarBridge: bridge
+
+    DxCalendar {
+        id: dxCalendar
+        bridge: root.calendarBridge
+        panelColor: root.bgDeep
+        textColor: root.textPrimary
+        mutedColor: root.textSecondary
+        accentColor: root.secondaryCyan
+    }
 
     // 1.0.343 — se incassato in un layout (DX-Pedition SplitView): disabilita
     // drag header + resize grip (il grip scriveva saveGeometry corrompendo il
@@ -100,6 +110,7 @@ Rectangle {
                 color: secondaryCyan; font.bold: true; font.pixelSize: 12
             }
             Text {
+                visible: root.width >= 480
                 text: root.onlineServicesPaused
                       ? qsTr("online services paused")
                       : bridge.dxCluster && bridge.dxCluster.connected
@@ -110,8 +121,38 @@ Rectangle {
             Item { Layout.fillWidth: true }
 
             Text {
+                visible: root.width >= 480
                 text: (root.spotModel ? root.spotModel.count : 0) + " spot"
                 color: textSecondary; font.pixelSize: 10
+            }
+
+            Button {
+                id: calendarButton
+                objectName: "openDxCalendar"
+                Layout.preferredWidth: 105
+                Layout.preferredHeight: 24
+                Layout.minimumHeight: 24
+                Layout.maximumHeight: 24
+                padding: 0
+                topInset: 0
+                bottomInset: 0
+                text: qsTr("DX calendar")
+                contentItem: Text {
+                    objectName: "dxCalendarButtonLabel"
+                    text: calendarButton.text
+                    color: root.secondaryCyan
+                    font.pixelSize: 11
+                    font.bold: true
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+                background: Rectangle {
+                    radius: 4
+                    color: root.bgDeep
+                    border.color: root.secondaryCyan
+                    border.width: 1
+                }
+                onClicked: dxCalendar.open()
             }
 
             Rectangle {
