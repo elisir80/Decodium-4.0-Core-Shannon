@@ -12866,7 +12866,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         }
 
         header: Rectangle {
-            height: 58
+            implicitHeight: 58
             color: mainWindow.glassDialogSurface(0.48)
             radius: 8
 
@@ -12977,40 +12977,35 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                 }
             }
 
-            Rectangle {
-                Layout.fillWidth: true
-                height: 1
-                color: glassBorder
-            }
+        }
 
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: 10
+        footer: Item {
+            implicitHeight: 64
 
-                Item { Layout.fillWidth: true }
+            Button {
+                objectName: "warningDialogOkButton"
+                anchors.right: parent.right
+                anchors.rightMargin: 18
+                anchors.verticalCenter: parent.verticalCenter
+                width: 128
+                height: 40
+                text: "OK"
+                onClicked: warningDialog.close()
 
-                Button {
-                    text: "OK"
-                    Layout.preferredWidth: 128
-                    Layout.preferredHeight: 40
-                    onClicked: warningDialog.close()
-
-                    contentItem: Text {
-                        text: parent.text
-                        color: textPrimary
-                        font.pixelSize: 14
-                        font.bold: true
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                    }
-
-                    background: Rectangle {
-                        color: parent.hovered ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.22)
-                                              : Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.12)
-                        border.color: secondaryCyan
-                        border.width: 1
-                        radius: 8
-                    }
+                contentItem: Text {
+                    text: parent.text
+                    color: textPrimary
+                    font.pixelSize: 14
+                    font.bold: true
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+                background: Rectangle {
+                    color: parent.hovered ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.22)
+                                          : Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.12)
+                    border.color: secondaryCyan
+                    border.width: 1
+                    radius: 8
                 }
             }
         }

@@ -45,7 +45,12 @@ void DecodiumBridge::initialiseTxAudioOutput()
             text = QStringLiteral("Audio TX: ") + text;
         }
         bridgeLog("SoundOutput error: " + text);
-        emit errorMessage(text);
+        const QString device = m_audioOutputDevice.trimmed().isEmpty()
+            ? tr("default output device") : m_audioOutputDevice.trimmed();
+        emit warningRaised(tr("Transmission audio error"),
+                           tr("The transmission audio output reported an error. Device: %1.\n\n%2\n\nCheck that the selected output device is connected and available in Settings > Audio.")
+                               .arg(device, text),
+                           QString());
         if ((m_bridgeAudioLegacyTxActive || m_ft2LinkTxActive) && m_transmitting) {
             m_txPlaybackHoldUntilMs = 0;
             m_txPlaybackHardDeadlineMs = 0;

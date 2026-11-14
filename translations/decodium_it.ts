@@ -4289,6 +4289,26 @@ attorno ai toni.</translation>
 <context>
     <name>DecodiumBridge</name>
     <message>
+        <source>default output device</source>
+        <translation>dispositivo di uscita predefinito</translation>
+    </message>
+    <message>
+        <source>Transmission audio error</source>
+        <translation>Errore audio in trasmissione</translation>
+    </message>
+    <message>
+        <source>The transmission audio output reported an error. Device: %1.
+
+%2
+
+Check that the selected output device is connected and available in Settings &gt; Audio.</source>
+        <translation>L’uscita audio di trasmissione ha segnalato un errore. Dispositivo: %1.
+
+%2
+
+Controlla che il dispositivo di uscita selezionato sia collegato e disponibile in Impostazioni &gt; Audio.</translation>
+    </message>
+    <message>
         <location filename="../src/bridge/DecodiumBridge.cpp" line="+10599"/>
         <source>%1 not connected</source>
         <translation>%1 non collegato</translation>

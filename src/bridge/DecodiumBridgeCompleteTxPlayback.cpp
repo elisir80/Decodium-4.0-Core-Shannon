@@ -245,7 +245,7 @@ void DecodiumBridge::completeTxPlayback(const QString& reason, bool error)
     }
 
     if (wasTransmitting) {
-        if (error) {
+        if (error && reason != QStringLiteral("sound-output-error")) {
             emit errorMessage(QStringLiteral("Audio TX: playback terminato con errore | reason=%1 device=\"%2\" tx=%3 msg=\"%4\"")
                                   .arg(reason,
                                        m_audioOutputDevice.trimmed().isEmpty()
@@ -253,7 +253,7 @@ void DecodiumBridge::completeTxPlayback(const QString& reason, bool error)
                                            : m_audioOutputDevice.trimmed(),
                                        QString::number(finishedTx),
                                        m_activeTxMessage.trimmed()));
-        } else {
+        } else if (!error) {
             emit statusMessage(tr("Transmission complete"));
         }
     }
