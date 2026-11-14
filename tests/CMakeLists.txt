@@ -1001,3 +1001,10 @@ target_include_directories(test_multisettings_switch PRIVATE ${CMAKE_SOURCE_DIR}
 target_link_libraries(test_multisettings_switch wsjt_qt wsjt_cxx wsjt_fort Qt6::Test Qt6::Widgets)
 add_test(NAME test_multisettings_switch COMMAND $<TARGET_FILE:test_multisettings_switch>)
 set_tests_properties(test_multisettings_switch PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
+add_executable(test_lab_storage_isolation test_lab_storage_isolation.cpp
+  ${CMAKE_SOURCE_DIR}/src/app/DecodiumStorageMigration.cpp)
+target_include_directories(test_lab_storage_isolation PRIVATE ${CMAKE_SOURCE_DIR})
+target_link_libraries(test_lab_storage_isolation PRIVATE Qt6::Test Qt6::Core)
+set_target_properties(test_lab_storage_isolation PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+add_test(NAME test_lab_storage_isolation COMMAND $<TARGET_FILE:test_lab_storage_isolation>)

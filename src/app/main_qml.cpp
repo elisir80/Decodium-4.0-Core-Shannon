@@ -174,6 +174,7 @@ __declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance = 0x00000001;
 #include "DecodiumDxCluster.h"
 #include "DecodiumLogging.hpp"
 #include "DecodiumStorageMigration.hpp"
+#include "DecodiumLabStorage.hpp"
 #include "DecodiumUpdater.hpp"
 #include "GraphicsPipelineCache.hpp"
 #include "LinuxGraphicsSafety.hpp"
@@ -1666,10 +1667,17 @@ static bool ensureLegacySqliteDatabase()
 
 int main(int argc, char* argv[])
 {
-    // IU8LMC — persistenza fuori dal registro di Windows + migrazione one-shot.
-    // DEVE restare la prima istruzione: da qui in poi ogni QSettings, il log e
-    // il database devono gia' vedere il nuovo layout su file.
-    DecodiumStorageMigration::configure();
+    QString labStorageError;
+    auto const labStorage = decodium::lab::configureStorage(argc, argv, &labStorageError);
+    if (labStorage == decodium::lab::StorageSetup::Failed) {
+        std::fprintf(stderr, "%s\n", qPrintable(labStorageError));
+        return 2;
+    }
+    if (labStorage == decodium::lab::StorageSetup::NotRequested) {
+        DecodiumStorageMigration::configure();
+    } else {
+        std::fprintf(stderr, "[LAB] Early storage isolation active; normal migration skipped\n");
+    }
 
     // Validate the test-only profile switch before startup workers exist.
     for (int i = 1; i < argc; ++i) {

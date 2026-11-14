@@ -298,6 +298,13 @@ jobs:
           set -euo pipefail
           bash scripts/ci/run-cat-release-gate.sh build-windows "$(nproc)"
 
+      - name: Verify laboratory storage isolation
+        run: |
+          set -euo pipefail
+          export PATH="${QT_PREFIX}/bin:/mingw64/bin:${HAMLIB_PREFIX}/bin:${RTLSDR_PREFIX}/bin:${PATH}"
+          cmake --build build-windows --target test_lab_storage_isolation --parallel "$(nproc)"
+          ctest --test-dir build-windows --output-on-failure -R '^test_lab_storage_isolation$'
+
       - name: Build Decodium
         run: |
           set -euo pipefail
