@@ -18,6 +18,12 @@ void DecodiumBridge::invalidateDecodeSession()
 {
     m_retiredDecodeSerial = m_decodeSerial;
     ++m_decodeSessionId;
+    if (m_q65Worker) {
+        m_q65Worker->retireThrough(m_retiredDecodeSerial);
+    }
+    if (m_fst4Worker) {
+        m_fst4Worker->retireThrough(m_retiredDecodeSerial);
+    }
     if (m_wsprWorker) {
         m_wsprWorker->retireThrough(m_retiredDecodeSerial);
     }

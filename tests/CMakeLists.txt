@@ -1048,3 +1048,43 @@ target_include_directories(test_lab_storage_isolation PRIVATE ${CMAKE_SOURCE_DIR
 target_link_libraries(test_lab_storage_isolation PRIVATE Qt6::Test Qt6::Core)
 set_target_properties(test_lab_storage_isolation PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
 add_test(NAME test_lab_storage_isolation COMMAND $<TARGET_FILE:test_lab_storage_isolation>)
+
+# Count resources in the real WSPR translation unit across repeated calls.
+# The short FT8 WAV exercises successful input processing, not WSPR sensitivity;
+# native WSPR decode equivalence uses the separate frozen reference recording.
+set(wspr_resource_sources wspr_resource_probe.c)
+foreach(wspr_source IN LISTS wsprd_CSRCS)
+  if(NOT wspr_source STREQUAL "lib/wsprd/wsprd.c")
+    list(APPEND wspr_resource_sources "${CMAKE_SOURCE_DIR}/${wspr_source}")
+  endif()
+endforeach()
+add_executable(test_wspr_resource_cleanup ${wspr_resource_sources})
+set_target_properties(test_wspr_resource_cleanup PROPERTIES AUTOMOC OFF)
+target_include_directories(test_wspr_resource_cleanup PRIVATE ${FFTW3_INCLUDE_DIRS})
+target_link_libraries(test_wspr_resource_cleanup PRIVATE ${FFTW3_LIBRARIES} ${LIBM_LIBRARIES})
+foreach(wspr_case IN ITEMS valid missing)
+  file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/wspr-resources-${wspr_case}")
+endforeach()
+add_test(NAME test_wspr_resource_valid COMMAND $<TARGET_FILE:test_wspr_resource_cleanup>
+  "${CMAKE_CURRENT_BINARY_DIR}/wspr-resources-valid"
+  "${CMAKE_SOURCE_DIR}/tests/bridge_refactor_fixtures/ft8-k1abc-1500.wav" 0)
+add_test(NAME test_wspr_resource_missing COMMAND $<TARGET_FILE:test_wspr_resource_cleanup>
+  "${CMAKE_CURRENT_BINARY_DIR}/wspr-resources-missing"
+  "${CMAKE_CURRENT_BINARY_DIR}/wspr-resources-missing/nonexistent.wav" 1)
+set_tests_properties(test_wspr_resource_valid test_wspr_resource_missing PROPERTIES TIMEOUT 60)
+
+# Build the maintained simulator without enabling unrelated utility targets.
+add_executable(q65_performance_fixture ../utils/q65sim.cpp)
+target_include_directories(q65_performance_fixture PRIVATE ${PROJECT_BINARY_DIR})
+target_link_libraries(q65_performance_fixture PRIVATE wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
+
+# Native FST4 profiling is opt-in and does not exercise the GUI or network.
+add_executable(fst4_performance_probe fst4_performance_probe.cpp)
+target_include_directories(fst4_performance_probe PRIVATE ${PROJECT_BINARY_DIR})
+target_link_libraries(fst4_performance_probe PRIVATE wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
+
+add_executable(test_fst4_decode_cancellation test_fst4_decode_cancellation.cpp)
+target_include_directories(test_fst4_decode_cancellation PRIVATE ${PROJECT_BINARY_DIR})
+target_link_libraries(test_fst4_decode_cancellation PRIVATE wsjt_qt wsjt_cxx wsjt_fort Qt6::Test Qt6::Core)
+add_test(NAME test_fst4_decode_cancellation COMMAND test_fst4_decode_cancellation)
+set_tests_properties(test_fst4_decode_cancellation PROPERTIES TIMEOUT 30)
