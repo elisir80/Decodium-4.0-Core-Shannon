@@ -1,5 +1,6 @@
 # Windows PowerShell 5.1; no Python, radio, virtual audio or administrator needed.
-param([ValidateRange(1,8)][int]$Threads=2, [switch]$LowCpu)
+param([ValidateRange(1,8)][int]$Threads=2, [switch]$LowCpu,
+      [ValidateSet('d3d11','software')][string]$GraphicsBackend='d3d11')
 $ErrorActionPreference='Stop'
 Set-StrictMode -Version Latest
 $root=$PSScriptRoot
@@ -32,7 +33,7 @@ $output=Join-Path $root ("results\"+$stamp+'-'+[guid]::NewGuid().ToString('N').S
 New-Item -ItemType Directory -Path $output -Force|Out-Null
 $machine=@{cpu=@(Get-CimInstance Win32_Processor|Select-Object Name,NumberOfCores,NumberOfLogicalProcessors);
     os=Get-CimInstance Win32_OperatingSystem|Select-Object Caption,Version,BuildNumber,TotalVisibleMemorySize,FreePhysicalMemory;
-    threads=$Threads;lowCpu=[bool]$LowCpu;manifest=$manifest;scope='File decode A/B, no RF or live-audio proof'}
+    threads=$Threads;lowCpu=[bool]$LowCpu;graphicsBackend=$GraphicsBackend;directGraphicsWorker=$true;manifest=$manifest;scope='File decode A/B, no RF or live-audio proof'}
 Write-Json $machine "$output\machine.json"
 # Qt 6 Windows ConfigLocation appends qttest and application name.
 # MultiSettings uses applicationName=decodium4 and appends decodium4.ini.
@@ -62,7 +63,7 @@ try {
         $index++
         Write-Host "Prova $index/4: $version. Non interagire con la finestra."
         $run=Join-Path $output "$index-$version"
-        New-Item -ItemType Directory -Path "$run\app","$run\settings\Decodium" -Force|Out-Null
+        New-Item -ItemType Directory -Path "$run\app","$run\settings\Decodium","$run\temp" -Force|Out-Null
         # Work on a private portable copy; installed programs are never edited.
         Copy-Item -Path "$root\versions\$version\*" -Destination "$run\app" -Recurse -Force
         $qml=Join-Path $run 'app\qml\decodium\Main.qml'
@@ -77,11 +78,14 @@ try {
         foreach($file in $legacyFiles) { [IO.File]::WriteAllText($file,'',$utf8) }
         $psi=New-Object System.Diagnostics.ProcessStartInfo
         $psi.FileName=Join-Path $run 'app\decodium.exe';$psi.WorkingDirectory=Join-Path $run 'app'
-        $psi.Arguments="--test-mode --rig-name $rig --lab-no-cat --lab-no-monitor --lab-mode FT8 --lab-callsign IU8LMC --lab-grid JM75 --lab-quit-ms 450000"
+        $psi.Arguments="--decodium-graphics-worker --test-mode --rig-name $rig --lab-no-cat --lab-no-monitor --lab-mode FT8 --lab-callsign IU8LMC --lab-grid JM75 --lab-quit-ms 450000"
         $psi.UseShellExecute=$false;$psi.RedirectStandardOutput=$true;$psi.RedirectStandardError=$true
         foreach($key in @($psi.EnvironmentVariables.Keys)) { if($key -match '^(DECODIUM_|QT_|QSG_|QML_|OMP_)') { $psi.EnvironmentVariables.Remove($key) } }
         $psi.EnvironmentVariables['DECODIUM_LAB_SETTINGS_DIR']=Join-Path $run 'settings'
         $psi.EnvironmentVariables['DECODIUM_FORCE_STANDALONE_UDP']='1'
+        $psi.EnvironmentVariables['DECODIUM_GRAPHICS_BACKEND']=$GraphicsBackend
+        $psi.EnvironmentVariables['TEMP']=Join-Path $run 'temp'
+        $psi.EnvironmentVariables['TMP']=Join-Path $run 'temp'
         $psi.EnvironmentVariables['DECODIUM_DISABLE_QML_CACHE']='1'
         $process=New-Object System.Diagnostics.Process;$process.StartInfo=$psi
         $timer=[Diagnostics.Stopwatch]::StartNew();[void]$process.Start()
@@ -101,6 +105,8 @@ try {
         $cases=@($events|Where-Object {$_.event -eq 'result'})
         $done=@($events|Where-Object {$_.event -eq 'done'})
         $valid=$process.ExitCode -eq 0 -and $cases.Count -eq $manifest.fixtures.Count -and $starts.Count -eq $cases.Count -and $done.Count -eq 1 -and $log.Contains('[LAB] CAT auto-connect disabled') -and !$log.Contains('QNativeSocketEngine::writeDatagram() was called not in')
+        $selected=if($GraphicsBackend -eq 'd3d11') {'Qt Quick graphics backend selected: d3d11'} else {'Qt Quick graphics: using the GPU-independent Qt software renderer'}
+        $valid=$valid -and $log.Contains($selected) -and $log.Contains('[LAB] Early storage isolation active; normal migration skipped')
         foreach($start in $starts) { if(!$start.cleared -or $start.threads -ne $Threads -or $start.lowCpu -ne [bool]$LowCpu) { $valid=$false } }
         foreach($case in $cases) { if($case.timeout -or $case.tx -or $case.stillDecoding) { $valid=$false } }
         foreach($fixture in $manifest.fixtures) {

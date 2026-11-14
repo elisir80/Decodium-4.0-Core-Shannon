@@ -18,6 +18,11 @@ Quando le due build verificate sono incluse:
    con result.json e console.log. Non inviare cartelle app o backup personali.
 
 PROVA STANDARD: due thread, Low CPU spento, profondita' 3, DEEP e media spenti.
+Grafica D3D11 uguale per le due versioni. Il test avvia direttamente il processo
+dell'interfaccia, escludendo il supervisore e i suoi tentativi automatici di
+recupero: CPU/RAM si riferiscono al processo che esegue realmente il programma.
+Se il driver D3D11 non funziona, il test e' invalido. Puoi ripetere ENTRAMBE le
+versioni con -GraphicsBackend software; non confrontare backend diversi.
 Gli stessi parametri valgono per entrambe le versioni; non sono un consiglio
 per cambiare la tua configurazione quotidiana.
 Per confrontare anche la modalita' Low CPU, esegui separatamente:
@@ -46,13 +51,16 @@ Il programma usa profili test nuovi, CAT e monitor disattivati, nessuna richiest
 TX. Modifica solo copie private dei programmi. Le porte UDP 2237/2239 devono
 essere libere. I file legacy dell'area Qt di TEST vengono salvati e ripristinati;
 le installazioni e i profili operativi non vengono modificati dal runner.
+TEMP/TMP sono privati per ogni prova. Entrambe le build isolano le impostazioni
+prima dell'avvio e saltano la migrazione dei profili normali in modalita' test.
 Non spegnere forzatamente PowerShell. In caso di arresto del PC, i backup di
 ripristino sono in results/<data>/restore-private: non inviarli ad altri.
 Il normale logger dell'applicazione puo' aggiungere righe al log diagnostico.
 
 PROVENIENZA BUILD
-Prima: commit 3529dae3e218ef978b77347795572d96a39e9a55.
-Dopo: stesso commit con la patch candidata registrata nel manifest.
+Prima: codice di 3529dae3e218ef978b77347795572d96a39e9a55 con la sola
+strumentazione comune di isolamento dei test. Il commit esatto e' nel manifest.
+Dopo: stessa strumentazione, piu' le ottimizzazioni della patch nel manifest.
 Le due build vanno prodotte con lo stesso workflow Windows/Qt/toolchain.
 Non occorre pubblicare una release: bastano artefatti privati di laboratorio.
 

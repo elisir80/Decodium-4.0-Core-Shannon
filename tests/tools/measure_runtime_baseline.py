@@ -39,12 +39,16 @@ def collect_diagnostics(rig, output, name):
     Read rotated files too, but retain only this random test identity's segment.
     This benchmark must run without other Decodium instances (shared logger).
     """
-    paths = [DIAGNOSTIC_LOG.with_name(f'decodium_diagnostic.{n}.log') for n in (3, 2, 1)]
-    paths.append(DIAGNOSTIC_LOG)
-    text = ''.join(path.read_text(errors='replace') for path in paths if path.is_file())
+    roots = [Path.home() / '.qttest/Library/Application Support/IU8LMC/Decodium/decodium_diagnostic.log',
+             DIAGNOSTIC_LOG]
     marker = f'Application identity: Decodium - {rig} - test'
-    position = text.find(marker)
-    if position < 0:
+    for root in roots:
+        paths = [root.with_name(f'decodium_diagnostic.{n}.log') for n in (3, 2, 1)] + [root]
+        text = ''.join(path.read_text(errors='replace') for path in paths if path.is_file())
+        position = text.find(marker)
+        if position >= 0:
+            break
+    else:
         return ''
     start = text.rfind('\n', 0, position) + 1
     end = text.find('Application identity:', position + len(marker))

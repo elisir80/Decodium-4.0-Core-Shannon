@@ -1041,3 +1041,10 @@ target_link_libraries(test_wspr_worker_queue PRIVATE Qt6::Test Qt6::Core)
 set_target_properties(test_wspr_worker_queue PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
 add_test(NAME test_wspr_worker_queue COMMAND $<TARGET_FILE:test_wspr_worker_queue>)
 set_tests_properties(test_wspr_worker_queue PROPERTIES TIMEOUT 30)
+
+add_executable(test_lab_storage_isolation test_lab_storage_isolation.cpp
+  ${CMAKE_SOURCE_DIR}/src/app/DecodiumStorageMigration.cpp)
+target_include_directories(test_lab_storage_isolation PRIVATE ${CMAKE_SOURCE_DIR})
+target_link_libraries(test_lab_storage_isolation PRIVATE Qt6::Test Qt6::Core)
+set_target_properties(test_lab_storage_isolation PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+add_test(NAME test_lab_storage_isolation COMMAND $<TARGET_FILE:test_lab_storage_isolation>)
