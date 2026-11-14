@@ -26,7 +26,7 @@ marker = b'GlassApplicationWindow {'
 assert original.count(marker) == 1
 try:
     qml.write_bytes(original.replace(marker, marker + b'\n' + probe.encode(), 1))
-    valid = run_case(binary, a.output, 'native', 1, 300)
+    valid = run_case(binary, a.output, 'native', 1, 450)
     log = (a.output / 'native-1.log').read_text()
     events = [json.loads(line.split('[PERFTEST] ', 1)[1]) for line in log.splitlines() if '[PERFTEST] ' in line]
     starts = [e for e in events if e['event'] == 'start']

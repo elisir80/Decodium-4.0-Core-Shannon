@@ -77,7 +77,7 @@ try {
         foreach($file in $legacyFiles) { [IO.File]::WriteAllText($file,'',$utf8) }
         $psi=New-Object System.Diagnostics.ProcessStartInfo
         $psi.FileName=Join-Path $run 'app\decodium.exe';$psi.WorkingDirectory=Join-Path $run 'app'
-        $psi.Arguments="--test-mode --rig-name $rig --lab-no-cat --lab-no-monitor --lab-mode FT8 --lab-callsign IU8LMC --lab-grid JM75 --lab-quit-ms 300000"
+        $psi.Arguments="--test-mode --rig-name $rig --lab-no-cat --lab-no-monitor --lab-mode FT8 --lab-callsign IU8LMC --lab-grid JM75 --lab-quit-ms 450000"
         $psi.UseShellExecute=$false;$psi.RedirectStandardOutput=$true;$psi.RedirectStandardError=$true
         foreach($key in @($psi.EnvironmentVariables.Keys)) { if($key -match '^(DECODIUM_|QT_|QSG_|QML_|OMP_)') { $psi.EnvironmentVariables.Remove($key) } }
         $psi.EnvironmentVariables['DECODIUM_LAB_SETTINGS_DIR']=Join-Path $run 'settings'
@@ -89,7 +89,7 @@ try {
         $samples=New-Object System.Collections.Generic.List[object]
         while(!$process.HasExited) {
             $process.Refresh()
-            if($timer.Elapsed.TotalSeconds -gt 320) { $process.Kill();throw 'Timeout del programma; prova non valida.' }
+            if($timer.Elapsed.TotalSeconds -gt 470) { $process.Kill();throw 'Timeout del programma; prova non valida.' }
             try { $samples.Add(@{seconds=$timer.Elapsed.TotalSeconds;cpuSeconds=$process.TotalProcessorTime.TotalSeconds;workingSetBytes=$process.WorkingSet64;privateBytes=$process.PrivateMemorySize64}) } catch { if(!$process.HasExited) { throw } }
             foreach($socket in $sinks) { while($socket.Available -gt 0) { $remote=New-Object Net.IPEndPoint([Net.IPAddress]::Any,0);[void]$socket.Receive([ref]$remote) } }
             Start-Sleep -Milliseconds 500
